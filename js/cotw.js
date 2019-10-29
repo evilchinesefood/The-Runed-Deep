@@ -43265,7 +43265,7 @@ var _mordrax$cotwelm$SplashView$cotwSubtitleImg = A2(
 	_elm_lang$html$Html$img,
 	{
 		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$src('/img/landing_cotw2.jpg'),
+		_0: _elm_lang$html$Html_Attributes$src('/img/original/llanding_cotw2.jpg'),
 		_1: {ctor: '[]'}
 	},
 	{ctor: '[]'});
@@ -43273,7 +43273,7 @@ var _mordrax$cotwelm$SplashView$cotwTitleImg = A2(
 	_elm_lang$html$Html$img,
 	{
 		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$src('/img/landing_cotw1.jpg'),
+		_0: _elm_lang$html$Html_Attributes$src('/img/original/llanding_cotw1.jpg'),
 		_1: {ctor: '[]'}
 	},
 	{ctor: '[]'});
