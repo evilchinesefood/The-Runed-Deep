@@ -1,0 +1,39 @@
+.building {
+    position: absolute;
+}
+.gate {
+    background: url('/assets/original/buildings.png') -0px -0px;
+    height: 32px;
+    width: 96px;
+}
+
+.hut {
+    background: url('/assets/original/buildings.png') -96px -0px;
+    height: 64px;
+    width: 64px;
+}
+
+.straw-house-east {
+    background: url('/assets/original/buildings.png') -0px -64px;
+    height: 96px;
+    width: 96px;
+}
+
+.straw-house-west {
+    background: url('/assets/original/buildings.png') -192px -64px;
+    height: 96px;
+    width: 96px;
+}
+
+.burnt-straw-house-west {
+    background: url('/assets/original/buildings.png') -288px -64px;
+    height: 96px;
+    width: 96px;
+}
+
+.hut-temple {
+    background: url('/assets/original/buildings.png') -0px -288px;
+    height: 160px;
+    width: 160px;
+}
+

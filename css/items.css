@@ -1,0 +1,282 @@
+.cotw-item {
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+}
+.club                  {
+	background: url('/assets/original/items.png') -0px   -896px;
+}
+.hammer                {
+	background: url('/assets/original/items.png') -0px   -768px;
+}
+.spear                 {
+	background: url('/assets/original/items.png') -0px   -864px;
+}
+.sword                 {
+	background: url('/assets/original/items.png') -0px   -192px;
+}
+.mace                  {
+	background: url('/assets/original/items.png') -0px   -224px;
+}
+.flail                 {
+	background: url('/assets/original/items.png') -0px   -736px;
+}
+.axe                   {
+	background: url('/assets/original/items.png') -0px   -160px;
+}
+.morning-star           {
+	background: url('/assets/original/items.png') -0px   -832px;
+}
+
+.leather-armour         {
+	background: url('/assets/original/items.png') -0px   -256px;
+}
+.metal-armour           {
+	background: url('/assets/original/items.png') -0px   -288px;
+}
+
+.wood-shield            {
+	background: url('/assets/original/items.png') -0px   -352px;
+}
+.metal-shield           {
+	background: url('/assets/original/items.png') -0px   -320px;
+}
+
+.leather-helmet         {
+	background: url('/assets/original/items.png') -0px   -416px;
+}
+.metal-helmet           {
+	background: url('/assets/original/items.png') -0px   -384px;
+}
+.helmet-of-detect-monsters{
+	background: url('/assets/original/items.png') -98px  -384px;
+}
+
+.bracers               {
+	background: url('/assets/original/items.png') -0px   -448px;
+}
+.bracers-enchanted      {
+	background: url('/assets/original/items.png') -32px  -448px;
+}
+.gauntlet              {
+	background: url('/assets/original/items.png') -0px   -480px;
+}
+.gauntlet-enchanted     {
+	background: url('/assets/original/items.png') -32px  -480px;
+}
+.gauntlet-of-slaying     {
+	background: url('/assets/original/items.png') -92px  -480px;
+}
+
+.slot-belt              {
+	background: url('/assets/original/items.png') -0px   -672px;
+}
+.wand-quiver-belt        {
+	background: url('/assets/original/items.png') -32px  -672px;
+}
+.utility-belt           {
+	background: url('/assets/original/items.png') -64px  -672px;
+}
+
+.boots                 {
+	background: url('/assets/original/items.png') -0px   -544px;
+}
+.boots-of-speed          {
+	background: url('/assets/original/items.png') -64px  -544px;
+}
+.boots-of-levitation     {
+	background: url('/assets/original/items.png') -96px  -544px;
+}
+
+.cloak                 {
+	background: url('/assets/original/items.png') -0px   -512px;
+}
+.ring                  {
+	background: url('/assets/original/items.png') -0px   -576px;
+}
+
+.amulet                {
+	background: url('/assets/original/items.png') -0px   -128px;
+}
+.amulet-cursed          {
+	background: url('/assets/original/items.png') -32px  -128px;
+}
+.amulet-resist-fire      {
+	background: url('/assets/original/items.png') -64px  -128px;
+}
+.amulet-resist-lightning {
+	background: url('/assets/original/items.png') -96px  -128px;
+}
+.amulet-resist-cold      {
+	background: url('/assets/original/items.png') -128px -128px;
+}
+.amulet-resist-drain     {
+	background: url('/assets/original/items.png') -160px -128px;
+}
+
+.wand                  {
+	background: url('/assets/original/items.png') -0px   -96px;
+}
+.wand-of-fire-ball        {
+	background: url('/assets/original/items.png') -32px  -96px;
+}
+.wand-of-lightning-ball   {
+	background: url('/assets/original/items.png') -64px  -96px;
+}
+.wand-of-light           {
+	background: url('/assets/original/items.png') -96px  -96px;
+}
+.wand-of-divination      {
+	background: url('/assets/original/items.png') -128px -96px;
+}
+.wand-of-nothing         {
+	background: url('/assets/original/items.png') -160px -96px;
+}
+.wand-of-cold-ball        {
+	background: url('/assets/original/items.png') -192px -96px;
+}
+.wand-of-cold-bolt        {
+	background: url('/assets/original/items.png') -224px -96px;
+}
+.wand-of-fire-bolt        {
+	background: url('/assets/original/items.png') -256px -96px;
+}
+.wand-of-lightning       {
+	background: url('/assets/original/items.png') -288px -96px;
+}
+
+.staff                 {
+	background: url('/assets/original/items.png') -0px   -64px;
+}
+.staff-fire             {
+	background: url('/assets/original/items.png') -32px  -64px;
+}
+.staff-smoke            {
+	background: url('/assets/original/items.png') -64px  -64px;
+}
+.staff-minor            {
+	background: url('/assets/original/items.png') -96px  -64px;
+}
+.staff-medium           {
+	background: url('/assets/original/items.png') -128px -64px;
+}
+.staff-major            {
+	background: url('/assets/original/items.png') -160px -64px;
+}
+.staff-green            {
+	background: url('/assets/original/items.png') -192px -64px;
+}
+.staff-light            {
+	background: url('/assets/original/items.png') -224px -64px;
+}
+
+.scroll                {
+	background: url('/assets/original/items.png') -256px -32px;
+}
+.spell-book             {
+	background: url('/assets/original/items.png') -32px  -32px;
+}
+
+.potion                {
+	background: url('/assets/original/items.png') -0px   -0px;
+}
+.potion-water           {
+	background: url('/assets/original/items.png') -32px  -0px;
+}
+.potion-minor-heal       {
+	background: url('/assets/original/items.png') -64px  -0px;
+}
+.potion-medium-heal      {
+	background: url('/assets/original/items.png') -96px  -0px;
+}
+.potion-major-heal       {
+	background: url('/assets/original/items.png') -128px -0px;
+}
+.potion-gain-attribute   {
+	background: url('/assets/original/items.png') -160px -0px;
+}
+.potion-lose-attribute   {
+	background: url('/assets/original/items.png') -192px -0px;
+}
+.potion-divination      {
+	background: url('/assets/original/items.png') -224px -0px;
+}
+
+.purse                 {
+	background: url('/assets/original/items.png') -0px   -608px;
+}
+.bag                   {
+	background: url('/assets/original/items.png') -32px  -608px;
+}
+.pack                  {
+	background: url('/assets/original/items.png') -96px  -608px;
+}
+.chest                 {
+	background: url('/assets/original/items.png') -64px  -608px;
+}
+.enchanted-pack         {
+	background: url('/assets/original/items.png') -128px -608px;
+}
+
+.coins-copper           {
+	background: url('/assets/original/items.png') -0px   -640px;
+}
+.coins-silver           {
+	background: url('/assets/original/items.png') -32px  -640px;
+}
+.coins-gold             {
+	background: url('/assets/original/items.png') -64px  -640px;
+}
+.coins-platinum         {
+	background: url('/assets/original/items.png') -96px  -640px;
+}
+
+.treasure-pile          {
+	background: url('/assets/original/items.png') -128px -640px;
+}
+.parchment             {
+	background: url('/assets/original/items.png') -0px   -704px;
+}
+.enchanted-helm-of-storms {
+	background: url('/assets/original/items.png') -32px  -704px;
+}
+.elemental-portal       {
+	background: url('/assets/original/items.png') -64px  -704px;
+}
+.amulet-of-kings         {
+	background: url('/assets/original/items.png') -96px  -704px;
+}
+.apple                 {
+	background: url('/assets/original/items.png') -128px -704px;
+}
+
+.broken-sword           {
+	background: url('/assets/original/items.png') -0px   -800px;
+}
+.broken-armour          {
+	background: url('/assets/original/items.png') -32px  -800px;
+}
+.broken-shield          {
+	background: url('/assets/original/items.png') -64px  -800px;
+}
+.broken-helmet          {
+	background: url('/assets/original/items.png') -96px  -800px;
+}
+.broken-belt            {
+	background: url('/assets/original/items.png') -128px -800px;
+}
+.broken-gauntlet        {
+	background: url('/assets/original/items.png') -160px -800px;
+}
+.broken-bracer          {
+	background: url('/assets/original/items.png') -192px -800px;
+}
+.broken-cloak           {
+	background: url('/assets/original/items.png') -224px -800px;
+}
+.broken-pack            {
+	background: url('/assets/original/items.png') -256px -800px;
+}
+.broken-boot            {
+	background: url('/assets/original/items.png') -288px -800px;
+}

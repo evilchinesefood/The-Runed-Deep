@@ -1,0 +1,119 @@
+.inventory {
+    display: flex;
+}
+
+/* Equipment */
+.inventory__equipment {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 40%
+}
+
+.equipment__slot-name {
+    font-size: 0.85em;
+    padding-top: 20px;
+    text-align: center;
+}
+.equipment__top-row,
+.equipment__bottom-row {
+    display: flex;
+}
+
+.equipment-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.equipment__slot {
+    width: 80px;
+    height: 120px;
+    border: 1px solid #d4d4d4;
+    padding-top: 20px;
+}
+
+.equipment__top-row .equipment__slot {
+}
+
+.equipment__bottom-row .equipment__slot {
+}
+
+.equipment-dude {
+    height: 480px;
+    width: 240px;
+    display: inline-block;
+    padding: 0;
+    background: url('/assets/original/equipment-dude.jpg') no-repeat;
+}
+
+/* Containers */
+.inventory__containers {
+    display: flex;
+    flex-direction: column;
+}
+.inventory__container-group {
+    border: 2px solid #d4d4d4;
+    height: 100%;
+}
+.container-group__name {
+    font-weight: bold;
+    color: ivory;
+    background: linear-gradient(to right, darkgray, white)
+}
+.container-group__contents {
+    flex-basis: 60%;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px 0;
+}
+.container-group__empty-child {
+    width:  100%;
+    text-align: center;
+    padding: 40px;
+    color: darkgray;
+}
+.container__purse {
+    height: 120px
+}
+
+.inventory__container {
+    display: flex;
+    min-height: 100px;
+    background-color: lightblue;
+    border: 2px solid #d4d4d4
+}
+
+.container__pack {
+
+}
+
+.droppable {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Items */
+.item {
+    width:  80px;
+    height: 80px;
+    display: block;
+    text-align: center;
+    padding: 5px;
+}
+
+.item__name {
+    font-size: 0.9em;
+    line-height: 1em;
+}
+
+/* Purse */
+.purse__coin {
+    text-align: center;
+    width: 80px;
+    font-size: 0.9em;
+    padding: 5px;
+}
+
+/* Dragdrop */
+.dragdrop-droppable {
+    height: 100%;
+}
