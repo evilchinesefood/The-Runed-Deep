@@ -2,7 +2,7 @@
     height: 100vh;
 }
 .rip__tombstone {
-    background-image: url(/assets/original/RIP_blank.png);
+    background-image: url(/img/original/RIP_blank.png);
     background-size: contain;
     background-repeat: no-repeat;
     height: 100%;
