@@ -4,279 +4,279 @@
     display: inline-block;
 }
 .club                  {
-	background: url('/img/original/items.png') -0px   -896px;
+	background: url('../img/original/items.png') -0px   -896px;
 }
 .hammer                {
-	background: url('/img/original/items.png') -0px   -768px;
+	background: url('../img/original/items.png') -0px   -768px;
 }
 .spear                 {
-	background: url('/img/original/items.png') -0px   -864px;
+	background: url('../img/original/items.png') -0px   -864px;
 }
 .sword                 {
-	background: url('/img/original/items.png') -0px   -192px;
+	background: url('../img/original/items.png') -0px   -192px;
 }
 .mace                  {
-	background: url('/img/original/items.png') -0px   -224px;
+	background: url('../img/original/items.png') -0px   -224px;
 }
 .flail                 {
-	background: url('/img/original/items.png') -0px   -736px;
+	background: url('../img/original/items.png') -0px   -736px;
 }
 .axe                   {
-	background: url('/img/original/items.png') -0px   -160px;
+	background: url('../img/original/items.png') -0px   -160px;
 }
 .morning-star           {
-	background: url('/img/original/items.png') -0px   -832px;
+	background: url('../img/original/items.png') -0px   -832px;
 }
 
 .leather-armour         {
-	background: url('/img/original/items.png') -0px   -256px;
+	background: url('../img/original/items.png') -0px   -256px;
 }
 .metal-armour           {
-	background: url('/img/original/items.png') -0px   -288px;
+	background: url('../img/original/items.png') -0px   -288px;
 }
 
 .wood-shield            {
-	background: url('/img/original/items.png') -0px   -352px;
+	background: url('../img/original/items.png') -0px   -352px;
 }
 .metal-shield           {
-	background: url('/img/original/items.png') -0px   -320px;
+	background: url('../img/original/items.png') -0px   -320px;
 }
 
 .leather-helmet         {
-	background: url('/img/original/items.png') -0px   -416px;
+	background: url('../img/original/items.png') -0px   -416px;
 }
 .metal-helmet           {
-	background: url('/img/original/items.png') -0px   -384px;
+	background: url('../img/original/items.png') -0px   -384px;
 }
 .helmet-of-detect-monsters{
-	background: url('/img/original/items.png') -98px  -384px;
+	background: url('../img/original/items.png') -98px  -384px;
 }
 
 .bracers               {
-	background: url('/img/original/items.png') -0px   -448px;
+	background: url('../img/original/items.png') -0px   -448px;
 }
 .bracers-enchanted      {
-	background: url('/img/original/items.png') -32px  -448px;
+	background: url('../img/original/items.png') -32px  -448px;
 }
 .gauntlet              {
-	background: url('/img/original/items.png') -0px   -480px;
+	background: url('../img/original/items.png') -0px   -480px;
 }
 .gauntlet-enchanted     {
-	background: url('/img/original/items.png') -32px  -480px;
+	background: url('../img/original/items.png') -32px  -480px;
 }
 .gauntlet-of-slaying     {
-	background: url('/img/original/items.png') -92px  -480px;
+	background: url('../img/original/items.png') -92px  -480px;
 }
 
 .slot-belt              {
-	background: url('/img/original/items.png') -0px   -672px;
+	background: url('../img/original/items.png') -0px   -672px;
 }
 .wand-quiver-belt        {
-	background: url('/img/original/items.png') -32px  -672px;
+	background: url('../img/original/items.png') -32px  -672px;
 }
 .utility-belt           {
-	background: url('/img/original/items.png') -64px  -672px;
+	background: url('../img/original/items.png') -64px  -672px;
 }
 
 .boots                 {
-	background: url('/img/original/items.png') -0px   -544px;
+	background: url('../img/original/items.png') -0px   -544px;
 }
 .boots-of-speed          {
-	background: url('/img/original/items.png') -64px  -544px;
+	background: url('../img/original/items.png') -64px  -544px;
 }
 .boots-of-levitation     {
-	background: url('/img/original/items.png') -96px  -544px;
+	background: url('../img/original/items.png') -96px  -544px;
 }
 
 .cloak                 {
-	background: url('/img/original/items.png') -0px   -512px;
+	background: url('../img/original/items.png') -0px   -512px;
 }
 .ring                  {
-	background: url('/img/original/items.png') -0px   -576px;
+	background: url('../img/original/items.png') -0px   -576px;
 }
 
 .amulet                {
-	background: url('/img/original/items.png') -0px   -128px;
+	background: url('../img/original/items.png') -0px   -128px;
 }
 .amulet-cursed          {
-	background: url('/img/original/items.png') -32px  -128px;
+	background: url('../img/original/items.png') -32px  -128px;
 }
 .amulet-resist-fire      {
-	background: url('/img/original/items.png') -64px  -128px;
+	background: url('../img/original/items.png') -64px  -128px;
 }
 .amulet-resist-lightning {
-	background: url('/img/original/items.png') -96px  -128px;
+	background: url('../img/original/items.png') -96px  -128px;
 }
 .amulet-resist-cold      {
-	background: url('/img/original/items.png') -128px -128px;
+	background: url('../img/original/items.png') -128px -128px;
 }
 .amulet-resist-drain     {
-	background: url('/img/original/items.png') -160px -128px;
+	background: url('../img/original/items.png') -160px -128px;
 }
 
 .wand                  {
-	background: url('/img/original/items.png') -0px   -96px;
+	background: url('../img/original/items.png') -0px   -96px;
 }
 .wand-of-fire-ball        {
-	background: url('/img/original/items.png') -32px  -96px;
+	background: url('../img/original/items.png') -32px  -96px;
 }
 .wand-of-lightning-ball   {
-	background: url('/img/original/items.png') -64px  -96px;
+	background: url('../img/original/items.png') -64px  -96px;
 }
 .wand-of-light           {
-	background: url('/img/original/items.png') -96px  -96px;
+	background: url('../img/original/items.png') -96px  -96px;
 }
 .wand-of-divination      {
-	background: url('/img/original/items.png') -128px -96px;
+	background: url('../img/original/items.png') -128px -96px;
 }
 .wand-of-nothing         {
-	background: url('/img/original/items.png') -160px -96px;
+	background: url('../img/original/items.png') -160px -96px;
 }
 .wand-of-cold-ball        {
-	background: url('/img/original/items.png') -192px -96px;
+	background: url('../img/original/items.png') -192px -96px;
 }
 .wand-of-cold-bolt        {
-	background: url('/img/original/items.png') -224px -96px;
+	background: url('../img/original/items.png') -224px -96px;
 }
 .wand-of-fire-bolt        {
-	background: url('/img/original/items.png') -256px -96px;
+	background: url('../img/original/items.png') -256px -96px;
 }
 .wand-of-lightning       {
-	background: url('/img/original/items.png') -288px -96px;
+	background: url('../img/original/items.png') -288px -96px;
 }
 
 .staff                 {
-	background: url('/img/original/items.png') -0px   -64px;
+	background: url('../img/original/items.png') -0px   -64px;
 }
 .staff-fire             {
-	background: url('/img/original/items.png') -32px  -64px;
+	background: url('../img/original/items.png') -32px  -64px;
 }
 .staff-smoke            {
-	background: url('/img/original/items.png') -64px  -64px;
+	background: url('../img/original/items.png') -64px  -64px;
 }
 .staff-minor            {
-	background: url('/img/original/items.png') -96px  -64px;
+	background: url('../img/original/items.png') -96px  -64px;
 }
 .staff-medium           {
-	background: url('/img/original/items.png') -128px -64px;
+	background: url('../img/original/items.png') -128px -64px;
 }
 .staff-major            {
-	background: url('/img/original/items.png') -160px -64px;
+	background: url('../img/original/items.png') -160px -64px;
 }
 .staff-green            {
-	background: url('/img/original/items.png') -192px -64px;
+	background: url('../img/original/items.png') -192px -64px;
 }
 .staff-light            {
-	background: url('/img/original/items.png') -224px -64px;
+	background: url('../img/original/items.png') -224px -64px;
 }
 
 .scroll                {
-	background: url('/img/original/items.png') -256px -32px;
+	background: url('../img/original/items.png') -256px -32px;
 }
 .spell-book             {
-	background: url('/img/original/items.png') -32px  -32px;
+	background: url('../img/original/items.png') -32px  -32px;
 }
 
 .potion                {
-	background: url('/img/original/items.png') -0px   -0px;
+	background: url('../img/original/items.png') -0px   -0px;
 }
 .potion-water           {
-	background: url('/img/original/items.png') -32px  -0px;
+	background: url('../img/original/items.png') -32px  -0px;
 }
 .potion-minor-heal       {
-	background: url('/img/original/items.png') -64px  -0px;
+	background: url('../img/original/items.png') -64px  -0px;
 }
 .potion-medium-heal      {
-	background: url('/img/original/items.png') -96px  -0px;
+	background: url('../img/original/items.png') -96px  -0px;
 }
 .potion-major-heal       {
-	background: url('/img/original/items.png') -128px -0px;
+	background: url('../img/original/items.png') -128px -0px;
 }
 .potion-gain-attribute   {
-	background: url('/img/original/items.png') -160px -0px;
+	background: url('../img/original/items.png') -160px -0px;
 }
 .potion-lose-attribute   {
-	background: url('/img/original/items.png') -192px -0px;
+	background: url('../img/original/items.png') -192px -0px;
 }
 .potion-divination      {
-	background: url('/img/original/items.png') -224px -0px;
+	background: url('../img/original/items.png') -224px -0px;
 }
 
 .purse                 {
-	background: url('/img/original/items.png') -0px   -608px;
+	background: url('../img/original/items.png') -0px   -608px;
 }
 .bag                   {
-	background: url('/img/original/items.png') -32px  -608px;
+	background: url('../img/original/items.png') -32px  -608px;
 }
 .pack                  {
-	background: url('/img/original/items.png') -96px  -608px;
+	background: url('../img/original/items.png') -96px  -608px;
 }
 .chest                 {
-	background: url('/img/original/items.png') -64px  -608px;
+	background: url('../img/original/items.png') -64px  -608px;
 }
 .enchanted-pack         {
-	background: url('/img/original/items.png') -128px -608px;
+	background: url('../img/original/items.png') -128px -608px;
 }
 
 .coins-copper           {
-	background: url('/img/original/items.png') -0px   -640px;
+	background: url('../img/original/items.png') -0px   -640px;
 }
 .coins-silver           {
-	background: url('/img/original/items.png') -32px  -640px;
+	background: url('../img/original/items.png') -32px  -640px;
 }
 .coins-gold             {
-	background: url('/img/original/items.png') -64px  -640px;
+	background: url('../img/original/items.png') -64px  -640px;
 }
 .coins-platinum         {
-	background: url('/img/original/items.png') -96px  -640px;
+	background: url('../img/original/items.png') -96px  -640px;
 }
 
 .treasure-pile          {
-	background: url('/img/original/items.png') -128px -640px;
+	background: url('../img/original/items.png') -128px -640px;
 }
 .parchment             {
-	background: url('/img/original/items.png') -0px   -704px;
+	background: url('../img/original/items.png') -0px   -704px;
 }
 .enchanted-helm-of-storms {
-	background: url('/img/original/items.png') -32px  -704px;
+	background: url('../img/original/items.png') -32px  -704px;
 }
 .elemental-portal       {
-	background: url('/img/original/items.png') -64px  -704px;
+	background: url('../img/original/items.png') -64px  -704px;
 }
 .amulet-of-kings         {
-	background: url('/img/original/items.png') -96px  -704px;
+	background: url('../img/original/items.png') -96px  -704px;
 }
 .apple                 {
-	background: url('/img/original/items.png') -128px -704px;
+	background: url('../img/original/items.png') -128px -704px;
 }
 
 .broken-sword           {
-	background: url('/img/original/items.png') -0px   -800px;
+	background: url('../img/original/items.png') -0px   -800px;
 }
 .broken-armour          {
-	background: url('/img/original/items.png') -32px  -800px;
+	background: url('../img/original/items.png') -32px  -800px;
 }
 .broken-shield          {
-	background: url('/img/original/items.png') -64px  -800px;
+	background: url('../img/original/items.png') -64px  -800px;
 }
 .broken-helmet          {
-	background: url('/img/original/items.png') -96px  -800px;
+	background: url('../img/original/items.png') -96px  -800px;
 }
 .broken-belt            {
-	background: url('/img/original/items.png') -128px -800px;
+	background: url('../img/original/items.png') -128px -800px;
 }
 .broken-gauntlet        {
-	background: url('/img/original/items.png') -160px -800px;
+	background: url('../img/original/items.png') -160px -800px;
 }
 .broken-bracer          {
-	background: url('/img/original/items.png') -192px -800px;
+	background: url('../img/original/items.png') -192px -800px;
 }
 .broken-cloak           {
-	background: url('/img/original/items.png') -224px -800px;
+	background: url('../img/original/items.png') -224px -800px;
 }
 .broken-pack            {
-	background: url('/img/original/items.png') -256px -800px;
+	background: url('../img/original/items.png') -256px -800px;
 }
 .broken-boot            {
-	background: url('/img/original/items.png') -288px -800px;
+	background: url('../img/original/items.png') -288px -800px;
 }
