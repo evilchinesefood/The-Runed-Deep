@@ -1,4 +1,10 @@
+.monster {
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+}
 
+/* Row 1 */
 .male-hero {
     background: url('../img/original/monsters.png') -0px -0px;
 }
@@ -41,6 +47,8 @@
 .viper {
     background: url('../img/original/monsters.png') -416px -0px;
 }
+
+/* Row 2 */
 .huge-ogre {
     background: url('../img/original/monsters.png') -0px -32px;
 }
@@ -83,6 +91,8 @@
 .manticore {
     background: url('../img/original/monsters.png') -416px -32px;
 }
+
+/* Row 3 */
 .animated-bronze-statue {
     background: url('../img/original/monsters.png') -0px -64px;
 }
@@ -125,6 +135,8 @@
 .ice-devil {
     background: url('../img/original/monsters.png') -416px -64px;
 }
+
+/* Row 4 */
 .rat-man {
     background: url('../img/original/monsters.png') -0px -96px;
 }
@@ -167,6 +179,8 @@
 .earth-elemental {
     background: url('../img/original/monsters.png') -416px -96px;
 }
+
+/* Row 5 */
 .hill-giant {
     background: url('../img/original/monsters.png') -0px -128px;
 }
