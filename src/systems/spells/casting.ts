@@ -111,7 +111,7 @@ function resolveSpellEffect(
 
     // ── Movement spells ─────────────────────────────────
     case 'phase-door':
-      return resolvePhaseDoor(state);
+      return resolvePhaseDoor(state, direction);
     case 'levitation':
       return addMsg(state, `${state.hero.name} begins to levitate. Traps will not trigger.`, 'system');
     case 'rune-of-return':
@@ -343,13 +343,21 @@ function resolveHeal(state: GameState, spell: SpellDef, pct: number, minHeal: nu
 function resolveShield(state: GameState, _spell: SpellDef): GameState {
   queueAnimation(buildBuffAnimation(state.hero.position, '#48f'));
   const hero = state.hero;
+  const alreadyActive = hero.activeEffects.some(e => e.id === 'shield');
   const newEffects = [
     ...hero.activeEffects.filter(e => e.id !== 'shield'),
     { id: 'shield', name: 'Shield', turnsRemaining: 30 },
   ];
+
+  // Only add AC bonus if shield wasn't already active (prevents stacking)
+  const newAc = alreadyActive ? hero.armorValue : hero.armorValue + 4;
+  const msg = alreadyActive
+    ? `${hero.name} refreshes the magical shield. (30 turns)`
+    : `A magical shield surrounds ${hero.name}. (+4 AC for 30 turns)`;
+
   return {
-    ...addMsg(state, `A magical shield surrounds ${hero.name}. (+4 AC for 30 turns)`, 'important'),
-    hero: { ...hero, activeEffects: newEffects, armorValue: hero.armorValue + 4 },
+    ...addMsg(state, msg, 'important'),
+    hero: { ...hero, activeEffects: newEffects, armorValue: newAc },
   };
 }
 
@@ -414,20 +422,51 @@ function applyStatusToMonster(state: GameState, target: Vector2, status: 'sleepi
 // Movement spells
 // ============================================================
 
-function resolvePhaseDoor(state: GameState): GameState {
+function resolvePhaseDoor(state: GameState, direction?: Direction): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
-  // Teleport 3-6 tiles in a random direction
+  const RANGE = 6;
+  const heroX = state.hero.position.x;
+  const heroY = state.hero.position.y;
+
+  if (direction) {
+    // Directed phase door: find the furthest walkable tile in that direction within range
+    const delta = getDirectionVector(direction);
+    let bestX = heroX;
+    let bestY = heroY;
+
+    for (let i = 1; i <= RANGE; i++) {
+      const nx = heroX + delta.x * i;
+      const ny = heroY + delta.y * i;
+      if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) break;
+      if (!floor.tiles[ny][nx].walkable) break;
+      if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;
+      bestX = nx;
+      bestY = ny;
+    }
+
+    if (bestX === heroX && bestY === heroY) {
+      return addMsg(state, `The phase door fizzles — no safe destination in that direction.`, 'system');
+    }
+
+    queueAnimation(buildTeleportAnimation(state.hero.position, { x: bestX, y: bestY }));
+    return {
+      ...addMsg(state, `${state.hero.name} phases through space!`, 'important'),
+      hero: { ...state.hero, position: { x: bestX, y: bestY } },
+    };
+  }
+
+  // No direction: random teleport within range (fallback)
   for (let attempt = 0; attempt < 50; attempt++) {
     const dx = Math.floor(Math.random() * 13) - 6;
     const dy = Math.floor(Math.random() * 13) - 6;
     const dist = Math.abs(dx) + Math.abs(dy);
     if (dist < 3 || dist > 8) continue;
 
-    const nx = state.hero.position.x + dx;
-    const ny = state.hero.position.y + dy;
+    const nx = heroX + dx;
+    const ny = heroY + dy;
     if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
     if (!floor.tiles[ny][nx].walkable) continue;
     if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;

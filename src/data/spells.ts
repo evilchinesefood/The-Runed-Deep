@@ -245,7 +245,7 @@ export const SPELLS: SpellDef[] = [
     category: 'movement',
     level: 1,
     manaCost: 1,
-    targeting: 'self',
+    targeting: 'direction',
     aoe: false,
     description: 'Teleports you a short distance in a random direction.',
   },

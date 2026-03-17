@@ -1,7 +1,7 @@
 import type { Floor } from '../core/types';
 
-const VIEW_RADIUS_NORMAL = 8;
-const VIEW_RADIUS_LIT = 12;
+const VIEW_RADIUS_NORMAL = 4;
+const VIEW_RADIUS_LIT = 10;
 
 /**
  * Simple raycasting field-of-view.

@@ -61,7 +61,7 @@ export class GameLoop {
   }
 
   private tickActiveEffects(state: GameState): GameState {
-    const hero = state.hero;
+    let hero = { ...state.hero };
     const remaining = hero.activeEffects
       .map(e => ({ ...e, turnsRemaining: e.turnsRemaining - 1 }))
       .filter(e => e.turnsRemaining > 0);
@@ -73,6 +73,17 @@ export class GameLoop {
     let messages = [...state.messages];
     for (const e of expired) {
       messages = [...messages, { text: `${e.name} has worn off.`, severity: 'system' as const, turn: state.turn }];
+
+      // Reverse effect-specific bonuses
+      if (e.id === 'shield') {
+        hero = { ...hero, armorValue: Math.max(0, hero.armorValue - 4) };
+      } else if (e.id === 'resist-cold') {
+        hero = { ...hero, resistances: { ...hero.resistances, cold: Math.max(0, hero.resistances.cold - 50) } };
+      } else if (e.id === 'resist-fire') {
+        hero = { ...hero, resistances: { ...hero.resistances, fire: Math.max(0, hero.resistances.fire - 50) } };
+      } else if (e.id === 'resist-lightning') {
+        hero = { ...hero, resistances: { ...hero.resistances, lightning: Math.max(0, hero.resistances.lightning - 50) } };
+      }
     }
 
     return {
