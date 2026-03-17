@@ -175,13 +175,13 @@ function resolveBolt(
     // Check for monster
     const monsterIdx = floor.monsters.findIndex(m => m.position.x === x && m.position.y === y);
     if (monsterIdx !== -1) {
-      queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, { x, y }));
+      queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, { x, y }, floor));
       return applySpellDamageToMonster(state, floorKey, monsterIdx, spell, minDmg, maxDmg, element);
     }
   }
 
   // Missed — still show the bolt flying
-  queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12));
+  queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, undefined, floor));
   return addMsg(state, `The ${spell.name} flies off into the darkness.`, 'combat');
 }
 
@@ -204,14 +204,14 @@ function resolveBall(
   }
   if (!target) return addMsg(state, `You need to pick a target for ${spell.name}.`, 'system');
 
-  // Queue ball animation (projectile + explosion)
-  if (direction) {
-    queueAnimation(buildBallAnimation(spell.id, state.hero.position, direction, target));
-  }
-
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
+
+  // Queue ball animation (projectile + explosion)
+  if (direction) {
+    queueAnimation(buildBallAnimation(spell.id, state.hero.position, direction, target, floor));
+  }
 
   let currentState = addMsg(state, `${state.hero.name} casts ${spell.name}!`, 'combat');
 

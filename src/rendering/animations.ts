@@ -322,8 +322,11 @@ const DIRECTION_ROTATION: Record<Direction, number> = {
   NE: 315,
 };
 
+import type { Floor } from '../core/types';
+
 /**
  * Build a projectile animation along a direction from origin.
+ * Stops at walls if floor data is provided.
  */
 export function buildBoltAnimation(
   spellId: string,
@@ -331,6 +334,7 @@ export function buildBoltAnimation(
   direction: Direction,
   maxRange: number,
   hitPos?: Vector2,
+  floor?: Floor,
 ): SpellAnimation[] {
   const sprite = SPELL_SPRITES[spellId] ?? 'arrows-spell';
   const delta = getDirectionVector(direction);
@@ -343,6 +347,13 @@ export function buildBoltAnimation(
   for (let i = 0; i < maxRange; i++) {
     x += delta.x;
     y += delta.y;
+
+    // Stop before going out of bounds or into a wall
+    if (floor) {
+      if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
+      if (!floor.tiles[y][x].walkable && floor.tiles[y][x].type === 'wall') break;
+    }
+
     path.push({ x, y });
     if (hitPos && x === hitPos.x && y === hitPos.y) break;
   }
@@ -372,6 +383,7 @@ export function buildBallAnimation(
   origin: Vector2,
   direction: Direction,
   target: Vector2,
+  floor?: Floor,
 ): SpellAnimation[] {
   const projectileSprite = SPELL_SPRITES[spellId] ?? 'fire1-spell';
   const element = getSpellElement(spellId);
@@ -383,10 +395,16 @@ export function buildBallAnimation(
   let x = origin.x;
   let y = origin.y;
 
-  // Trace path to target
+  // Trace path to target, stop at walls
   for (let i = 0; i < 15; i++) {
     x += delta.x;
     y += delta.y;
+
+    if (floor) {
+      if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
+      if (!floor.tiles[y][x].walkable && floor.tiles[y][x].type === 'wall') break;
+    }
+
     path.push({ x, y });
     if (x === target.x && y === target.y) break;
   }
