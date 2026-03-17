@@ -8,6 +8,7 @@ import { createCharacterCreationScreen } from './ui/character-creation';
 import { createCharacterInfoScreen } from './ui/character-info';
 import { createDeathScreen } from './ui/death-screen';
 import { generateFloor } from './systems/dungeon/generator';
+import { SPELL_BY_ID } from './data/spells';
 import { computeFov } from './utils/fov';
 import type { GameState, Screen } from './core/types';
 
@@ -22,6 +23,20 @@ const input = new InputManager();
 const gameLoop = new GameLoop(createInitialGameState(), render);
 input.setHandler(action => gameLoop.handleAction(action));
 
+// Spell mode indicator
+input.setSpellModeCallback((spellId) => {
+  const indicator = document.getElementById('spell-mode-indicator');
+  if (indicator) {
+    if (spellId) {
+      const spell = SPELL_BY_ID[spellId];
+      indicator.textContent = `Casting: ${spell?.name ?? spellId} — pick a direction (Esc to cancel)`;
+      indicator.style.display = 'block';
+    } else {
+      indicator.style.display = 'none';
+    }
+  }
+});
+
 // Initial render
 render(gameLoop.getState());
 
@@ -33,11 +48,15 @@ function render(state: GameState): void {
     }
 
     if (state.screen === 'game') {
+      // Sync known spells to input manager for number-key casting
+      input.setKnownSpells(state.hero.knownSpells);
+
       // Compute FOV before rendering map
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
       if (floor) {
-        computeFov(floor, state.hero.position.x, state.hero.position.y);
+        const hasLight = state.hero.activeEffects.some(e => e.id === 'light' && e.turnsRemaining > 0);
+        computeFov(floor, state.hero.position.x, state.hero.position.y, hasLight);
       }
 
       mapRenderer?.render(state);
@@ -105,6 +124,12 @@ function switchScreen(state: GameState): void {
       const gameContainer = document.createElement('div');
       gameContainer.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding-top:8px;';
       root.appendChild(gameContainer);
+
+      // Spell targeting mode indicator
+      const spellIndicator = document.createElement('div');
+      spellIndicator.id = 'spell-mode-indicator';
+      spellIndicator.style.cssText = 'display:none;color:#ff0;background:#220;padding:4px 12px;font-size:13px;font-family:sans-serif;border:1px solid #550;margin-bottom:4px;width:672px;text-align:center;box-sizing:border-box;';
+      gameContainer.appendChild(spellIndicator);
 
       mapRenderer = new MapRenderer(gameContainer);
       hudRenderer = new HudRenderer(gameContainer);

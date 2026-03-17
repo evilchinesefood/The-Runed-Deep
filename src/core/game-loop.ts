@@ -39,7 +39,12 @@ export class GameLoop {
       newState = checkAndApplyLevelUps(newState);
     }
 
-    // 3. Process monster turns (when in game screen and a turn-consuming action happened)
+    // 3. Tick active effects (when a turn was consumed)
+    if (newState.screen === 'game' && newState.turn > this.state.turn) {
+      newState = this.tickActiveEffects(newState);
+    }
+
+    // 4. Process monster turns (when in game screen and a turn-consuming action happened)
     if (newState.screen === 'game' && newState.turn > this.state.turn) {
       newState = this.processMonsterTurns(newState);
     }
@@ -53,6 +58,28 @@ export class GameLoop {
     this.state = newState;
     this.onStateChange?.(newState);
     this.onRender(newState);
+  }
+
+  private tickActiveEffects(state: GameState): GameState {
+    const hero = state.hero;
+    const remaining = hero.activeEffects
+      .map(e => ({ ...e, turnsRemaining: e.turnsRemaining - 1 }))
+      .filter(e => e.turnsRemaining > 0);
+
+    const expired = hero.activeEffects.filter(
+      e => !remaining.find(r => r.id === e.id)
+    );
+
+    let messages = [...state.messages];
+    for (const e of expired) {
+      messages = [...messages, { text: `${e.name} has worn off.`, severity: 'system' as const, turn: state.turn }];
+    }
+
+    return {
+      ...state,
+      hero: { ...hero, activeEffects: remaining },
+      messages,
+    };
   }
 
   private processMonsterTurns(state: GameState): GameState {

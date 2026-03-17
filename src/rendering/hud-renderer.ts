@@ -1,5 +1,6 @@
 import type { GameState, Message } from '../core/types';
 import { xpToNextLevel } from '../systems/character/leveling';
+import { SPELL_BY_ID } from '../data/spells';
 
 function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -19,9 +20,21 @@ export class HudRenderer {
   private container: HTMLElement;
   private statsEl: HTMLElement;
   private messagesEl: HTMLElement;
+  private spellBarEl: HTMLElement;
 
   constructor(container: HTMLElement) {
     this.container = container;
+
+    // Spell bar
+    this.spellBarEl = el('div', {
+      display: 'flex',
+      width: '672px',
+      margin: '2px auto',
+      gap: '4px',
+      fontFamily: "'Segoe UI', Tahoma, sans-serif",
+      fontSize: '11px',
+    });
+    this.container.appendChild(this.spellBarEl);
 
     const hud = el('div', {
       display: 'flex',
@@ -55,6 +68,7 @@ export class HudRenderer {
   }
 
   render(state: GameState): void {
+    this.renderSpellBar(state);
     this.renderStats(state);
     this.renderMessages(state.messages);
   }
@@ -108,6 +122,40 @@ export class HudRenderer {
       `Floor: ${state.currentFloor + 1}  Copper: ${h.copper}`
     );
     this.statsEl.appendChild(floorInfo);
+  }
+
+  private renderSpellBar(state: GameState): void {
+    this.spellBarEl.replaceChildren();
+    const spells = state.hero.knownSpells;
+    const mp = state.hero.mp;
+
+    if (spells.length === 0) {
+      this.spellBarEl.appendChild(el('div', { color: '#555', padding: '2px 4px' }, 'No spells known'));
+      return;
+    }
+
+    // Show up to 9 spells with number key labels
+    const max = Math.min(9, spells.length);
+    for (let i = 0; i < max; i++) {
+      const spell = SPELL_BY_ID[spells[i]];
+      if (!spell) continue;
+
+      const canCast = mp >= spell.manaCost;
+      const btn = el('div', {
+        padding: '2px 6px',
+        background: canCast ? '#1a1a2a' : '#1a1a1a',
+        border: `1px solid ${canCast ? '#446' : '#222'}`,
+        color: canCast ? '#aac' : '#555',
+        cursor: canCast ? 'pointer' : 'default',
+        whiteSpace: 'nowrap',
+      }, `${i + 1}:${spell.name}`);
+
+      this.spellBarEl.appendChild(btn);
+    }
+
+    if (spells.length > 9) {
+      this.spellBarEl.appendChild(el('div', { color: '#555', padding: '2px 4px' }, `+${spells.length - 9} more`));
+    }
   }
 
   private renderMessages(messages: Message[]): void {

@@ -1,6 +1,7 @@
 import type { GameState, GameAction, Direction, Vector2, Message } from './types';
 import { generateFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
+import { castSpell } from '../systems/spells/casting';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -21,6 +22,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'move':
       return processMove(state, action.direction);
+    case 'castSpell':
+      return processCastSpell(state, action);
     case 'useStairs':
       return processUseStairs(state);
     case 'setScreen':
@@ -67,6 +70,10 @@ function processMove(state: GameState, direction: Direction): GameState {
     hero: { ...state.hero, position: newPos },
     turn: state.turn + 1,
   };
+}
+
+function processCastSpell(state: GameState, action: Extract<GameAction, { type: 'castSpell' }>): GameState {
+  return castSpell(state, action.spellId, action.direction, action.target);
 }
 
 function processUseStairs(state: GameState): GameState {

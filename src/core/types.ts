@@ -261,7 +261,7 @@ export interface GameState {
 export type GameAction =
   | { type: 'move'; direction: Direction }
   | { type: 'attack'; target: Vector2 }
-  | { type: 'castSpell'; spellId: string; target?: Vector2 }
+  | { type: 'castSpell'; spellId: string; direction?: Direction; target?: Vector2 }
   | { type: 'pickupItem' }
   | { type: 'useStairs' }
   | { type: 'openDoor'; position: Vector2 }

@@ -1,36 +1,26 @@
 import type { GameAction, Direction } from '../core/types';
+import { SPELL_BY_ID } from '../data/spells';
 
 export type ActionHandler = (action: GameAction) => void;
+export type SpellModeCallback = (spellId: string | null) => void;
 
 const KEY_TO_DIRECTION: Record<string, Direction> = {
-  // Arrow keys
-  ArrowUp: 'N',
-  ArrowDown: 'S',
-  ArrowLeft: 'W',
-  ArrowRight: 'E',
-  // Numpad
-  Numpad8: 'N',
-  Numpad9: 'NE',
-  Numpad6: 'E',
-  Numpad3: 'SE',
-  Numpad2: 'S',
-  Numpad1: 'SW',
-  Numpad4: 'W',
-  Numpad7: 'NW',
-  // Vim-style
-  KeyK: 'N',
-  KeyL: 'E',
-  KeyJ: 'S',
-  KeyH: 'W',
-  KeyY: 'NW',
-  KeyU: 'NE',
-  KeyB: 'SW',
-  KeyN: 'SE',
+  ArrowUp: 'N', ArrowDown: 'S', ArrowLeft: 'W', ArrowRight: 'E',
+  Numpad8: 'N', Numpad9: 'NE', Numpad6: 'E', Numpad3: 'SE',
+  Numpad2: 'S', Numpad1: 'SW', Numpad4: 'W', Numpad7: 'NW',
+  KeyK: 'N', KeyL: 'E', KeyJ: 'S', KeyH: 'W',
+  KeyY: 'NW', KeyU: 'NE', KeyB: 'SW', KeyN: 'SE',
 };
 
 export class InputManager {
   private handler: ActionHandler | null = null;
   private enabled = true;
+
+  // Spell casting state
+  private pendingSpellId: string | null = null;
+  private onSpellModeChange: SpellModeCallback | null = null;
+  // Known spells reference (set from outside so we can map number keys)
+  private knownSpells: string[] = [];
 
   constructor() {
     this.setupKeyboard();
@@ -43,6 +33,41 @@ export class InputManager {
 
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
+    if (!enabled) this.cancelSpellMode();
+  }
+
+  setKnownSpells(spells: string[]): void {
+    this.knownSpells = spells;
+  }
+
+  setSpellModeCallback(cb: SpellModeCallback): void {
+    this.onSpellModeChange = cb;
+  }
+
+  isInSpellMode(): boolean {
+    return this.pendingSpellId !== null;
+  }
+
+  private cancelSpellMode(): void {
+    if (this.pendingSpellId) {
+      this.pendingSpellId = null;
+      this.onSpellModeChange?.(null);
+    }
+  }
+
+  private enterSpellMode(spellId: string): void {
+    const spell = SPELL_BY_ID[spellId];
+    if (!spell) return;
+
+    // Self-cast and 'none' targeting spells cast immediately
+    if (spell.targeting === 'self' || spell.targeting === 'none') {
+      this.emit({ type: 'castSpell', spellId });
+      return;
+    }
+
+    // Direction/target spells need a second input
+    this.pendingSpellId = spellId;
+    this.onSpellModeChange?.(spellId);
   }
 
   private emit(action: GameAction): void {
@@ -55,6 +80,32 @@ export class InputManager {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
       if (!this.enabled) return;
 
+      // If in spell targeting mode, handle direction/escape
+      if (this.pendingSpellId) {
+        e.preventDefault();
+
+        if (e.code === 'Escape') {
+          this.cancelSpellMode();
+          return;
+        }
+
+        const direction = KEY_TO_DIRECTION[e.code];
+        if (direction) {
+          const spell = SPELL_BY_ID[this.pendingSpellId];
+          if (spell?.targeting === 'direction') {
+            this.emit({ type: 'castSpell', spellId: this.pendingSpellId, direction });
+          } else if (spell?.targeting === 'target') {
+            // For target spells, use direction to pick the nearest monster in that direction
+            // (simplified: cast at the direction as a bolt-like target)
+            this.emit({ type: 'castSpell', spellId: this.pendingSpellId, direction });
+          }
+          this.pendingSpellId = null;
+          this.onSpellModeChange?.(null);
+          return;
+        }
+        return; // Ignore other keys in spell mode
+      }
+
       // Movement
       const direction = KEY_TO_DIRECTION[e.code];
       if (direction) {
@@ -63,8 +114,24 @@ export class InputManager {
         return;
       }
 
+      // Number keys 1-9: quick cast spell from known spells list
+      const digitMatch = e.code.match(/^Digit([1-9])$/);
+      if (digitMatch && !e.shiftKey && !e.ctrlKey) {
+        const idx = parseInt(digitMatch[1]) - 1;
+        if (idx < this.knownSpells.length) {
+          e.preventDefault();
+          this.enterSpellMode(this.knownSpells[idx]);
+          return;
+        }
+      }
+
       // Hotkeys
       switch (e.code) {
+        case 'KeyZ':
+          // Open spell list (handled by UI, emits setScreen or similar)
+          e.preventDefault();
+          // For now, same as number keys but shows a message
+          break;
         case 'KeyG':
           e.preventDefault();
           this.emit({ type: 'pickupItem' });
@@ -79,7 +146,6 @@ export class InputManager {
           break;
         case 'Period':
           if (e.shiftKey) {
-            // > key (Shift+Period) — go down stairs
             e.preventDefault();
             this.emit({ type: 'useStairs' });
           } else {
@@ -89,7 +155,6 @@ export class InputManager {
           break;
         case 'Comma':
           if (e.shiftKey) {
-            // < key (Shift+Comma) — go up stairs
             e.preventDefault();
             this.emit({ type: 'useStairs' });
           }
@@ -136,7 +201,6 @@ export class InputManager {
 
       if (dist < SWIPE_THRESHOLD) return;
 
-      // Convert swipe to 8-directional movement
       const angle = Math.atan2(dy, dx) * (180 / Math.PI);
       const direction = angleToDirection(angle);
       if (direction) {
@@ -147,7 +211,6 @@ export class InputManager {
 }
 
 function angleToDirection(angle: number): Direction {
-  // Normalize angle to 0-360
   const a = ((angle % 360) + 360) % 360;
   if (a >= 337.5 || a < 22.5) return 'E';
   if (a >= 22.5 && a < 67.5) return 'SE';

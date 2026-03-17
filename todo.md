@@ -47,10 +47,10 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Four attributes: Strength, Intelligence, Constitution, Dexterity
 - [x] Derived stats: HP, MP, Armor Value from attributes
 - [x] Full spell database (all 30 spells defined)
-- [ ] Experience and leveling (XP curve doubles per level)
+- [ ] Experience and leveling (XP curve is previous level + 1/3 more per level)
 - [ ] HP/MP gains on level-up based on CON/INT
 - [ ] Spell learning on level-up
-- [ ] Max level 30
+- [ ] No Max Level, Level up forever.
 
 ### 2.3 Dungeon Generation
 - [x] Room generation (rectangular — basic)
