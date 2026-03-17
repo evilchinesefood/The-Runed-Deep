@@ -12,6 +12,7 @@ import { SPELL_BY_ID } from './data/spells';
 import { AnimationRenderer } from './rendering/animations';
 import { drainAnimations } from './rendering/animation-queue';
 import { computeFov } from './utils/fov';
+import { loadGame } from './core/save-load';
 import type { GameState, Screen } from './core/types';
 
 const root = document.getElementById('game-root')!;
@@ -111,7 +112,16 @@ function switchScreen(state: GameState): void {
   switch (state.screen) {
     case 'splash':
       input.setEnabled(false);
-      createSplashScreen(root, action => gameLoop.handleAction(action));
+      createSplashScreen(
+        root,
+        action => gameLoop.handleAction(action),
+        (slot) => {
+          const loaded = loadGame(slot);
+          if (loaded) {
+            gameLoop.setState(loaded);
+          }
+        },
+      );
       break;
 
     case 'character-creation':

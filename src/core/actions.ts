@@ -2,6 +2,7 @@ import type { GameState, GameAction, Direction, Vector2, Message } from './types
 import { generateFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
 import { castSpell } from '../systems/spells/casting';
+import { saveGame } from './save-load';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -28,6 +29,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processUseStairs(state);
     case 'setScreen':
       return { ...state, screen: action.screen };
+    case 'save':
+      return processSave(state);
     case 'rest':
       return processRest(state);
     case 'newGame':
@@ -138,7 +141,7 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   const depthLabel = targetFloor + 1;
   const verb = direction === 'descend' ? 'descends to' : 'ascends to';
 
-  return {
+  const newState: GameState = {
     ...state,
     hero: { ...state.hero, position: arrivalPos },
     currentFloor: targetFloor,
@@ -149,6 +152,17 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
       { text: `${state.hero.name} ${verb} level ${depthLabel}.`, severity: 'important', turn: state.turn },
     ],
   };
+
+  // Auto-save on floor change
+  saveGame(newState, 1);
+
+  return newState;
+}
+
+function processSave(state: GameState): GameState {
+  const success = saveGame(state, 1);
+  const msg = success ? 'Game saved.' : 'Failed to save game!';
+  return addMessage(state, msg, 'system');
 }
 
 function addMessage(state: GameState, text: string, severity: Message['severity']): GameState {
