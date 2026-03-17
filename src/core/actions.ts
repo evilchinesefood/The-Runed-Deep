@@ -1,4 +1,6 @@
-import type { GameState, GameAction, Direction, Vector2 } from './types';
+import type { GameState, GameAction, Direction, Vector2, Message } from './types';
+import { generateFloor } from '../systems/dungeon/generator';
+import { playerAttacksMonster } from '../systems/combat/combat';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -19,6 +21,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'move':
       return processMove(state, action.direction);
+    case 'useStairs':
+      return processUseStairs(state);
     case 'setScreen':
       return { ...state, screen: action.screen };
     case 'rest':
@@ -49,20 +53,101 @@ function processMove(state: GameState, direction: Direction): GameState {
   const tile = floor.tiles[newPos.y][newPos.x];
   if (!tile.walkable) return state;
 
-  // Check for monster at target position
+  // Check for monster at target position — attack it
   const monsterAtTarget = floor.monsters.find(
     m => m.position.x === newPos.x && m.position.y === newPos.y
   );
 
   if (monsterAtTarget) {
-    // Combat will be handled by combat system
-    return state;
+    return playerAttacksMonster(state, monsterAtTarget.id);
   }
 
   return {
     ...state,
     hero: { ...state.hero, position: newPos },
     turn: state.turn + 1,
+  };
+}
+
+function processUseStairs(state: GameState): GameState {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const heroTile = floor.tiles[state.hero.position.y][state.hero.position.x];
+
+  if (heroTile.type === 'stairs-down') {
+    return goToFloor(state, state.currentFloor + 1, 'descend');
+  } else if (heroTile.type === 'stairs-up') {
+    if (state.currentFloor === 0) {
+      // TODO: Return to town
+      return addMessage(state, 'You cannot go up from here yet.', 'system');
+    }
+    return goToFloor(state, state.currentFloor - 1, 'ascend');
+  }
+
+  return addMessage(state, 'There are no stairs here.', 'system');
+}
+
+function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 'descend'): GameState {
+  const targetKey = `${state.currentDungeon}-${targetFloor}`;
+  let floors = { ...state.floors };
+
+  // Generate floor if it doesn't exist yet
+  if (!floors[targetKey]) {
+    const { floor: newFloor } = generateFloor(
+      state.currentDungeon,
+      targetFloor,
+      state.rngSeed,
+      true,   // has stairs up
+      true,   // has stairs down
+    );
+    floors = { ...floors, [targetKey]: newFloor };
+  }
+
+  const targetFloorData = floors[targetKey];
+
+  // Find the matching stairs on the target floor
+  // Going down → arrive at stairs-up on the next floor
+  // Going up → arrive at stairs-down on the previous floor
+  const arrivalStairType = direction === 'descend' ? 'stairs-up' : 'stairs-down';
+  let arrivalPos: Vector2 | null = null;
+
+  for (let y = 0; y < targetFloorData.height; y++) {
+    for (let x = 0; x < targetFloorData.width; x++) {
+      if (targetFloorData.tiles[y][x].type === arrivalStairType) {
+        arrivalPos = { x, y };
+        break;
+      }
+    }
+    if (arrivalPos) break;
+  }
+
+  // Fallback: if no matching stairs found, use center of first room
+  if (!arrivalPos) {
+    arrivalPos = { x: Math.floor(targetFloorData.width / 2), y: Math.floor(targetFloorData.height / 2) };
+  }
+
+  const depthLabel = targetFloor + 1;
+  const verb = direction === 'descend' ? 'descends to' : 'ascends to';
+
+  return {
+    ...state,
+    hero: { ...state.hero, position: arrivalPos },
+    currentFloor: targetFloor,
+    floors,
+    turn: state.turn + 1,
+    messages: [
+      ...state.messages,
+      { text: `${state.hero.name} ${verb} level ${depthLabel}.`, severity: 'important', turn: state.turn },
+    ],
+  };
+}
+
+function addMessage(state: GameState, text: string, severity: Message['severity']): GameState {
+  return {
+    ...state,
+    messages: [...state.messages, { text, severity, turn: state.turn }],
   };
 }
 

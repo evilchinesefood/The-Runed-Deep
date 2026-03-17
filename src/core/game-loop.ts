@@ -1,5 +1,7 @@
 import type { GameState, GameAction } from './types';
 import { processAction } from './actions';
+import { processAllMonsterTurns } from '../systems/monsters/ai';
+import { checkAndApplyLevelUps } from '../systems/character/leveling';
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -32,25 +34,30 @@ export class GameLoop {
     // 1. Process player action
     let newState = processAction(this.state, action);
 
-    // 2. Process monster turns (when in game screen and a turn-consuming action happened)
+    // 2. Check for level-ups (after XP gain from combat)
+    if (newState.screen === 'game') {
+      newState = checkAndApplyLevelUps(newState);
+    }
+
+    // 3. Process monster turns (when in game screen and a turn-consuming action happened)
     if (newState.screen === 'game' && newState.turn > this.state.turn) {
       newState = this.processMonsterTurns(newState);
     }
 
-    // 3. Update state and render
+    // 4. Check for player death
+    if (newState.screen === 'game' && newState.hero.hp <= 0) {
+      newState = { ...newState, screen: 'death' };
+    }
+
+    // 4. Update state and render
     this.state = newState;
     this.onStateChange?.(newState);
     this.onRender(newState);
   }
 
   private processMonsterTurns(state: GameState): GameState {
-    const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
-    const floor = state.floors[floorKey];
-    if (!floor) return state;
-
-    // Each monster gets a turn — will be implemented in monster AI system
-    // For now, just return state unchanged
-    return state;
+    if (state.hero.hp <= 0) return state;
+    return processAllMonsterTurns(state);
   }
 
   render(): void {

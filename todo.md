@@ -61,7 +61,7 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [ ] Locked and secret doors
 - [ ] Trap placement (pit, arrow, portal, fire, acid, dart, etc.)
 - [ ] Item/treasure placement
-- [ ] Monster spawning per floor depth
+- [x] Monster spawning per floor depth (65 monster types + depth-weighted selection)
 - [ ] Floor persistence (generated once, remembered)
 
 ### 2.4 Map & Exploration

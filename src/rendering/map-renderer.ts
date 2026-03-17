@@ -4,9 +4,14 @@ const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
 const VIEWPORT_TILES_Y = 15;
 
+interface TileCell {
+  floor: HTMLElement;    // Bottom layer: terrain tile
+  entity: HTMLElement;   // Top layer: monster, hero, or item (transparent bg)
+}
+
 export class MapRenderer {
   private container: HTMLElement;
-  private tileElements: HTMLElement[][] = [];
+  private cells: TileCell[][] = [];
   private mapContainer: HTMLElement;
 
   constructor(container: HTMLElement) {
@@ -29,18 +34,23 @@ export class MapRenderer {
 
   private initTileGrid(): void {
     for (let y = 0; y < VIEWPORT_TILES_Y; y++) {
-      this.tileElements[y] = [];
+      this.cells[y] = [];
       for (let x = 0; x < VIEWPORT_TILES_X; x++) {
-        const el = document.createElement('div');
-        el.style.cssText = `
-          position: absolute;
-          left: ${x * TILE_SIZE}px;
-          top: ${y * TILE_SIZE}px;
-          width: ${TILE_SIZE}px;
-          height: ${TILE_SIZE}px;
-        `;
-        this.mapContainer.appendChild(el);
-        this.tileElements[y][x] = el;
+        const left = x * TILE_SIZE;
+        const top = y * TILE_SIZE;
+        const posStyle = `position:absolute;left:${left}px;top:${top}px;width:${TILE_SIZE}px;height:${TILE_SIZE}px;`;
+
+        // Floor layer (bottom)
+        const floorEl = document.createElement('div');
+        floorEl.style.cssText = posStyle;
+        this.mapContainer.appendChild(floorEl);
+
+        // Entity layer (top, transparent background)
+        const entityEl = document.createElement('div');
+        entityEl.style.cssText = posStyle + 'background-color:transparent;';
+        this.mapContainer.appendChild(entityEl);
+
+        this.cells[y][x] = { floor: floorEl, entity: entityEl };
       }
     }
   }
@@ -59,15 +69,18 @@ export class MapRenderer {
       for (let vx = 0; vx < VIEWPORT_TILES_X; vx++) {
         const worldX = cameraX + vx;
         const worldY = cameraY + vy;
-        const el = this.tileElements[vy][vx];
+        const cell = this.cells[vy][vx];
 
-        // Clear previous classes (keep only positional style)
-        el.className = '';
+        // Reset both layers
+        cell.floor.className = '';
+        cell.floor.style.background = '';
+        cell.entity.className = '';
+        cell.entity.style.display = 'none';
 
-        // Out of bounds
+        // Out of bounds — solid black
         if (worldX < 0 || worldX >= floor.width || worldY < 0 || worldY >= floor.height) {
-          el.className = 'tile-rock';
-          el.style.opacity = '1';
+          cell.floor.style.background = '#000';
+          cell.floor.style.opacity = '1';
           continue;
         }
 
@@ -75,22 +88,37 @@ export class MapRenderer {
         const visible = floor.visible[worldY][worldX];
 
         if (!explored) {
-          el.className = '';
-          el.style.opacity = '0';
+          cell.floor.style.background = '#000';
+          cell.floor.style.opacity = '1';
           continue;
         }
 
-        // Render floor tile
         const tile = floor.tiles[worldY][worldX];
-        el.className = tile.sprite;
-        el.style.opacity = visible ? '1' : '0.4';
+        const opacity = visible ? '1' : '0.4';
 
-        // If visible, check for entities on this tile
+        // Tiles like stairs and doors are overlays on top of the base floor
+        const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
+          || tile.type === 'door-closed' || tile.type === 'door-open';
+
+        if (isOverlayTile) {
+          // Show base floor underneath, tile sprite on entity layer
+          cell.floor.className = 'lit-dgn';
+          cell.floor.style.opacity = opacity;
+          cell.entity.className = tile.sprite;
+          cell.entity.style.display = 'block';
+          cell.entity.style.opacity = opacity;
+        } else {
+          cell.floor.className = tile.sprite;
+          cell.floor.style.opacity = opacity;
+        }
+
+        // If visible, check for entities to overlay (hero/monsters/items take priority)
         if (visible) {
           // Hero
           if (worldX === state.hero.position.x && worldY === state.hero.position.y) {
-            el.className = state.hero.gender === 'male' ? 'monster-male-hero' : 'monster-female-hero';
-            el.style.opacity = '1';
+            cell.entity.className = state.hero.gender === 'male' ? 'male-hero' : 'female-hero';
+            cell.entity.style.display = 'block';
+            cell.entity.style.opacity = '1';
             continue;
           }
 
@@ -99,7 +127,9 @@ export class MapRenderer {
             m => m.position.x === worldX && m.position.y === worldY
           );
           if (monster) {
-            el.className = monster.sprite;
+            cell.entity.className = monster.sprite;
+            cell.entity.style.display = 'block';
+            cell.entity.style.opacity = '1';
             continue;
           }
 
@@ -108,7 +138,9 @@ export class MapRenderer {
             i => i.position.x === worldX && i.position.y === worldY
           );
           if (item) {
-            el.className = item.item.sprite;
+            cell.entity.className = item.item.sprite;
+            cell.entity.style.display = 'block';
+            cell.entity.style.opacity = '1';
             continue;
           }
         }

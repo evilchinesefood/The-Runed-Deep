@@ -21,7 +21,7 @@
     margin: 20px;
 }
 .avatar {
-    background-image: url('../assets/monsters.png');
+    background-image: url('../../assets/monsters.png');
     height: 32px;
     width: 32px;
 }

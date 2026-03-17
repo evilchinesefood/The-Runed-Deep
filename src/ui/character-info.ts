@@ -1,5 +1,6 @@
 import type { GameState, Attributes, Hero } from '../core/types';
 import { SPELL_BY_ID } from '../data/spells';
+import { xpToNextLevel, xpRequiredForLevel } from '../systems/character/leveling';
 
 function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -87,7 +88,7 @@ export function createCharacterInfoScreen(
   const heroSprite = el('div', { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' });
 
   const spriteEl = el('div', { width: '32px', height: '32px' });
-  spriteEl.className = h.gender === 'male' ? 'monster-male-hero' : 'monster-female-hero';
+  spriteEl.className = h.gender === 'male' ? 'male-hero' : 'female-hero';
   heroSprite.appendChild(spriteEl);
 
   const nameBlock = el('div');
@@ -107,7 +108,12 @@ export function createCharacterInfoScreen(
   panel.appendChild(statLine('Hit Points', `${h.hp} / ${h.maxHp}`, hpColor));
   panel.appendChild(statLine('Mana', `${h.mp} / ${h.maxMp}`, '#48f'));
   panel.appendChild(statLine('Armor Class', h.armorValue));
-  panel.appendChild(statLine('Experience', h.xp));
+  const toNext = xpToNextLevel(h, state.difficulty);
+  const nextLevelXp = xpRequiredForLevel(h.level + 1, state.difficulty);
+  const xpStr = toNext === Infinity
+    ? `${h.xp} (MAX LEVEL)`
+    : `${h.xp} / ${nextLevelXp} (${toNext} to next)`;
+  panel.appendChild(statLine('Experience', xpStr));
   panel.appendChild(statLine('Copper', h.copper));
   panel.appendChild(statLine('Turn', state.turn));
 

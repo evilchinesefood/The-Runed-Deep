@@ -32,7 +32,7 @@ export function createCharacterCreationScreen(
   const state = {
     name: 'Hero',
     gender: 'male' as Gender,
-    attributes: { strength: 50, intelligence: 50, constitution: 50, dexterity: 50 } as Attributes,
+    attributes: { strength: 60, intelligence: 55, constitution: 60, dexterity: 55 } as Attributes,
     difficulty: 'easy' as Difficulty,
     startingSpell: STARTER_SPELLS[0].id,
   };

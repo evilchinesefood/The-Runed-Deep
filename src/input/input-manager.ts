@@ -78,8 +78,25 @@ export class InputManager {
           this.emit({ type: 'setScreen', screen: 'character-info' });
           break;
         case 'Period':
+          if (e.shiftKey) {
+            // > key (Shift+Period) — go down stairs
+            e.preventDefault();
+            this.emit({ type: 'useStairs' });
+          } else {
+            e.preventDefault();
+            this.emit({ type: 'rest' });
+          }
+          break;
+        case 'Comma':
+          if (e.shiftKey) {
+            // < key (Shift+Comma) — go up stairs
+            e.preventDefault();
+            this.emit({ type: 'useStairs' });
+          }
+          break;
+        case 'Enter':
           e.preventDefault();
-          this.emit({ type: 'rest' });
+          this.emit({ type: 'useStairs' });
           break;
         case 'KeyS':
           if (e.ctrlKey) {

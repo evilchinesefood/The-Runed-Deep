@@ -1,4 +1,5 @@
 import type { Floor, Tile, Vector2 } from '../../core/types';
+import { spawnMonsters } from '../monsters/spawning';
 
 interface Room {
   x: number;
@@ -22,21 +23,21 @@ function seededRandom(seed: number): () => number {
 }
 
 function createWallTile(): Tile {
-  return { type: 'wall', sprite: 'tile-dark-dungeon', walkable: false, transparent: false };
+  return { type: 'wall', sprite: 'rock', walkable: false, transparent: false };
 }
 
 function createFloorTile(): Tile {
-  return { type: 'floor', sprite: 'tile-lit-dungeon', walkable: true, transparent: true };
+  return { type: 'floor', sprite: 'lit-dgn', walkable: true, transparent: true };
 }
 
 function createDoorTile(): Tile {
-  return { type: 'door-closed', sprite: 'tile-door-closed', walkable: true, transparent: false };
+  return { type: 'door-closed', sprite: 'door-closed', walkable: true, transparent: false };
 }
 
 function createStairsTile(direction: 'up' | 'down'): Tile {
   return {
     type: direction === 'up' ? 'stairs-up' : 'stairs-down',
-    sprite: direction === 'up' ? 'tile-stairs-up' : 'tile-stairs-down',
+    sprite: direction === 'up' ? 'stairs-up' : 'stairs-down',
     walkable: true,
     transparent: true,
   };
@@ -153,6 +154,11 @@ export function generateFloor(
     height: FLOOR_HEIGHT,
   };
 
+  // Spawn monsters appropriate for this depth
+  // Depth = floorNum + 1 (floor 0 is depth 1)
+  const effectiveDepth = floorNum + 1;
+  floor.monsters = spawnMonsters(floor, effectiveDepth, playerStart, rand);
+
   return { floor, playerStart };
 }
 
@@ -177,36 +183,69 @@ function carveVertical(tiles: Tile[][], y1: number, y2: number, x: number): void
 }
 
 function placeDoors(tiles: Tile[][], room: Room, rand: () => number): void {
-  // Check each edge tile of the room for corridor connections
-  const edges: Vector2[] = [];
+  // Find wall tiles that sit between a room floor tile and a corridor floor tile.
+  // These are the natural doorway positions — one tile outside the room boundary.
+  const wallCandidates: Vector2[] = [];
 
-  for (let x = room.x; x < room.x + room.w; x++) {
-    if (room.y > 0) edges.push({ x, y: room.y });
-    if (room.y + room.h < tiles.length) edges.push({ x, y: room.y + room.h - 1 });
+  // Check tiles just outside each room edge
+  // Top edge: row above the room (y = room.y - 1)
+  if (room.y > 0) {
+    for (let x = room.x; x < room.x + room.w; x++) {
+      wallCandidates.push({ x, y: room.y - 1 });
+    }
   }
-  for (let y = room.y; y < room.y + room.h; y++) {
-    if (room.x > 0) edges.push({ x: room.x, y });
-    if (room.x + room.w < tiles[0].length) edges.push({ x: room.x + room.w - 1, y });
+  // Bottom edge: row below the room (y = room.y + room.h)
+  if (room.y + room.h < tiles.length) {
+    for (let x = room.x; x < room.x + room.w; x++) {
+      wallCandidates.push({ x, y: room.y + room.h });
+    }
+  }
+  // Left edge: column left of the room (x = room.x - 1)
+  if (room.x > 0) {
+    for (let y = room.y; y < room.y + room.h; y++) {
+      wallCandidates.push({ x: room.x - 1, y });
+    }
+  }
+  // Right edge: column right of the room (x = room.x + room.w)
+  if (room.x + room.w < tiles[0].length) {
+    for (let y = room.y; y < room.y + room.h; y++) {
+      wallCandidates.push({ x: room.x + room.w, y });
+    }
   }
 
-  for (const pos of edges) {
-    if (!isCorridorEntrance(tiles, pos, room)) continue;
-    if (rand() < 0.3) {
+  for (const pos of wallCandidates) {
+    const tile = tiles[pos.y][pos.x];
+    // Only place doors where corridors have already carved through walls
+    if (!tile.walkable) continue;
+
+    // Verify this tile connects a room interior to a corridor
+    // (has a room floor neighbor on one side and corridor floor on another)
+    if (isDoorworthy(tiles, pos, room) && rand() < 0.4) {
       tiles[pos.y][pos.x] = createDoorTile();
     }
   }
 }
 
-function isCorridorEntrance(tiles: Tile[][], pos: Vector2, room: Room): boolean {
-  // A corridor entrance is a floor tile on the room boundary
-  // where the adjacent tile outside the room is also a floor tile
+function isDoorworthy(tiles: Tile[][], pos: Vector2, _room: Room): boolean {
+  // A good door position is a floor tile just outside the room that has:
+  // - A room floor tile on one side (inside the room)
+  // - A floor tile on the opposite side (corridor continuing away)
+  // AND is flanked by walls on the perpendicular axis (so it's a narrow passage)
   const { x, y } = pos;
-  const outsidePositions: Vector2[] = [];
+  const h = tiles.length;
+  const w = tiles[0].length;
 
-  if (y === room.y && y > 0) outsidePositions.push({ x, y: y - 1 });
-  if (y === room.y + room.h - 1 && y < tiles.length - 1) outsidePositions.push({ x, y: y + 1 });
-  if (x === room.x && x > 0) outsidePositions.push({ x: x - 1, y });
-  if (x === room.x + room.w - 1 && x < tiles[0].length - 1) outsidePositions.push({ x: x + 1, y });
+  const up = y > 0 ? tiles[y - 1][x] : null;
+  const down = y < h - 1 ? tiles[y + 1][x] : null;
+  const left = x > 0 ? tiles[y][x - 1] : null;
+  const right = x < w - 1 ? tiles[y][x + 1] : null;
 
-  return outsidePositions.some(p => tiles[p.y][p.x].walkable);
+  // Vertical passage: floor above and below, walls left and right
+  const verticalPassage = (up?.walkable === true) && (down?.walkable === true)
+    && !(left?.walkable) && !(right?.walkable);
+  // Horizontal passage: floor left and right, walls above and below
+  const horizontalPassage = (left?.walkable === true) && (right?.walkable === true)
+    && !(up?.walkable) && !(down?.walkable);
+
+  return verticalPassage || horizontalPassage;
 }

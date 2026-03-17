@@ -6,6 +6,7 @@ import { HudRenderer } from './rendering/hud-renderer';
 import { createSplashScreen } from './ui/splash-screen';
 import { createCharacterCreationScreen } from './ui/character-creation';
 import { createCharacterInfoScreen } from './ui/character-info';
+import { createDeathScreen } from './ui/death-screen';
 import { generateFloor } from './systems/dungeon/generator';
 import { computeFov } from './utils/fov';
 import type { GameState, Screen } from './core/types';
@@ -25,21 +26,29 @@ input.setHandler(action => gameLoop.handleAction(action));
 render(gameLoop.getState());
 
 function render(state: GameState): void {
-  const currentScreen = root.dataset.screen as Screen | undefined;
-  if (currentScreen !== state.screen) {
-    switchScreen(state);
-  }
-
-  if (state.screen === 'game') {
-    // Compute FOV before rendering map
-    const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
-    const floor = state.floors[floorKey];
-    if (floor) {
-      computeFov(floor, state.hero.position.x, state.hero.position.y);
+  try {
+    const currentScreen = root.dataset.screen as Screen | undefined;
+    if (currentScreen !== state.screen) {
+      switchScreen(state);
     }
 
-    mapRenderer?.render(state);
-    hudRenderer?.render(state);
+    if (state.screen === 'game') {
+      // Compute FOV before rendering map
+      const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+      const floor = state.floors[floorKey];
+      if (floor) {
+        computeFov(floor, state.hero.position.x, state.hero.position.y);
+      }
+
+      mapRenderer?.render(state);
+      hudRenderer?.render(state);
+    }
+  } catch (err) {
+    console.error('Render error:', err);
+    const errDiv = document.createElement('div');
+    errDiv.style.cssText = 'color:red;padding:20px;font-family:monospace;white-space:pre-wrap;';
+    errDiv.textContent = `Render error:\n${err instanceof Error ? err.stack ?? err.message : String(err)}`;
+    root.replaceChildren(errDiv);
   }
 }
 
@@ -58,27 +67,35 @@ function switchScreen(state: GameState): void {
     case 'character-creation':
       input.setEnabled(false);
       createCharacterCreationScreen(root, result => {
-        const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell);
+        try {
+          const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell);
 
-        // Generate the first dungeon floor
-        const { floor, playerStart } = generateFloor('mine', 0, Date.now(), false, true);
-        hero.position = playerStart;
+          // Generate the first dungeon floor
+          const { floor, playerStart } = generateFloor('mine', 0, Date.now(), false, true);
+          hero.position = playerStart;
 
-        const newState: GameState = {
-          ...gameLoop.getState(),
-          screen: 'game',
-          hero,
-          difficulty: result.difficulty,
-          currentDungeon: 'mine',
-          currentFloor: 0,
-          floors: { 'mine-0': floor },
-          messages: [
-            { text: `${result.name} enters the Abandoned Mine...`, severity: 'important', turn: 0 },
-            { text: 'Use arrow keys or numpad to move. Press ? for help.', severity: 'system', turn: 0 },
-          ],
-        };
+          const newState: GameState = {
+            ...gameLoop.getState(),
+            screen: 'game',
+            hero,
+            difficulty: result.difficulty,
+            currentDungeon: 'mine',
+            currentFloor: 0,
+            floors: { 'mine-0': floor },
+            messages: [
+              { text: `${result.name} enters the Abandoned Mine...`, severity: 'important', turn: 0 },
+              { text: 'Use arrow keys or numpad to move. Press ? for help.', severity: 'system', turn: 0 },
+            ],
+          };
 
-        gameLoop.setState(newState);
+          gameLoop.setState(newState);
+        } catch (err) {
+          console.error('Failed to start game:', err);
+          const errDiv = document.createElement('div');
+          errDiv.style.cssText = 'color:red;padding:20px;font-family:monospace;white-space:pre-wrap;';
+          errDiv.textContent = `Error starting game:\n${err instanceof Error ? err.stack ?? err.message : String(err)}`;
+          root.replaceChildren(errDiv);
+        }
       });
       break;
 
@@ -100,6 +117,18 @@ function switchScreen(state: GameState): void {
         gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
       });
       root.appendChild(infoScreen);
+      break;
+    }
+
+    case 'death': {
+      input.setEnabled(false);
+      createDeathScreen(root, gameLoop.getState(), action => {
+        if (action.type === 'setScreen' && action.screen === 'splash') {
+          // Reset to a fresh game state
+          const freshState = createInitialGameState();
+          gameLoop.setState(freshState);
+        }
+      });
       break;
     }
 

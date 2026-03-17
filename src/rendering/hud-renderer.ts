@@ -1,4 +1,5 @@
 import type { GameState, Message } from '../core/types';
+import { xpToNextLevel } from '../systems/character/leveling';
 
 function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -91,15 +92,22 @@ export class HudRenderer {
     );
     this.statsEl.appendChild(attrs);
 
+    const xpNeeded = xpToNextLevel(h, state.difficulty);
+    const xpDisplay = xpNeeded === Infinity ? 'MAX' : `${h.xp} (${xpNeeded} to next)`;
     const info = el('div', { fontSize: '11px', marginTop: '2px' },
-      `AC: ${h.armorValue}  XP: ${h.xp}  Turn: ${state.turn}`
+      `AC: ${h.armorValue}  Turn: ${state.turn}`
     );
     this.statsEl.appendChild(info);
 
-    const copper = el('div', { fontSize: '11px', marginTop: '2px' },
-      `Copper: ${h.copper}`
+    const xpRow = el('div', { fontSize: '11px', marginTop: '2px' },
+      `XP: ${xpDisplay}`
     );
-    this.statsEl.appendChild(copper);
+    this.statsEl.appendChild(xpRow);
+
+    const floorInfo = el('div', { fontSize: '11px', marginTop: '2px' },
+      `Floor: ${state.currentFloor + 1}  Copper: ${h.copper}`
+    );
+    this.statsEl.appendChild(floorInfo);
   }
 
   private renderMessages(messages: Message[]): void {

@@ -29,30 +29,7 @@ export function createSplashScreen(
     textShadow: '2px 2px 4px #000',
   }, 'Castle of the Winds');
 
-  const subtitle = el('div', {
-    fontSize: '14px',
-    color: '#888',
-    marginBottom: '40px',
-  }, 'A Question of Vengeance');
-
-  const imgContainer = el('div', {
-    display: 'flex',
-    gap: '0px',
-    marginBottom: '40px',
-  });
-
-  const img1 = document.createElement('img');
-  img1.src = '/assets/landing_cotw1.jpg';
-  img1.style.cssText = 'max-height: 300px;';
-  img1.alt = 'Castle of the Winds';
-
-  const img2 = document.createElement('img');
-  img2.src = '/assets/landing_cotw2.jpg';
-  img2.style.cssText = 'max-height: 300px;';
-  img2.alt = 'Castle of the Winds';
-
-  imgContainer.appendChild(img1);
-  imgContainer.appendChild(img2);
+  const spacer = el('div', { marginBottom: '40px' });
 
   const buttons = el('div', {
     display: 'flex',
@@ -80,8 +57,7 @@ export function createSplashScreen(
   buttons.appendChild(loadBtn);
 
   splash.appendChild(title);
-  splash.appendChild(subtitle);
-  splash.appendChild(imgContainer);
+  splash.appendChild(spacer);
   splash.appendChild(buttons);
 
   container.appendChild(splash);
