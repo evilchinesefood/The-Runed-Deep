@@ -1,0 +1,429 @@
+.inventory-item {
+ height: 32px;
+ width: 32px;
+ display: inline-block;
+}
+
+/* Row 1 */
+.potion {
+	background: url('../assets/items.png') -0px -0px;
+}
+.potion-water {
+	background: url('../assets/items.png') -32px -0px;
+}
+.potion-heal-minor {
+	background: url('../assets/items.png') -64px -0px;
+}
+.potion-heal-medium {
+	background: url('../assets/items.png') -96px -0px;
+}
+.potion-heal-major {
+	background: url('../assets/items.png') -128px -0px;
+}
+.potion-gain-attribute {
+	background: url('../assets/items.png') -160px -0px;
+}
+.potion-lose-attribute {
+	background: url('../assets/items.png') -192px -0px;
+}
+.potion-divination {
+	background: url('../assets/items.png') -224px -0px;
+}
+
+/* Row 2 */
+.scroll {
+	background: url('../assets/items.png') -0px -32px;
+}
+.spell-book {
+	background: url('../assets/items.png') -32px -32px;
+}
+
+/* Row 3 */
+.staff {
+	background: url('../assets/items.png') -0px -64px;
+}
+.staff-fire {
+	background: url('../assets/items.png') -32px -64px;
+}
+.staff-smoke {
+	background: url('../assets/items.png') -64px -64px;
+}
+.staff-minor {
+	background: url('../assets/items.png') -96px -64px;
+}
+.staff-medium {
+	background: url('../assets/items.png') -128px -64px;
+}
+.staff-major {
+	background: url('../assets/items.png') -160px -64px;
+}
+.staff-green {
+	background: url('../assets/items.png') -192px -64px;
+}
+.staff-light {
+	background: url('../assets/items.png') -224px -64px;
+}
+
+/* Row 4 */
+.wand {
+	background: url('../assets/items.png') -0px -96px;
+}
+.wand-of-fire-ball {
+	background: url('../assets/items.png') -32px -96px;
+}
+.wand-of-lightning-ball {
+	background: url('../assets/items.png') -64px -96px;
+}
+.wand-of-light {
+	background: url('../assets/items.png') -96px -96px;
+}
+.wand-of-divination {
+	background: url('../assets/items.png') -128px -96px;
+}
+.wand-of-nothing {
+	background: url('../assets/items.png') -160px -96px;
+}
+.wand-of-cold-ball {
+	background: url('../assets/items.png') -192px -96px;
+}
+.wand-of-cold-bolt {
+	background: url('../assets/items.png') -224px -96px;
+}
+.wand-of-fire-bolt {
+	background: url('../assets/items.png') -256px -96px;
+}
+.wand-of-lightning {
+	background: url('../assets/items.png') -288px -96px;
+}
+
+/* Row 5 */
+.amulet {
+	background: url('../assets/items.png') -0px -128px;
+}
+.amulet-cursed {
+	background: url('../assets/items.png') -32px -128px;
+}
+.amulet-resist-fire {
+	background: url('../assets/items.png') -64px -128px;
+}
+.amulet-resist-lightning {
+	background: url('../assets/items.png') -96px -128px;
+}
+.amulet-resist-cold {
+	background: url('../assets/items.png') -128px -128px;
+}
+.amulet-resist-drain {
+	background: url('../assets/items.png') -160px -128px;
+}
+
+/* Row 6 */
+.axe {
+	background: url('../assets/items.png') -0px -160px;
+}
+.axe-cursed {
+	background: url('../assets/items.png') -32px -160px;
+}
+.axe-enchanted {
+	background: url('../assets/items.png') -64px -160px;
+}
+
+/* Row 7 */
+.sword {
+	background: url('../assets/items.png') -0px -192px;
+}
+.sword-cursed {
+	background: url('../assets/items.png') -32px -192px;
+}
+.sword-enchanted {
+	background: url('../assets/items.png') -64px -192px;
+}
+
+/* Row 8 */
+.mace {
+	background: url('../assets/items.png') -0px -224px;
+}
+.mace-cursed {
+	background: url('../assets/items.png') -32px -224px;
+}
+.mace-enchanted {
+	background: url('../assets/items.png') -64px -224px;
+}
+
+/* Row 9 */
+.leather-armour {
+	background: url('../assets/items.png') -0px -256px;
+}
+.leather-armour-cursed {
+	background: url('../assets/items.png') -32px -256px;
+}
+.leather-armour-enchanted {
+	background: url('../assets/items.png') -64px -256px;
+}
+
+/* Row 10 */
+.metal-armour {
+	background: url('../assets/items.png') -0px -288px;
+}
+.metal-armour-cursed {
+	background: url('../assets/items.png') -32px -288px;
+}
+.metal-armour-enchanted {
+	background: url('../assets/items.png') -64px -288px;
+}
+
+/* Row 11 */
+.metal-shield {
+	background: url('../assets/items.png') -0px -320px;
+}
+.metal-shield-cursed {
+	background: url('../assets/items.png') -32px -320px;
+}
+.metal-shield-enchanted {
+	background: url('../assets/items.png') -64px -320px;
+}
+
+/* Row 12 */
+.wood-shield {
+	background: url('../assets/items.png') -0px -352px;
+}
+.wood-shield-cursed {
+	background: url('../assets/items.png') -32px -352px;
+}
+.wood-shield-enchanted {
+	background: url('../assets/items.png') -64px -352px;
+}
+
+/* Row 13 */
+.metal-helmet {
+	background: url('../assets/items.png') -0px -384px;
+}
+.metal-helmet-cursed {
+	background: url('../assets/items.png') -32px -384px;
+}
+.metal-helmet-enchanted {
+	background: url('../assets/items.png') -64px -384px;
+}
+.metal-helmet-of-detect-monsters {
+	background: url('../assets/items.png') -96px -384px;
+}
+
+/* Row 14 */
+.leather-helmet {
+	background: url('../assets/items.png') -0px -416px;
+}
+.leather-helmet-cursed {
+	background: url('../assets/items.png') -32px -416px;
+}
+.leather-helmet-enchanted {
+	background: url('../assets/items.png') -64px -416px;
+}
+
+/* Row 15 */
+.bracers {
+	background: url('../assets/items.png') -0px -448px;
+}
+.bracers-cursed {
+	background: url('../assets/items.png') -32px -448px;
+}
+.bracers-enchanted {
+	background: url('../assets/items.png') -64px -448px;
+}
+
+/* Row 16 */
+.gauntlet {
+	background: url('../assets/items.png') -0px -480px;
+}
+.gauntlet-cursed {
+	background: url('../assets/items.png') -32px -480px;
+}
+.gauntlet-enchanted {
+	background: url('../assets/items.png') -64px -480px;
+}
+.gauntlet-of-slaying {
+	background: url('../assets/items.png') -92px -480px;
+}
+
+/* Row 17 */
+.cloak {
+	background: url('../assets/items.png') -0px -512px;
+}
+.cloak-cursed {
+	background: url('../assets/items.png') -32px -512px;
+}
+.cloak-enchanted {
+	background: url('../assets/items.png') -64px -512px;
+}
+
+/* Row 18 */
+.boots {
+	background: url('../assets/items.png') -0px -544px;
+}
+.boots-cursed {
+	background: url('../assets/items.png') -32px -544px;
+}
+.boots-of-speed {
+	background: url('../assets/items.png') -64px -544px;
+}
+.boots-of-levitation {
+	background: url('../assets/items.png') -96px -544px;
+}
+
+/* Row 19 */
+.ring {
+	background: url('../assets/items.png') -0px -576px;
+}
+.ring-cursed {
+	background: url('../assets/items.png') -32px -576px;
+}
+.ring-enchanted {
+	background: url('../assets/items.png') -64px -576px;
+}
+
+/* Row 20 */
+.purse {
+	background: url('../assets/items.png') -0px -608px;
+}
+.bag {
+	background: url('../assets/items.png') -32px -608px;
+}
+.chest {
+	background: url('../assets/items.png') -64px -608px;
+}
+.pack {
+	background: url('../assets/items.png') -96px -608px;
+}
+.pack-enchanted {
+	background: url('../assets/items.png') -128px -608px;
+}
+
+/* Row 21 */
+.coins-copper {
+	background: url('../assets/items.png') -0px -640px;
+}
+.coins-silver {
+	background: url('../assets/items.png') -32px -640px;
+}
+.coins-gold {
+	background: url('../assets/items.png') -64px -640px;
+}
+.coins-platinum {
+	background: url('../assets/items.png') -96px -640px;
+}
+.treasure-pile {
+	background: url('../assets/items.png') -128px -640px;
+}
+
+/* Row 22 */
+.belt {
+	background: url('../assets/items.png') -0px -672px;
+}
+.belt-wand-quiver {
+	background: url('../assets/items.png') -32px -672px;
+}
+.belt-utility {
+	background: url('../assets/items.png') -64px -672px;
+}
+
+/* Row 23 */
+.parchment {
+	background: url('../assets/items.png') -0px -704px;
+}
+.metal-helmet-of-storms {
+	background: url('../assets/items.png') -32px -704px;
+}
+.elemental-portal {
+	background: url('../assets/items.png') -64px -704px;
+}
+.amulet-of-kings {
+	background: url('../assets/items.png') -96px -704px;
+}
+.apple {
+	background: url('../assets/items.png') -128px -704px;
+}
+
+/* Row 24 */
+.flail {
+	background: url('../assets/items.png') -0px -736px;
+}
+.flail-cursed {
+	background: url('../assets/items.png') -32px -736px;
+}
+.flail-enchanted {
+	background: url('../assets/items.png') -64px -736px;
+}
+
+/* Row 25 */
+.hammer {
+	background: url('../assets/items.png') -0px -768px;
+}
+.hammer-cursed {
+	background: url('../assets/items.png') -32px -768px;
+}
+.hammer-enchanted {
+	background: url('../assets/items.png') -64px -768px;
+}
+
+/* Row 26 */
+.broken-sword {
+	background: url('../assets/items.png') -0px -800px;
+}
+.broken-armour {
+	background: url('../assets/items.png') -32px -800px;
+}
+.broken-shield {
+	background: url('../assets/items.png') -64px -800px;
+}
+.broken-helmet {
+	background: url('../assets/items.png') -96px -800px;
+}
+.broken-belt {
+	background: url('../assets/items.png') -128px -800px;
+}
+.broken-gauntlet {
+	background: url('../assets/items.png') -160px -800px;
+}
+.broken-bracer {
+	background: url('../assets/items.png') -192px -800px;
+}
+.broken-cloak {
+	background: url('../assets/items.png') -224px -800px;
+}
+.broken-pack {
+	background: url('../assets/items.png') -256px -800px;
+}
+.broken-boot {
+	background: url('../assets/items.png') -288px -800px;
+}
+
+/* Row 27 */
+.morning-star {
+	background: url('../assets/items.png') -0px -832px;
+}
+.morning-star-cursed {
+	background: url('../assets/items.png') -32px -832px;
+}
+.morning-star-enchanted {
+	background: url('../assets/items.png') -64px -832px;
+}
+
+/* Row 28 */
+.spear {
+	background: url('../assets/items.png') -0px -864px;
+}
+.spear-cursed {
+	background: url('../assets/items.png') -32px -864px;
+}
+.spear-enchanted {
+	background: url('../assets/items.png') -64px -864px;
+}
+
+/* Row 29 */
+.club {
+	background: url('../assets/items.png') -0px -896px;
+}
+.club-cursed {
+	background: url('../assets/items.png') -32px -896px;
+}
+.club-enchanted {
+	background: url('../assets/items.png') -64px -896px;
+}
