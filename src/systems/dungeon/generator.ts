@@ -66,15 +66,18 @@ export function generateFloor(
   const tiles: Tile[][] = [];
   const explored: boolean[][] = [];
   const visible: boolean[][] = [];
+  const lit: boolean[][] = [];
 
   for (let y = 0; y < FLOOR_HEIGHT; y++) {
     tiles[y] = [];
     explored[y] = [];
     visible[y] = [];
+    lit[y] = [];
     for (let x = 0; x < FLOOR_WIDTH; x++) {
       tiles[y][x] = createWallTile();
       explored[y][x] = false;
       visible[y][x] = false;
+      lit[y][x] = false;
     }
   }
 
@@ -150,6 +153,7 @@ export function generateFloor(
     items: [],
     explored,
     visible,
+    lit,
     width: FLOOR_WIDTH,
     height: FLOOR_HEIGHT,
   };

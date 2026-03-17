@@ -45,6 +45,11 @@ export function computeFov(floor: Floor, px: number, py: number, hasLight: boole
       floor.visible[ty][tx] = true;
       floor.explored[ty][tx] = true;
 
+      // Light spell permanently illuminates visible tiles
+      if (hasLight) {
+        floor.lit[ty][tx] = true;
+      }
+
       if (!floor.tiles[ty][tx].transparent) break;
     }
   }

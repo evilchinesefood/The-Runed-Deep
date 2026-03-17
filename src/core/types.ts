@@ -208,6 +208,7 @@ export interface Floor {
   items: PlacedItem[];
   explored: boolean[][];
   visible: boolean[][];
+  lit: boolean[][];         // permanently illuminated tiles (from Light spell)
   width: number;
   height: number;
 }

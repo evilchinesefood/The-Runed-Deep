@@ -86,6 +86,7 @@ export class MapRenderer {
 
         const explored = floor.explored[worldY][worldX];
         const visible = floor.visible[worldY][worldX];
+        const isLit = floor.lit[worldY][worldX];
 
         if (!explored) {
           cell.floor.style.background = '#000';
@@ -94,14 +95,14 @@ export class MapRenderer {
         }
 
         const tile = floor.tiles[worldY][worldX];
-        const opacity = visible ? '1' : '0.4';
+        // Visible = full brightness, permanently lit = full brightness, explored only = dimmed
+        const opacity = (visible || isLit) ? '1' : '0.5';
 
         // Tiles like stairs and doors are overlays on top of the base floor
         const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
           || tile.type === 'door-closed' || tile.type === 'door-open';
 
         if (isOverlayTile) {
-          // Show base floor underneath, tile sprite on entity layer
           cell.floor.className = 'lit-dgn';
           cell.floor.style.opacity = opacity;
           cell.entity.className = tile.sprite;
