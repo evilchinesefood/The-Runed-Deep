@@ -1,4 +1,6 @@
 import type { GameState, Hero, Monster, Message, Floor } from '../../core/types';
+import { queueAnimation } from '../../rendering/animation-queue';
+import type { SpellAnimation } from '../../rendering/animations';
 
 // ============================================================
 // Dice rolling
@@ -102,6 +104,14 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
   // Monsters have an armor stat from their template
   const damage = Math.max(1, rawDamage);
 
+  // Hit flash on the monster
+  queueAnimation([{
+    type: 'flash',
+    position: { ...monster.position },
+    color: '#fff',
+    duration: 80,
+  } as SpellAnimation]);
+
   const newHp = monster.hp - damage;
 
   if (newHp <= 0) {
@@ -179,6 +189,14 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   }
 
   const newHp = state.hero.hp - damage;
+
+  // Hit flash on the hero
+  queueAnimation([{
+    type: 'flash',
+    position: { ...state.hero.position },
+    color: '#f44',
+    duration: 80,
+  } as SpellAnimation]);
 
   messages.push({
     text: `The ${monster.name} hits ${state.hero.name} for ${damage} damage. (${Math.max(0, newHp)}/${state.hero.maxHp} HP)`,

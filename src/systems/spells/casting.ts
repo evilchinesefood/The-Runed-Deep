@@ -1,6 +1,15 @@
 import type { GameState, Monster, Floor, Vector2, Message, Direction } from '../../core/types';
 import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
 import { getDirectionVector } from '../../core/actions';
+import { queueAnimation } from '../../rendering/animation-queue';
+import {
+  buildBoltAnimation,
+  buildBallAnimation,
+  buildHealAnimation,
+  buildBuffAnimation,
+  buildTeleportAnimation,
+  buildDetectAnimation,
+} from '../../rendering/animations';
 
 // ============================================================
 // Spell Casting
@@ -166,10 +175,13 @@ function resolveBolt(
     // Check for monster
     const monsterIdx = floor.monsters.findIndex(m => m.position.x === x && m.position.y === y);
     if (monsterIdx !== -1) {
+      queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, { x, y }));
       return applySpellDamageToMonster(state, floorKey, monsterIdx, spell, minDmg, maxDmg, element);
     }
   }
 
+  // Missed — still show the bolt flying
+  queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12));
   return addMsg(state, `The ${spell.name} flies off into the darkness.`, 'combat');
 }
 
@@ -191,6 +203,11 @@ function resolveBall(
     target = findTargetInDirection(state, direction);
   }
   if (!target) return addMsg(state, `You need to pick a target for ${spell.name}.`, 'system');
+
+  // Queue ball animation (projectile + explosion)
+  if (direction) {
+    queueAnimation(buildBallAnimation(spell.id, state.hero.position, direction, target));
+  }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
@@ -311,6 +328,8 @@ function resolveHeal(state: GameState, spell: SpellDef, pct: number, minHeal: nu
     return addMsg(state, `${hero.name} is already at full health.`, 'system');
   }
 
+  queueAnimation(buildHealAnimation(hero.position));
+
   return {
     ...addMsg(state, `${spell.name} heals ${hero.name} for ${healed} HP. (${newHp}/${hero.maxHp})`, 'important'),
     hero: { ...hero, hp: newHp },
@@ -322,6 +341,7 @@ function resolveHeal(state: GameState, spell: SpellDef, pct: number, minHeal: nu
 // ============================================================
 
 function resolveShield(state: GameState, _spell: SpellDef): GameState {
+  queueAnimation(buildBuffAnimation(state.hero.position, '#48f'));
   const hero = state.hero;
   const newEffects = [
     ...hero.activeEffects.filter(e => e.id !== 'shield'),
@@ -339,6 +359,8 @@ function resolveShield(state: GameState, _spell: SpellDef): GameState {
 
 function resolveResist(state: GameState, spell: SpellDef): GameState {
   const element = spell.id.replace('resist-', '');
+  const color = element === 'cold' ? '#4af' : element === 'fire' ? '#f64' : '#ff4';
+  queueAnimation(buildBuffAnimation(state.hero.position, color));
   const hero = state.hero;
   const newEffects = [
     ...hero.activeEffects.filter(e => e.id !== spell.id),
@@ -410,6 +432,7 @@ function resolvePhaseDoor(state: GameState): GameState {
     if (!floor.tiles[ny][nx].walkable) continue;
     if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;
 
+    queueAnimation(buildTeleportAnimation(state.hero.position, { x: nx, y: ny }));
     return {
       ...addMsg(state, `${state.hero.name} phases through space!`, 'important'),
       hero: { ...state.hero, position: { x: nx, y: ny } },
@@ -437,6 +460,7 @@ function resolveTeleport(state: GameState): GameState {
   if (candidates.length === 0) return addMsg(state, `The teleport fizzles.`, 'system');
   const dest = candidates[Math.floor(Math.random() * candidates.length)];
 
+  queueAnimation(buildTeleportAnimation(state.hero.position, dest));
   return {
     ...addMsg(state, `${state.hero.name} teleports!`, 'important'),
     hero: { ...state.hero, position: dest },
@@ -448,6 +472,7 @@ function resolveTeleport(state: GameState): GameState {
 // ============================================================
 
 function resolveDetectMonsters(state: GameState): GameState {
+  queueAnimation(buildDetectAnimation(state.hero.position, '#f44'));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -467,6 +492,7 @@ function resolveDetectMonsters(state: GameState): GameState {
 }
 
 function resolveDetectObjects(state: GameState): GameState {
+  queueAnimation(buildDetectAnimation(state.hero.position, '#ff0'));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -505,6 +531,7 @@ function resolveDetectTraps(state: GameState): GameState {
 }
 
 function resolveClairvoyance(state: GameState): GameState {
+  queueAnimation(buildDetectAnimation(state.hero.position, '#88f'));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -535,6 +562,7 @@ function resolveClairvoyance(state: GameState): GameState {
 // ============================================================
 
 function resolveLight(state: GameState): GameState {
+  queueAnimation(buildBuffAnimation(state.hero.position, '#ff8'));
   const hero = state.hero;
   const newEffects = [
     ...hero.activeEffects.filter(e => e.id !== 'light'),

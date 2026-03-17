@@ -9,6 +9,8 @@ import { createCharacterInfoScreen } from './ui/character-info';
 import { createDeathScreen } from './ui/death-screen';
 import { generateFloor } from './systems/dungeon/generator';
 import { SPELL_BY_ID } from './data/spells';
+import { AnimationRenderer } from './rendering/animations';
+import { drainAnimations } from './rendering/animation-queue';
 import { computeFov } from './utils/fov';
 import type { GameState, Screen } from './core/types';
 
@@ -17,11 +19,17 @@ root.style.cssText = 'background:#000;min-height:100vh;';
 
 let mapRenderer: MapRenderer | null = null;
 let hudRenderer: HudRenderer | null = null;
+let animRenderer: AnimationRenderer | null = null;
 
 const input = new InputManager();
 
 const gameLoop = new GameLoop(createInitialGameState(), render);
-input.setHandler(action => gameLoop.handleAction(action));
+input.setHandler(action => {
+  if (animRenderer?.isPlaying()) return; // ignore input during animations
+  gameLoop.handleAction(action);
+  // After action, play any queued animations
+  playPendingAnimations();
+});
 
 // Spell mode indicator
 input.setSpellModeCallback((spellId) => {
@@ -36,6 +44,28 @@ input.setSpellModeCallback((spellId) => {
     }
   }
 });
+
+function playPendingAnimations(): void {
+  const groups = drainAnimations();
+  if (groups.length === 0 || !animRenderer) return;
+
+  // Set camera for animation positioning
+  const state = gameLoop.getState();
+  const VIEWPORT_X = 21;
+  const VIEWPORT_Y = 15;
+  const cameraX = state.hero.position.x - Math.floor(VIEWPORT_X / 2);
+  const cameraY = state.hero.position.y - Math.floor(VIEWPORT_Y / 2);
+  animRenderer.setCamera(cameraX, cameraY);
+
+  for (const group of groups) {
+    animRenderer.enqueue(group);
+  }
+
+  input.setEnabled(false);
+  animRenderer.play().then(() => {
+    input.setEnabled(true);
+  });
+}
 
 // Initial render
 render(gameLoop.getState());
@@ -76,6 +106,7 @@ function switchScreen(state: GameState): void {
   root.dataset.screen = state.screen;
   mapRenderer = null;
   hudRenderer = null;
+  animRenderer = null;
 
   switch (state.screen) {
     case 'splash':
@@ -132,6 +163,7 @@ function switchScreen(state: GameState): void {
       gameContainer.appendChild(spellIndicator);
 
       mapRenderer = new MapRenderer(gameContainer);
+      animRenderer = new AnimationRenderer(mapRenderer.getMapContainer());
       hudRenderer = new HudRenderer(gameContainer);
       break;
     }
