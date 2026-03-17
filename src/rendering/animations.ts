@@ -17,6 +17,7 @@ export interface ProjectileAnim {
   sprite: string;         // CSS class for the projectile
   path: Vector2[];        // world positions to travel through
   speed: number;          // ms per tile
+  rotation: number;       // degrees to rotate the sprite (0 = default/east)
 }
 
 export interface ExplosionAnim {
@@ -150,6 +151,9 @@ export class AnimationRenderer {
       if (anim.path.length === 0) { resolve(); return; }
 
       const el = this.createSpriteEl(anim.sprite);
+      if (anim.rotation !== 0) {
+        el.style.transform = `rotate(${anim.rotation}deg)`;
+      }
       this.animLayer.appendChild(el);
 
       let step = 0;
@@ -304,6 +308,21 @@ import type { Direction } from '../core/types';
 import { getDirectionVector } from '../core/actions';
 
 /**
+ * Direction → rotation in degrees.
+ * Sprites are drawn pointing right (East) by default.
+ */
+const DIRECTION_ROTATION: Record<Direction, number> = {
+  E: 0,
+  SE: 45,
+  S: 90,
+  SW: 135,
+  W: 180,
+  NW: 225,
+  N: 270,
+  NE: 315,
+};
+
+/**
  * Build a projectile animation along a direction from origin.
  */
 export function buildBoltAnimation(
@@ -315,6 +334,7 @@ export function buildBoltAnimation(
 ): SpellAnimation[] {
   const sprite = SPELL_SPRITES[spellId] ?? 'arrows-spell';
   const delta = getDirectionVector(direction);
+  const rotation = DIRECTION_ROTATION[direction];
 
   const path: Vector2[] = [];
   let x = origin.x;
@@ -328,7 +348,7 @@ export function buildBoltAnimation(
   }
 
   const anims: SpellAnimation[] = [
-    { type: 'projectile', sprite, path, speed: 40 },
+    { type: 'projectile', sprite, path, speed: 40, rotation },
   ];
 
   // Flash at hit position
@@ -358,6 +378,7 @@ export function buildBallAnimation(
   const explosionSprite = EXPLOSION_SPRITES[element] ?? 'fire2-spell';
 
   const delta = getDirectionVector(direction);
+  const rotation = DIRECTION_ROTATION[direction];
   const path: Vector2[] = [];
   let x = origin.x;
   let y = origin.y;
@@ -371,7 +392,7 @@ export function buildBallAnimation(
   }
 
   return [
-    { type: 'projectile', sprite: projectileSprite, path, speed: 40 },
+    { type: 'projectile', sprite: projectileSprite, path, speed: 40, rotation },
     { type: 'explosion', sprite: explosionSprite, center: target, radius: 1, duration: 250 },
   ];
 }

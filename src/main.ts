@@ -165,6 +165,22 @@ function switchScreen(state: GameState): void {
       mapRenderer = new MapRenderer(gameContainer);
       animRenderer = new AnimationRenderer(mapRenderer.getMapContainer());
       hudRenderer = new HudRenderer(gameContainer);
+
+      // Spell bar click → enter spell casting mode
+      hudRenderer.setSpellClickHandler((spellId) => {
+        input.startSpellCast(spellId);
+      });
+
+      // Map click → direction for spell targeting or click-to-move
+      mapRenderer.getMapContainer().addEventListener('click', (e: MouseEvent) => {
+        const state = gameLoop.getState();
+        const worldPos = mapRenderer!.screenToWorld(e.clientX, e.clientY, state.hero.position);
+        if (worldPos) {
+          input.handleMapClick(state.hero.position.x, state.hero.position.y, worldPos.x, worldPos.y);
+          playPendingAnimations();
+        }
+      });
+
       break;
     }
 

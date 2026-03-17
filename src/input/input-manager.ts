@@ -48,6 +48,42 @@ export class InputManager {
     return this.pendingSpellId !== null;
   }
 
+  /** Called from UI (spell bar click) to start casting a spell */
+  startSpellCast(spellId: string): void {
+    if (!this.enabled) return;
+    this.enterSpellMode(spellId);
+  }
+
+  /**
+   * Called when the map is clicked during spell targeting mode.
+   * Computes direction from hero to clicked position and casts.
+   */
+  handleMapClick(heroX: number, heroY: number, worldX: number, worldY: number): void {
+    if (!this.enabled) return;
+
+    if (this.pendingSpellId) {
+      // Compute direction from hero to clicked tile
+      const dx = worldX - heroX;
+      const dy = worldY - heroY;
+      if (dx === 0 && dy === 0) return;
+
+      const direction = vectorToDirection(dx, dy);
+      const spell = SPELL_BY_ID[this.pendingSpellId];
+
+      if (spell?.targeting === 'direction') {
+        this.emit({ type: 'castSpell', spellId: this.pendingSpellId, direction });
+      } else if (spell?.targeting === 'target') {
+        this.emit({ type: 'castSpell', spellId: this.pendingSpellId, direction, target: { x: worldX, y: worldY } });
+      }
+
+      this.pendingSpellId = null;
+      this.onSpellModeChange?.(null);
+      return;
+    }
+
+    // Not in spell mode — could use for click-to-move later
+  }
+
   private cancelSpellMode(): void {
     if (this.pendingSpellId) {
       this.pendingSpellId = null;
@@ -208,6 +244,11 @@ export class InputManager {
       }
     }, { passive: true });
   }
+}
+
+function vectorToDirection(dx: number, dy: number): Direction {
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  return angleToDirection(angle);
 }
 
 function angleToDirection(angle: number): Direction {

@@ -16,11 +16,14 @@ function bar(pct: number, color: string): HTMLElement {
   return track;
 }
 
+export type SpellClickHandler = (spellId: string) => void;
+
 export class HudRenderer {
   private container: HTMLElement;
   private statsEl: HTMLElement;
   private messagesEl: HTMLElement;
   private spellBarEl: HTMLElement;
+  private onSpellClick: SpellClickHandler | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -65,6 +68,10 @@ export class HudRenderer {
     hud.appendChild(this.messagesEl);
     hud.appendChild(this.statsEl);
     this.container.appendChild(hud);
+  }
+
+  setSpellClickHandler(handler: SpellClickHandler): void {
+    this.onSpellClick = handler;
   }
 
   render(state: GameState): void {
@@ -141,6 +148,7 @@ export class HudRenderer {
       if (!spell) continue;
 
       const canCast = mp >= spell.manaCost;
+      const spellId = spells[i];
       const btn = el('div', {
         padding: '2px 6px',
         background: canCast ? '#1a1a2a' : '#1a1a1a',
@@ -148,7 +156,14 @@ export class HudRenderer {
         color: canCast ? '#aac' : '#555',
         cursor: canCast ? 'pointer' : 'default',
         whiteSpace: 'nowrap',
+        userSelect: 'none',
       }, `${i + 1}:${spell.name}`);
+
+      if (canCast) {
+        btn.addEventListener('click', () => {
+          this.onSpellClick?.(spellId);
+        });
+      }
 
       this.spellBarEl.appendChild(btn);
     }
