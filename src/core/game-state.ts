@@ -9,6 +9,7 @@ import type {
   Gender,
 } from './types';
 import { computeMaxHp, computeMaxMp, computeBaseArmorValue } from '../systems/character/derived-stats';
+import { getDifficultyConfig } from '../data/difficulty';
 
 export function createDefaultAttributes(): Attributes {
   return { strength: 50, intelligence: 50, constitution: 50, dexterity: 50 };
@@ -41,11 +42,13 @@ export function createHero(
   name: string,
   gender: Gender,
   attributes: Attributes,
-  startingSpell?: string
+  startingSpell?: string,
+  difficulty: Difficulty = 'intermediate',
 ): Hero {
   const maxHp = computeMaxHp(attributes.constitution, 1);
   const maxMp = computeMaxMp(attributes.intelligence, 1);
   const armorValue = computeBaseArmorValue(attributes.dexterity);
+  const config = getDifficultyConfig(difficulty);
 
   return {
     name,
@@ -60,7 +63,7 @@ export function createHero(
     level: 1,
     equipment: createEmptyEquipment(),
     inventory: [],
-    copper: 100,
+    copper: config.startingCopper,
     knownSpells: startingSpell ? [startingSpell] : [],
     activeEffects: [],
     resistances: createDefaultResistances(),

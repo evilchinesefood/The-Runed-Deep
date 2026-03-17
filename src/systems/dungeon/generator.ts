@@ -1,4 +1,4 @@
-import type { Floor, Tile, Vector2 } from '../../core/types';
+import type { Floor, Tile, Vector2, Difficulty } from '../../core/types';
 import { spawnMonsters } from '../monsters/spawning';
 
 interface Room {
@@ -57,7 +57,8 @@ export function generateFloor(
   floorNum: number,
   seed: number,
   hasStairsUp: boolean = true,
-  hasStairsDown: boolean = true
+  hasStairsDown: boolean = true,
+  difficulty: Difficulty = 'intermediate',
 ): { floor: Floor; playerStart: Vector2 } {
   const rand = seededRandom(seed + floorNum * 1000);
   const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min;
@@ -161,7 +162,7 @@ export function generateFloor(
   // Spawn monsters appropriate for this depth
   // Depth = floorNum + 1 (floor 0 is depth 1)
   const effectiveDepth = floorNum + 1;
-  floor.monsters = spawnMonsters(floor, effectiveDepth, playerStart, rand);
+  floor.monsters = spawnMonsters(floor, effectiveDepth, playerStart, rand, difficulty);
 
   return { floor, playerStart };
 }

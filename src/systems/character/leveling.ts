@@ -1,6 +1,7 @@
 import type { GameState, Hero, Difficulty, Message } from '../../core/types';
 import { computeMaxHp, computeMaxMp, computeTotalArmorValue } from './derived-stats';
 import { SPELLS } from '../../data/spells';
+import { getDifficultyConfig } from '../../data/difficulty';
 
 // ============================================================
 // XP Thresholds
@@ -45,13 +46,6 @@ const BASE_XP_TABLE: number[] = [
 
 const MAX_LEVEL = 30;
 
-const DIFFICULTY_XP_BONUS: Record<Difficulty, number> = {
-  easy: 0,
-  intermediate: 20,
-  hard: 40,
-  impossible: 80,
-};
-
 /**
  * Returns the total XP required to reach a given level.
  */
@@ -60,7 +54,8 @@ export function xpRequiredForLevel(level: number, difficulty: Difficulty): numbe
   if (level > MAX_LEVEL) return Infinity;
 
   const base = BASE_XP_TABLE[level - 1] ?? Infinity;
-  const diffBonus = DIFFICULTY_XP_BONUS[difficulty] * (level - 1);
+  const config = getDifficultyConfig(difficulty);
+  const diffBonus = config.xpPerLevelBonus * (level - 1);
   return base + diffBonus;
 }
 

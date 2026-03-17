@@ -1,5 +1,6 @@
-import type { Monster, Vector2, ElementalResistances, Floor } from '../../core/types';
+import type { Monster, Vector2, ElementalResistances, Floor, Difficulty } from '../../core/types';
 import { getMonstersForDepth, getNewestUnlockFloor, getBossForFloor, type MonsterTemplate } from '../../data/monsters';
+import { getDifficultyConfig } from '../../data/difficulty';
 
 let nextMonsterId = 1;
 
@@ -31,21 +32,25 @@ function getFloorScaling(depth: number): { hpMult: number; dmgMult: number } {
 
 /**
  * Creates a Monster instance from a template at a given position.
- * Applies floor-based scaling to HP and damage.
+ * Applies floor-based scaling AND difficulty scaling to HP, damage, speed.
  */
 export function createMonster(
   template: MonsterTemplate,
   position: Vector2,
   depth: number,
-  rand: () => number
+  rand: () => number,
+  difficulty: Difficulty = 'intermediate',
 ): Monster {
   const { hpMult, dmgMult } = getFloorScaling(depth);
+  const config = getDifficultyConfig(difficulty);
 
   const baseHp = rollRange(template.hp[0], template.hp[1], rand);
-  const hp = Math.round(baseHp * hpMult);
+  const hp = Math.round(baseHp * hpMult * config.monsterHpMult);
 
-  const scaledDmgMin = Math.round(template.damage[0] * dmgMult);
-  const scaledDmgMax = Math.round(template.damage[1] * dmgMult);
+  const scaledDmgMin = Math.round(template.damage[0] * dmgMult * config.monsterDamageMult);
+  const scaledDmgMax = Math.round(template.damage[1] * dmgMult * config.monsterDamageMult);
+
+  const speed = Math.round(template.speed * config.monsterSpeedMult * 100) / 100;
 
   return {
     id: `monster-${nextMonsterId++}`,
@@ -56,7 +61,7 @@ export function createMonster(
     hp,
     maxHp: hp,
     damage: [Math.max(1, scaledDmgMin), Math.max(2, scaledDmgMax)],
-    speed: template.speed,
+    speed,
     xpValue: template.xpValue,
     resistances: fullResistances(template.resistances),
     ai: template.ai,
@@ -134,12 +139,15 @@ export function spawnMonsters(
   depth: number,
   playerStart: Vector2,
   rand: () => number,
+  difficulty: Difficulty = 'intermediate',
 ): Monster[] {
+  const config = getDifficultyConfig(difficulty);
   const positions = getSpawnablePositions(floor, playerStart);
   if (positions.length === 0) return [];
 
-  // Monster count scales with depth: base 3 per 100 tiles, +0.3 per floor
-  const density = 3 + depth * 0.3;
+  // Monster count scales with depth and difficulty
+  const baseDensity = 3 + depth * 0.3;
+  const density = baseDensity * config.spawnDensityMult;
   const count = Math.max(2, Math.round(positions.length * density / 100));
 
   // Shuffle positions
@@ -156,7 +164,7 @@ export function spawnMonsters(
   if (boss && positions.length > 0) {
     const pos = positions.shift()!;
     usedPositions.add(`${pos.x},${pos.y}`);
-    monsters.push(createMonster(boss, pos, depth, rand));
+    monsters.push(createMonster(boss, pos, depth, rand, difficulty));
   }
 
   // Spawn regular monsters
@@ -169,7 +177,7 @@ export function spawnMonsters(
     if (usedPositions.has(key)) continue;
     usedPositions.add(key);
 
-    monsters.push(createMonster(template, pos, depth, rand));
+    monsters.push(createMonster(template, pos, depth, rand, difficulty));
   }
 
   return monsters;

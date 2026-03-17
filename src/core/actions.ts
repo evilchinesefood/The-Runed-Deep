@@ -111,6 +111,7 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
       state.rngSeed,
       true,   // has stairs up
       true,   // has stairs down
+      state.difficulty,
     );
     floors = { ...floors, [targetKey]: newFloor };
   }

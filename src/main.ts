@@ -128,10 +128,10 @@ function switchScreen(state: GameState): void {
       input.setEnabled(false);
       createCharacterCreationScreen(root, result => {
         try {
-          const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell);
+          const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell, result.difficulty);
 
           // Generate the first dungeon floor
-          const { floor, playerStart } = generateFloor('mine', 0, Date.now(), false, true);
+          const { floor, playerStart } = generateFloor('mine', 0, Date.now(), false, true, result.difficulty);
           hero.position = playerStart;
 
           const newState: GameState = {
