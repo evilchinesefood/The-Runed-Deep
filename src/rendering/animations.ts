@@ -348,10 +348,10 @@ export function buildBoltAnimation(
     x += delta.x;
     y += delta.y;
 
-    // Stop before going out of bounds or into a wall
+    // Stop at bounds or non-walkable tiles (walls, closed doors)
     if (floor) {
       if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
-      if (!floor.tiles[y][x].walkable && floor.tiles[y][x].type === 'wall') break;
+      if (!floor.tiles[y][x].walkable) break;
     }
 
     path.push({ x, y });
@@ -402,7 +402,7 @@ export function buildBallAnimation(
 
     if (floor) {
       if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
-      if (!floor.tiles[y][x].walkable && floor.tiles[y][x].type === 'wall') break;
+      if (!floor.tiles[y][x].walkable) break;
     }
 
     path.push({ x, y });
