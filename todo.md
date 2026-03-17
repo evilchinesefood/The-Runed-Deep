@@ -47,31 +47,33 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Four attributes: Strength, Intelligence, Constitution, Dexterity
 - [x] Derived stats: HP, MP, Armor Value from attributes
 - [x] Full spell database (all 30 spells defined)
-- [ ] Experience and leveling (XP curve is previous level + 1/3 more per level)
-- [ ] HP/MP gains on level-up based on CON/INT
-- [ ] Spell learning on level-up
-- [ ] No Max Level, Level up forever.
+- [x] Experience and leveling (doubling XP curve, difficulty scaling)
+- [x] HP/MP gains on level-up based on CON/INT
+- [x] 20% HP heal on level-up
+- [x] Spell learning on level-up (one spell per level, fixed order)
+- [x] Max level 30
+- [x] XP progress shown in HUD and character info
 
 ### 2.3 Dungeon Generation
 - [x] Room generation (rectangular — basic)
 - [ ] Additional room types (cross, diamond, circular, dead-end)
 - [x] Corridor generation connecting rooms
 - [x] Stairs placement (up/down)
-- [x] Door placement (open, closed)
+- [x] Door placement (in wall gaps between rooms and corridors)
 - [ ] Locked and secret doors
 - [ ] Trap placement (pit, arrow, portal, fire, acid, dart, etc.)
 - [ ] Item/treasure placement
-- [x] Monster spawning per floor depth (65 monster types + depth-weighted selection)
-- [ ] Floor persistence (generated once, remembered)
+- [x] Monster spawning per floor depth (61 types, progressive unlock, weighted)
+- [x] Floor persistence (generated once per seed, remembered in state)
 
 ### 2.4 Map & Exploration
-- [x] Tile-based map rendering (32x32 CSS sprites)
+- [x] Tile-based map rendering (32x32 CSS sprites, two-layer floor+entity)
 - [x] 8-directional movement (keyboard arrows/numpad/vim keys)
-- [x] Field of view / line of sight (raycasting)
-- [x] Fog of war (unexplored = hidden, explored but not visible = dimmed)
+- [x] Field of view / line of sight (raycasting, extended radius with Light spell)
+- [x] Fog of war (unexplored = black, explored but not visible = dimmed)
 - [x] Scroll-to-follow camera centered on player
+- [x] Stair navigation (> to descend, < to ascend, Enter on stairs)
 - [ ] Click/tap-to-move with pathfinding
-- [ ] Light spell illumination
 - [ ] Minimap / full map view
 
 ---
@@ -79,15 +81,18 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 ## Phase 3: Combat & Items
 
 ### 3.1 Combat System
-- [ ] Melee attack (walk into enemy tile)
-- [ ] Hit/miss calculation (based on DEX, weapon accuracy, monster evasion)
-- [ ] Damage calculation (STR + weapon damage dice)
-- [ ] Armor reduction
-- [ ] Monster death → XP award → loot drop
-- [ ] Player death → RIP screen
-- [ ] Monster turn AI (move toward player, attack when adjacent)
+- [x] Melee attack (walk into enemy tile)
+- [x] Hit/miss calculation (based on DEX vs monster evasion)
+- [x] Damage calculation (STR + weapon damage)
+- [x] Armor reduction on monster attacks
+- [x] Monster death → XP award
+- [x] Player death → RIP screen with tombstone
+- [x] Monster turn AI (move toward player within 20 tiles, attack when adjacent)
+- [x] Per-floor difficulty scaling (+8% HP, +5% damage per floor)
+- [x] Progressive monster unlock (1-2 new types per floor, weighted spawning)
+- [x] Boss monsters on specific floors
 - [ ] Speed system (encumbrance affects turn order)
-- [ ] Difficulty scaling (monster HP/damage multipliers)
+- [ ] Loot drops on monster death
 
 ### 3.2 Item System
 - [ ] Item database: weapons, armor, shields, helmets, cloaks, boots, rings, amulets, belts, bracers, gauntlets
@@ -116,67 +121,71 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 ### 4.1 Spell System (30 Spells)
 
 **Attack spells:**
-- [ ] Magic Arrow (L1, 1 MP)
-- [ ] Cold Bolt (L2, 2 MP)
-- [ ] Lightning Bolt (L3, 3 MP)
-- [ ] Fire Bolt (L3, 3 MP)
-- [ ] Cold Ball (L3, 4 MP) — AoE
-- [ ] Ball Lightning (L4, 4 MP) — AoE
-- [ ] Fire Ball (L4, 5 MP) — AoE
+- [x] Magic Arrow (L1, 1 MP) — directional bolt
+- [x] Cold Bolt (L2, 2 MP) — directional bolt, cold element
+- [x] Lightning Bolt (L3, 3 MP) — directional bolt, lightning element
+- [x] Fire Bolt (L3, 3 MP) — directional bolt, fire element
+- [x] Cold Ball (L3, 4 MP) — AoE, cold element
+- [x] Ball Lightning (L4, 4 MP) — AoE, lightning element
+- [x] Fire Ball (L4, 5 MP) — AoE, fire element
 
 **Healing spells:**
-- [ ] Heal Minor Wounds (L1, 1 MP)
-- [ ] Heal Medium Wounds (L3, 3 MP)
-- [ ] Heal Major Wounds (L4, 5 MP)
-- [ ] Healing / full restore (L5, 6 MP)
-- [ ] Neutralize Poison (L2, 3 MP)
+- [x] Heal Minor Wounds (L1, 1 MP) — 15% HP
+- [x] Heal Medium Wounds (L3, 3 MP) — 35% HP
+- [x] Heal Major Wounds (L4, 5 MP) — 60% HP
+- [x] Healing / full restore (L5, 6 MP) — 100% HP
+- [x] Neutralize Poison (L2, 3 MP)
 
 **Defense spells:**
-- [ ] Shield (L1, 1 MP)
-- [ ] Resist Cold (L3, 3 MP)
-- [ ] Resist Lightning (L3, 3 MP)
-- [ ] Resist Fire (L3, 3 MP)
+- [x] Shield (L1, 1 MP) — +4 AC for 30 turns
+- [x] Resist Cold (L3, 3 MP) — +50% cold resist for 50 turns
+- [x] Resist Lightning (L3, 3 MP) — +50% lightning resist for 50 turns
+- [x] Resist Fire (L3, 3 MP) — +50% fire resist for 50 turns
 
 **Control spells:**
-- [ ] Sleep Monster (L3, 4 MP)
-- [ ] Slow Monster (L3, 4 MP)
-- [ ] Transmogrify Monster (L5, 6 MP)
+- [x] Sleep Monster (L3, 4 MP) — directional targeting
+- [x] Slow Monster (L3, 4 MP) — directional targeting
+- [ ] Transmogrify Monster (L5, 6 MP) — not yet implemented
 
 **Movement spells:**
-- [ ] Phase Door (L1, 1 MP)
-- [ ] Levitation (L2, 2 MP)
-- [ ] Rune of Return (L3, 3 MP) — town ↔ dungeon
-- [ ] Teleport (L3, 3 MP)
+- [x] Phase Door (L1, 1 MP) — random short teleport
+- [x] Levitation (L2, 2 MP) — message only (trap avoidance not yet)
+- [x] Rune of Return (L3, 3 MP) — message only (town not yet)
+- [x] Teleport (L3, 3 MP) — random position on floor
 
 **Divination spells:**
-- [ ] Detect Objects (L1, 1 MP)
-- [ ] Detect Monsters (L2, 2 MP)
-- [ ] Detect Traps (L2, 2 MP)
-- [ ] Identify (L2, 2 MP)
-- [ ] Clairvoyance (L2, 3 MP)
+- [x] Detect Objects (L1, 1 MP) — reveals item positions
+- [x] Detect Monsters (L2, 2 MP) — reveals monster positions
+- [x] Detect Traps (L2, 2 MP) — reveals trap positions
+- [x] Identify (L2, 2 MP) — message only (items not yet)
+- [x] Clairvoyance (L2, 3 MP) — reveals 10x10 area
 
 **Misc spells:**
-- [ ] Light (L1, 1 MP)
-- [ ] Remove Curse (L3, 3 MP)
+- [x] Light (L1, 1 MP) — extended FOV (12 vs 8) for 100 turns
+- [x] Remove Curse (L3, 3 MP) — message only (cursed items not yet)
 
 **Spell mechanics:**
-- [ ] Mana cost system (minimum 1 MP)
-- [ ] Bolt targeting (line projectile)
-- [ ] Ball targeting (AoE, 1-tile blast radius, half damage adjacent)
-- [ ] Spell shortcut bar (up to 9 spells)
+- [x] Mana cost system (minimum 1 MP)
+- [x] Bolt targeting (line projectile up to 12 tiles)
+- [x] Ball targeting (AoE, 1-tile blast radius, half damage adjacent)
+- [x] Spell shortcut bar (number keys 1-9)
+- [x] Spell bar in HUD showing known spells with hotkeys
+- [x] Spell targeting mode indicator
+- [x] Active effect duration tracking with expiry messages
+- [x] Elemental resistance calculations
 - [ ] Spellbook items teach spells permanently
 - [ ] Wand/staff charges for non-learnable spells
 
-### 4.2 Monster System (~90 Types)
-- [ ] Monster database with stats (HP, damage, speed, XP value, resistances)
-- [ ] Monster categories: animals, humanoids, undead, giants, dragons, elementals, devils, wizards
-- [ ] Basic AI: move toward player, attack when adjacent
+### 4.2 Monster System
+- [x] Monster database with stats (61 non-boss + 7 boss monsters)
+- [x] Monster categories: animals, humanoids, undead, giants, dragons, elementals, devils, wizards
+- [x] Basic AI: move toward player, attack when adjacent
+- [x] Elemental immunities/resistances per monster type
+- [x] Monster spawning scaled to dungeon depth (progressive tier unlock)
+- [x] Boss monsters on specific floors (Hrungnir, Wolf-Man, Bear-Man, Giant Kings, Surtur)
 - [ ] Ranged AI: spellcasting monsters (Cold/Lightning/Fire Bolt)
-- [ ] Special abilities: drain stats (undead), steal money (Sneak Thief), summon allies (wizards/devils), poison (scorpions/vipers)
-- [ ] Elemental immunities/resistances per monster type
+- [ ] Special abilities: drain stats, steal money, summon allies, poison
 - [ ] Physical-immune monsters (slimes — must use magic)
-- [ ] Monster spawning scaled to dungeon depth
-- [ ] Boss monsters with pre-designed encounters
 
 ---
 
@@ -216,11 +225,9 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [ ] Ruined Castle (25 levels) — Part 2 endgame
 
 ### 6.2 Boss Encounters
-- [ ] Hrungnir the Hill Giant Lord (end of Part 1)
-- [ ] Wolf-Man, Bear-Man (Ruined Castle mid-bosses)
-- [ ] Four Giant Kings (late-game bosses)
-- [ ] Surtur the Fire Giant (final boss)
+- [x] Boss data defined (Hrungnir, Wolf-Man, Bear-Man, Giant Kings, Surtur)
 - [ ] Pre-designed boss floors
+- [ ] Boss-specific loot rewards
 
 ### 6.3 Story Elements
 - [ ] Opening sequence (farm destroyed, godparents killed)
@@ -239,12 +246,12 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 ## Phase 7: Polish & Completeness
 
 ### 7.1 UI Polish
-- [ ] Character info screen with attribute bar graphs
-- [ ] Spell selection UI
-- [ ] Quick spell bar
+- [x] Character info screen with attribute bar graphs
+- [x] Spell bar with number key labels
+- [x] Death/RIP screen with tombstone and cause of death
+- [ ] Spell selection UI (full list beyond 9)
 - [ ] Context menus (right-click / long-press)
 - [ ] Tooltips for items and monsters
-- [ ] Death/RIP screen with tombstone
 - [ ] Difficulty indicators
 
 ### 7.2 Touch Controls
@@ -252,7 +259,7 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [ ] Tap-to-move with pathfinding
 - [ ] Long-press for context actions
 - [ ] Touch-friendly button sizes (min 44px)
-- [ ] Swipe gestures for directional movement
+- [x] Swipe gestures for directional movement
 
 ### 7.3 Game Features
 - [ ] Save/load (multiple save slots)
@@ -262,7 +269,6 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [ ] Rest/sleep to recover HP/MP
 - [ ] Time system (actions consume in-game time)
 - [ ] Scoring / Valhalla's Champions leaderboard
-- [ ] Attribute flavor text (replace all TODO placeholders)
 - [ ] Item renaming
 
 ### 7.4 Mobile & Responsive
