@@ -276,6 +276,7 @@ export type GameAction =
   | { type: 'castSpell'; spellId: string; direction?: Direction; target?: Vector2 }
   | { type: 'pickupItem' }
   | { type: 'useStairs' }
+  | { type: 'contextAction' }
   | { type: 'rest' }
   | { type: 'search' }
   | { type: 'useItem'; itemId: string }

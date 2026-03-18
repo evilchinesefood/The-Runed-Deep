@@ -87,12 +87,10 @@ export class TouchControls {
     `;
 
     const actions: [string, string, GameAction][] = [
-      ['G', 'Pickup', { type: 'pickupItem' }],
+      ['E', 'Action', { type: 'contextAction' }],
       ['I', 'Items', { type: 'setScreen', screen: 'inventory' }],
       ['Z', 'Spells', { type: 'setScreen', screen: 'spells' }],
       ['M', 'Map', { type: 'setScreen', screen: 'map' }],
-      ['S', 'Search', { type: 'search' }],
-      ['>', 'Stairs', { type: 'useStairs' }],
     ];
 
     for (const [key, label, action] of actions) {

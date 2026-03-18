@@ -193,6 +193,10 @@ export class InputManager {
           e.preventDefault();
           this.emit({ type: 'setScreen', screen: 'map' });
           break;
+        case 'KeyE':
+          e.preventDefault();
+          this.emit({ type: 'contextAction' });
+          break;
         case 'KeyG':
           e.preventDefault();
           this.emit({ type: 'pickupItem' });

@@ -48,6 +48,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processSave(state);
     case 'rest':
       return processRest(state);
+    case 'contextAction':
+      return processContextAction(state);
     case 'pickupItem':
       return processPickupItem(state);
     case 'dropItem':
@@ -68,6 +70,49 @@ export function processAction(state: GameState, action: GameAction): GameState {
     default:
       return state;
   }
+}
+
+/** E key — smart context action based on what's on the hero's tile */
+function processContextAction(state: GameState): GameState {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const pos = state.hero.position;
+  const tile = floor.tiles[pos.y][pos.x];
+
+  // Building → enter it
+  if (tile.type === 'building' && tile.buildingId) {
+    return processEnterBuilding(state);
+  }
+
+  // Stairs → use them
+  if (tile.type === 'stairs-up' || tile.type === 'stairs-down') {
+    return processUseStairs(state);
+  }
+
+  // Items on ground → pick up
+  const itemsHere = floor.items.filter(i => i.position.x === pos.x && i.position.y === pos.y);
+  if (itemsHere.length > 0) {
+    return processPickupItem(state);
+  }
+
+  // Adjacent doors or potential secrets → search
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = pos.x + dx;
+      const ny = pos.y + dy;
+      if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
+      const adj = floor.tiles[ny][nx];
+      if (adj.type === 'door-closed' || adj.type === 'door-locked' || adj.type === 'door-secret') {
+        return processSearch(state);
+      }
+    }
+  }
+
+  // Nothing to do → wait
+  return processRest(state);
 }
 
 function processMove(state: GameState, direction: Direction): GameState {

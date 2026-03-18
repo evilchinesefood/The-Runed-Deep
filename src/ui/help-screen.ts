@@ -6,10 +6,11 @@ const KEYS: [string, string][] = [
   ['Numpad 7,9,1,3 / YUBN', 'Diagonal movement'],
   ['', ''],
   // Actions
+  ['E', 'Context action (pickup / stairs / enter / search / wait)'],
   ['G', 'Pick up item'],
   ['. (period)', 'Wait (recover HP/MP over time)'],
   ['S', 'Search nearby'],
-  ['> or < or Enter', 'Use stairs'],
+  ['> or < or Enter', 'Use stairs / enter building'],
   ['', ''],
   // Screens
   ['I', 'Inventory / Equipment'],
