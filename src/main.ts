@@ -21,6 +21,10 @@ import { loadGame } from './core/save-load';
 import type { GameState, Screen } from './core/types';
 import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
 import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
+import { TouchControls } from './ui/TouchControls';
+import { getScale, applyResponsiveStyles } from './ui/Responsive';
+
+applyResponsiveStyles();
 
 const root = document.getElementById('game-root')!;
 root.style.cssText = 'background:#000;min-height:100vh;';
@@ -117,6 +121,14 @@ input.setHandler(action => {
     autoPath = [];
     if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
   }
+  if (animRenderer?.isPlaying()) return;
+  gameLoop.handleAction(action);
+  playPendingAnimations();
+});
+
+// Touch controls
+const touchControls = new TouchControls();
+touchControls.setHandler(action => {
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
   playPendingAnimations();
@@ -232,6 +244,9 @@ function switchScreen(state: GameState): void {
   // Run all cleanup functions from previous screen
   while (screenCleanups.length > 0) screenCleanups.pop()!();
 
+  // Hide touch controls by default; shown only on game screen
+  if (TouchControls.isTouchDevice()) touchControls.hide();
+
   root.replaceChildren();
   root.dataset.screen = state.screen;
   mapRenderer = null;
@@ -290,9 +305,17 @@ function switchScreen(state: GameState): void {
 
     case 'game': {
       input.setEnabled(true);
+      if (TouchControls.isTouchDevice()) touchControls.show();
 
       const gameContainer = document.createElement('div');
       gameContainer.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding-top:8px;';
+
+      const scale = getScale();
+      if (scale < 1) {
+        gameContainer.style.transform = `scale(${scale})`;
+        gameContainer.style.transformOrigin = 'top center';
+      }
+
       root.appendChild(gameContainer);
 
       // Spell targeting mode indicator

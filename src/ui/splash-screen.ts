@@ -1,5 +1,6 @@
 import type { GameAction } from '../core/types';
 import { getSaveSlots, deleteSave } from '../core/save-load';
+import { getLeaderboard } from '../systems/Scoring';
 
 function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -56,7 +57,78 @@ export function createSplashScreen(
   newGameBtn.addEventListener('click', () => onAction({ type: 'newGame' }));
   buttons.appendChild(newGameBtn);
 
+  const lbBtn = document.createElement('button');
+  lbBtn.textContent = 'Leaderboard';
+  lbBtn.style.cssText = BTN_STYLE;
+  buttons.appendChild(lbBtn);
+
   splash.appendChild(buttons);
+
+  // Leaderboard panel (toggled)
+  const lbPanel = el('div', {
+    display: 'none',
+    width: '440px',
+    background: '#111',
+    border: '1px solid #444',
+    padding: '16px',
+    marginBottom: '20px',
+    boxSizing: 'border-box',
+  });
+
+  const lbTitle = el('div', {
+    fontSize: '14px',
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: '10px',
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+  }, 'Hall of the Fallen');
+  lbPanel.appendChild(lbTitle);
+
+  const renderLeaderboard = () => {
+    // Clear previous entries (keep title)
+    while (lbPanel.children.length > 1) lbPanel.removeChild(lbPanel.lastChild!);
+
+    const entries = getLeaderboard();
+    if (entries.length === 0) {
+      lbPanel.appendChild(el('div', { color: '#555', textAlign: 'center', fontSize: '13px' }, 'No runs recorded yet.'));
+      return;
+    }
+
+    const table = el('div', {
+      display: 'grid',
+      gridTemplateColumns: '24px 1fr 70px 50px 50px 80px',
+      gap: '2px 8px',
+      fontSize: '12px',
+    });
+
+    for (const h of ['#', 'Name', 'Score', 'Lvl', 'Floor', 'Diff']) {
+      table.appendChild(el('div', { color: '#555', fontWeight: 'bold', paddingBottom: '4px' }, h));
+    }
+
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      table.appendChild(el('div', { color: '#666' }, `${i + 1}`));
+      table.appendChild(el('div', { color: '#aaa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, e.name));
+      table.appendChild(el('div', { color: '#666' }, e.score.toLocaleString()));
+      table.appendChild(el('div', { color: '#666' }, `${e.level}`));
+      table.appendChild(el('div', { color: '#666' }, `${e.floor}`));
+      table.appendChild(el('div', { color: '#666', fontSize: '11px' }, e.difficulty));
+    }
+
+    lbPanel.appendChild(table);
+  };
+
+  lbBtn.addEventListener('click', () => {
+    if (lbPanel.style.display === 'none') {
+      renderLeaderboard();
+      lbPanel.style.display = 'block';
+    } else {
+      lbPanel.style.display = 'none';
+    }
+  });
+
+  splash.appendChild(lbPanel);
 
   // Save slots
   const slots = getSaveSlots();
