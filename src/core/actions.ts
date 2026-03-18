@@ -7,7 +7,7 @@ import { processPickupItem } from '../systems/inventory/pickup';
 import { processDropItem } from '../systems/inventory/drop';
 import { processEquipItem, processUnequipItem } from '../systems/inventory/equipment';
 import { processUseItem } from '../systems/inventory/use-item';
-import { generateTownMap } from '../systems/town/TownMap';
+import { generateTownMap, BUILDING_FLAVORS } from '../systems/town/TownMap';
 import { initShopInventory, restockShop } from '../systems/town/Shops';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
@@ -215,16 +215,13 @@ function processMove(state: GameState, direction: Direction): GameState {
     });
   }
 
-  // Notify when stepping onto a building
+  // Notify when stepping onto a building entrance
   const movedTile = (floors[floorKey] ?? floor).tiles[newPos.y]?.[newPos.x];
   if (movedTile?.type === 'building' && movedTile.buildingId) {
-    const names: Record<string, string> = {
-      'weapon-shop': 'Weapon Shop', 'armor-shop': 'Armor Shop', 'general-store': 'General Store',
-      'magic-shop': 'Magic Shop', 'junk-store': "Olaf's Junk Store", 'temple': 'Temple of Odin',
-      'sage': 'The Sage', 'bank': 'Bank', 'inn': 'The Inn',
-    };
+    const info = BUILDING_FLAVORS[movedTile.buildingId];
+    const bName = info?.name ?? movedTile.buildingId;
     messages.push({
-      text: `You are at the ${names[movedTile.buildingId] ?? movedTile.buildingId}. (Enter to go inside)`,
+      text: `You are at ${bName}. (Press Enter or E to go inside)`,
       severity: 'normal' as const,
       turn: state.turn + 1,
     });
@@ -253,7 +250,18 @@ function processEnterBuilding(state: GameState): GameState {
   }
   const shopIds = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
   const screen = shopIds.includes(tile.buildingId) ? 'shop' as const : 'service' as const;
-  return { ...state, screen, activeBuildingId: tile.buildingId };
+
+  const info = BUILDING_FLAVORS[tile.buildingId];
+  const msg = info
+    ? `You enter ${info.name}. ${info.flavor}`
+    : `You enter the building.`;
+
+  return {
+    ...state,
+    screen,
+    activeBuildingId: tile.buildingId,
+    messages: [...state.messages, { text: msg, severity: 'important' as const, turn: state.turn }],
+  };
 }
 
 function processUseStairs(state: GameState): GameState {
@@ -289,10 +297,9 @@ export function teleportToTown(state: GameState): GameState {
   let floors = { ...state.floors };
   const townKey = 'town-0';
 
-  if (!floors[townKey]) {
-    const { floor } = generateTownMap();
-    floors = { ...floors, [townKey]: floor };
-  }
+  // Always regenerate town map (layout may have changed)
+  const { floor: townFloor } = generateTownMap();
+  floors = { ...floors, [townKey]: townFloor };
 
   const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
 
@@ -311,7 +318,7 @@ export function teleportToTown(state: GameState): GameState {
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
-    hero: { ...state.hero, position: { x: 12, y: 10 } },
+    hero: { ...state.hero, position: { x: 12, y: 8 } },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
     messages: [...state.messages, { text: 'You arrive in town.', severity: 'important' as const, turn: state.turn }],
   };

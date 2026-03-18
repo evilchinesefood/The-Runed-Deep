@@ -1,5 +1,6 @@
 import type { GameState, Vector2 } from '../core/types';
 import { showItemTooltip, showPileTooltip, hideItemTooltip } from '../ui/item-tooltip';
+// Building sprite rendering reads from floor tile data at runtime
 
 const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
@@ -204,6 +205,69 @@ export class MapRenderer {
             continue;
           }
         }
+      }
+    }
+
+    // Render multi-tile building sprites as overlays (town only)
+    this.renderBuildingOverlays(state, cameraX, cameraY);
+  }
+
+  private buildingOverlays: HTMLElement[] = [];
+
+  // Sprite dimensions for building CSS classes
+  private static BUILDING_SPRITES: Record<string, [number, number]> = {
+    'straw-house-east': [96, 96], 'straw-house-west': [96, 96],
+    'hut': [64, 64], 'hut-fire': [64, 64],
+    'house-up': [96, 64], 'house-down1': [96, 64], 'house-down2': [96, 64],
+    'house-right': [64, 96], 'junk-yard': [96, 96],
+    'villa1': [96, 128], 'villa2': [96, 128], 'pantheon': [96, 128],
+    'temple': [160, 160], 'hut-temple': [160, 160], 'hut-temple-fire': [160, 160],
+    'town': [256, 160], 'yurt': [64, 64], 'gate': [96, 32],
+    'straw-house-east-fire': [96, 96], 'straw-house-west-fire': [96, 96],
+  };
+
+  private renderBuildingOverlays(state: GameState, cameraX: number, cameraY: number): void {
+    // Remove old overlays
+    for (const el of this.buildingOverlays) el.remove();
+    this.buildingOverlays = [];
+
+    if (state.currentDungeon !== 'town') return;
+
+    const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+    const floor = state.floors[floorKey];
+    if (!floor) return;
+
+    // Scan floor tiles for building sprites (type='building' with non-walkable = sprite anchor)
+    for (let y = 0; y < floor.height; y++) {
+      for (let x = 0; x < floor.width; x++) {
+        const tile = floor.tiles[y][x];
+        if (tile.type !== 'building' || tile.walkable) continue; // skip entrance tiles
+
+        const dims = MapRenderer.BUILDING_SPRITES[tile.sprite];
+        if (!dims) continue;
+
+        const [sw, sh] = dims;
+        const screenX = (x - cameraX) * TILE_SIZE;
+        const screenY = (y - cameraY) * TILE_SIZE;
+        const vpW = VIEWPORT_TILES_X * TILE_SIZE;
+        const vpH = VIEWPORT_TILES_Y * TILE_SIZE;
+
+        if (screenX + sw < 0 || screenX > vpW) continue;
+        if (screenY + sh < 0 || screenY > vpH) continue;
+
+        const div = document.createElement('div');
+        div.className = tile.sprite;
+        div.style.cssText = `
+          position:absolute;
+          left:${screenX}px;
+          top:${screenY}px;
+          width:${sw}px;
+          height:${sh}px;
+          pointer-events:none;
+          z-index:5;
+        `;
+        this.mapContainer.appendChild(div);
+        this.buildingOverlays.push(div);
       }
     }
   }

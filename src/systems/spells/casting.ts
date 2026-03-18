@@ -721,10 +721,8 @@ const SHOP_IDS_SPELL = ['weapon-shop', 'armor-shop', 'general-store', 'magic-sho
 function teleportToTownFromSpell(state: GameState): GameState {
   let floors = { ...state.floors };
   const townKey = 'town-0';
-  if (!floors[townKey]) {
-    const { floor: townFloor } = generateTownMap();
-    floors = { ...floors, [townKey]: townFloor };
-  }
+  const { floor: townFloor } = generateTownMap();
+  floors = { ...floors, [townKey]: townFloor };
   const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
   let shopInventories = { ...state.town.shopInventories };
   for (const sid of SHOP_IDS_SPELL) {
@@ -740,7 +738,7 @@ function teleportToTownFromSpell(state: GameState): GameState {
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
-    hero: { ...state.hero, position: { x: 12, y: 10 } },
+    hero: { ...state.hero, position: { x: 12, y: 8 } },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
   };
 }

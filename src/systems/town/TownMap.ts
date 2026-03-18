@@ -1,130 +1,179 @@
 // ============================================================
-// Town map generation — fixed 25x20 layout
+// Town map generation — compact layout with multi-tile buildings
 // ============================================================
 
 import type { Floor, Tile, Vector2 } from '../../core/types';
 
 const W = 25;
-const H = 20;
+const H = 26;
 
-const WALL_TILE: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
-const GRASS_TILE: Tile = { type: 'grass', sprite: 'grass', walkable: true, transparent: true };
-const PATH_TILE: Tile = { type: 'path', sprite: 'path', walkable: true, transparent: true };
+const GRASS: Tile = { type: 'grass', sprite: 'grass', walkable: true, transparent: true };
+const PATH: Tile = { type: 'path', sprite: 'path', walkable: true, transparent: true };
+const WALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
 
-function makeTile(t: Partial<Tile> & Pick<Tile, 'type' | 'sprite' | 'walkable' | 'transparent'>): Tile {
-  return { ...t };
-}
-
-function emptyGrid(): Tile[][] {
-  return Array.from({ length: H }, () => Array.from({ length: W }, () => ({ ...GRASS_TILE })));
-}
-
-function placeBorder(tiles: Tile[][]): void {
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (x === 0 || x === W - 1 || y === 0 || y === H - 1) {
-        tiles[y][x] = { ...WALL_TILE };
-      }
-    }
-  }
-}
-
-function setPath(tiles: Tile[][], x: number, y: number): void {
-  if (x <= 0 || x >= W - 1 || y <= 0 || y >= H - 1) return;
-  if (tiles[y][x].type === 'building' || tiles[y][x].type === 'stairs-down') return;
-  tiles[y][x] = { ...PATH_TILE };
-}
-
-function drawHLine(tiles: Tile[][], x1: number, x2: number, y: number): void {
-  const [a, b] = x1 < x2 ? [x1, x2] : [x2, x1];
-  for (let x = a; x <= b; x++) setPath(tiles, x, y);
-}
-
-function drawVLine(tiles: Tile[][], x: number, y1: number, y2: number): void {
-  const [a, b] = y1 < y2 ? [y1, y2] : [y2, y1];
-  for (let y = a; y <= b; y++) setPath(tiles, x, y);
-}
-
-interface BuildingPlacement {
+export interface TownBuilding {
   id: string;
-  x: number;
+  name: string;
+  flavor: string;
+  x: number;       // top-left tile of sprite/footprint
   y: number;
+  w: number;       // footprint width in tiles
+  h: number;       // footprint height in tiles
+  entranceX: number;
+  entranceY: number;
   sprite: string;
+  spriteW: number;
+  spriteH: number;
 }
 
-const BUILDINGS: BuildingPlacement[] = [
-  { id: 'temple',        x: 12, y: 3,  sprite: 'temple' },
-  { id: 'weapon-shop',   x: 4,  y: 4,  sprite: 'house-right' },
-  { id: 'armor-shop',    x: 20, y: 4,  sprite: 'house-right' },
-  { id: 'general-store', x: 3,  y: 9,  sprite: 'hut' },
-  { id: 'magic-shop',    x: 21, y: 9,  sprite: 'villa1' },
-  { id: 'inn',           x: 17, y: 10, sprite: 'hut-fire' },
-  { id: 'bank',          x: 12, y: 14, sprite: 'villa2' },
-  { id: 'sage',          x: 20, y: 14, sprite: 'hut' },
-  { id: 'junk-store',    x: 4,  y: 14, sprite: 'junk-yard' },
+// Sprite reference:
+// straw-house-east  96x96 (3x3 tiles) — door on RIGHT
+// straw-house-west  96x96 (3x3 tiles) — door on LEFT
+// hut               64x64 (2x2 tiles) — door on RIGHT
+// hut-fire          64x64 (2x2 tiles) — door on RIGHT
+// house-up          96x64 (3x2 tiles) — door on TOP
+// house-down1       96x64 (3x2 tiles) — door on BOTTOM
+// house-right       64x96 (2x3 tiles) — door on RIGHT bottom
+// junk-yard         96x96 (3x3 tiles) — door on RIGHT
+// villa2            96x128 (3x4 tiles) — door on TOP
+// temple            160x160 (5x5 tiles) — door on TOP
+// pantheon          96x128 (3x4 tiles) — door on BOTTOM
+
+export const TOWN_BUILDINGS: TownBuilding[] = [
+  // === Left side (entrances face RIGHT toward center spine) ===
+  {
+    id: 'weapon-shop', name: 'Weapon Shop',
+    flavor: 'Fine blades and sturdy hammers for the discerning adventurer.',
+    x: 2, y: 2, w: 3, h: 3, entranceX: 5, entranceY: 3,
+    sprite: 'straw-house-east', spriteW: 96, spriteH: 96,
+  },
+  {
+    id: 'general-store', name: 'General Store',
+    flavor: 'Potions, scrolls, and sundries for every occasion.',
+    x: 3, y: 8, w: 2, h: 2, entranceX: 5, entranceY: 8,
+    sprite: 'hut', spriteW: 64, spriteH: 64,
+  },
+  {
+    id: 'junk-store', name: "Olaf's Junk Store",
+    flavor: "One man's trash is another man's slightly different trash.",
+    x: 2, y: 12, w: 3, h: 3, entranceX: 5, entranceY: 12,
+    sprite: 'junk-yard', spriteW: 96, spriteH: 96,
+  },
+  {
+    id: 'bank', name: 'Bank',
+    flavor: 'Keep your wealth safe from the dangers below.',
+    x: 2, y: 17, w: 3, h: 4, entranceX: 5, entranceY: 17,
+    sprite: 'villa2', spriteW: 96, spriteH: 128,
+  },
+
+  // === Right side (entrances face LEFT toward center spine) ===
+  {
+    id: 'armor-shop', name: 'Armor Shop',
+    flavor: 'Protection for every part of the body.',
+    x: 19, y: 2, w: 3, h: 3, entranceX: 18, entranceY: 3,
+    sprite: 'straw-house-west', spriteW: 96, spriteH: 96,
+  },
+  {
+    id: 'inn', name: 'The Resting Stag Inn',
+    flavor: 'A warm bed and a hearty meal await.',
+    x: 19, y: 7, w: 3, h: 2, entranceX: 20, entranceY: 9,
+    sprite: 'house-down1', spriteW: 96, spriteH: 64,
+  },
+  {
+    id: 'sage', name: 'The Sage',
+    flavor: 'Ancient knowledge to reveal the secrets of your treasures.',
+    x: 20, y: 11, w: 2, h: 2, entranceX: 22, entranceY: 12,
+    sprite: 'hut-fire', spriteW: 64, spriteH: 64,
+  },
+  {
+    id: 'magic-shop', name: 'Magic Shop',
+    flavor: 'Arcane tomes and enchanted wands of great power.',
+    x: 20, y: 16, w: 2, h: 3, entranceX: 22, entranceY: 17,
+    sprite: 'house-right', spriteW: 64, spriteH: 96,
+  },
+
+  // === Temple at south center (entrance on top/north side) ===
+  {
+    id: 'temple', name: 'Temple of Odin',
+    flavor: 'A place of healing and divine protection.',
+    x: 10, y: 19, w: 5, h: 5, entranceX: 12, entranceY: 18,
+    sprite: 'temple', spriteW: 160, spriteH: 160,
+  },
 ];
 
-const DUNGEON_ENTRANCE = { x: 12, y: 17, sprite: 'mine-entrance' };
-const PLAYER_START: Vector2 = { x: 12, y: 10 };
-
-function placeBuildings(tiles: Tile[][]): void {
-  for (const b of BUILDINGS) {
-    tiles[b.y][b.x] = makeTile({ type: 'building', sprite: b.sprite, walkable: true, transparent: true, buildingId: b.id });
-  }
-  tiles[DUNGEON_ENTRANCE.y][DUNGEON_ENTRANCE.x] = makeTile({ type: 'stairs-down', sprite: DUNGEON_ENTRANCE.sprite, walkable: true, transparent: true });
+export const BUILDING_FLAVORS: Record<string, { name: string; flavor: string }> = {};
+for (const b of TOWN_BUILDINGS) {
+  BUILDING_FLAVORS[b.id] = { name: b.name, flavor: b.flavor };
 }
 
-// Draw main vertical spine and horizontal spurs to each building
-function drawPaths(tiles: Tile[][]): void {
-  const cx = 12;
-
-  // Main north-south spine (y:3 to y:17)
-  drawVLine(tiles, cx, 3, 17);
-
-  // temple spur already on spine
-  // weapon-shop (4,4) -> spine at (12,4)
-  drawHLine(tiles, 4, cx, 4);
-  // armor-shop (20,4) -> spine at (12,4)
-  drawHLine(tiles, cx, 20, 4);
-
-  // general-store (3,9) -> horizontal to (12,9) on spine
-  drawHLine(tiles, 3, cx, 9);
-  // magic-shop (21,9) -> horizontal to (12,9) on spine
-  drawHLine(tiles, cx, 21, 9);
-
-  // inn (17,10) -> horizontal to spine at (12,10)
-  drawHLine(tiles, cx, 17, 10);
-
-  // bank (12,14) already on spine
-  // sage (20,14) -> spine
-  drawHLine(tiles, cx, 20, 14);
-  // junk-store (4,14) -> spine
-  drawHLine(tiles, 4, cx, 14);
-
-  // dungeon entrance (12,17) already on spine
-}
+const DUNGEON_ENTRANCE = { x: 12, y: 1 };
+const PLAYER_START: Vector2 = { x: 12, y: 8 };
 
 export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
-  const tiles = emptyGrid();
-  placeBorder(tiles);
-  placeBuildings(tiles);
-  drawPaths(tiles);
+  const tiles: Tile[][] = Array.from({ length: H }, () =>
+    Array.from({ length: W }, () => ({ ...GRASS }))
+  );
 
-  const explored: boolean[][] = Array.from({ length: H }, () => Array(W).fill(true));
-  const visible: boolean[][] = Array.from({ length: H }, () => Array(W).fill(true));
-  const lit: boolean[][] = Array.from({ length: H }, () => Array(W).fill(true));
+  // Border walls
+  for (let x = 0; x < W; x++) { tiles[0][x] = { ...WALL }; tiles[H - 1][x] = { ...WALL }; }
+  for (let y = 0; y < H; y++) { tiles[y][0] = { ...WALL }; tiles[y][W - 1] = { ...WALL }; }
 
-  const floor: Floor = {
-    id: 'town-0',
-    tiles,
-    monsters: [],
-    items: [],
-    explored,
-    visible,
-    lit,
-    width: W,
-    height: H,
+  // Place building footprints as walls
+  for (const b of TOWN_BUILDINGS) {
+    for (let by = b.y; by < b.y + b.h && by < H; by++) {
+      for (let bx = b.x; bx < b.x + b.w && bx < W; bx++) {
+        tiles[by][bx] = { type: 'wall', sprite: 'rock', walkable: false, transparent: true };
+      }
+    }
+    // Top-left for sprite overlay
+    if (b.y >= 0 && b.y < H && b.x >= 0 && b.x < W) {
+      tiles[b.y][b.x] = { type: 'building', sprite: b.sprite, walkable: false, transparent: true, buildingId: b.id };
+    }
+    // Entrance tile
+    if (b.entranceY >= 0 && b.entranceY < H && b.entranceX >= 0 && b.entranceX < W) {
+      tiles[b.entranceY][b.entranceX] = {
+        type: 'building', sprite: 'path', walkable: true, transparent: true, buildingId: b.id,
+      };
+    }
+  }
+
+  // Dungeon entrance at top
+  tiles[DUNGEON_ENTRANCE.y][DUNGEON_ENTRANCE.x] = {
+    type: 'stairs-down', sprite: 'mine-entrance', walkable: true, transparent: true,
   };
 
-  return { floor, playerStart: PLAYER_START };
+  // === Paths ===
+  // Main vertical spine
+  for (let y = 1; y < H - 1; y++) sp(tiles, 12, y);
+
+  // Left branches to entrances
+  for (let x = 5; x <= 12; x++) sp(tiles, x, 3);   // weapon shop
+  for (let x = 5; x <= 12; x++) sp(tiles, x, 8);   // general store
+  for (let x = 5; x <= 12; x++) sp(tiles, x, 12);  // junk store
+  for (let x = 5; x <= 12; x++) sp(tiles, x, 17);  // bank
+
+  // Right branches to entrances
+  for (let x = 12; x <= 18; x++) sp(tiles, x, 3);  // armor shop
+  for (let x = 12; x <= 20; x++) sp(tiles, x, 9);  // inn
+  for (let x = 12; x <= 22; x++) sp(tiles, x, 12); // sage
+  for (let x = 12; x <= 22; x++) sp(tiles, x, 17); // magic shop
+
+  // Temple entrance
+  sp(tiles, 12, 15);
+
+  const explored = Array.from({ length: H }, () => Array(W).fill(true));
+  const visible = Array.from({ length: H }, () => Array(W).fill(true));
+  const lit = Array.from({ length: H }, () => Array(W).fill(true));
+
+  return {
+    floor: { id: 'town-0', tiles, monsters: [], items: [], explored, visible, lit, width: W, height: H },
+    playerStart: PLAYER_START,
+  };
+}
+
+function sp(tiles: Tile[][], x: number, y: number): void {
+  if (x <= 0 || x >= W - 1 || y <= 0 || y >= H - 1) return;
+  const t = tiles[y][x];
+  if (t.type === 'wall' || t.type === 'stairs-down' || t.type === 'building') return;
+  tiles[y][x] = { ...PATH };
 }
