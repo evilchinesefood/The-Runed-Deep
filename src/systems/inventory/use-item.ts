@@ -167,7 +167,14 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     };
   }
   const spellName = spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  const hero = removeFromInventory({ ...state.hero, knownSpells: [...state.hero.knownSpells, spellId] }, idx);
+  const newHotkeys = state.hero.spellHotkeys.length < 7
+    ? [...state.hero.spellHotkeys, spellId]
+    : state.hero.spellHotkeys;
+  const hero = removeFromInventory({
+    ...state.hero,
+    knownSpells: [...state.hero.knownSpells, spellId],
+    spellHotkeys: newHotkeys,
+  }, idx);
   return {
     ...state,
     hero,

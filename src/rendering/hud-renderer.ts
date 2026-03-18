@@ -86,11 +86,14 @@ export class HudRenderer {
 
     this.statsEl.replaceChildren();
 
-    const nameRow = el('div', { marginBottom: '4px' });
+    const nameRow = el('div', { marginBottom: '4px', display: 'flex', alignItems: 'baseline', gap: '6px' });
     const strong = document.createElement('strong');
     strong.textContent = h.name;
     nameRow.appendChild(strong);
-    nameRow.appendChild(document.createTextNode(` Lv.${h.level}`));
+    nameRow.appendChild(el('span', { fontSize: '12px' }, `Lv.${h.level}`));
+    const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
+    const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+    nameRow.appendChild(el('span', { fontSize: '10px', color: diffColors[state.difficulty] ?? '#888', marginLeft: 'auto' }, diffLabel));
     this.statsEl.appendChild(nameRow);
 
     const hpLabel = el('div', {}, `HP: `);
@@ -127,30 +130,26 @@ export class HudRenderer {
     );
     this.statsEl.appendChild(floorInfo);
 
-    // Difficulty indicator
-    const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
-    const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
-    const diffRow = el('div', { fontSize: '10px', marginTop: '2px', color: diffColors[state.difficulty] ?? '#888' }, diffLabel);
-    this.statsEl.appendChild(diffRow);
   }
 
   private renderSpellBar(state: GameState): void {
     this.spellBarEl.replaceChildren();
-    const spells = state.hero.knownSpells;
+    const hotkeys = state.hero.spellHotkeys;
     const mp = state.hero.mp;
 
-    if (spells.length === 0) {
-      this.spellBarEl.appendChild(el('div', { color: '#555', padding: '2px 4px' }, 'No spells known'));
+    if (hotkeys.length === 0) {
+      this.spellBarEl.appendChild(el('div', { color: '#555', padding: '2px 4px' }, 'Press Z to manage spells'));
       return;
     }
 
-    for (let i = 0; i < spells.length; i++) {
-      const spell = SPELL_BY_ID[spells[i]];
+    const max = Math.min(hotkeys.length, 7);
+    for (let i = 0; i < max; i++) {
+      const spell = SPELL_BY_ID[hotkeys[i]];
       if (!spell) continue;
 
       const canCast = mp >= spell.manaCost;
-      const spellId = spells[i];
-      const label = i < 9 ? `${i + 1}:${spell.name}` : spell.name;
+      const spellId = hotkeys[i];
+      const label = `${i + 1}:${spell.name}`;
       const btn = el('div', {
         padding: '2px 5px',
         background: canCast ? '#1a1a2a' : '#1a1a1a',

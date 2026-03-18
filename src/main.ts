@@ -174,6 +174,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         inventory: [],
         copper: 1000,
         knownSpells: getAllSpellIds(),
+        spellHotkeys: getAllSpellIds().slice(0, 7),
         activeEffects: [],
         resistances: createDefaultResistances(),
         armorValue: 6,
@@ -217,6 +218,7 @@ function render(state: GameState): void {
     if (state.screen === 'game') {
       // Sync known spells to input manager for number-key casting
       input.setKnownSpells(state.hero.knownSpells);
+      input.setSpellHotkeys(state.hero.spellHotkeys);
 
       // Compute FOV before rendering map
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
@@ -380,6 +382,10 @@ function switchScreen(state: GameState): void {
           setTimeout(() => input.startSpellCast(spellId), 50);
         },
         () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+        (hotkeys) => {
+          const s = gameLoop.getState();
+          gameLoop.setState({ ...s, hero: { ...s.hero, spellHotkeys: hotkeys } });
+        },
       );
       addScreenCleanup(spellScreen.cleanup);
       root.appendChild(spellScreen);

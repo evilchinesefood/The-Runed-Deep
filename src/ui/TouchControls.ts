@@ -2,9 +2,24 @@ import type { GameAction } from '../core/types';
 
 export type TouchActionHandler = (action: GameAction) => void;
 
+let activeBtn: HTMLElement | null = null;
+
+function releaseActive(): void {
+  if (activeBtn) {
+    activeBtn.style.background = activeBtn.dataset.defaultBg ?? '#333';
+    activeBtn.style.transform = '';
+    activeBtn = null;
+  }
+}
+
+document.addEventListener('touchend', releaseActive, { passive: true });
+document.addEventListener('touchcancel', releaseActive, { passive: true });
+document.addEventListener('mouseup', releaseActive);
+
 function makeBtn(content: string, size: number, onClick: () => void): HTMLElement {
   const btn = document.createElement('div');
   btn.textContent = content;
+  btn.dataset.defaultBg = '#333';
   btn.style.cssText = `
     width:${size}px;height:${size}px;
     display:flex;align-items:center;justify-content:center;
@@ -13,14 +28,14 @@ function makeBtn(content: string, size: number, onClick: () => void): HTMLElemen
     font-weight:bold;user-select:none;touch-action:none;
     cursor:pointer;transition:background 0.08s,transform 0.08s;
   `;
-  const press = () => { btn.style.background = '#555'; btn.style.transform = 'scale(0.92)'; };
-  const release = () => { btn.style.background = '#333'; btn.style.transform = ''; };
+  const press = () => {
+    releaseActive();
+    activeBtn = btn;
+    btn.style.background = '#555';
+    btn.style.transform = 'scale(0.92)';
+  };
   btn.addEventListener('touchstart', (e) => { e.preventDefault(); press(); onClick(); });
-  btn.addEventListener('touchend', release);
-  btn.addEventListener('touchcancel', release);
   btn.addEventListener('mousedown', (e) => { e.preventDefault(); press(); onClick(); });
-  btn.addEventListener('mouseup', release);
-  btn.addEventListener('mouseleave', release);
   return btn;
 }
 
@@ -56,7 +71,11 @@ export class TouchControls {
       btn.style.gridRow = row;
       btn.style.gridColumn = col;
       btn.style.fontSize = isCenter ? '14px' : '18px';
-      if (isCenter) { btn.style.background = '#222'; btn.style.color = '#555'; }
+      if (isCenter) {
+        btn.style.background = '#222';
+        btn.dataset.defaultBg = '#222';
+        btn.style.color = '#555';
+      }
       this.dpad.appendChild(btn);
     }
 
@@ -111,6 +130,7 @@ export class TouchControls {
 
   hide(): void {
     if (this.visible) {
+      releaseActive();
       this.container.remove();
       this.visible = false;
     }

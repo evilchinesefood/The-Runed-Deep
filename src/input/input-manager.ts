@@ -20,8 +20,7 @@ export class InputManager {
   // Spell casting state
   private pendingSpellId: string | null = null;
   private onSpellModeChange: SpellModeCallback | null = null;
-  // Known spells reference (set from outside so we can map number keys)
-  private knownSpells: string[] = [];
+  private spellHotkeys: string[] = [];
   private onPathClick: PathClickCallback | null = null;
 
   constructor() {
@@ -38,8 +37,12 @@ export class InputManager {
     if (!enabled) this.cancelSpellMode();
   }
 
-  setKnownSpells(spells: string[]): void {
-    this.knownSpells = spells;
+  setKnownSpells(_spells: string[]): void {
+    // kept for API compatibility; hotkeys are now used for number-key casting
+  }
+
+  setSpellHotkeys(hotkeys: string[]): void {
+    this.spellHotkeys = hotkeys;
   }
 
   setSpellModeCallback(cb: SpellModeCallback): void {
@@ -169,13 +172,13 @@ export class InputManager {
         return;
       }
 
-      // Number keys 1-9: quick cast spell from known spells list
-      const digitMatch = e.code.match(/^Digit([1-9])$/);
+      // Number keys 1-7: quick cast spell from hotkey slots
+      const digitMatch = e.code.match(/^Digit([1-7])$/);
       if (digitMatch && !e.shiftKey && !e.ctrlKey) {
         const idx = parseInt(digitMatch[1]) - 1;
-        if (idx < this.knownSpells.length) {
+        if (idx < this.spellHotkeys.length) {
           e.preventDefault();
-          this.enterSpellMode(this.knownSpells[idx]);
+          this.enterSpellMode(this.spellHotkeys[idx]);
           return;
         }
       }

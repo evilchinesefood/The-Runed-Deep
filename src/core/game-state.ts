@@ -65,6 +65,7 @@ export function createHero(
     inventory: [],
     copper: config.startingCopper,
     knownSpells: startingSpell ? [startingSpell] : [],
+    spellHotkeys: startingSpell ? [startingSpell] : [],
     activeEffects: [],
     resistances: createDefaultResistances(),
     armorValue,

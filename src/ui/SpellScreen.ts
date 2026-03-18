@@ -12,8 +12,10 @@ export function createSpellScreen(
   state: GameState,
   onCast: (spellId: string) => void,
   onClose: () => void,
+  onUpdateHotkeys: (hotkeys: string[]) => void,
 ): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
+  let hotkeys = [...h.spellHotkeys];
 
   const screen = createScreen();
   screen.style.minHeight = '100vh';
@@ -21,27 +23,72 @@ export function createSpellScreen(
   // Title bar with MP display
   const titleBar = createTitleBar('Spells', () => { cleanup(); onClose(); });
   const mpSpan = el('span', { color: '#48f', fontSize: '14px' }, `MP: ${h.mp}/${h.maxMp}`);
-  // Insert MP span before close button
   const closeBtn = titleBar.lastChild;
   titleBar.insertBefore(mpSpan, closeBtn);
   screen.appendChild(titleBar);
 
-  if (h.knownSpells.length === 0) {
-    const panel = createPanel();
-    panel.style.textAlign = 'center';
-    panel.style.color = '#555';
-    panel.style.padding = '24px';
-    panel.textContent = 'No spells learned yet.';
-    screen.appendChild(panel);
-  } else {
-    // Group spells by category
-    const grouped: Record<string, { spell: SpellDef; idx: number }[]> = {};
-    for (let i = 0; i < h.knownSpells.length; i++) {
-      const spell = SPELL_BY_ID[h.knownSpells[i]];
+  // Hotkey bar panel
+  const hotkeyPanel = createPanel('HOTKEYS (1-7)');
+  screen.appendChild(hotkeyPanel);
+
+  function renderHotkeyPanel(): void {
+    // Remove all children after the header
+    const header = hotkeyPanel.firstElementChild;
+    while (hotkeyPanel.lastChild && hotkeyPanel.lastChild !== header) {
+      hotkeyPanel.removeChild(hotkeyPanel.lastChild);
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const slotId = hotkeys[i];
+      const spell = slotId ? SPELL_BY_ID[slotId] : null;
+      const row = el('div', {
+        display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '3px 8px', fontSize: '12px',
+      });
+      row.appendChild(el('span', { color: '#888', width: '16px', textAlign: 'center', fontFamily: 'monospace' }, String(i + 1)));
+      row.appendChild(el('span', { flex: '1', color: spell ? '#ddd' : '#444' }, spell ? spell.name : '— empty —'));
+      if (spell) {
+        const removeBtn = el('span', {
+          color: '#f64', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
+        }, '[X]');
+        removeBtn.addEventListener('click', () => {
+          hotkeys.splice(i, 1);
+          onUpdateHotkeys([...hotkeys]);
+          renderHotkeyPanel();
+          renderCategoryPanels();
+        });
+        row.appendChild(removeBtn);
+      }
+      hotkeyPanel.appendChild(row);
+    }
+  }
+
+  renderHotkeyPanel();
+
+  // Category panels container — rebuild when hotkeys change
+  const categoryContainer = document.createElement('div');
+  screen.appendChild(categoryContainer);
+
+  function renderCategoryPanels(): void {
+    categoryContainer.replaceChildren();
+
+    if (h.knownSpells.length === 0) {
+      const panel = createPanel();
+      panel.style.textAlign = 'center';
+      panel.style.color = '#555';
+      panel.style.padding = '24px';
+      panel.textContent = 'No spells learned yet.';
+      categoryContainer.appendChild(panel);
+      return;
+    }
+
+    const grouped: Record<string, { spell: SpellDef; spellId: string }[]> = {};
+    for (const sid of h.knownSpells) {
+      const spell = SPELL_BY_ID[sid];
       if (!spell) continue;
       const cat = spell.category;
       if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push({ spell, idx: i });
+      grouped[cat].push({ spell, spellId: sid });
     }
 
     for (const cat of CATEGORY_ORDER) {
@@ -50,12 +97,14 @@ export function createSpellScreen(
 
       const catColor = CATEGORY_COLORS[cat] || '#aaa';
       const panel = createPanel(cat);
-      // Override panel-header color with category color
       const header = panel.firstElementChild as HTMLElement | null;
       if (header) header.style.color = catColor;
 
-      for (const { spell, idx } of spells) {
+      for (const { spell, spellId } of spells) {
         const canCast = h.mp >= spell.manaCost;
+        const inHotkeys = hotkeys.includes(spellId);
+        const canAdd = !inHotkeys && hotkeys.length < 7;
+
         const row = el('div', {
           display: 'flex',
           alignItems: 'center',
@@ -66,12 +115,13 @@ export function createSpellScreen(
           opacity: canCast ? '1' : '0.4',
         });
 
-        // Hotkey badge
-        const hotkey = idx < 9 ? String(idx + 1) : '';
+        // Hotkey slot badge
+        const hkIdx = hotkeys.indexOf(spellId);
+        const badge = hkIdx !== -1 ? String(hkIdx + 1) : '';
         row.appendChild(el('span', {
           width: '20px', textAlign: 'center',
-          fontSize: '11px', color: '#666', fontFamily: 'monospace',
-        }, hotkey));
+          fontSize: '11px', color: '#888', fontFamily: 'monospace',
+        }, badge));
 
         // Spell name
         row.appendChild(el('span', {
@@ -93,6 +143,35 @@ export function createSpellScreen(
           fontSize: '10px', color: '#555', width: '50px', textAlign: 'right',
         }, spell.targeting));
 
+        // Hotkey toggle button
+        if (inHotkeys) {
+          const removeBtn = el('span', {
+            color: '#f64', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
+          }, '[-]');
+          removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hotkeys = hotkeys.filter(id => id !== spellId);
+            onUpdateHotkeys([...hotkeys]);
+            renderHotkeyPanel();
+            renderCategoryPanels();
+          });
+          row.appendChild(removeBtn);
+        } else if (canAdd) {
+          const addBtn = el('span', {
+            color: '#4f4', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
+          }, '[+]');
+          addBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hotkeys.push(spellId);
+            onUpdateHotkeys([...hotkeys]);
+            renderHotkeyPanel();
+            renderCategoryPanels();
+          });
+          row.appendChild(addBtn);
+        } else {
+          row.appendChild(el('span', { width: '28px' }, ''));
+        }
+
         if (canCast) {
           row.addEventListener('click', () => {
             cleanup();
@@ -105,15 +184,17 @@ export function createSpellScreen(
         panel.appendChild(row);
       }
 
-      screen.appendChild(panel);
+      categoryContainer.appendChild(panel);
     }
   }
+
+  renderCategoryPanels();
 
   // Description footer
   screen.appendChild(el('div', {
     width: '100%', fontSize: '11px', color: '#555',
     marginTop: '4px', textAlign: 'center',
-  }, 'Click a spell to cast it. Keys 1-9 also work from the game screen.'));
+  }, 'Click a spell to cast it. Use [+]/[-] to manage hotkey slots 1-7.'));
 
   // Keyboard
   const keyHandler = (e: KeyboardEvent) => {
@@ -123,16 +204,17 @@ export function createSpellScreen(
       onClose();
       return;
     }
-    // Number keys to quick-cast
-    const digit = e.code.match(/^Digit([1-9])$/);
+    // Number keys to quick-cast via hotkeys
+    const digit = e.code.match(/^Digit([1-7])$/);
     if (digit) {
       const idx = parseInt(digit[1]) - 1;
-      if (idx < h.knownSpells.length) {
-        const spell = SPELL_BY_ID[h.knownSpells[idx]];
+      if (idx < hotkeys.length) {
+        const sid = hotkeys[idx];
+        const spell = SPELL_BY_ID[sid];
         if (spell && h.mp >= spell.manaCost) {
           e.preventDefault();
           cleanup();
-          onCast(h.knownSpells[idx]);
+          onCast(sid);
         }
       }
     }

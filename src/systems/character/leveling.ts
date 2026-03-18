@@ -206,6 +206,9 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     const spellId = getSpellForLevel(hero.level);
     if (spellId && !hero.knownSpells.includes(spellId)) {
       hero.knownSpells = [...hero.knownSpells, spellId];
+      if (hero.spellHotkeys.length < 7) {
+        hero.spellHotkeys = [...hero.spellHotkeys, spellId];
+      }
       const spell = SPELLS.find(s => s.id === spellId);
       const spellName = spell?.name ?? spellId;
       messages.push({
