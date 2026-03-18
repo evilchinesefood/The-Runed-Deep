@@ -311,7 +311,7 @@ export function createInventoryScreen(
       if (tpl?.equipSlot) {
         actions.appendChild(btn('[E]', () => onAction({ type: 'equipItem', itemId: item.id })));
       }
-      if (item.category === 'potion' || item.category === 'scroll') {
+      if (item.category === 'potion' || item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') {
         actions.appendChild(btn('[U]', () => onAction({ type: 'useItem', itemId: item.id })));
       }
       actions.appendChild(btn('[D]', () => onAction({ type: 'dropItem', itemId: item.id })));
@@ -390,7 +390,7 @@ export function createInventoryScreen(
       return;
     }
     if (e.code === 'KeyU') {
-      if (item.category === 'potion' || item.category === 'scroll') {
+      if (item.category === 'potion' || item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') {
         e.preventDefault(); onAction({ type: 'useItem', itemId: item.id });
       }
       return;

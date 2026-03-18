@@ -1,5 +1,7 @@
-import type { GameState, Item, Message, Hero } from '../../core/types';
+import type { GameState, Item, Message, Hero, Direction } from '../../core/types';
 import { recomputeDerivedStats } from '../character/derived-stats';
+import { ITEM_BY_ID } from '../../data/items';
+import { castSpell } from '../spells/casting';
 
 export function processUseItem(state: GameState, itemId: string): GameState {
   const idx = state.hero.inventory.findIndex(i => i.id === itemId);
@@ -12,6 +14,10 @@ export function processUseItem(state: GameState, itemId: string): GameState {
       return usePotion(state, item, idx);
     case 'scroll':
       return useScroll(state, item, idx);
+    case 'spellbook':
+      return useSpellbook(state, item, idx);
+    case 'wand':
+      return useWand(state, item, idx);
     default:
       return {
         ...state,
@@ -143,6 +149,109 @@ export function removeCurseFromFirst(hero: Hero, messages: Message[], turn: numb
   }
   messages.push({ text: 'No cursed items found.', severity: 'system', turn });
   return hero;
+}
+
+function useSpellbook(state: GameState, item: Item, idx: number): GameState {
+  const tpl = ITEM_BY_ID[item.templateId];
+  const spellId = tpl?.spellId;
+  if (!spellId) {
+    return {
+      ...state,
+      messages: [...state.messages, { text: `${item.name} contains no spell.`, severity: 'system' as const, turn: state.turn }],
+    };
+  }
+  if (state.hero.knownSpells.includes(spellId)) {
+    return {
+      ...state,
+      messages: [...state.messages, { text: `You already know that spell.`, severity: 'system' as const, turn: state.turn }],
+    };
+  }
+  const spellName = spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const hero = removeFromInventory({ ...state.hero, knownSpells: [...state.hero.knownSpells, spellId] }, idx);
+  return {
+    ...state,
+    hero,
+    messages: [...state.messages, { text: `You learn ${spellName}!`, severity: 'important' as const, turn: state.turn }],
+    turn: state.turn + 1,
+  };
+}
+
+function useWand(state: GameState, item: Item, idx: number): GameState {
+  const tpl = ITEM_BY_ID[item.templateId];
+  const spellId = tpl?.spellId;
+  if (!spellId) {
+    return {
+      ...state,
+      messages: [...state.messages, { text: `${item.name} does nothing.`, severity: 'system' as const, turn: state.turn }],
+    };
+  }
+  const charges = item.properties['charges'] ?? 0;
+  if (charges <= 0) {
+    return {
+      ...state,
+      messages: [...state.messages, { text: `The wand is depleted.`, severity: 'system' as const, turn: state.turn }],
+    };
+  }
+
+  // Decrement charges on the item
+  const updatedItem = { ...item, properties: { ...item.properties, charges: charges - 1 } };
+  const inv = [...state.hero.inventory];
+  inv[idx] = updatedItem;
+  let s: GameState = { ...state, hero: { ...state.hero, inventory: inv } };
+
+  // Find direction toward nearest visible monster
+  const dir = findNearestMonsterDirection(s);
+
+  // Cast the spell — restore MP temporarily since wands don't use MP
+  const savedMp = s.hero.mp;
+  s = { ...s, hero: { ...s.hero, mp: 9999, knownSpells: [...s.hero.knownSpells, spellId] } };
+  s = castSpell(s, spellId, dir ?? 'E');
+  // Restore MP and knownSpells (remove wand spell if it wasn't already known)
+  const wasKnown = state.hero.knownSpells.includes(spellId);
+  const spells = wasKnown ? s.hero.knownSpells : s.hero.knownSpells.filter(sp => sp !== spellId);
+  s = { ...s, hero: { ...s.hero, mp: savedMp, knownSpells: spells } };
+
+  s = {
+    ...s,
+    messages: [...s.messages, {
+      text: `You zap the wand! (${charges - 1} charges remaining)`,
+      severity: 'important' as const,
+      turn: s.turn,
+    }],
+  };
+  return s;
+}
+
+function findNearestMonsterDirection(state: GameState): Direction | undefined {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return undefined;
+  const hero = state.hero;
+  let best: { dist: number; dir: Direction } | null = null;
+  for (const m of floor.monsters) {
+    if (m.hp <= 0) continue;
+    const dx = m.position.x - hero.position.x;
+    const dy = m.position.y - hero.position.y;
+    const dist = Math.abs(dx) + Math.abs(dy);
+    if (!best || dist < best.dist) {
+      const dir = vecToDirection(dx, dy);
+      if (dir) best = { dist, dir };
+    }
+  }
+  return best?.dir;
+}
+
+function vecToDirection(dx: number, dy: number): Direction | undefined {
+  if (dx === 0 && dy === 0) return undefined;
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  if (angle >= -22.5 && angle < 22.5)   return 'E';
+  if (angle >= 22.5  && angle < 67.5)   return 'SE';
+  if (angle >= 67.5  && angle < 112.5)  return 'S';
+  if (angle >= 112.5 && angle < 157.5)  return 'SW';
+  if (angle >= 157.5 || angle < -157.5) return 'W';
+  if (angle >= -157.5 && angle < -112.5) return 'NW';
+  if (angle >= -112.5 && angle < -67.5) return 'N';
+  return 'NE';
 }
 
 function teleportHero(

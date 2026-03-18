@@ -33,6 +33,13 @@ function walkable(floor: Floor, x: number, y: number): boolean {
   return floor.tiles[y][x].walkable;
 }
 
+/** Like walkable but ghosts with 'phase-through-walls' can pass through walls. */
+function canMoveTo(floor: Floor, x: number, y: number, phasing: boolean): boolean {
+  if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) return false;
+  if (phasing) return true;
+  return floor.tiles[y][x].walkable;
+}
+
 /** True if no other monster occupies (x,y) (excluding monsterIndex). */
 function noMonster(floor: Floor, x: number, y: number, excludeIdx: number): boolean {
   return !floor.monsters.some((m, i) => i !== excludeIdx && m.position.x === x && m.position.y === y);
@@ -98,13 +105,14 @@ function moveToward(state: GameState, floorKey: string, idx: number, target: Vec
   if (!floor) return state;
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
+  const phasing = monster.abilities.includes('phase-through-walls');
 
   let bestPos: Vector2 | null = null;
   let bestDist = Infinity;
 
   for (const d of ALL_DIRS) {
     const nx = x + d.x, ny = y + d.y;
-    if (!walkable(floor, nx, ny)) continue;
+    if (!canMoveTo(floor, nx, ny, phasing)) continue;
     if (!noMonster(floor, nx, ny, idx)) continue;
     if (nx === target.x && ny === target.y) continue; // don't walk onto hero
 
@@ -122,13 +130,14 @@ function moveAwayFrom(state: GameState, floorKey: string, idx: number, threat: V
   if (!floor) return state;
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
+  const phasing = monster.abilities.includes('phase-through-walls');
 
   let bestPos: Vector2 | null = null;
   let bestDist = -Infinity;
 
   for (const d of ALL_DIRS) {
     const nx = x + d.x, ny = y + d.y;
-    if (!walkable(floor, nx, ny)) continue;
+    if (!canMoveTo(floor, nx, ny, phasing)) continue;
     if (!noMonster(floor, nx, ny, idx)) continue;
 
     const dist = manhattan({ x: nx, y: ny }, threat);
@@ -403,6 +412,36 @@ export function processMonsterAbility(state: GameState, monster: Monster): GameS
         break;
       }
 
+      case 'paralyze': {
+        if (Math.random() < 0.20) {
+          const already = s.hero.activeEffects.some(e => e.id === 'paralyzed');
+          if (!already) {
+            const effects = [
+              ...s.hero.activeEffects,
+              { id: 'paralyzed', name: 'Paralyzed', turnsRemaining: 3 },
+            ];
+            s = { ...s, hero: { ...s.hero, activeEffects: effects } };
+            s = addMsg(s, `The ${monster.name}'s attack paralyzes you!`, 'important');
+          }
+        }
+        break;
+      }
+
+      case 'blind': {
+        if (Math.random() < 0.25) {
+          const already = s.hero.activeEffects.some(e => e.id === 'blinded');
+          if (!already) {
+            const effects = [
+              ...s.hero.activeEffects,
+              { id: 'blinded', name: 'Blinded', turnsRemaining: 8 },
+            ];
+            s = { ...s, hero: { ...s.hero, activeEffects: effects } };
+            s = addMsg(s, `The ${monster.name} blinds you!`, 'important');
+          }
+        }
+        break;
+      }
+
       // physical-immune is handled in combat.ts damage calc — skip here
       default:
         break;
@@ -426,6 +465,31 @@ function processMelee(state: GameState, floorKey: string, idx: number): GameStat
     monster = { ...monster, fleeing: monster.fleeing - 1 };
     let s = updateMonster(state, floorKey, idx, monster);
     return moveAwayFrom(s, floorKey, idx, hero.position);
+  }
+
+  // Charge ability: rush the hero from 2-4 tiles away in a straight line
+  if (dist >= 2 && dist <= 4 && monster.abilities.includes('charge')) {
+    const dx = hero.position.x - monster.position.x;
+    const dy = hero.position.y - monster.position.y;
+    const isLine = dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy);
+    if (isLine && hasLineOfSight(floor, monster.position, hero.position)) {
+      const stepX = dx === 0 ? 0 : dx > 0 ? 1 : -1;
+      const stepY = dy === 0 ? 0 : dy > 0 ? 1 : -1;
+      const chargePos = { x: hero.position.x - stepX, y: hero.position.y - stepY };
+      if (walkable(floor, chargePos.x, chargePos.y) && noMonster(floor, chargePos.x, chargePos.y, idx)) {
+        let s = updateMonster(state, floorKey, idx, { ...monster, position: chargePos });
+        s = addMsg(s, `The ${monster.name} charges!`, 'combat');
+        const boosted = { ...monster, position: chargePos, damage: [Math.floor(monster.damage[0] * 1.5), Math.floor(monster.damage[1] * 1.5)] as [number, number] };
+        const newFloor = s.floors[floorKey];
+        if (newFloor) {
+          const newIdx = newFloor.monsters.findIndex(m => m.id === monster.id);
+          if (newIdx >= 0) {
+            s = updateMonster(s, floorKey, newIdx, boosted);
+            return monsterAttacksPlayer(s, boosted);
+          }
+        }
+      }
+    }
   }
 
   if (dist <= 1) {
@@ -534,6 +598,18 @@ function processThief(state: GameState, floorKey: string, idx: number): GameStat
 
   // Tick flee timer
   if (monster.fleeing > 0) {
+    // 30% chance to teleport away while fleeing
+    if (Math.random() < 0.30) {
+      for (let tries = 0; tries < 100; tries++) {
+        const rx = Math.floor(Math.random() * floor.width);
+        const ry = Math.floor(Math.random() * floor.height);
+        if (walkable(floor, rx, ry) && noMonster(floor, rx, ry, idx) && !(rx === hero.position.x && ry === hero.position.y)) {
+          monster = { ...monster, fleeing: monster.fleeing - 1, position: { x: rx, y: ry } };
+          let s = updateMonster(state, floorKey, idx, monster);
+          return addMsg(s, `The ${monster.name} vanishes!`, 'important');
+        }
+      }
+    }
     monster = { ...monster, fleeing: monster.fleeing - 1 };
     let s = updateMonster(state, floorKey, idx, monster);
     return moveAwayFrom(s, floorKey, idx, hero.position);
@@ -647,6 +723,19 @@ export function processAllMonsterTurns(state: GameState): GameState {
       case 'caster':   cur = processCaster(cur, floorKey, idx);   break;
       case 'thief':    cur = processThief(cur, floorKey, idx);    break;
       case 'summoner': cur = processSummoner(cur, floorKey, idx); break;
+    }
+
+    // Regeneration: monsters with 'regenerate' ability recover 2 HP per turn
+    const afterFloor = cur.floors[floorKey];
+    if (afterFloor) {
+      const mIdx = afterFloor.monsters.findIndex(m => m.id === mId);
+      if (mIdx >= 0) {
+        const m = afterFloor.monsters[mIdx];
+        if (m.abilities.includes('regenerate') && m.hp < m.maxHp && m.hp > 0) {
+          const healed = Math.min(m.maxHp, m.hp + 2);
+          cur = updateMonster(cur, floorKey, mIdx, { ...m, hp: healed });
+        }
+      }
     }
 
     if (cur.hero.hp <= 0) break;

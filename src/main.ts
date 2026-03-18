@@ -211,7 +211,9 @@ function render(state: GameState): void {
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
       if (floor) {
-        computeFov(floor, state.hero.position.x, state.hero.position.y);
+        const isBlinded = state.hero.activeEffects.some(e => e.id === 'blinded');
+        const fovRadius = isBlinded ? 1 : 4;
+        computeFov(floor, state.hero.position.x, state.hero.position.y, fovRadius);
       }
 
       mapRenderer?.render(state);

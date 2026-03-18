@@ -113,10 +113,16 @@ function buildTooltipContent(item: Item): HTMLElement {
     hasStats = true;
   }
 
-  // Scroll spell
-  if (item.category === 'scroll' && tpl?.spellId) {
+  // Scroll/spellbook/wand spell
+  if ((item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') && tpl?.spellId) {
     const spellName = tpl.spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    statsBox.appendChild(statLine(`Casts: ${spellName}`));
+    statsBox.appendChild(statLine(`Spell: ${spellName}`));
+    hasStats = true;
+  }
+
+  // Charges
+  if (item.properties['charges'] !== undefined) {
+    statsBox.appendChild(statLine(`Charges: ${item.properties['charges']}`));
     hasStats = true;
   }
 

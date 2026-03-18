@@ -24,6 +24,15 @@ export function getDirectionVector(dir: Direction): Vector2 {
 }
 
 export function processAction(state: GameState, action: GameAction): GameState {
+  // Paralyzed heroes cannot move
+  if (action.type === 'move' && state.hero.activeEffects.some(e => e.id === 'paralyzed')) {
+    return {
+      ...state,
+      messages: [...state.messages, { text: 'You are paralyzed and cannot move!', severity: 'important' as const, turn: state.turn }],
+      turn: state.turn + 1,
+    };
+  }
+
   switch (action.type) {
     case 'move':
       return processMove(state, action.direction);

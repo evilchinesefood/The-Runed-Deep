@@ -165,6 +165,38 @@ const SCROLLS: ItemTemplate[] = [
     weight: 50, value: 50, depthMin: 5, depthMax: 99, spellId: 'remove-curse' },
 ];
 
+// ── Spellbooks ────────────────────────────────────────────
+
+const SPELLBOOKS: ItemTemplate[] = [
+  { id: 'book-heal-medium', name: 'Spellbook of Heal Medium Wounds', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 200, depthMin: 8, depthMax: 99, spellId: 'heal-medium-wounds' },
+  { id: 'book-fire-bolt', name: 'Spellbook of Fire Bolt', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 250, depthMin: 10, depthMax: 99, spellId: 'fire-bolt' },
+  { id: 'book-shield', name: 'Spellbook of Shield', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 200, depthMin: 6, depthMax: 99, spellId: 'shield' },
+  { id: 'book-teleport', name: 'Spellbook of Teleport', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 300, depthMin: 12, depthMax: 99, spellId: 'teleport' },
+  { id: 'book-heal-major', name: 'Spellbook of Heal Major Wounds', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 400, depthMin: 15, depthMax: 99, spellId: 'heal-major-wounds' },
+];
+
+// ── Wands ─────────────────────────────────────────────────
+
+const WANDS: ItemTemplate[] = [
+  { id: 'wand-fire-bolt', name: 'Wand of Fire Bolt', category: 'wand', sprite: 'wand-of-fire-bolt',
+    weight: 200, value: 150, depthMin: 6, depthMax: 99, spellId: 'fire-bolt', charges: 8 },
+  { id: 'wand-cold-bolt', name: 'Wand of Cold Bolt', category: 'wand', sprite: 'wand-of-cold-bolt',
+    weight: 200, value: 150, depthMin: 6, depthMax: 99, spellId: 'cold-bolt', charges: 8 },
+  { id: 'wand-lightning', name: 'Wand of Lightning Bolt', category: 'wand', sprite: 'wand-of-lightning',
+    weight: 200, value: 150, depthMin: 8, depthMax: 99, spellId: 'lightning-bolt', charges: 6 },
+  { id: 'wand-fire-ball', name: 'Wand of Fire Ball', category: 'wand', sprite: 'wand-of-fire-ball',
+    weight: 200, value: 300, depthMin: 14, depthMax: 99, spellId: 'fire-ball', charges: 4 },
+  { id: 'wand-cold-ball', name: 'Wand of Cold Ball', category: 'wand', sprite: 'wand-of-cold-ball',
+    weight: 200, value: 300, depthMin: 14, depthMax: 99, spellId: 'cold-ball', charges: 4 },
+  { id: 'wand-light', name: 'Wand of Light', category: 'wand', sprite: 'wand-of-light',
+    weight: 200, value: 80, depthMin: 3, depthMax: 99, spellId: 'light', charges: 10 },
+];
+
 // ── Currency ──────────────────────────────────────────────
 
 const CURRENCY: ItemTemplate[] = [
@@ -184,6 +216,8 @@ export const ALL_ITEM_TEMPLATES: ItemTemplate[] = [
   ...EQUIPMENT,
   ...POTIONS,
   ...SCROLLS,
+  ...SPELLBOOKS,
+  ...WANDS,
   ...CURRENCY,
 ];
 

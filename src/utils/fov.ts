@@ -1,13 +1,12 @@
 import type { Floor } from '../core/types';
 
-const VIEW_RADIUS = 4;
-
 /**
  * Simple raycasting field-of-view.
  * Casts rays from the player outward in all directions,
  * marking tiles as visible until hitting a non-transparent tile.
  */
-export function computeFov(floor: Floor, px: number, py: number): void {
+export function computeFov(floor: Floor, px: number, py: number, radius?: number): void {
+  const VIEW_RADIUS = radius ?? 4;
   // Reset visibility
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {

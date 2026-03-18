@@ -2,6 +2,8 @@ import type { GameState, Monster, Floor, Vector2, Message, Direction } from '../
 import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
 import { getDirectionVector } from '../../core/actions';
 import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-item';
+import { getMonstersForDepth } from '../../data/monsters';
+import { createMonster } from '../monsters/spawning';
 import { queueAnimation } from '../../rendering/animation-queue';
 import {
   buildBoltAnimation,
@@ -112,8 +114,10 @@ function resolveSpellEffect(
       const t = target ?? (direction ? findTargetInDirection(state, direction) : undefined);
       return resolveSlowMonster(state, t);
     }
-    case 'transmogrify-monster':
-      return addMsg(state, `The air shimmers but nothing happens... yet.`, 'system');
+    case 'transmogrify-monster': {
+      const t = target ?? (direction ? findTargetInDirection(state, direction) : undefined);
+      return resolveTransmogrify(state, t);
+    }
 
     // ── Movement spells ─────────────────────────────────
     case 'phase-door':
@@ -417,6 +421,31 @@ function resolveSleepMonster(state: GameState, target: Vector2 | undefined): Gam
 function resolveSlowMonster(state: GameState, target: Vector2 | undefined): GameState {
   if (!target) return addMsg(state, `You need to pick a target.`, 'system');
   return applyStatusToMonster(state, target, 'slowed', `is slowed!`);
+}
+
+function resolveTransmogrify(state: GameState, target: Vector2 | undefined): GameState {
+  if (!target) return addMsg(state, `You need to aim the spell.`, 'system');
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const idx = floor.monsters.findIndex(m => m.position.x === target.x && m.position.y === target.y);
+  if (idx === -1) return addMsg(state, `There's no monster there.`, 'system');
+
+  const original = floor.monsters[idx];
+  const weakDepth = Math.max(1, state.currentFloor - 4);
+  const candidates = getMonstersForDepth(weakDepth);
+  if (candidates.length === 0) return addMsg(state, `The spell fizzles.`, 'system');
+
+  const template = candidates[Math.floor(Math.random() * candidates.length)];
+  const newMonster = createMonster(template, original.position, weakDepth, Math.random, state.difficulty);
+
+  const newMonsters = [...floor.monsters];
+  newMonsters[idx] = newMonster;
+  return {
+    ...addMsg(state, `The ${original.name} transforms into a ${newMonster.name}!`, 'important'),
+    floors: { ...state.floors, [floorKey]: { ...floor, monsters: newMonsters } },
+  };
 }
 
 function applyStatusToMonster(state: GameState, target: Vector2, status: 'sleeping' | 'slowed', msg: string): GameState {
