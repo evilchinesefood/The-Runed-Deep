@@ -3,6 +3,10 @@ import { generateFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
 import { castSpell } from '../systems/spells/casting';
 import { saveGame } from './save-load';
+import { processPickupItem } from '../systems/inventory/pickup';
+import { processDropItem } from '../systems/inventory/drop';
+import { processEquipItem, processUnequipItem } from '../systems/inventory/equipment';
+import { processUseItem } from '../systems/inventory/use-item';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -33,6 +37,16 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processSave(state);
     case 'rest':
       return processRest(state);
+    case 'pickupItem':
+      return processPickupItem(state);
+    case 'dropItem':
+      return processDropItem(state, action.itemId);
+    case 'equipItem':
+      return processEquipItem(state, action.itemId);
+    case 'unequipItem':
+      return processUnequipItem(state, action.slot);
+    case 'useItem':
+      return processUseItem(state, action.itemId);
     case 'newGame':
       return { ...state, screen: 'character-creation' };
     default:
@@ -68,9 +82,29 @@ function processMove(state: GameState, direction: Direction): GameState {
     return playerAttacksMonster(state, monsterAtTarget.id);
   }
 
+  // Check for items at new position
+  const itemsAtPos = floor.items.filter(
+    i => i.position.x === newPos.x && i.position.y === newPos.y
+  );
+  const messages = [...state.messages];
+  if (itemsAtPos.length === 1) {
+    messages.push({
+      text: `You see ${itemsAtPos[0].item.name} on the ground. (G to pick up)`,
+      severity: 'normal' as const,
+      turn: state.turn + 1,
+    });
+  } else if (itemsAtPos.length > 1) {
+    messages.push({
+      text: `You see ${itemsAtPos.length} items on the ground. (G to pick up)`,
+      severity: 'normal' as const,
+      turn: state.turn + 1,
+    });
+  }
+
   return {
     ...state,
     hero: { ...state.hero, position: newPos },
+    messages,
     turn: state.turn + 1,
   };
 }

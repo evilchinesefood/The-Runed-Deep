@@ -1,0 +1,201 @@
+// ============================================================
+// Item Database — Castle of the Winds
+//
+// All item templates organized by category. Each has a depth
+// range for when it can appear as loot. Deeper = better items.
+// ============================================================
+
+import type { ItemCategory, EquipSlot } from '../core/types';
+
+export interface ItemTemplate {
+  id: string;
+  name: string;
+  category: ItemCategory;
+  sprite: string;
+  equipSlot?: EquipSlot;
+  weight: number;          // grams
+  value: number;           // copper pieces
+  depthMin: number;        // earliest floor this appears
+  depthMax: number;        // latest floor (99 = forever)
+  // Combat properties
+  damageMin?: number;
+  damageMax?: number;
+  accuracy?: number;       // hit bonus
+  ac?: number;             // armor class bonus
+  twoHanded?: boolean;
+  // Special
+  healAmount?: number;     // for potions
+  healPct?: number;        // heal as % of max HP
+  spellId?: string;        // for spellbooks/wands
+  charges?: number;        // for wands
+}
+
+// ── Weapons ───────────────────────────────────────────────
+
+const WEAPONS: ItemTemplate[] = [
+  { id: 'club', name: 'Club', category: 'weapon', sprite: 'club', equipSlot: 'weapon',
+    weight: 1500, value: 5, depthMin: 1, depthMax: 8, damageMin: 1, damageMax: 4, accuracy: 0 },
+  { id: 'dagger', name: 'Dagger', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
+    weight: 500, value: 10, depthMin: 1, depthMax: 10, damageMin: 1, damageMax: 5, accuracy: 1 },
+  { id: 'spear', name: 'Spear', category: 'weapon', sprite: 'spear', equipSlot: 'weapon',
+    weight: 2500, value: 15, depthMin: 2, depthMax: 12, damageMin: 2, damageMax: 6, accuracy: 0 },
+  { id: 'hand-axe', name: 'Hand Axe', category: 'weapon', sprite: 'axe', equipSlot: 'weapon',
+    weight: 2000, value: 20, depthMin: 3, depthMax: 14, damageMin: 2, damageMax: 7, accuracy: 0 },
+  { id: 'hammer', name: 'Hammer', category: 'weapon', sprite: 'hammer', equipSlot: 'weapon',
+    weight: 2500, value: 20, depthMin: 3, depthMax: 14, damageMin: 2, damageMax: 8, accuracy: -1 },
+  { id: 'mace', name: 'Mace', category: 'weapon', sprite: 'mace', equipSlot: 'weapon',
+    weight: 3000, value: 30, depthMin: 5, depthMax: 18, damageMin: 3, damageMax: 8, accuracy: 0 },
+  { id: 'short-sword', name: 'Short Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
+    weight: 1500, value: 35, depthMin: 5, depthMax: 18, damageMin: 2, damageMax: 8, accuracy: 1 },
+  { id: 'flail', name: 'Flail', category: 'weapon', sprite: 'flail', equipSlot: 'weapon',
+    weight: 3000, value: 40, depthMin: 7, depthMax: 22, damageMin: 3, damageMax: 10, accuracy: -1 },
+  { id: 'axe', name: 'Axe', category: 'weapon', sprite: 'axe', equipSlot: 'weapon',
+    weight: 3000, value: 45, depthMin: 8, depthMax: 24, damageMin: 3, damageMax: 10, accuracy: 0 },
+  { id: 'war-hammer', name: 'War Hammer', category: 'weapon', sprite: 'hammer', equipSlot: 'weapon',
+    weight: 3500, value: 50, depthMin: 10, depthMax: 26, damageMin: 4, damageMax: 11, accuracy: -1 },
+  { id: 'long-sword', name: 'Long Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
+    weight: 2000, value: 60, depthMin: 10, depthMax: 28, damageMin: 3, damageMax: 11, accuracy: 1 },
+  { id: 'morning-star', name: 'Morning Star', category: 'weapon', sprite: 'morning-star', equipSlot: 'weapon',
+    weight: 4000, value: 55, depthMin: 12, depthMax: 28, damageMin: 4, damageMax: 12, accuracy: 0 },
+  { id: 'battle-axe', name: 'Battle Axe', category: 'weapon', sprite: 'axe', equipSlot: 'weapon',
+    weight: 4000, value: 70, depthMin: 14, depthMax: 32, damageMin: 4, damageMax: 13, accuracy: 0, twoHanded: true },
+  { id: 'broad-sword', name: 'Broad Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
+    weight: 2500, value: 80, depthMin: 16, depthMax: 34, damageMin: 4, damageMax: 13, accuracy: 1 },
+  { id: 'bastard-sword', name: 'Bastard Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
+    weight: 3000, value: 100, depthMin: 20, depthMax: 38, damageMin: 5, damageMax: 15, accuracy: 1 },
+  { id: 'two-handed-sword', name: 'Two-Handed Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
+    weight: 4500, value: 120, depthMin: 24, depthMax: 99, damageMin: 6, damageMax: 18, accuracy: 0, twoHanded: true },
+];
+
+// ── Armor ─────────────────────────────────────────────────
+
+const ARMOR: ItemTemplate[] = [
+  { id: 'leather-armor', name: 'Leather Armor', category: 'armor', sprite: 'leather-armour', equipSlot: 'body',
+    weight: 5000, value: 30, depthMin: 1, depthMax: 14, ac: 3 },
+  { id: 'studded-leather', name: 'Studded Leather', category: 'armor', sprite: 'leather-armour-enchanted', equipSlot: 'body',
+    weight: 6000, value: 60, depthMin: 5, depthMax: 20, ac: 5 },
+  { id: 'chain-mail', name: 'Chain Mail', category: 'armor', sprite: 'metal-armour', equipSlot: 'body',
+    weight: 10000, value: 100, depthMin: 8, depthMax: 26, ac: 7 },
+  { id: 'splint-mail', name: 'Splint Mail', category: 'armor', sprite: 'metal-armour', equipSlot: 'body',
+    weight: 12000, value: 150, depthMin: 14, depthMax: 32, ac: 9 },
+  { id: 'plate-mail', name: 'Plate Mail', category: 'armor', sprite: 'metal-armour-enchanted', equipSlot: 'body',
+    weight: 15000, value: 250, depthMin: 20, depthMax: 99, ac: 12 },
+];
+
+// ── Shields ───────────────────────────────────────────────
+
+const SHIELDS: ItemTemplate[] = [
+  { id: 'small-wood-shield', name: 'Small Wooden Shield', category: 'shield', sprite: 'wood-shield', equipSlot: 'shield',
+    weight: 2000, value: 10, depthMin: 1, depthMax: 12, ac: 1 },
+  { id: 'medium-wood-shield', name: 'Medium Wooden Shield', category: 'shield', sprite: 'wood-shield', equipSlot: 'shield',
+    weight: 3000, value: 20, depthMin: 3, depthMax: 16, ac: 2 },
+  { id: 'small-iron-shield', name: 'Small Iron Shield', category: 'shield', sprite: 'metal-shield', equipSlot: 'shield',
+    weight: 3000, value: 30, depthMin: 5, depthMax: 20, ac: 2 },
+  { id: 'medium-iron-shield', name: 'Medium Iron Shield', category: 'shield', sprite: 'metal-shield', equipSlot: 'shield',
+    weight: 4000, value: 50, depthMin: 8, depthMax: 26, ac: 3 },
+  { id: 'large-steel-shield', name: 'Large Steel Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
+    weight: 5000, value: 80, depthMin: 14, depthMax: 99, ac: 5 },
+];
+
+// ── Helmets ───────────────────────────────────────────────
+
+const HELMETS: ItemTemplate[] = [
+  { id: 'leather-cap', name: 'Leather Cap', category: 'helmet', sprite: 'leather-helmet', equipSlot: 'helmet',
+    weight: 500, value: 10, depthMin: 1, depthMax: 14, ac: 1 },
+  { id: 'iron-helm', name: 'Iron Helm', category: 'helmet', sprite: 'metal-helmet', equipSlot: 'helmet',
+    weight: 1500, value: 30, depthMin: 5, depthMax: 24, ac: 2 },
+  { id: 'steel-helm', name: 'Steel Helm', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
+    weight: 2000, value: 60, depthMin: 12, depthMax: 99, ac: 3 },
+];
+
+// ── Other Equipment ───────────────────────────────────────
+
+const EQUIPMENT: ItemTemplate[] = [
+  { id: 'cloak', name: 'Cloak', category: 'cloak', sprite: 'cloak', equipSlot: 'cloak',
+    weight: 1000, value: 15, depthMin: 1, depthMax: 20, ac: 1 },
+  { id: 'fine-cloak', name: 'Fine Cloak', category: 'cloak', sprite: 'cloak-enchanted', equipSlot: 'cloak',
+    weight: 800, value: 40, depthMin: 10, depthMax: 99, ac: 2 },
+  { id: 'leather-bracers', name: 'Leather Bracers', category: 'bracers', sprite: 'bracers', equipSlot: 'bracers',
+    weight: 500, value: 15, depthMin: 2, depthMax: 18, ac: 1 },
+  { id: 'iron-bracers', name: 'Iron Bracers', category: 'bracers', sprite: 'bracers-enchanted', equipSlot: 'bracers',
+    weight: 1000, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
+  { id: 'leather-gauntlets', name: 'Leather Gauntlets', category: 'gauntlets', sprite: 'gauntlet', equipSlot: 'gauntlets',
+    weight: 400, value: 15, depthMin: 2, depthMax: 18, ac: 1 },
+  { id: 'iron-gauntlets', name: 'Iron Gauntlets', category: 'gauntlets', sprite: 'gauntlet-enchanted', equipSlot: 'gauntlets',
+    weight: 800, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
+  { id: 'leather-boots', name: 'Leather Boots', category: 'boots', sprite: 'boots', equipSlot: 'boots',
+    weight: 800, value: 15, depthMin: 1, depthMax: 18, ac: 1 },
+  { id: 'iron-boots', name: 'Iron Boots', category: 'boots', sprite: 'boots', equipSlot: 'boots',
+    weight: 1500, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
+  { id: 'belt', name: 'Belt', category: 'belt', sprite: 'belt', equipSlot: 'belt',
+    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
+  { id: 'ring', name: 'Ring', category: 'ring', sprite: 'ring', equipSlot: 'ringLeft',
+    weight: 50, value: 20, depthMin: 5, depthMax: 99, ac: 0 },
+  { id: 'amulet', name: 'Amulet', category: 'amulet', sprite: 'amulet', equipSlot: 'amulet',
+    weight: 100, value: 25, depthMin: 5, depthMax: 99, ac: 0 },
+];
+
+// ── Potions ───────────────────────────────────────────────
+
+const POTIONS: ItemTemplate[] = [
+  { id: 'potion-heal-minor', name: 'Potion of Minor Healing', category: 'potion', sprite: 'potion-heal-minor',
+    weight: 200, value: 15, depthMin: 1, depthMax: 99, healPct: 0.25, healAmount: 8 },
+  { id: 'potion-heal-medium', name: 'Potion of Medium Healing', category: 'potion', sprite: 'potion-heal-medium',
+    weight: 200, value: 40, depthMin: 5, depthMax: 99, healPct: 0.50, healAmount: 20 },
+  { id: 'potion-heal-major', name: 'Potion of Major Healing', category: 'potion', sprite: 'potion-heal-major',
+    weight: 200, value: 80, depthMin: 12, depthMax: 99, healPct: 0.75, healAmount: 40 },
+  { id: 'potion-gain-str', name: 'Draught of Gain Strength', category: 'potion', sprite: 'potion-gain-attribute',
+    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+  { id: 'potion-gain-int', name: 'Draught of Gain Intelligence', category: 'potion', sprite: 'potion-gain-attribute',
+    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+  { id: 'potion-gain-con', name: 'Draught of Gain Constitution', category: 'potion', sprite: 'potion-gain-attribute',
+    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+  { id: 'potion-gain-dex', name: 'Draught of Gain Dexterity', category: 'potion', sprite: 'potion-gain-attribute',
+    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+];
+
+// ── Scrolls ───────────────────────────────────────────────
+
+const SCROLLS: ItemTemplate[] = [
+  { id: 'scroll-identify', name: 'Scroll of Identify', category: 'scroll', sprite: 'scroll',
+    weight: 50, value: 30, depthMin: 1, depthMax: 99, spellId: 'identify' },
+  { id: 'scroll-teleport', name: 'Scroll of Teleport', category: 'scroll', sprite: 'scroll',
+    weight: 50, value: 40, depthMin: 3, depthMax: 99, spellId: 'teleport' },
+  { id: 'scroll-remove-curse', name: 'Scroll of Remove Curse', category: 'scroll', sprite: 'scroll',
+    weight: 50, value: 50, depthMin: 5, depthMax: 99, spellId: 'remove-curse' },
+];
+
+// ── Currency ──────────────────────────────────────────────
+
+const CURRENCY: ItemTemplate[] = [
+  { id: 'copper-coins', name: 'Copper Coins', category: 'currency', sprite: 'coins-copper',
+    weight: 50, value: 0, depthMin: 1, depthMax: 99 },
+];
+
+// ============================================================
+// Exports
+// ============================================================
+
+export const ALL_ITEM_TEMPLATES: ItemTemplate[] = [
+  ...WEAPONS,
+  ...ARMOR,
+  ...SHIELDS,
+  ...HELMETS,
+  ...EQUIPMENT,
+  ...POTIONS,
+  ...SCROLLS,
+  ...CURRENCY,
+];
+
+export const ITEM_BY_ID: Record<string, ItemTemplate> = Object.fromEntries(
+  ALL_ITEM_TEMPLATES.map(t => [t.id, t])
+);
+
+/**
+ * Get item templates that can appear at the given depth.
+ */
+export function getItemsForDepth(depth: number): ItemTemplate[] {
+  return ALL_ITEM_TEMPLATES.filter(
+    t => depth >= t.depthMin && depth <= t.depthMax && t.category !== 'currency'
+  );
+}

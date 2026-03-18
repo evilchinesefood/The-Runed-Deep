@@ -42,7 +42,8 @@
     width: 240px;
     display: inline-block;
     padding: 0;
-    background: url('../../assets/equipment-dude.jpg') no-repeat;
+    background: url('../../assets/equipment-dude.png') no-repeat center;
+    background-size: contain;
 }
 
 /* Containers */

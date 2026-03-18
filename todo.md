@@ -95,27 +95,34 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Combat hit flash animations (white on monster, red on hero)
 - [x] Centralized difficulty config (Easy/Intermediate/Hard/Impossible)
 - [ ] Speed system (encumbrance affects turn order)
-- [ ] Loot drops on monster death
+- [x] Loot drops on monster death
 
-### 3.2 Item System — NOT STARTED
-- [ ] Item database: weapons, armor, shields, helmets, cloaks, boots, rings, amulets, belts, bracers, gauntlets
-- [ ] Item properties: base stats, weight, bulk, value
-- [ ] Enchantments (+accuracy, +damage, +AC, resistances, attribute bonuses)
-- [ ] Cursed items (negative effects, can't unequip until Remove Curse)
-- [ ] Unidentified items (display generic name until identified)
+### 3.2 Item System — MOSTLY COMPLETE
+- [x] Item database: weapons, armor, shields, helmets, cloaks, boots, rings, amulets, belts, bracers, gauntlets
+- [x] Item properties: base stats, weight, bulk, value
+- [x] Enchantments (+accuracy, +damage, +AC, resistances, attribute bonuses)
+- [x] Cursed items (negative effects, can't unequip until Remove Curse)
+- [x] Unidentified items (display generic name until identified)
 - [ ] Material tiers: regular, elven, meteoric steel
-- [ ] Consumables: potions, scrolls, spellbooks, wands, staffs
+- [x] Consumables: potions, scrolls (healing, stat gain, identify, teleport, remove curse)
+- [ ] Spellbooks, wands, staffs (charges-based items)
 - [ ] Worthless items (Ring of Adornment, Blank Scroll, etc.)
 
-### 3.3 Inventory & Equipment — NOT STARTED
-- [ ] Equipment slots: weapon, shield, helmet, body armor, cloak, bracers, gauntlets, belt, boots, ring x2, amulet, pack, purse
-- [ ] Equip/unequip with stat recalculation
-- [ ] Weight and bulk tracking with encumbrance
+### 3.3 Inventory & Equipment — MOSTLY COMPLETE
+- [x] Equipment slots: weapon, shield, helmet, body armor, cloak, bracers, gauntlets, belt, boots, ring x2, amulet, pack, purse
+- [x] Equip/unequip with stat recalculation
+- [x] Weight and bulk tracking (silent — encumbrance affects speed TBD)
 - [ ] Container system: packs (weight+bulk limit), chests, belts (slot-based), purses (money only)
 - [ ] Pack of Holding (magic compression)
 - [ ] Drag-drop inventory management (mouse + touch)
-- [ ] Item pickup, drop, throw
-- [ ] Currency: copper pieces
+- [x] Item pickup (G key), drop
+- [ ] Item throw
+- [x] Currency: copper pieces
+- [x] Paperdoll inventory screen (I key)
+- [x] Item use: potions and scrolls
+- [x] Identify spell and scroll working
+- [x] Remove Curse spell and scroll working
+- [ ] Weight/encumbrance affecting movement speed
 
 ---
 
@@ -156,12 +163,12 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 
 **Divination spells:**
 - [x] Detect Objects/Monsters/Traps — reveals positions
-- [x] Identify — message only (items not yet)
+- [x] Identify — identifies first unidentified item in inventory/equipment
 - [x] Clairvoyance — reveals 10x10 area
 
 **Misc spells:**
 - [x] Light — permanent room illumination, extended FOV
-- [x] Remove Curse — message only (cursed items not yet)
+- [x] Remove Curse — removes curse from first cursed equipped item
 
 **Spell mechanics:**
 - [x] Mana cost system, bolt/ball targeting, spell bar (keys 1-9)

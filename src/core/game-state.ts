@@ -68,6 +68,8 @@ export function createHero(
     activeEffects: [],
     resistances: createDefaultResistances(),
     armorValue,
+    equipDamageBonus: 0,
+    equipAccuracyBonus: 0,
   };
 }
 

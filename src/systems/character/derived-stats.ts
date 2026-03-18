@@ -54,6 +54,15 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const maxMp = computeMaxMp(hero.attributes.intelligence, hero.level);
   const armorValue = computeTotalArmorValue(hero.attributes.dexterity, hero.equipment);
 
+  // Weapon bonuses
+  let equipDamageBonus = 0;
+  let equipAccuracyBonus = 0;
+  const weapon = hero.equipment.weapon;
+  if (weapon) {
+    equipDamageBonus = weapon.enchantment;
+    equipAccuracyBonus = (weapon.properties['accuracy'] ?? 0) + weapon.enchantment;
+  }
+
   // Clamp current HP/MP to new max (don't exceed, but don't reduce if already below)
   const hp = Math.min(hero.hp, maxHp);
   const mp = Math.min(hero.mp, maxMp);
@@ -65,6 +74,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
     hp,
     mp,
     armorValue,
+    equipDamageBonus,
+    equipAccuracyBonus,
   };
 }
 

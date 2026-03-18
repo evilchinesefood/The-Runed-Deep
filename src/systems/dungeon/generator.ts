@@ -27,7 +27,7 @@ function createWallTile(): Tile {
 }
 
 function createFloorTile(): Tile {
-  return { type: 'floor', sprite: 'lit-dgn', walkable: true, transparent: true };
+  return { type: 'floor', sprite: 'dark-dgn', walkable: true, transparent: true };
 }
 
 function createDoorTile(): Tile {

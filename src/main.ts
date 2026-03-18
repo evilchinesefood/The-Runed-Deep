@@ -6,7 +6,9 @@ import { HudRenderer } from './rendering/hud-renderer';
 import { createSplashScreen } from './ui/splash-screen';
 import { createCharacterCreationScreen } from './ui/character-creation';
 import { createCharacterInfoScreen } from './ui/character-info';
+import { createInventoryScreen } from './ui/inventory-screen';
 import { createDeathScreen } from './ui/death-screen';
+import { createHelpScreen } from './ui/help-screen';
 import { generateFloor } from './systems/dungeon/generator';
 import { SPELL_BY_ID } from './data/spells';
 import { AnimationRenderer } from './rendering/animations';
@@ -14,6 +16,8 @@ import { drainAnimations } from './rendering/animation-queue';
 import { computeFov } from './utils/fov';
 import { loadGame } from './core/save-load';
 import type { GameState, Screen } from './core/types';
+import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
+import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
 
 const root = document.getElementById('game-root')!;
 root.style.cssText = 'background:#000;min-height:100vh;';
@@ -68,6 +72,51 @@ function playPendingAnimations(): void {
   });
 }
 
+// F9: Launch spell test arena
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.code === 'F9') {
+    e.preventDefault();
+    const { floor: testFloor, playerStart } = generateTestFloor();
+    const testState: GameState = {
+      screen: 'game',
+      hero: {
+        name: 'Test Hero',
+        gender: 'male',
+        position: playerStart,
+        attributes: { strength: 60, intelligence: 70, constitution: 60, dexterity: 60 },
+        hp: 200, maxHp: 200,
+        mp: 500, maxMp: 500,
+        xp: 0, level: 10,
+        equipment: createEmptyEquipment(),
+        inventory: [],
+        copper: 1000,
+        knownSpells: getAllSpellIds(),
+        activeEffects: [],
+        resistances: createDefaultResistances(),
+        armorValue: 6,
+        equipDamageBonus: 0,
+        equipAccuracyBonus: 0,
+      },
+      currentFloor: 0,
+      currentDungeon: 'mine',
+      floors: { 'mine-0': testFloor },
+      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0 },
+      messages: [
+        { text: '=== SPELL TEST ARENA ===', severity: 'important', turn: 0 },
+        { text: 'All 30 spells available. 500 MP. Monsters placed for testing.', severity: 'system', turn: 0 },
+        { text: 'Bolt targets: E line at y=15. AoE group: x=10-11, y=20-21.', severity: 'system', turn: 0 },
+        { text: 'Items on ground near start. Cursed armor + unidentified ring for ID/curse testing.', severity: 'system', turn: 0 },
+        { text: 'Enclosed room at top-right for Light spell testing.', severity: 'system', turn: 0 },
+      ],
+      turn: 0,
+      gameTime: 0,
+      difficulty: 'easy',
+      rngSeed: Date.now(),
+    };
+    gameLoop.setState(testState);
+  }
+});
+
 // Initial render
 render(gameLoop.getState());
 
@@ -86,8 +135,7 @@ function render(state: GameState): void {
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
       if (floor) {
-        const hasLight = state.hero.activeEffects.some(e => e.id === 'light' && e.turnsRemaining > 0);
-        computeFov(floor, state.hero.position.x, state.hero.position.y, hasLight);
+        computeFov(floor, state.hero.position.x, state.hero.position.y);
       }
 
       mapRenderer?.render(state);
@@ -203,11 +251,37 @@ function switchScreen(state: GameState): void {
       break;
     }
 
+    case 'inventory': {
+      input.setEnabled(true);
+      const renderInventory = () => {
+        const invScreen = createInventoryScreen(
+          gameLoop.getState(),
+          action => {
+            gameLoop.handleAction(action);
+            root.replaceChildren();
+            renderInventory();
+          },
+          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+        );
+        root.replaceChildren(invScreen);
+      };
+      renderInventory();
+      break;
+    }
+
+    case 'help': {
+      input.setEnabled(true);
+      const helpScreen = createHelpScreen(() => {
+        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+      });
+      root.appendChild(helpScreen);
+      break;
+    }
+
     case 'death': {
       input.setEnabled(false);
       createDeathScreen(root, gameLoop.getState(), action => {
         if (action.type === 'setScreen' && action.screen === 'splash') {
-          // Reset to a fresh game state
           const freshState = createInitialGameState();
           gameLoop.setState(freshState);
         }

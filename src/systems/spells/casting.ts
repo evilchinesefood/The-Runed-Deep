@@ -1,6 +1,7 @@
 import type { GameState, Monster, Floor, Vector2, Message, Direction } from '../../core/types';
 import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
 import { getDirectionVector } from '../../core/actions';
+import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-item';
 import { queueAnimation } from '../../rendering/animation-queue';
 import {
   buildBoltAnimation,
@@ -126,16 +127,22 @@ function resolveSpellEffect(
       return resolveDetectMonsters(state);
     case 'detect-traps':
       return resolveDetectTraps(state);
-    case 'identify':
-      return addMsg(state, `The identify spell requires an item to target.`, 'system');
+    case 'identify': {
+      const msgs: Message[] = [];
+      const hero = identifyFirstUnknown(state.hero, msgs, state.turn);
+      return { ...state, hero, messages: [...state.messages, ...msgs] };
+    }
     case 'clairvoyance':
       return resolveClairvoyance(state);
 
     // ── Misc spells ─────────────────────────────────────
     case 'light':
       return resolveLight(state);
-    case 'remove-curse':
-      return addMsg(state, `The remove curse spell requires a cursed equipped item.`, 'system');
+    case 'remove-curse': {
+      const msgs: Message[] = [];
+      const hero = removeCurseFromFirst(state.hero, msgs, state.turn);
+      return { ...state, hero, messages: [...state.messages, ...msgs] };
+    }
 
     default:
       return addMsg(state, `${spell.name} fizzles.`, 'system');
@@ -602,14 +609,49 @@ function resolveClairvoyance(state: GameState): GameState {
 
 function resolveLight(state: GameState): GameState {
   queueAnimation(buildBuffAnimation(state.hero.position, '#ff8'));
-  const hero = state.hero;
-  const newEffects = [
-    ...hero.activeEffects.filter(e => e.id !== 'light'),
-    { id: 'light', name: 'Light', turnsRemaining: 100 },
-  ];
+
+  // Immediately light all visible floor tiles in extended FOV, no persistent effect
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return addMsg(state, 'Nothing happens.', 'system');
+
+  const newFloor = { ...floor, lit: floor.lit.map(row => [...row]) };
+
+  // Compute extended FOV and mark floor tiles as permanently lit
+  const VIEW_RADIUS = 10;
+  const px = state.hero.position.x;
+  const py = state.hero.position.y;
+
+  // Light player tile
+  if (newFloor.tiles[py]?.[px]?.type === 'floor') {
+    newFloor.lit[py][px] = true;
+  }
+
+  // Cast rays outward
+  const RAYS = 360;
+  for (let i = 0; i < RAYS; i++) {
+    const angle = (i / RAYS) * Math.PI * 2;
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    let cx = px + 0.5;
+    let cy = py + 0.5;
+
+    for (let step = 0; step < VIEW_RADIUS; step++) {
+      cx += dx;
+      cy += dy;
+      const tx = Math.floor(cx);
+      const ty = Math.floor(cy);
+      if (tx < 0 || tx >= newFloor.width || ty < 0 || ty >= newFloor.height) break;
+      if (newFloor.tiles[ty][tx].type === 'floor') {
+        newFloor.lit[ty][tx] = true;
+      }
+      if (!newFloor.tiles[ty][tx].transparent) break;
+    }
+  }
+
   return {
-    ...addMsg(state, `The area around ${hero.name} brightens.`, 'important'),
-    hero: { ...hero, activeEffects: newEffects },
+    ...addMsg(state, `The area around ${state.hero.name} brightens.`, 'important'),
+    floors: { ...state.floors, [floorKey]: newFloor },
   };
 }
 

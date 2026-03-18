@@ -15,6 +15,7 @@ export type Screen =
   | 'game'
   | 'inventory'
   | 'character-info'
+  | 'help'
   | 'death';
 
 export type Difficulty = 'easy' | 'intermediate' | 'hard' | 'impossible';
@@ -99,6 +100,8 @@ export interface Hero {
   activeEffects: StatusEffect[];
   resistances: ElementalResistances;
   armorValue: number;
+  equipDamageBonus: number;
+  equipAccuracyBonus: number;
 }
 
 // ============================================================

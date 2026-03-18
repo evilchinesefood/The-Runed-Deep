@@ -28,14 +28,18 @@ export class HudRenderer {
   constructor(container: HTMLElement) {
     this.container = container;
 
-    // Spell bar
+    // Spell bar — scrollable, wraps within fixed width
     this.spellBarEl = el('div', {
       display: 'flex',
+      flexWrap: 'wrap',
       width: '672px',
+      maxHeight: '44px',
+      overflowY: 'auto',
       margin: '2px auto',
-      gap: '4px',
+      gap: '3px',
       fontFamily: "'Segoe UI', Tahoma, sans-serif",
       fontSize: '11px',
+      boxSizing: 'border-box',
     });
     this.container.appendChild(this.spellBarEl);
 
@@ -51,7 +55,7 @@ export class HudRenderer {
 
     this.messagesEl = el('div', {
       flex: '7',
-      height: '120px',
+      height: '150px',
       overflowY: 'auto',
       background: '#111',
       border: '1px solid #333',
@@ -141,23 +145,22 @@ export class HudRenderer {
       return;
     }
 
-    // Show up to 9 spells with number key labels
-    const max = Math.min(9, spells.length);
-    for (let i = 0; i < max; i++) {
+    for (let i = 0; i < spells.length; i++) {
       const spell = SPELL_BY_ID[spells[i]];
       if (!spell) continue;
 
       const canCast = mp >= spell.manaCost;
       const spellId = spells[i];
+      const label = i < 9 ? `${i + 1}:${spell.name}` : spell.name;
       const btn = el('div', {
-        padding: '2px 6px',
+        padding: '2px 5px',
         background: canCast ? '#1a1a2a' : '#1a1a1a',
         border: `1px solid ${canCast ? '#446' : '#222'}`,
         color: canCast ? '#aac' : '#555',
         cursor: canCast ? 'pointer' : 'default',
         whiteSpace: 'nowrap',
         userSelect: 'none',
-      }, `${i + 1}:${spell.name}`);
+      }, label);
 
       if (canCast) {
         btn.addEventListener('click', () => {
@@ -166,10 +169,6 @@ export class HudRenderer {
       }
 
       this.spellBarEl.appendChild(btn);
-    }
-
-    if (spells.length > 9) {
-      this.spellBarEl.appendChild(el('div', { color: '#555', padding: '2px 4px' }, `+${spells.length - 9} more`));
     }
   }
 

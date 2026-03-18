@@ -1,5 +1,5 @@
 import type { GameAction } from '../core/types';
-import { getSaveSlots } from '../core/save-load';
+import { getSaveSlots, deleteSave } from '../core/save-load';
 
 function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -32,6 +32,13 @@ export function createSplashScreen(
     color: '#ccc',
     fontFamily: "'Segoe UI', Tahoma, sans-serif",
   });
+
+  // Logo image
+  const logo = document.createElement('img');
+  logo.src = '/assets/logo.png';
+  logo.alt = 'Castle of the Winds';
+  logo.style.cssText = 'max-width:400px;height:auto;margin-bottom:24px;';
+  splash.appendChild(logo);
 
   splash.appendChild(el('h1', {
     fontSize: '36px',
@@ -81,6 +88,7 @@ export function createSplashScreen(
         background: '#1a1a1a',
         border: '1px solid #444',
         cursor: 'pointer',
+        position: 'relative',
       });
 
       const details = el('div');
@@ -94,6 +102,8 @@ export function createSplashScreen(
       ));
       row.appendChild(details);
 
+      const btnGroup = el('div', { display: 'flex', gap: '8px', alignItems: 'center' });
+
       const loadBtn = document.createElement('button');
       loadBtn.textContent = 'Load';
       loadBtn.style.cssText = 'padding:6px 16px;background:#335;color:#aaf;border:1px solid #558;cursor:pointer;';
@@ -101,8 +111,57 @@ export function createSplashScreen(
         e.stopPropagation();
         onLoadSlot(info.slot);
       });
-      row.appendChild(loadBtn);
+      btnGroup.appendChild(loadBtn);
 
+      // Delete button
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'X';
+      delBtn.style.cssText = 'padding:4px 8px;background:#411;color:#f66;border:1px solid #633;cursor:pointer;font-weight:bold;font-size:12px;';
+      const slotNum = info.slot;
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Show confirmation
+        const confirm = el('div', {
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          right: '0',
+          bottom: '0',
+          background: 'rgba(0,0,0,0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          zIndex: '10',
+        });
+        confirm.appendChild(el('span', { color: '#f88', fontSize: '13px' }, 'Delete this save?'));
+        const yesBtn = document.createElement('button');
+        yesBtn.textContent = 'Yes';
+        yesBtn.style.cssText = 'padding:4px 14px;background:#622;color:#faa;border:1px solid #844;cursor:pointer;';
+        yesBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          deleteSave(slotNum);
+          row.remove();
+          // If no saves left, remove the entire section
+          if (slotContainer.children.length === 0) {
+            slotContainer.previousElementSibling?.remove(); // "Saved Games" label
+            slotContainer.remove();
+          }
+        });
+        const noBtn = document.createElement('button');
+        noBtn.textContent = 'No';
+        noBtn.style.cssText = 'padding:4px 14px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
+        noBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          confirm.remove();
+        });
+        confirm.appendChild(yesBtn);
+        confirm.appendChild(noBtn);
+        row.appendChild(confirm);
+      });
+      btnGroup.appendChild(delBtn);
+
+      row.appendChild(btnGroup);
       row.addEventListener('click', () => onLoadSlot(info.slot));
 
       slotContainer.appendChild(row);

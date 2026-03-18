@@ -1,6 +1,7 @@
 import type { GameState, Hero, Monster, Message, Floor } from '../../core/types';
 import { queueAnimation } from '../../rendering/animation-queue';
 import type { SpellAnimation } from '../../rendering/animations';
+import { generateLoot } from '../items/loot';
 
 // ============================================================
 // Dice rolling
@@ -89,7 +90,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
   const messages: Message[] = [];
 
   // Hit check
-  const hitChance = calcHitChance(state.hero.attributes.dexterity, Math.floor(monster.speed * 30));
+  const hitChance = calcHitChance(state.hero.attributes.dexterity + state.hero.equipAccuracyBonus, Math.floor(monster.speed * 30));
   if (!doesHit(hitChance)) {
     messages.push({
       text: `${state.hero.name} misses the ${monster.name}.`,
@@ -125,7 +126,20 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     // Remove monster from floor, award XP
     const newMonsters = [...floor.monsters];
     newMonsters.splice(monsterIndex, 1);
-    const newFloor: Floor = { ...floor, monsters: newMonsters };
+
+    // Loot drop
+    const loot = generateLoot(state.currentFloor, monster.position);
+    let newItems = [...floor.items];
+    if (loot) {
+      newItems.push({ item: loot, position: { ...monster.position } });
+      messages.push({
+        text: `The ${monster.name} dropped ${loot.name}.`,
+        severity: 'normal',
+        turn: state.turn,
+      });
+    }
+
+    const newFloor: Floor = { ...floor, monsters: newMonsters, items: newItems };
 
     return {
       ...applyMessages(state, messages),

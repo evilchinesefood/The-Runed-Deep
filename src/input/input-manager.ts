@@ -208,6 +208,12 @@ export class InputManager {
             this.emit({ type: 'search' });
           }
           break;
+        case 'Slash':
+          if (e.shiftKey) { // ? key
+            e.preventDefault();
+            this.emit({ type: 'setScreen', screen: 'help' });
+          }
+          break;
         case 'Escape':
           e.preventDefault();
           this.emit({ type: 'setScreen', screen: 'game' });

@@ -1,4 +1,5 @@
 import type { GameState, Vector2 } from '../core/types';
+import { showItemTooltip, hideItemTooltip } from '../ui/item-tooltip';
 
 const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
@@ -13,6 +14,7 @@ export class MapRenderer {
   private container: HTMLElement;
   private cells: TileCell[][] = [];
   private mapContainer: HTMLElement;
+  private lastState: GameState | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -30,6 +32,7 @@ export class MapRenderer {
     this.container.appendChild(this.mapContainer);
 
     this.initTileGrid();
+    this.setupTooltipEvents();
   }
 
   private initTileGrid(): void {
@@ -55,8 +58,37 @@ export class MapRenderer {
     }
   }
 
+  private setupTooltipEvents(): void {
+    this.mapContainer.addEventListener('mousemove', (e: MouseEvent) => {
+      if (!this.lastState) return;
+      const state = this.lastState;
+      const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+      const floor = state.floors[floorKey];
+      if (!floor) { hideItemTooltip(); return; }
+
+      const worldPos = this.screenToWorld(e.clientX, e.clientY, state.hero.position);
+      if (!worldPos) { hideItemTooltip(); return; }
+
+      // Only show tooltip for visible tiles
+      const tileVisible = floor.visible[worldPos.y]?.[worldPos.x] || floor.lit[worldPos.y]?.[worldPos.x];
+      if (!tileVisible) { hideItemTooltip(); return; }
+
+      const groundItem = floor.items.find(
+        i => i.position.x === worldPos.x && i.position.y === worldPos.y
+      );
+      if (groundItem) {
+        showItemTooltip(groundItem.item, e.clientX, e.clientY);
+      } else {
+        hideItemTooltip();
+      }
+    });
+
+    this.mapContainer.addEventListener('mouseleave', () => { hideItemTooltip(); });
+  }
+
   render(state: GameState): void {
     if (state.screen !== 'game') return;
+    this.lastState = state;
 
     const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
     const floor = state.floors[floorKey];
@@ -95,26 +127,35 @@ export class MapRenderer {
         }
 
         const tile = floor.tiles[worldY][worldX];
-        // Visible = full brightness, permanently lit = full brightness, explored only = dimmed
-        const opacity = (visible || isLit) ? '1' : '0.5';
+        const isWall = tile.type === 'wall';
+        const isFloorTile = tile.type === 'floor';
+
+        // Walls only brighten when directly visible, never from permanent lighting
+        // Floor tiles brighten from visibility OR permanent Light spell
+        const opacity = isWall
+          ? (visible ? '1' : '0.5')
+          : ((visible || isLit) ? '1' : '0.5');
+
+        // Use lit (blue) floor sprite only for floor tiles with permanent light
+        const floorSprite = (isLit && isFloorTile) ? 'lit-dgn' : tile.sprite;
 
         // Tiles like stairs and doors are overlays on top of the base floor
         const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
           || tile.type === 'door-closed' || tile.type === 'door-open';
 
         if (isOverlayTile) {
-          cell.floor.className = 'lit-dgn';
+          cell.floor.className = isLit ? 'lit-dgn' : 'dark-dgn';
           cell.floor.style.opacity = opacity;
           cell.entity.className = tile.sprite;
           cell.entity.style.display = 'block';
           cell.entity.style.opacity = opacity;
         } else {
-          cell.floor.className = tile.sprite;
+          cell.floor.className = floorSprite;
           cell.floor.style.opacity = opacity;
         }
 
-        // If visible, check for entities to overlay (hero/monsters/items take priority)
-        if (visible) {
+        // If visible or permanently lit, show entities (hero/monsters/items)
+        if (visible || isLit) {
           // Hero
           if (worldX === state.hero.position.x && worldY === state.hero.position.y) {
             cell.entity.className = state.hero.gender === 'male' ? 'male-hero' : 'female-hero';

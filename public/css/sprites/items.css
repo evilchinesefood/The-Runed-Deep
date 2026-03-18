@@ -261,6 +261,9 @@
 .boots-cursed {
 	background: url('../../assets/items.png') -32px -544px;
 }
+.boots-enchanted {
+	background: url('../../assets/items.png') -64px -544px;
+}
 .boots-of-speed {
 	background: url('../../assets/items.png') -64px -544px;
 }

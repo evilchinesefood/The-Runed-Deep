@@ -8,11 +8,6 @@ function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): 
   return e;
 }
 
-const BTN_BASE = 'padding:6px 16px;color:#fff;border:1px solid #666;cursor:pointer;';
-const BTN_OFF = BTN_BASE + 'background:#222;';
-const BTN_ON = BTN_BASE + 'background:#555;';
-const SMALL_BTN = 'width:28px;height:28px;background:#333;color:#fff;border:1px solid #555;cursor:pointer;';
-
 export interface CharCreationResult {
   name: string;
   gender: Gender;
@@ -20,6 +15,8 @@ export interface CharCreationResult {
   difficulty: Difficulty;
   startingSpell: string;
 }
+
+const PANEL = 'background:#111;border:1px solid #333;padding:16px;margin-bottom:12px;width:480px;box-sizing:border-box;';
 
 export function createCharacterCreationScreen(
   container: HTMLElement,
@@ -41,106 +38,119 @@ export function createCharacterCreationScreen(
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '40px',
+    padding: '24px',
     background: '#000',
     color: '#ccc',
     fontFamily: "'Segoe UI', Tahoma, sans-serif",
     minHeight: '100vh',
   });
 
-  screen.appendChild(el('h2', { color: '#c90', margin: '0 0 24px' }, 'Create Your Character'));
+  // Title
+  screen.appendChild(el('h2', {
+    color: '#c90',
+    margin: '0 0 20px',
+    fontSize: '22px',
+    letterSpacing: '1px',
+  }, 'New Character'));
 
-  // ── Name ────────────────────────────────────────────────
-  const nameRow = el('div', { marginBottom: '16px' });
-  nameRow.appendChild(el('label', { marginRight: '8px' }, 'Name: '));
+  // ── Name & Gender row ─────────────────────────────────
+  const topPanel = document.createElement('div');
+  topPanel.style.cssText = PANEL + 'display:flex;gap:24px;align-items:center;';
+
+  // Name
+  const nameGroup = el('div', { flex: '1' });
+  nameGroup.appendChild(el('div', { fontSize: '11px', color: '#888', marginBottom: '4px' }, 'NAME'));
   const nameInput = document.createElement('input');
   nameInput.type = 'text';
   nameInput.value = state.name;
-  nameInput.style.cssText = 'padding:4px 8px;font-size:14px;background:#222;color:#fff;border:1px solid #555;';
+  nameInput.style.cssText = 'width:100%;padding:6px 8px;font-size:14px;background:#1a1a1a;color:#fff;border:1px solid #444;box-sizing:border-box;';
   nameInput.addEventListener('input', () => { state.name = nameInput.value; });
-  nameRow.appendChild(nameInput);
-  screen.appendChild(nameRow);
+  nameGroup.appendChild(nameInput);
+  topPanel.appendChild(nameGroup);
 
-  // ── Gender ──────────────────────────────────────────────
-  const genderRow = el('div', { marginBottom: '16px', display: 'flex', gap: '16px', alignItems: 'center' });
-  genderRow.appendChild(el('span', {}, 'Gender: '));
+  // Gender
+  const genderGroup = el('div');
+  genderGroup.appendChild(el('div', { fontSize: '11px', color: '#888', marginBottom: '4px' }, 'GENDER'));
+  const genderBtns = el('div', { display: 'flex', gap: '4px' });
 
   for (const g of ['male', 'female'] as Gender[]) {
     const btn = document.createElement('button');
-    btn.textContent = g.charAt(0).toUpperCase() + g.slice(1);
-    btn.style.cssText = g === state.gender ? BTN_ON : BTN_OFF;
+    btn.textContent = g === 'male' ? 'Male' : 'Female';
     btn.dataset.gender = g;
+    btn.style.cssText = `padding:6px 14px;font-size:13px;border:1px solid #555;cursor:pointer;${g === state.gender ? 'background:#446;color:#aaf;' : 'background:#222;color:#888;'}`;
     btn.addEventListener('click', () => {
       state.gender = g;
-      genderRow.querySelectorAll('button').forEach(b => {
+      genderBtns.querySelectorAll('button').forEach(b => {
         const bb = b as HTMLButtonElement;
-        bb.style.cssText = bb.dataset.gender === state.gender ? BTN_ON : BTN_OFF;
+        bb.style.cssText = `padding:6px 14px;font-size:13px;border:1px solid #555;cursor:pointer;${bb.dataset.gender === g ? 'background:#446;color:#aaf;' : 'background:#222;color:#888;'}`;
       });
     });
-    genderRow.appendChild(btn);
+    genderBtns.appendChild(btn);
   }
-  screen.appendChild(genderRow);
+  genderGroup.appendChild(genderBtns);
+  topPanel.appendChild(genderGroup);
+  screen.appendChild(topPanel);
 
-  // ── Attributes ──────────────────────────────────────────
-  const pointsDisplay = el('div', { marginBottom: '12px', fontSize: '14px' });
-  screen.appendChild(pointsDisplay);
+  // ── Attributes ────────────────────────────────────────
+  const attrPanel = document.createElement('div');
+  attrPanel.style.cssText = PANEL;
 
-  const attrContainer = el('div', { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' });
+  const attrHeader = el('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' });
+  attrHeader.appendChild(el('div', { fontSize: '11px', color: '#888' }, 'ATTRIBUTES'));
+  const pointsDisplay = el('span', { fontSize: '12px' });
+  attrHeader.appendChild(pointsDisplay);
+  attrPanel.appendChild(attrHeader);
+
   const attrNames: (keyof Attributes)[] = ['strength', 'intelligence', 'constitution', 'dexterity'];
-  const attrLabels: Record<keyof Attributes, string> = {
-    strength: 'Strength',
-    intelligence: 'Intelligence',
-    constitution: 'Constitution',
-    dexterity: 'Dexterity',
-  };
+  const attrLabels: Record<keyof Attributes, string> = { strength: 'STR', intelligence: 'INT', constitution: 'CON', dexterity: 'DEX' };
+  const attrColors: Record<keyof Attributes, string> = { strength: '#e44', intelligence: '#48f', constitution: '#4c4', dexterity: '#fc4' };
   const valueDisplays: Record<string, HTMLElement> = {};
+  const barFills: Record<string, HTMLElement> = {};
 
-  function pointsUsed(): number {
-    return attrNames.reduce((sum, a) => sum + state.attributes[a], 0);
-  }
-
-  function pointsRemaining(): number {
-    return TOTAL_POINTS - pointsUsed();
-  }
+  function pointsUsed(): number { return attrNames.reduce((s, a) => s + state.attributes[a], 0); }
+  function pointsRemaining(): number { return TOTAL_POINTS - pointsUsed(); }
 
   for (const attr of attrNames) {
-    const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px' });
-    row.appendChild(el('span', { width: '100px', display: 'inline-block' }, attrLabels[attr]));
+    const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' });
 
-    const minusBtn = document.createElement('button');
-    minusBtn.textContent = '-';
-    minusBtn.style.cssText = SMALL_BTN;
-    minusBtn.addEventListener('click', () => {
-      if (state.attributes[attr] > MIN_ATTR) {
-        state.attributes[attr]--;
-        updateAll();
-      }
-    });
+    row.appendChild(el('span', { width: '32px', fontSize: '12px', color: attrColors[attr], fontWeight: 'bold' }, attrLabels[attr]));
 
-    const plusBtn = document.createElement('button');
-    plusBtn.textContent = '+';
-    plusBtn.style.cssText = SMALL_BTN;
-    plusBtn.addEventListener('click', () => {
-      if (state.attributes[attr] < MAX_ATTR && pointsUsed() < TOTAL_POINTS) {
-        state.attributes[attr]++;
-        updateAll();
-      }
-    });
+    const minus = document.createElement('button');
+    minus.textContent = '-';
+    minus.style.cssText = 'width:24px;height:24px;background:#222;color:#ccc;border:1px solid #444;cursor:pointer;font-size:14px;line-height:1;padding:0;';
+    minus.addEventListener('click', () => { if (state.attributes[attr] > MIN_ATTR) { state.attributes[attr]--; updateAll(); } });
+    row.appendChild(minus);
 
-    const valDisplay = el('span', { width: '30px', textAlign: 'center', fontWeight: 'bold' }, String(state.attributes[attr]));
+    // Bar
+    const barTrack = el('div', { flex: '1', height: '18px', background: '#1a1a1a', border: '1px solid #333', position: 'relative' });
+    const barFill = el('div', { height: '100%', background: attrColors[attr], opacity: '0.6', transition: 'width 0.1s' });
+    barTrack.appendChild(barFill);
+    barFills[attr] = barFill;
+    row.appendChild(barTrack);
+
+    const valDisplay = el('span', { width: '28px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px' }, String(state.attributes[attr]));
     valueDisplays[attr] = valDisplay;
-
-    row.appendChild(minusBtn);
     row.appendChild(valDisplay);
-    row.appendChild(plusBtn);
-    attrContainer.appendChild(row);
+
+    const plus = document.createElement('button');
+    plus.textContent = '+';
+    plus.style.cssText = 'width:24px;height:24px;background:#222;color:#ccc;border:1px solid #444;cursor:pointer;font-size:14px;line-height:1;padding:0;';
+    plus.addEventListener('click', () => { if (state.attributes[attr] < MAX_ATTR && pointsUsed() < TOTAL_POINTS) { state.attributes[attr]++; updateAll(); } });
+    row.appendChild(plus);
+
+    attrPanel.appendChild(row);
   }
-  screen.appendChild(attrContainer);
+  screen.appendChild(attrPanel);
 
-  // ── Starting Spell ──────────────────────────────────────
-  screen.appendChild(el('div', { marginBottom: '8px', fontSize: '14px', color: '#aaa' }, 'Choose your starting spell:'));
+  // ── Stat Preview ──────────────────────────────────────
+  const previewPanel = document.createElement('div');
+  previewPanel.style.cssText = PANEL + 'display:flex;gap:24px;justify-content:center;padding:10px 16px;';
+  screen.appendChild(previewPanel);
 
-  const spellContainer = el('div', { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '24px', width: '400px' });
+  // ── Starting Spell ────────────────────────────────────
+  const spellPanel = document.createElement('div');
+  spellPanel.style.cssText = PANEL;
+  spellPanel.appendChild(el('div', { fontSize: '11px', color: '#888', marginBottom: '8px' }, 'STARTING SPELL'));
 
   for (const spell of STARTER_SPELLS) {
     const row = el('div', {
@@ -148,121 +158,120 @@ export function createCharacterCreationScreen(
       alignItems: 'center',
       gap: '10px',
       padding: '6px 10px',
-      border: '1px solid #444',
+      border: '1px solid transparent',
       cursor: 'pointer',
-      background: spell.id === state.startingSpell ? '#335' : '#111',
+      borderRadius: '3px',
+      marginBottom: '2px',
     });
     row.dataset.spellId = spell.id;
 
-    const radio = el('span', {
-      width: '12px',
-      height: '12px',
+    const dot = el('div', {
+      width: '10px',
+      height: '10px',
       borderRadius: '50%',
-      border: '2px solid #888',
-      display: 'inline-block',
-      background: spell.id === state.startingSpell ? '#48f' : 'transparent',
+      border: '2px solid #666',
+      flexShrink: '0',
     });
-    row.appendChild(radio);
+    row.appendChild(dot);
 
     const info = el('div', { flex: '1' });
-    info.appendChild(el('div', { fontWeight: 'bold', color: '#ddd' }, spell.name));
-    info.appendChild(el('div', { fontSize: '11px', color: '#888' }, `${spell.category} — ${spell.description}`));
+    info.appendChild(el('span', { fontWeight: 'bold', color: '#ddd', fontSize: '13px' }, spell.name));
+    info.appendChild(el('span', { fontSize: '11px', color: '#666', marginLeft: '8px' }, spell.description));
     row.appendChild(info);
 
-    const costBadge = el('span', { fontSize: '11px', color: '#48f' }, `${spell.manaCost} MP`);
-    row.appendChild(costBadge);
+    row.appendChild(el('span', { fontSize: '11px', color: '#48f', flexShrink: '0' }, `${spell.manaCost} MP`));
 
     row.addEventListener('click', () => {
       state.startingSpell = spell.id;
       updateSpellSelection();
     });
 
-    spellContainer.appendChild(row);
+    spellPanel.appendChild(row);
   }
-  screen.appendChild(spellContainer);
+  screen.appendChild(spellPanel);
 
   function updateSpellSelection(): void {
-    spellContainer.querySelectorAll<HTMLElement>('[data-spell-id]').forEach(row => {
+    spellPanel.querySelectorAll<HTMLElement>('[data-spell-id]').forEach(row => {
       const selected = row.dataset.spellId === state.startingSpell;
-      row.style.background = selected ? '#335' : '#111';
-      const radio = row.children[0] as HTMLElement;
-      radio.style.background = selected ? '#48f' : 'transparent';
+      row.style.background = selected ? '#1a1a2a' : 'transparent';
+      row.style.borderColor = selected ? '#446' : 'transparent';
+      const dot = row.children[0] as HTMLElement;
+      dot.style.background = selected ? '#48f' : 'transparent';
+      dot.style.borderColor = selected ? '#48f' : '#666';
     });
   }
 
-  // ── Difficulty ──────────────────────────────────────────
-  const diffRow = el('div', { marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center' });
-  diffRow.appendChild(el('span', {}, 'Difficulty: '));
+  // ── Difficulty ────────────────────────────────────────
+  const diffPanel = document.createElement('div');
+  diffPanel.style.cssText = PANEL + 'display:flex;align-items:center;gap:12px;';
+  diffPanel.appendChild(el('span', { fontSize: '11px', color: '#888' }, 'DIFFICULTY'));
 
   const difficulties: Difficulty[] = ['easy', 'intermediate', 'hard', 'impossible'];
+  const diffColors: Record<Difficulty, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
+
   for (const d of difficulties) {
     const btn = document.createElement('button');
     btn.textContent = d.charAt(0).toUpperCase() + d.slice(1);
-    btn.style.cssText = d === state.difficulty ? BTN_ON : BTN_OFF;
     btn.dataset.diff = d;
+    btn.style.cssText = `padding:5px 12px;font-size:12px;border:1px solid #444;cursor:pointer;${d === state.difficulty ? `background:#222;color:${diffColors[d]};border-color:${diffColors[d]};` : 'background:#111;color:#666;'}`;
     btn.addEventListener('click', () => {
       state.difficulty = d;
-      diffRow.querySelectorAll('button').forEach(b => {
+      diffPanel.querySelectorAll('button').forEach(b => {
         const bb = b as HTMLButtonElement;
-        bb.style.cssText = bb.dataset.diff === d ? BTN_ON : BTN_OFF;
+        const dd = bb.dataset.diff as Difficulty;
+        bb.style.cssText = `padding:5px 12px;font-size:12px;border:1px solid #444;cursor:pointer;${dd === d ? `background:#222;color:${diffColors[dd]};border-color:${diffColors[dd]};` : 'background:#111;color:#666;'}`;
       });
     });
-    diffRow.appendChild(btn);
+    diffPanel.appendChild(btn);
   }
-  screen.appendChild(diffRow);
+  screen.appendChild(diffPanel);
 
-  // ── Stat Preview ────────────────────────────────────────
-  const previewBox = el('div', {
-    marginBottom: '16px',
-    padding: '10px 16px',
-    background: '#111',
-    border: '1px solid #333',
-    fontSize: '12px',
-    color: '#aaa',
-    width: '400px',
-  });
-  screen.appendChild(previewBox);
-
-  // ── Start Button + Validation ───────────────────────────
-  const validationMsg = el('div', { marginBottom: '8px', fontSize: '13px', color: '#f44', height: '20px' });
+  // ── Validation + Start ────────────────────────────────
+  const validationMsg = el('div', { fontSize: '13px', color: '#f44', height: '20px', marginTop: '8px' });
   screen.appendChild(validationMsg);
 
   const startBtn = document.createElement('button');
   startBtn.textContent = 'Begin Adventure';
-  startBtn.style.cssText = 'padding:12px 40px;font-size:18px;background:#530;color:#fc0;border:2px solid #c90;cursor:pointer;';
+  startBtn.style.cssText = 'padding:12px 40px;font-size:16px;background:#530;color:#fc0;border:2px solid #c90;cursor:pointer;margin-top:4px;letter-spacing:1px;';
   startBtn.addEventListener('click', () => {
-    const remaining = pointsRemaining();
-    if (remaining !== 0) return;
-    if (!state.name.trim()) {
-      state.name = 'Hero';
-    }
+    if (pointsRemaining() !== 0) return;
+    if (!state.name.trim()) state.name = 'Hero';
     onComplete({ ...state });
   });
   screen.appendChild(startBtn);
 
-  // ── Update everything ───────────────────────────────────
+  // ── Update loop ───────────────────────────────────────
   function updateAll(): void {
     for (const attr of attrNames) {
       valueDisplays[attr].textContent = String(state.attributes[attr]);
+      const pct = ((state.attributes[attr] - MIN_ATTR) / (MAX_ATTR - MIN_ATTR)) * 100;
+      barFills[attr].style.width = `${pct}%`;
     }
 
     const remaining = pointsRemaining();
-    pointsDisplay.textContent = `Attribute Points Remaining: ${remaining}`;
+    pointsDisplay.textContent = remaining === 0
+      ? 'All points allocated'
+      : `${remaining} points remaining`;
     pointsDisplay.style.color = remaining === 0 ? '#4f4' : '#fa0';
 
-    // Stat preview
+    // Preview
     const con = state.attributes.constitution;
     const int = state.attributes.intelligence;
     const dex = state.attributes.dexterity;
-    const str = state.attributes.strength;
     const hp = 10 + Math.floor(con / 5);
     const mp = 5 + Math.floor(int / 5);
     const ac = Math.floor(dex / 10);
 
-    previewBox.replaceChildren();
-    previewBox.appendChild(el('div', { color: '#ccc', marginBottom: '4px', fontWeight: 'bold' }, 'Starting Stats Preview'));
-    previewBox.appendChild(el('div', {}, `HP: ${hp}  |  MP: ${mp}  |  AC: ${ac}`));
-    previewBox.appendChild(el('div', {}, `Carry capacity: ~${str * 100}g  |  Hit bonus: +${Math.floor(dex / 15)}`));
+    previewPanel.replaceChildren();
+    const stats: [string, string | number, string][] = [
+      ['HP', hp, '#4c4'], ['MP', mp, '#48f'], ['AC', ac, '#fc4'],
+    ];
+    for (const [label, val, color] of stats) {
+      const box = el('div', { textAlign: 'center' });
+      box.appendChild(el('div', { fontSize: '18px', fontWeight: 'bold', color }, String(val)));
+      box.appendChild(el('div', { fontSize: '10px', color: '#666' }, label));
+      previewPanel.appendChild(box);
+    }
 
     // Validation
     if (remaining > 0) {
@@ -277,6 +286,7 @@ export function createCharacterCreationScreen(
   }
 
   updateAll();
+  updateSpellSelection();
 
   container.appendChild(screen);
   return screen;
