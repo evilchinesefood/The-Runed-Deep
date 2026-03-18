@@ -47,6 +47,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processUnequipItem(state, action.slot);
     case 'useItem':
       return processUseItem(state, action.itemId);
+    case 'search':
+      return processSearch(state);
     case 'newGame':
       return { ...state, screen: 'character-creation' };
     default:
@@ -71,6 +73,43 @@ function processMove(state: GameState, direction: Direction): GameState {
   }
 
   const tile = floor.tiles[newPos.y][newPos.x];
+
+  // Bump into closed door → open it
+  if (tile.type === 'door-closed') {
+    const newTiles = floor.tiles.map(row => [...row]);
+    newTiles[newPos.y][newPos.x] = {
+      type: 'door-open', sprite: 'door-open', walkable: true, transparent: true,
+    };
+    return {
+      ...state,
+      floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
+      messages: [...state.messages, { text: 'You open the door.', severity: 'normal' as const, turn: state.turn }],
+      turn: state.turn + 1,
+    };
+  }
+
+  // Bump into locked door → STR check to force open
+  if (tile.type === 'door-locked') {
+    const strCheck = Math.random() * 100 < state.hero.attributes.strength;
+    if (strCheck) {
+      const newTiles = floor.tiles.map(row => [...row]);
+      newTiles[newPos.y][newPos.x] = {
+        type: 'door-open', sprite: 'door-broken', walkable: true, transparent: true,
+      };
+      return {
+        ...state,
+        floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
+        messages: [...state.messages, { text: 'You force the locked door open!', severity: 'important' as const, turn: state.turn }],
+        turn: state.turn + 1,
+      };
+    }
+    return {
+      ...state,
+      messages: [...state.messages, { text: 'The door is locked. You fail to force it open.', severity: 'normal' as const, turn: state.turn }],
+      turn: state.turn + 1,
+    };
+  }
+
   if (!tile.walkable) return state;
 
   // Check for monster at target position — attack it
@@ -313,6 +352,66 @@ function processRest(state: GameState): GameState {
   return {
     ...state,
     hero,
+    messages,
+    turn: state.turn + 1,
+  };
+}
+
+function processSearch(state: GameState): GameState {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const pos = state.hero.position;
+  const messages = [...state.messages];
+  let found = 0;
+
+  // Check all 8 adjacent tiles + current tile for secret doors and hidden traps
+  const newTiles = floor.tiles.map(row => [...row]);
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const x = pos.x + dx;
+      const y = pos.y + dy;
+      if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) continue;
+
+      const tile = newTiles[y][x];
+
+      // Reveal secret doors
+      if (tile.type === 'door-secret') {
+        newTiles[y][x] = {
+          type: 'door-closed',
+          sprite: 'door-closed',
+          walkable: false,
+          transparent: false,
+        };
+        messages.push({ text: 'You found a secret door!', severity: 'important' as const, turn: state.turn });
+        found++;
+      }
+
+      // Reveal hidden traps
+      if (tile.type === 'trap' && !tile.trapRevealed) {
+        const trapSprites: Record<string, string> = {
+          pit: 'pit-trap', arrow: 'arrow-trap', fire: 'fire-trap',
+          dart: 'dart-trap', portal: 'portal-trap', acid: 'acid-trap',
+        };
+        newTiles[y][x] = {
+          ...tile,
+          trapRevealed: true,
+          sprite: trapSprites[tile.trapType ?? ''] ?? 'pit-trap',
+        };
+        messages.push({ text: `You found a ${tile.trapType} trap!`, severity: 'important' as const, turn: state.turn });
+        found++;
+      }
+    }
+  }
+
+  if (found === 0) {
+    messages.push({ text: 'You search but find nothing.', severity: 'system' as const, turn: state.turn });
+  }
+
+  return {
+    ...state,
+    floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
     messages,
     turn: state.turn + 1,
   };

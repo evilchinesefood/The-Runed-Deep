@@ -14,9 +14,11 @@ const TILE_COLORS: Record<string, string> = {
   wall: '#888',
   'door-closed': '#a86',
   'door-open': '#a86',
+  'door-locked': '#a64',
+  'door-secret': '#888', // looks like wall until found
   'stairs-up': '#4f4',
   'stairs-down': '#f44',
-  trap: '#555', // hidden traps look like floor
+  trap: '#555',
 };
 
 export function createMapScreen(

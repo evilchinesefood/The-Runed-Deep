@@ -8,6 +8,7 @@ interface Room {
   y: number;
   w: number;
   h: number;
+  shape: 'rect' | 'cross' | 'diamond' | 'circle' | 'deadend';
 }
 
 const FLOOR_WIDTH = 50;
@@ -33,7 +34,15 @@ function createFloorTile(): Tile {
 }
 
 function createDoorTile(): Tile {
-  return { type: 'door-closed', sprite: 'door-closed', walkable: true, transparent: false };
+  return { type: 'door-closed', sprite: 'door-closed', walkable: false, transparent: false };
+}
+
+function createLockedDoorTile(): Tile {
+  return { type: 'door-locked', sprite: 'door-closed', walkable: false, transparent: false };
+}
+
+function createSecretDoorTile(): Tile {
+  return { type: 'door-secret', sprite: 'rock', walkable: false, transparent: false };
 }
 
 function createStairsTile(direction: 'up' | 'down'): Tile {
@@ -105,27 +114,30 @@ export function generateFloor(
     }
   }
 
-  // Generate rooms
+  // Generate rooms with random shapes
+  const shapes: Room['shape'][] = ['rect', 'rect', 'rect', 'cross', 'diamond', 'circle', 'deadend'];
   const rooms: Room[] = [];
   for (let attempt = 0; attempt < ROOM_ATTEMPTS; attempt++) {
-    const w = randInt(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
-    const h = randInt(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
+    const shape = shapes[Math.floor(rand() * shapes.length)];
+    // Dead-end rooms are small
+    const minS = shape === 'deadend' ? 3 : MIN_ROOM_SIZE;
+    const maxS = shape === 'deadend' ? 5 : MAX_ROOM_SIZE;
+    // Cross/diamond/circle need at least 5 to look right
+    const minShape = (shape === 'cross' || shape === 'diamond' || shape === 'circle') ? Math.max(minS, 5) : minS;
+    const w = randInt(minShape, maxS);
+    const h = randInt(minShape, maxS);
     const x = randInt(1, FLOOR_WIDTH - w - 1);
     const y = randInt(1, FLOOR_HEIGHT - h - 1);
-    const room: Room = { x, y, w, h };
+    const room: Room = { x, y, w, h, shape };
 
     if (rooms.every(r => !roomsOverlap(r, room))) {
       rooms.push(room);
     }
   }
 
-  // Carve rooms
+  // Carve rooms based on shape
   for (const room of rooms) {
-    for (let ry = room.y; ry < room.y + room.h; ry++) {
-      for (let rx = room.x; rx < room.x + room.w; rx++) {
-        tiles[ry][rx] = createFloorTile();
-      }
-    }
+    carveRoom(tiles, room);
   }
 
   // Connect rooms with corridors
@@ -195,6 +207,90 @@ export function generateFloor(
   return { floor, playerStart };
 }
 
+function carveRoom(tiles: Tile[][], room: Room): void {
+
+  switch (room.shape) {
+    case 'rect':
+    default:
+      for (let ry = room.y; ry < room.y + room.h; ry++) {
+        for (let rx = room.x; rx < room.x + room.w; rx++) {
+          tiles[ry][rx] = createFloorTile();
+        }
+      }
+      break;
+
+    case 'cross': {
+      // Horizontal bar (full width, middle third height)
+      const barH = Math.max(2, Math.floor(room.h / 3));
+      const barTop = room.y + Math.floor((room.h - barH) / 2);
+      for (let ry = barTop; ry < barTop + barH; ry++) {
+        for (let rx = room.x; rx < room.x + room.w; rx++) {
+          tiles[ry][rx] = createFloorTile();
+        }
+      }
+      // Vertical bar (middle third width, full height)
+      const barW = Math.max(2, Math.floor(room.w / 3));
+      const barLeft = room.x + Math.floor((room.w - barW) / 2);
+      for (let ry = room.y; ry < room.y + room.h; ry++) {
+        for (let rx = barLeft; rx < barLeft + barW; rx++) {
+          tiles[ry][rx] = createFloorTile();
+        }
+      }
+      break;
+    }
+
+    case 'diamond': {
+      const hw = room.w / 2;
+      const hh = room.h / 2;
+      for (let ry = room.y; ry < room.y + room.h; ry++) {
+        for (let rx = room.x; rx < room.x + room.w; rx++) {
+          const dx = Math.abs((rx - room.x) - hw + 0.5) / hw;
+          const dy = Math.abs((ry - room.y) - hh + 0.5) / hh;
+          if (dx + dy <= 1.0) {
+            tiles[ry][rx] = createFloorTile();
+          }
+        }
+      }
+      break;
+    }
+
+    case 'circle': {
+      const hw = room.w / 2;
+      const hh = room.h / 2;
+      for (let ry = room.y; ry < room.y + room.h; ry++) {
+        for (let rx = room.x; rx < room.x + room.w; rx++) {
+          const dx = ((rx - room.x) - hw + 0.5) / hw;
+          const dy = ((ry - room.y) - hh + 0.5) / hh;
+          if (dx * dx + dy * dy <= 1.0) {
+            tiles[ry][rx] = createFloorTile();
+          }
+        }
+      }
+      break;
+    }
+
+    case 'deadend': {
+      // Small room, only 1-2 tiles wide in one dimension
+      const narrow = Math.min(room.w, room.h);
+      const isVert = room.h > room.w;
+      if (isVert) {
+        const midX = room.x + Math.floor(room.w / 2);
+        for (let ry = room.y; ry < room.y + room.h; ry++) {
+          tiles[ry][midX] = createFloorTile();
+          if (narrow >= 3) tiles[ry][midX - 1] = createFloorTile();
+        }
+      } else {
+        const midY = room.y + Math.floor(room.h / 2);
+        for (let rx = room.x; rx < room.x + room.w; rx++) {
+          tiles[midY][rx] = createFloorTile();
+          if (narrow >= 3) tiles[midY - 1][rx] = createFloorTile();
+        }
+      }
+      break;
+    }
+  }
+}
+
 function carveHorizontal(tiles: Tile[][], x1: number, x2: number, y: number): void {
   const minX = Math.min(x1, x2);
   const maxX = Math.max(x1, x2);
@@ -253,8 +349,16 @@ function placeDoors(tiles: Tile[][], room: Room, rand: () => number): void {
 
     // Verify this tile connects a room interior to a corridor
     // (has a room floor neighbor on one side and corridor floor on another)
-    if (isDoorworthy(tiles, pos, room) && rand() < 0.4) {
-      tiles[pos.y][pos.x] = createDoorTile();
+    if (isDoorworthy(tiles, pos, room)) {
+      const roll = rand();
+      if (roll < 0.30) {
+        tiles[pos.y][pos.x] = createDoorTile();        // 30% normal door
+      } else if (roll < 0.38) {
+        tiles[pos.y][pos.x] = createLockedDoorTile();   // 8% locked door
+      } else if (roll < 0.44) {
+        tiles[pos.y][pos.x] = createSecretDoorTile();   // 6% secret door
+      }
+      // 56% no door (open passage)
     }
   }
 }

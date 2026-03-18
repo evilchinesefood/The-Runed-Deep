@@ -152,7 +152,7 @@ export class MapRenderer {
         // Overlay tiles (stairs, doors, revealed traps) render on ground layer
         // so they stay visible under hero/monsters
         const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
-          || tile.type === 'door-closed' || tile.type === 'door-open'
+          || tile.type === 'door-closed' || tile.type === 'door-open' || tile.type === 'door-locked'
           || (tile.type === 'trap' && tile.trapRevealed);
 
         if (isOverlayTile) {
