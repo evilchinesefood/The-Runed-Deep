@@ -1,13 +1,7 @@
 import type { GameState, Message } from '../core/types';
 import { xpToNextLevel } from '../systems/character/leveling';
 import { SPELL_BY_ID } from '../data/spells';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { el } from '../ui/Theme';
 
 function bar(pct: number, color: string): HTMLElement {
   const track = el('div', { background: '#333', height: '6px', margin: '2px 0 4px' });
@@ -28,16 +22,16 @@ export class HudRenderer {
   constructor(container: HTMLElement) {
     this.container = container;
 
-    // Spell bar — scrollable, wraps within fixed width
+    // Spell bar — scrollable, wraps within full width
     this.spellBarEl = el('div', {
       display: 'flex',
       flexWrap: 'wrap',
-      width: '672px',
+      width: '100%',
+      maxWidth: 'var(--game-width)',
       maxHeight: '44px',
       overflowY: 'auto',
       margin: '2px auto',
       gap: '3px',
-      fontFamily: "'Segoe UI', Tahoma, sans-serif",
       fontSize: '11px',
       boxSizing: 'border-box',
     });
@@ -45,12 +39,11 @@ export class HudRenderer {
 
     const hud = el('div', {
       display: 'flex',
-      width: '672px',
+      width: '100%',
+      maxWidth: 'var(--game-width)',
       margin: '4px auto',
       gap: '8px',
-      fontFamily: "'Segoe UI', Tahoma, sans-serif",
       fontSize: '13px',
-      color: '#ccc',
     });
 
     this.messagesEl = el('div', {

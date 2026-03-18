@@ -1,12 +1,6 @@
 import type { GameState } from '../core/types';
 import { SPELL_BY_ID, type SpellDef } from '../data/spells';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
 const CATEGORY_ORDER = ['attack', 'healing', 'defense', 'control', 'movement', 'divination', 'misc'];
 const CATEGORY_COLORS: Record<string, string> = {
@@ -21,40 +15,22 @@ export function createSpellScreen(
 ): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '24px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
-  // Title
-  const titleBar = el('div', {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '550px',
-    marginBottom: '8px',
-  });
-  titleBar.appendChild(el('h2', { color: '#c90', margin: '0', fontSize: '18px' }, 'Spells'));
-  titleBar.appendChild(el('span', { color: '#48f', fontSize: '14px' }, `MP: ${h.mp}/${h.maxMp}`));
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close (Esc)';
-  closeBtn.style.cssText = 'padding:4px 12px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
-  closeBtn.addEventListener('click', () => { cleanup(); onClose(); });
-  titleBar.appendChild(closeBtn);
+  // Title bar with MP display
+  const titleBar = createTitleBar('Spells', () => { cleanup(); onClose(); });
+  const mpSpan = el('span', { color: '#48f', fontSize: '14px' }, `MP: ${h.mp}/${h.maxMp}`);
+  // Insert MP span before close button
+  const closeBtn = titleBar.lastChild;
+  titleBar.insertBefore(mpSpan, closeBtn);
   screen.appendChild(titleBar);
 
   if (h.knownSpells.length === 0) {
-    const panel = el('div', {
-      width: '550px', background: '#111', border: '1px solid #333',
-      padding: '24px', textAlign: 'center', color: '#555',
-    });
+    const panel = createPanel();
+    panel.style.textAlign = 'center';
+    panel.style.color = '#555';
+    panel.style.padding = '24px';
     panel.textContent = 'No spells learned yet.';
     screen.appendChild(panel);
   } else {
@@ -73,16 +49,10 @@ export function createSpellScreen(
       if (!spells || spells.length === 0) continue;
 
       const catColor = CATEGORY_COLORS[cat] || '#aaa';
-      const panel = el('div', {
-        width: '550px', background: '#111', border: '1px solid #333',
-        padding: '10px 12px', marginBottom: '6px', boxSizing: 'border-box',
-      });
-
-      // Category header
-      panel.appendChild(el('div', {
-        fontSize: '11px', color: catColor, fontWeight: 'bold',
-        textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '1px',
-      }, cat));
+      const panel = createPanel(cat);
+      // Override panel-header color with category color
+      const header = panel.firstElementChild as HTMLElement | null;
+      if (header) header.style.color = catColor;
 
       for (const { spell, idx } of spells) {
         const canCast = h.mp >= spell.manaCost;
@@ -141,7 +111,7 @@ export function createSpellScreen(
 
   // Description footer
   screen.appendChild(el('div', {
-    width: '550px', fontSize: '11px', color: '#555',
+    width: '100%', fontSize: '11px', color: '#555',
     marginTop: '4px', textAlign: 'center',
   }, 'Click a spell to cast it. Keys 1-9 also work from the game screen.'));
 

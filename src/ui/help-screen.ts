@@ -1,9 +1,4 @@
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
 const KEYS: [string, string][] = [
   // Movement
@@ -38,45 +33,16 @@ const KEYS: [string, string][] = [
 ];
 
 export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: () => void } {
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '24px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
-  // Title bar
-  const titleBar = el('div', {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '500px',
-    marginBottom: '12px',
-  });
-  titleBar.appendChild(el('h2', { color: '#c90', margin: '0', fontSize: '18px' }, 'Keyboard Controls'));
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close (Esc)';
-  closeBtn.style.cssText = 'padding:4px 12px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
-  closeBtn.addEventListener('click', () => { cleanup(); onClose(); });
-  titleBar.appendChild(closeBtn);
-  screen.appendChild(titleBar);
+  screen.appendChild(createTitleBar('Keyboard Controls', () => { cleanup(); onClose(); }));
 
   // Key list
-  const panel = el('div', {
-    width: '500px',
-    background: '#111',
-    border: '1px solid #333',
-    padding: '16px',
-  });
+  const panel = createPanel();
 
   for (const [key, desc] of KEYS) {
     if (key === '' && desc === '') {
-      // Spacer
       panel.appendChild(el('div', { height: '8px' }));
       continue;
     }
@@ -104,21 +70,13 @@ export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: 
   screen.appendChild(panel);
 
   // Tips
-  const tips = el('div', {
-    width: '500px',
-    background: '#111',
-    border: '1px solid #333',
-    padding: '12px 16px',
-    marginTop: '8px',
-    fontSize: '12px',
-    color: '#888',
-  });
-  tips.appendChild(el('div', { color: '#c90', marginBottom: '6px', fontWeight: 'bold' }, 'Tips'));
-  tips.appendChild(el('div', { marginBottom: '3px' }, 'Walk into enemies to attack them.'));
-  tips.appendChild(el('div', { marginBottom: '3px' }, 'Cast Light to permanently illuminate rooms.'));
-  tips.appendChild(el('div', { marginBottom: '3px' }, 'Equipping unidentified items reveals their true nature.'));
-  tips.appendChild(el('div', { marginBottom: '3px' }, 'Cursed items cannot be removed without Remove Curse.'));
-  tips.appendChild(el('div', {}, 'Hover over items for detailed stat tooltips.'));
+  const tips = createPanel('Tips');
+  tips.style.marginTop = '0';
+  tips.appendChild(el('div', { marginBottom: '3px', fontSize: '12px', color: '#888' }, 'Walk into enemies to attack them.'));
+  tips.appendChild(el('div', { marginBottom: '3px', fontSize: '12px', color: '#888' }, 'Cast Light to permanently illuminate rooms.'));
+  tips.appendChild(el('div', { marginBottom: '3px', fontSize: '12px', color: '#888' }, 'Equipping unidentified items reveals their true nature.'));
+  tips.appendChild(el('div', { marginBottom: '3px', fontSize: '12px', color: '#888' }, 'Cursed items cannot be removed without Remove Curse.'));
+  tips.appendChild(el('div', { fontSize: '12px', color: '#888' }, 'Hover over items for detailed stat tooltips.'));
   screen.appendChild(tips);
 
   // Keyboard handler

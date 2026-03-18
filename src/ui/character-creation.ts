@@ -1,12 +1,6 @@
 import type { Attributes, Difficulty, Gender } from '../core/types';
 import { STARTER_SPELLS } from '../data/spells';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createButton, el } from './Theme';
 
 export interface CharCreationResult {
   name: string;
@@ -15,8 +9,6 @@ export interface CharCreationResult {
   difficulty: Difficulty;
   startingSpell: string;
 }
-
-const PANEL = 'background:#111;border:1px solid #333;padding:16px;margin-bottom:12px;width:480px;box-sizing:border-box;';
 
 export function createCharacterCreationScreen(
   container: HTMLElement,
@@ -34,16 +26,8 @@ export function createCharacterCreationScreen(
     startingSpell: STARTER_SPELLS[0].id,
   };
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '24px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
   // Title
   screen.appendChild(el('h2', {
@@ -54,8 +38,10 @@ export function createCharacterCreationScreen(
   }, 'New Character'));
 
   // ── Name & Gender row ─────────────────────────────────
-  const topPanel = document.createElement('div');
-  topPanel.style.cssText = PANEL + 'display:flex;gap:24px;align-items:center;';
+  const topPanel = createPanel('NAME & GENDER');
+  topPanel.style.display = 'flex';
+  topPanel.style.gap = '24px';
+  topPanel.style.alignItems = 'center';
 
   // Name
   const nameGroup = el('div', { flex: '1' });
@@ -92,11 +78,9 @@ export function createCharacterCreationScreen(
   screen.appendChild(topPanel);
 
   // ── Attributes ────────────────────────────────────────
-  const attrPanel = document.createElement('div');
-  attrPanel.style.cssText = PANEL;
+  const attrPanel = createPanel('ATTRIBUTES');
 
   const attrHeader = el('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' });
-  attrHeader.appendChild(el('div', { fontSize: '11px', color: '#888' }, 'ATTRIBUTES'));
   const pointsDisplay = el('span', { fontSize: '12px' });
   attrHeader.appendChild(pointsDisplay);
   attrPanel.appendChild(attrHeader);
@@ -115,9 +99,10 @@ export function createCharacterCreationScreen(
 
     row.appendChild(el('span', { width: '32px', fontSize: '12px', color: attrColors[attr], fontWeight: 'bold' }, attrLabels[attr]));
 
-    const minus = document.createElement('button');
-    minus.textContent = '-';
-    minus.style.cssText = 'width:24px;height:24px;background:#222;color:#ccc;border:1px solid #444;cursor:pointer;font-size:14px;line-height:1;padding:0;';
+    const minus = createButton('-', 'sm');
+    minus.style.width = '24px';
+    minus.style.height = '24px';
+    minus.style.padding = '0';
     minus.addEventListener('click', () => { if (state.attributes[attr] > MIN_ATTR) { state.attributes[attr]--; updateAll(); } });
     row.appendChild(minus);
 
@@ -132,9 +117,10 @@ export function createCharacterCreationScreen(
     valueDisplays[attr] = valDisplay;
     row.appendChild(valDisplay);
 
-    const plus = document.createElement('button');
-    plus.textContent = '+';
-    plus.style.cssText = 'width:24px;height:24px;background:#222;color:#ccc;border:1px solid #444;cursor:pointer;font-size:14px;line-height:1;padding:0;';
+    const plus = createButton('+', 'sm');
+    plus.style.width = '24px';
+    plus.style.height = '24px';
+    plus.style.padding = '0';
     plus.addEventListener('click', () => { if (state.attributes[attr] < MAX_ATTR && pointsUsed() < TOTAL_POINTS) { state.attributes[attr]++; updateAll(); } });
     row.appendChild(plus);
 
@@ -143,14 +129,15 @@ export function createCharacterCreationScreen(
   screen.appendChild(attrPanel);
 
   // ── Stat Preview ──────────────────────────────────────
-  const previewPanel = document.createElement('div');
-  previewPanel.style.cssText = PANEL + 'display:flex;gap:24px;justify-content:center;padding:10px 16px;';
+  const previewPanel = createPanel();
+  previewPanel.style.display = 'flex';
+  previewPanel.style.gap = '24px';
+  previewPanel.style.justifyContent = 'center';
+  previewPanel.style.padding = '10px 16px';
   screen.appendChild(previewPanel);
 
   // ── Starting Spell ────────────────────────────────────
-  const spellPanel = document.createElement('div');
-  spellPanel.style.cssText = PANEL;
-  spellPanel.appendChild(el('div', { fontSize: '11px', color: '#888', marginBottom: '8px' }, 'STARTING SPELL'));
+  const spellPanel = createPanel('STARTING SPELL');
 
   for (const spell of STARTER_SPELLS) {
     const row = el('div', {
@@ -202,9 +189,10 @@ export function createCharacterCreationScreen(
   }
 
   // ── Difficulty ────────────────────────────────────────
-  const diffPanel = document.createElement('div');
-  diffPanel.style.cssText = PANEL + 'display:flex;align-items:center;gap:12px;';
-  diffPanel.appendChild(el('span', { fontSize: '11px', color: '#888' }, 'DIFFICULTY'));
+  const diffPanel = createPanel('DIFFICULTY');
+  diffPanel.style.display = 'flex';
+  diffPanel.style.alignItems = 'center';
+  diffPanel.style.gap = '12px';
 
   const difficulties: Difficulty[] = ['easy', 'intermediate', 'hard', 'impossible'];
   const diffColors: Record<Difficulty, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
@@ -230,9 +218,7 @@ export function createCharacterCreationScreen(
   const validationMsg = el('div', { fontSize: '13px', color: '#f44', height: '20px', marginTop: '8px' });
   screen.appendChild(validationMsg);
 
-  const startBtn = document.createElement('button');
-  startBtn.textContent = 'Begin Adventure';
-  startBtn.style.cssText = 'padding:12px 40px;font-size:16px;background:#530;color:#fc0;border:2px solid #c90;cursor:pointer;margin-top:4px;letter-spacing:1px;';
+  const startBtn = createButton('Begin Adventure', 'primary');
   startBtn.addEventListener('click', () => {
     if (pointsRemaining() !== 0) return;
     if (!state.name.trim()) state.name = 'Hero';

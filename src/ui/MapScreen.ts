@@ -1,11 +1,5 @@
 import type { GameState } from '../core/types';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createTitleBar, el } from './Theme';
 
 const CELL = 6; // pixels per tile on minimap
 
@@ -28,35 +22,10 @@ export function createMapScreen(
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '24px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
-  // Title
-  const titleBar = el('div', {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: `${floor ? floor.width * CELL : 300}px`,
-    maxWidth: '672px',
-    marginBottom: '8px',
-  });
-  titleBar.appendChild(el('h2', { color: '#c90', margin: '0', fontSize: '18px' },
-    `Floor ${state.currentFloor + 1} Map`));
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close (Esc)';
-  closeBtn.style.cssText = 'padding:4px 12px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
-  closeBtn.addEventListener('click', () => { cleanup(); onClose(); });
-  titleBar.appendChild(closeBtn);
-  screen.appendChild(titleBar);
+  screen.appendChild(createTitleBar(`Floor ${state.currentFloor + 1} Map`, () => { cleanup(); onClose(); }));
 
   if (!floor) {
     screen.appendChild(el('div', { color: '#888' }, 'No map data available.'));
@@ -69,7 +38,7 @@ export function createMapScreen(
   const canvas = document.createElement('canvas');
   canvas.width = floor.width * CELL;
   canvas.height = floor.height * CELL;
-  canvas.style.cssText = `border:1px solid #333;image-rendering:pixelated;max-width:672px;`;
+  canvas.style.cssText = `border:1px solid #333;image-rendering:pixelated;max-width:100%;`;
   screen.appendChild(canvas);
 
   const ctx = canvas.getContext('2d')!;
@@ -95,7 +64,6 @@ export function createMapScreen(
       // Dimmed if only explored (not visible or lit)
       const visible = floor.visible[y][x];
       if (!visible && !isLit) {
-        // Darken the color
         ctx.globalAlpha = 0.4;
       } else {
         ctx.globalAlpha = 1;

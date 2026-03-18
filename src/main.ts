@@ -22,12 +22,11 @@ import type { GameState, Screen } from './core/types';
 import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
 import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
 import { TouchControls } from './ui/TouchControls';
-import { getScale, applyResponsiveStyles } from './ui/Responsive';
+import { injectTheme } from './ui/Theme';
 
-applyResponsiveStyles();
+injectTheme();
 
 const root = document.getElementById('game-root')!;
-root.style.cssText = 'background:#000;min-height:100vh;';
 
 let mapRenderer: MapRenderer | null = null;
 let hudRenderer: HudRenderer | null = null;
@@ -308,20 +307,13 @@ function switchScreen(state: GameState): void {
       touchControls.show();
 
       const gameContainer = document.createElement('div');
-      gameContainer.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding-top:8px;';
-
-      const scale = getScale();
-      if (scale < 1) {
-        gameContainer.style.transform = `scale(${scale})`;
-        gameContainer.style.transformOrigin = 'top center';
-      }
-
+      gameContainer.className = 'game-layout';
       root.appendChild(gameContainer);
 
       // Spell targeting mode indicator
       const spellIndicator = document.createElement('div');
       spellIndicator.id = 'spell-mode-indicator';
-      spellIndicator.style.cssText = 'display:none;color:#ff0;background:#220;padding:4px 12px;font-size:13px;font-family:sans-serif;border:1px solid #550;margin-bottom:4px;width:672px;text-align:center;box-sizing:border-box;';
+      spellIndicator.style.cssText = 'display:none;color:#ff0;background:#220;padding:4px 12px;font-size:13px;border:1px solid #550;margin-bottom:4px;width:100%;max-width:672px;text-align:center;';
       gameContainer.appendChild(spellIndicator);
 
       mapRenderer = new MapRenderer(gameContainer);

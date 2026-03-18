@@ -2,13 +2,7 @@ import type { GameState, GameAction, EquipSlot, Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
 import { getDisplayName } from '../systems/inventory/display-name';
 import { attachItemTooltip, hideItemTooltip } from './item-tooltip';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
 function sectionHeader(text: string): HTMLElement {
   return el('div', {
@@ -116,48 +110,19 @@ export function createInventoryScreen(
   const h = state.hero;
   let selectedIdx = 0;
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '16px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
   // ── Title bar ──────────────────────────────────────────────
-  const titleBar = el('div', {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '672px',
-    marginBottom: '8px',
-  });
-  titleBar.appendChild(el('h2', { color: '#c90', margin: '0', fontSize: '18px' }, 'EQUIPMENT'));
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close (Esc)';
-  closeBtn.style.cssText =
-    'padding:4px 12px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
-  closeBtn.addEventListener('click', () => { cleanup(); onClose(); });
-  titleBar.appendChild(closeBtn);
-  screen.appendChild(titleBar);
+  screen.appendChild(createTitleBar('EQUIPMENT', () => { cleanup(); onClose(); }));
 
   // ── Equipment panel: paperdoll + slot legend ─────────────────
-  const equipPanel = el('div', {
-    width: '672px',
-    background: '#111',
-    border: '1px solid #333',
-    display: 'flex',
-    marginBottom: '8px',
-    padding: '8px',
-    gap: '16px',
-    boxSizing: 'border-box',
-  });
+  const equipPanel = createPanel();
+  equipPanel.style.display = 'flex';
+  equipPanel.style.gap = '16px';
+  equipPanel.style.padding = '8px';
 
-  // Left: paperdoll with overlaid equipment slots
+  // Left: paperdoll with overlaid equipment slots (fixed dims for positioning)
   const dollWrapper = el('div', {
     position: 'relative',
     width: '240px',
@@ -225,7 +190,6 @@ export function createInventoryScreen(
       const nameSpan = el('span', { color: itemNameColor(item) }, getDisplayName(item));
       row.appendChild(nameSpan);
 
-      // AC or damage info
       if (item.properties['ac']) {
         row.appendChild(el('span', { color: '#586', fontSize: '11px', marginLeft: '4px' },
           `AC+${item.properties['ac'] + item.enchantment}`));
@@ -250,17 +214,9 @@ export function createInventoryScreen(
   screen.appendChild(equipPanel);
 
   // ── Inventory panel ────────────────────────────────────────
-  const invPanel = el('div', {
-    width: '672px',
-    background: '#111',
-    border: '1px solid #333',
-    padding: '12px',
-    marginBottom: '8px',
-    maxHeight: '260px',
-    overflowY: 'auto',
-    boxSizing: 'border-box',
-  });
-  invPanel.appendChild(sectionHeader('INVENTORY'));
+  const invPanel = createPanel('INVENTORY');
+  invPanel.style.maxHeight = '260px';
+  invPanel.style.overflowY = 'auto';
 
   let invRows: HTMLElement[] = [];
 
@@ -340,17 +296,8 @@ export function createInventoryScreen(
   ];
   const totalWeight = allItems.reduce((sum, it) => sum + it.weight, 0) / 1000;
 
-  const footer = el('div', {
-    width: '672px',
-    background: '#111',
-    border: '1px solid #333',
-    padding: '8px 12px',
-    display: 'flex',
-    gap: '24px',
-    fontSize: '13px',
-    color: '#aaa',
-    boxSizing: 'border-box',
-  });
+  const footer = el('div', { width: '100%' });
+  footer.className = 'footer';
   footer.appendChild(el('span', undefined, `Weight: ${totalWeight.toFixed(1)} kg`));
   footer.appendChild(el('span', undefined, `Copper: ${h.copper}`));
   footer.appendChild(el('span', undefined, `Items: ${h.inventory.length}`));

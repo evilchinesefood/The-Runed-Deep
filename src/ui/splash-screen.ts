@@ -1,44 +1,22 @@
 import type { GameAction } from '../core/types';
 import { getSaveSlots, deleteSave } from '../core/save-load';
 import { getLeaderboard } from '../systems/Scoring';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
-
-const BTN_STYLE = `
-  padding: 12px 32px;
-  font-size: 16px;
-  background: #333;
-  color: #fff;
-  border: 2px solid #666;
-  cursor: pointer;
-`;
+import { createScreen, createPanel, createButton, el } from './Theme';
 
 export function createSplashScreen(
   container: HTMLElement,
   onAction: (action: GameAction) => void,
   onLoadSlot: (slot: number) => void,
 ): HTMLElement {
-  const splash = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-  });
+  const splash = createScreen();
+  splash.style.justifyContent = 'center';
+  splash.style.minHeight = '100vh';
 
   // Logo image
   const logo = document.createElement('img');
   logo.src = '/assets/logo.png';
   logo.alt = 'Castle of the Winds';
-  logo.style.cssText = 'max-width:400px;height:auto;margin-bottom:24px;';
+  logo.style.cssText = 'max-width:100%;height:auto;margin-bottom:24px;';
   splash.appendChild(logo);
 
   splash.appendChild(el('h1', {
@@ -51,42 +29,21 @@ export function createSplashScreen(
   // Buttons
   const buttons = el('div', { display: 'flex', gap: '20px', marginBottom: '30px' });
 
-  const newGameBtn = document.createElement('button');
-  newGameBtn.textContent = 'New Game';
-  newGameBtn.style.cssText = BTN_STYLE;
+  const newGameBtn = createButton('New Game');
   newGameBtn.addEventListener('click', () => onAction({ type: 'newGame' }));
   buttons.appendChild(newGameBtn);
 
-  const lbBtn = document.createElement('button');
-  lbBtn.textContent = 'Leaderboard';
-  lbBtn.style.cssText = BTN_STYLE;
+  const lbBtn = createButton('Leaderboard');
   buttons.appendChild(lbBtn);
 
   splash.appendChild(buttons);
 
   // Leaderboard panel (toggled)
-  const lbPanel = el('div', {
-    display: 'none',
-    width: '440px',
-    background: '#111',
-    border: '1px solid #444',
-    padding: '16px',
-    marginBottom: '20px',
-    boxSizing: 'border-box',
-  });
-
-  const lbTitle = el('div', {
-    fontSize: '14px',
-    color: '#888',
-    textAlign: 'center',
-    marginBottom: '10px',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-  }, 'Hall of the Fallen');
-  lbPanel.appendChild(lbTitle);
+  const lbPanel = createPanel('Hall of the Fallen');
+  lbPanel.style.display = 'none';
 
   const renderLeaderboard = () => {
-    // Clear previous entries (keep title)
+    // Clear previous entries (keep header)
     while (lbPanel.children.length > 1) lbPanel.removeChild(lbPanel.lastChild!);
 
     const entries = getLeaderboard();
@@ -141,12 +98,11 @@ export function createSplashScreen(
       marginBottom: '12px',
     }, 'Saved Games'));
 
-    const slotContainer = el('div', {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      width: '400px',
-    });
+    const slotPanel = createPanel();
+    slotPanel.style.display = 'flex';
+    slotPanel.style.flexDirection = 'column';
+    slotPanel.style.gap = '8px';
+    slotPanel.style.padding = '8px';
 
     for (let i = 0; i < slots.length; i++) {
       const info = slots[i];
@@ -176,23 +132,19 @@ export function createSplashScreen(
 
       const btnGroup = el('div', { display: 'flex', gap: '8px', alignItems: 'center' });
 
-      const loadBtn = document.createElement('button');
-      loadBtn.textContent = 'Load';
-      loadBtn.style.cssText = 'padding:6px 16px;background:#335;color:#aaf;border:1px solid #558;cursor:pointer;';
+      const loadBtn = createButton('Load');
       loadBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         onLoadSlot(info.slot);
       });
       btnGroup.appendChild(loadBtn);
 
-      // Delete button
-      const delBtn = document.createElement('button');
-      delBtn.textContent = 'X';
-      delBtn.style.cssText = 'padding:4px 8px;background:#411;color:#f66;border:1px solid #633;cursor:pointer;font-weight:bold;font-size:12px;';
+      const delBtn = createButton('X', 'danger');
+      delBtn.style.fontSize = '12px';
+      delBtn.style.padding = '4px 8px';
       const slotNum = info.slot;
       delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        // Show confirmation
         const confirm = el('div', {
           position: 'absolute',
           top: '0',
@@ -207,22 +159,17 @@ export function createSplashScreen(
           zIndex: '10',
         });
         confirm.appendChild(el('span', { color: '#f88', fontSize: '13px' }, 'Delete this save?'));
-        const yesBtn = document.createElement('button');
-        yesBtn.textContent = 'Yes';
-        yesBtn.style.cssText = 'padding:4px 14px;background:#622;color:#faa;border:1px solid #844;cursor:pointer;';
+        const yesBtn = createButton('Yes', 'danger');
         yesBtn.addEventListener('click', (ev) => {
           ev.stopPropagation();
           deleteSave(slotNum);
           row.remove();
-          // If no saves left, remove the entire section
-          if (slotContainer.children.length === 0) {
-            slotContainer.previousElementSibling?.remove(); // "Saved Games" label
-            slotContainer.remove();
+          if (slotPanel.children.length === 0) {
+            slotPanel.previousElementSibling?.remove();
+            slotPanel.remove();
           }
         });
-        const noBtn = document.createElement('button');
-        noBtn.textContent = 'No';
-        noBtn.style.cssText = 'padding:4px 14px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
+        const noBtn = createButton('No');
         noBtn.addEventListener('click', (ev) => {
           ev.stopPropagation();
           confirm.remove();
@@ -236,10 +183,10 @@ export function createSplashScreen(
       row.appendChild(btnGroup);
       row.addEventListener('click', () => onLoadSlot(info.slot));
 
-      slotContainer.appendChild(row);
+      slotPanel.appendChild(row);
     }
 
-    splash.appendChild(slotContainer);
+    splash.appendChild(slotPanel);
   }
 
   container.appendChild(splash);

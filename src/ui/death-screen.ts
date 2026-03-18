@@ -1,12 +1,6 @@
 import type { GameState, GameAction } from '../core/types';
 import { calculateScore, addToLeaderboard, getLeaderboard } from '../systems/Scoring';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createButton, el } from './Theme';
 
 export function createDeathScreen(
   container: HTMLElement,
@@ -44,28 +38,21 @@ export function createDeathScreen(
   const rank = addToLeaderboard(entry);
   const leaderboard = getLeaderboard();
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    padding: '20px',
-    boxSizing: 'border-box',
-  });
+  const screen = createScreen();
+  screen.style.justifyContent = 'center';
+  screen.style.minHeight = '100vh';
 
   // Tombstone
   const tombstone = el('div', {
-    width: '320px',
+    maxWidth: '320px',
+    width: '100%',
     padding: '40px 30px',
     background: '#1a1a1a',
     border: '3px solid #444',
     borderRadius: '60px 60px 0 0',
     textAlign: 'center',
     marginBottom: '20px',
+    boxSizing: 'border-box',
   });
 
   tombstone.appendChild(el('div', {
@@ -143,19 +130,8 @@ export function createDeathScreen(
 
   // Leaderboard
   if (leaderboard.length > 0) {
-    const lbSection = el('div', {
-      width: '400px',
-      marginBottom: '24px',
-    });
-
-    lbSection.appendChild(el('div', {
-      fontSize: '14px',
-      color: '#888',
-      textAlign: 'center',
-      marginBottom: '8px',
-      letterSpacing: '1px',
-      textTransform: 'uppercase',
-    }, 'Hall of the Fallen'));
+    const lbPanel = createPanel('Hall of the Fallen');
+    lbPanel.style.marginBottom = '24px';
 
     const table = el('div', {
       display: 'grid',
@@ -183,16 +159,14 @@ export function createDeathScreen(
       table.appendChild(el('div', { color: rowColor, fontSize: '11px' }, e.difficulty));
     }
 
-    lbSection.appendChild(table);
-    screen.appendChild(lbSection);
+    lbPanel.appendChild(table);
+    screen.appendChild(lbPanel);
   }
 
   // Buttons
   const buttons = el('div', { display: 'flex', gap: '20px' });
 
-  const newGameBtn = document.createElement('button');
-  newGameBtn.textContent = 'New Game';
-  newGameBtn.style.cssText = 'padding:12px 32px;font-size:16px;background:#333;color:#fff;border:2px solid #666;cursor:pointer;';
+  const newGameBtn = createButton('New Game');
   newGameBtn.addEventListener('click', () => {
     onAction({ type: 'setScreen', screen: 'splash' });
   });

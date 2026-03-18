@@ -1,13 +1,7 @@
 import type { GameState, Attributes, Hero } from '../core/types';
 import { SPELL_BY_ID } from '../data/spells';
 import { xpToNextLevel, xpRequiredForLevel } from '../systems/character/leveling';
-
-function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
-  const e = document.createElement(tag);
-  if (styles) Object.assign(e.style, styles);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
 function attrBar(label: string, value: number, max: number, color: string): HTMLElement {
   const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
@@ -49,40 +43,12 @@ export function createCharacterInfoScreen(
 ): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
 
-  const screen = el('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '24px',
-    background: '#000',
-    color: '#ccc',
-    fontFamily: "'Segoe UI', Tahoma, sans-serif",
-    minHeight: '100vh',
-  });
+  const screen = createScreen();
+  screen.style.minHeight = '100vh';
 
-  // Title bar
-  const titleBar = el('div', {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '500px',
-    marginBottom: '8px',
-  });
-  titleBar.appendChild(el('h2', { color: '#c90', margin: '0' }, 'Character Info'));
+  screen.appendChild(createTitleBar('Character Info', onClose));
 
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close (Esc)';
-  closeBtn.style.cssText = 'padding:4px 12px;background:#333;color:#ccc;border:1px solid #555;cursor:pointer;';
-  closeBtn.addEventListener('click', onClose);
-  titleBar.appendChild(closeBtn);
-  screen.appendChild(titleBar);
-
-  const panel = el('div', {
-    width: '500px',
-    background: '#111',
-    border: '1px solid #333',
-    padding: '16px',
-  });
+  const panel = createPanel();
 
   // ── Identity ────────────────────────────────────────────
   const heroSprite = el('div', { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' });
