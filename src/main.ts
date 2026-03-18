@@ -9,6 +9,9 @@ import { createCharacterInfoScreen } from './ui/character-info';
 import { createInventoryScreen } from './ui/inventory-screen';
 import { createDeathScreen } from './ui/death-screen';
 import { createHelpScreen } from './ui/help-screen';
+import { createMapScreen } from './ui/MapScreen';
+import { createSpellScreen } from './ui/SpellScreen';
+import { findPath } from './utils/Pathfinding';
 import { generateFloor } from './systems/dungeon/generator';
 import { SPELL_BY_ID } from './data/spells';
 import { AnimationRenderer } from './rendering/animations';
@@ -29,12 +32,6 @@ let animRenderer: AnimationRenderer | null = null;
 const input = new InputManager();
 
 const gameLoop = new GameLoop(createInitialGameState(), render);
-input.setHandler(action => {
-  if (animRenderer?.isPlaying()) return; // ignore input during animations
-  gameLoop.handleAction(action);
-  // After action, play any queued animations
-  playPendingAnimations();
-});
 
 // Spell mode indicator
 input.setSpellModeCallback((spellId) => {
@@ -48,6 +45,81 @@ input.setSpellModeCallback((spellId) => {
       indicator.style.display = 'none';
     }
   }
+});
+
+// Click-to-move: pathfind and auto-walk
+let autoPath: { x: number; y: number }[] = [];
+let autoWalkTimer: number | null = null;
+
+input.setPathClickCallback((target) => {
+  const state = gameLoop.getState();
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return;
+
+  const path = findPath(floor, state.hero.position, target);
+  if (path.length === 0) return;
+
+  autoPath = path;
+  stepAutoPath();
+});
+
+function stepAutoPath(): void {
+  if (autoPath.length === 0) return;
+  if (animRenderer?.isPlaying()) {
+    autoWalkTimer = window.setTimeout(stepAutoPath, 100);
+    return;
+  }
+
+  const state = gameLoop.getState();
+  if (state.screen !== 'game' || state.hero.hp <= 0) { autoPath = []; return; }
+
+  const next = autoPath[0];
+  const dx = next.x - state.hero.position.x;
+  const dy = next.y - state.hero.position.y;
+
+  // Stop auto-walk if a monster is adjacent
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (floor) {
+    const hasAdjacentMonster = floor.monsters.some(m => {
+      const mx = Math.abs(m.position.x - state.hero.position.x);
+      const my = Math.abs(m.position.y - state.hero.position.y);
+      return mx <= 1 && my <= 1;
+    });
+    if (hasAdjacentMonster) { autoPath = []; return; }
+  }
+
+  const direction = dxdyToDirection(dx, dy);
+  if (direction) {
+    autoPath.shift();
+    gameLoop.handleAction({ type: 'move', direction });
+    playPendingAnimations();
+    if (autoPath.length > 0) {
+      autoWalkTimer = window.setTimeout(stepAutoPath, 120);
+    }
+  } else {
+    autoPath = [];
+  }
+}
+
+function dxdyToDirection(dx: number, dy: number): import('./core/types').Direction | null {
+  const map: Record<string, import('./core/types').Direction> = {
+    '0,-1': 'N', '1,-1': 'NE', '1,0': 'E', '1,1': 'SE',
+    '0,1': 'S', '-1,1': 'SW', '-1,0': 'W', '-1,-1': 'NW',
+  };
+  return map[`${dx},${dy}`] ?? null;
+}
+
+// Input handler — cancels auto-walk on manual movement
+input.setHandler(action => {
+  if (autoPath.length > 0 && action.type === 'move') {
+    autoPath = [];
+    if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
+  }
+  if (animRenderer?.isPlaying()) return;
+  gameLoop.handleAction(action);
+  playPendingAnimations();
 });
 
 function playPendingAnimations(): void {
@@ -278,6 +350,33 @@ function switchScreen(state: GameState): void {
         root.replaceChildren(invScreen);
       };
       renderInventory();
+      break;
+    }
+
+    case 'spells': {
+      input.setEnabled(false);
+      const spellScreen = createSpellScreen(
+        gameLoop.getState(),
+        (spellId) => {
+          gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+          // After returning to game, start spell casting
+          setTimeout(() => input.startSpellCast(spellId), 50);
+        },
+        () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+      );
+      addScreenCleanup(spellScreen.cleanup);
+      root.appendChild(spellScreen);
+      break;
+    }
+
+    case 'map': {
+      input.setEnabled(false);
+      const mapScreen = createMapScreen(
+        gameLoop.getState(),
+        () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+      );
+      addScreenCleanup(mapScreen.cleanup);
+      root.appendChild(mapScreen);
       break;
     }
 

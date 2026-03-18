@@ -133,6 +133,12 @@ export class HudRenderer {
       `Floor: ${state.currentFloor + 1}  Copper: ${h.copper}`
     );
     this.statsEl.appendChild(floorInfo);
+
+    // Difficulty indicator
+    const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
+    const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+    const diffRow = el('div', { fontSize: '10px', marginTop: '2px', color: diffColors[state.difficulty] ?? '#888' }, diffLabel);
+    this.statsEl.appendChild(diffRow);
   }
 
   private renderSpellBar(state: GameState): void {

@@ -23,9 +23,14 @@ const KEYS: [string, string][] = [
   ['Esc', 'Close current screen / Return to game'],
   ['', ''],
   // Spells
+  ['Z', 'Open full spell list'],
   ['1-9', 'Quick-cast spell (by slot)'],
   ['Click spell bar', 'Select spell to cast'],
   ['Direction key / Click map', 'Aim directional spell'],
+  ['', ''],
+  // Map & Navigation
+  ['M', 'Full floor map'],
+  ['Click on map', 'Auto-walk to tile (pathfinding)'],
   ['', ''],
   // System
   ['Ctrl+S', 'Save game'],

@@ -15,6 +15,8 @@ export type Screen =
   | 'game'
   | 'inventory'
   | 'character-info'
+  | 'spells'
+  | 'map'
   | 'help'
   | 'death';
 

@@ -1,8 +1,9 @@
-import type { GameAction, Direction } from '../core/types';
+import type { GameAction, Direction, Vector2 } from '../core/types';
 import { SPELL_BY_ID } from '../data/spells';
 
 export type ActionHandler = (action: GameAction) => void;
 export type SpellModeCallback = (spellId: string | null) => void;
+export type PathClickCallback = (target: Vector2) => void;
 
 const KEY_TO_DIRECTION: Record<string, Direction> = {
   ArrowUp: 'N', ArrowDown: 'S', ArrowLeft: 'W', ArrowRight: 'E',
@@ -21,6 +22,7 @@ export class InputManager {
   private onSpellModeChange: SpellModeCallback | null = null;
   // Known spells reference (set from outside so we can map number keys)
   private knownSpells: string[] = [];
+  private onPathClick: PathClickCallback | null = null;
 
   constructor() {
     this.setupKeyboard();
@@ -42,6 +44,10 @@ export class InputManager {
 
   setSpellModeCallback(cb: SpellModeCallback): void {
     this.onSpellModeChange = cb;
+  }
+
+  setPathClickCallback(cb: PathClickCallback): void {
+    this.onPathClick = cb;
   }
 
   isInSpellMode(): boolean {
@@ -81,7 +87,20 @@ export class InputManager {
       return;
     }
 
-    // Not in spell mode — could use for click-to-move later
+    // Not in spell mode — click-to-move
+    const dx = worldX - heroX;
+    const dy = worldY - heroY;
+    if (dx === 0 && dy === 0) return;
+
+    // Adjacent tile: move directly
+    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+      const direction = vectorToDirection(dx, dy);
+      this.emit({ type: 'move', direction });
+      return;
+    }
+
+    // Distant tile: emit pathfind action (handled by game loop)
+    this.onPathClick?.({ x: worldX, y: worldY });
   }
 
   private cancelSpellMode(): void {
@@ -164,9 +183,12 @@ export class InputManager {
       // Hotkeys
       switch (e.code) {
         case 'KeyZ':
-          // Open spell list (handled by UI, emits setScreen or similar)
           e.preventDefault();
-          // For now, same as number keys but shows a message
+          this.emit({ type: 'setScreen', screen: 'spells' });
+          break;
+        case 'KeyM':
+          e.preventDefault();
+          this.emit({ type: 'setScreen', screen: 'map' });
           break;
         case 'KeyG':
           e.preventDefault();
