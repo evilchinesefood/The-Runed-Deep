@@ -117,6 +117,10 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
   }
 });
 
+// Screen cleanup registry — called on every screen switch
+const screenCleanups: (() => void)[] = [];
+function addScreenCleanup(fn: () => void): void { screenCleanups.push(fn); }
+
 // Initial render
 render(gameLoop.getState());
 
@@ -149,10 +153,6 @@ function render(state: GameState): void {
     root.replaceChildren(errDiv);
   }
 }
-
-// Screen cleanup registry — called on every screen switch
-const screenCleanups: (() => void)[] = [];
-function addScreenCleanup(fn: () => void): void { screenCleanups.push(fn); }
 
 function switchScreen(state: GameState): void {
   // Run all cleanup functions from previous screen
