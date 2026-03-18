@@ -663,8 +663,9 @@ function resolveLight(state: GameState): GameState {
   const px = state.hero.position.x;
   const py = state.hero.position.y;
 
-  // Light player tile
-  if (newFloor.tiles[py]?.[px]?.type === 'floor') {
+  // Light player tile (floor and trap tiles — not walls)
+  const canLight = (t: string) => t === 'floor' || t === 'trap';
+  if (newFloor.tiles[py]?.[px] && canLight(newFloor.tiles[py][px].type)) {
     newFloor.lit[py][px] = true;
   }
 
@@ -683,7 +684,7 @@ function resolveLight(state: GameState): GameState {
       const tx = Math.floor(cx);
       const ty = Math.floor(cy);
       if (tx < 0 || tx >= newFloor.width || ty < 0 || ty >= newFloor.height) break;
-      if (newFloor.tiles[ty][tx].type === 'floor') {
+      if (canLight(newFloor.tiles[ty][tx].type)) {
         newFloor.lit[ty][tx] = true;
       }
       if (!newFloor.tiles[ty][tx].transparent) break;

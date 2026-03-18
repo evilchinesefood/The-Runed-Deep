@@ -140,16 +140,16 @@ export class MapRenderer {
 
         const tile = floor.tiles[worldY][worldX];
         const isWall = tile.type === 'wall';
-        const isFloorTile = tile.type === 'floor';
+        const isFloorLike = tile.type === 'floor' || tile.type === 'trap';
 
         // Walls only brighten when directly visible, never from permanent lighting
-        // Floor tiles brighten from visibility OR permanent Light spell
+        // Floor/trap tiles brighten from visibility OR permanent Light spell
         const opacity = isWall
           ? (visible ? '1' : '0.5')
           : ((visible || isLit) ? '1' : '0.5');
 
-        // Use lit (blue) floor sprite only for floor tiles with permanent light
-        const floorSprite = (isLit && isFloorTile) ? 'lit-dgn' : tile.sprite;
+        // Use lit (blue) floor sprite for floor-like tiles with permanent light
+        const floorSprite = (isLit && isFloorLike) ? 'lit-dgn' : tile.sprite;
 
         // Overlay tiles (stairs, doors, revealed traps) render on ground layer
         // so they stay visible under hero/monsters

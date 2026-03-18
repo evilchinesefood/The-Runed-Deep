@@ -245,7 +245,7 @@ function switchScreen(state: GameState): void {
   while (screenCleanups.length > 0) screenCleanups.pop()!();
 
   // Hide touch controls by default; shown only on game screen
-  if (TouchControls.isTouchDevice()) touchControls.hide();
+  touchControls.hide();
 
   root.replaceChildren();
   root.dataset.screen = state.screen;
@@ -305,7 +305,7 @@ function switchScreen(state: GameState): void {
 
     case 'game': {
       input.setEnabled(true);
-      if (TouchControls.isTouchDevice()) touchControls.show();
+      touchControls.show();
 
       const gameContainer = document.createElement('div');
       gameContainer.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding-top:8px;';
