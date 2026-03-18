@@ -79,6 +79,7 @@ export function createDefaultTown(): TownState {
     id: 'hamlet',
     shopInventories: {},
     bankBalance: 0,
+    deepestFloor: 0,
   };
 }
 
@@ -95,5 +96,7 @@ export function createInitialGameState(difficulty: Difficulty = 'easy'): GameSta
     gameTime: 0,
     difficulty,
     rngSeed: Date.now(),
+    returnFloor: 0,
+    activeBuildingId: '',
   };
 }

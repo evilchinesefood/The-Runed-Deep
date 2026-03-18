@@ -205,6 +205,8 @@ const SCROLLS: ItemTemplate[] = [
     weight: 50, value: 40, depthMin: 3, depthMax: 99, spellId: 'teleport' },
   { id: 'scroll-remove-curse', name: 'Scroll of Remove Curse', category: 'scroll', sprite: 'scroll',
     weight: 50, value: 50, depthMin: 5, depthMax: 99, spellId: 'remove-curse' },
+  { id: 'scroll-rune-of-return', name: 'Scroll of Rune of Return', category: 'scroll', sprite: 'scroll',
+    weight: 50, value: 60, depthMin: 1, depthMax: 99, spellId: 'rune-of-return' },
 ];
 
 // ── Spellbooks ────────────────────────────────────────────

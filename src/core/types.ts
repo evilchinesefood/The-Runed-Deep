@@ -18,6 +18,8 @@ export type Screen =
   | 'spells'
   | 'map'
   | 'help'
+  | 'shop'
+  | 'service'
   | 'death';
 
 export type Difficulty = 'easy' | 'intermediate' | 'hard' | 'impossible';
@@ -220,7 +222,7 @@ export interface Floor {
   height: number;
 }
 
-export type DungeonId = 'mine' | 'fortress' | 'castle';
+export type DungeonId = 'mine' | 'fortress' | 'castle' | 'town';
 
 // ============================================================
 // Town
@@ -230,6 +232,7 @@ export interface TownState {
   id: string;
   shopInventories: Record<string, Item[]>;
   bankBalance: number;
+  deepestFloor: number;
 }
 
 // ============================================================
@@ -260,6 +263,8 @@ export interface GameState {
   gameTime: number;               // in-game seconds
   difficulty: Difficulty;
   rngSeed: number;
+  returnFloor: number;
+  activeBuildingId: string;
 }
 
 // ============================================================

@@ -7,6 +7,8 @@ import { processPickupItem } from '../systems/inventory/pickup';
 import { processDropItem } from '../systems/inventory/drop';
 import { processEquipItem, processUnequipItem } from '../systems/inventory/equipment';
 import { processUseItem } from '../systems/inventory/use-item';
+import { generateTownMap } from '../systems/town/TownMap';
+import { initShopInventory, restockShop } from '../systems/town/Shops';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -58,6 +60,9 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processUseItem(state, action.itemId);
     case 'search':
       return processSearch(state);
+    case 'enterBuilding': {
+      return processEnterBuilding(state);
+    }
     case 'newGame':
       return { ...state, screen: 'character-creation' };
     default:
@@ -165,6 +170,21 @@ function processMove(state: GameState, direction: Direction): GameState {
     });
   }
 
+  // Notify when stepping onto a building
+  const movedTile = (floors[floorKey] ?? floor).tiles[newPos.y]?.[newPos.x];
+  if (movedTile?.type === 'building' && movedTile.buildingId) {
+    const names: Record<string, string> = {
+      'weapon-shop': 'Weapon Shop', 'armor-shop': 'Armor Shop', 'general-store': 'General Store',
+      'magic-shop': 'Magic Shop', 'junk-store': "Olaf's Junk Store", 'temple': 'Temple of Odin',
+      'sage': 'The Sage', 'bank': 'Bank', 'inn': 'The Inn',
+    };
+    messages.push({
+      text: `You are at the ${names[movedTile.buildingId] ?? movedTile.buildingId}. (Enter to go inside)`,
+      severity: 'normal' as const,
+      turn: state.turn + 1,
+    });
+  }
+
   return {
     ...state,
     hero,
@@ -178,6 +198,19 @@ function processCastSpell(state: GameState, action: Extract<GameAction, { type: 
   return castSpell(state, action.spellId, action.direction, action.target);
 }
 
+function processEnterBuilding(state: GameState): GameState {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+  const tile = floor.tiles[state.hero.position.y][state.hero.position.x];
+  if (tile.type !== 'building' || !tile.buildingId) {
+    return addMessage(state, 'There is no building here.', 'system');
+  }
+  const shopIds = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
+  const screen = shopIds.includes(tile.buildingId) ? 'shop' as const : 'service' as const;
+  return { ...state, screen, activeBuildingId: tile.buildingId };
+}
+
 function processUseStairs(state: GameState): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
@@ -185,17 +218,87 @@ function processUseStairs(state: GameState): GameState {
 
   const heroTile = floor.tiles[state.hero.position.y][state.hero.position.x];
 
+  // Redirect building entry via Enter key
+  if (heroTile.type === 'building') {
+    return processEnterBuilding(state);
+  }
+
   if (heroTile.type === 'stairs-down') {
+    if (state.currentDungeon === 'town') {
+      return returnToDungeon(state);
+    }
     return goToFloor(state, state.currentFloor + 1, 'descend');
   } else if (heroTile.type === 'stairs-up') {
     if (state.currentFloor === 0) {
-      // TODO: Return to town
-      return addMessage(state, 'You cannot go up from here yet.', 'system');
+      return teleportToTown(state);
     }
     return goToFloor(state, state.currentFloor - 1, 'ascend');
   }
 
   return addMessage(state, 'There are no stairs here.', 'system');
+}
+
+const SHOP_IDS = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
+
+export function teleportToTown(state: GameState): GameState {
+  let floors = { ...state.floors };
+  const townKey = 'town-0';
+
+  if (!floors[townKey]) {
+    const { floor } = generateTownMap();
+    floors = { ...floors, [townKey]: floor };
+  }
+
+  const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
+
+  let shopInventories = { ...state.town.shopInventories };
+  for (const sid of SHOP_IDS) {
+    if (!shopInventories[sid] || shopInventories[sid].length === 0) {
+      shopInventories[sid] = initShopInventory(sid, deepest);
+    } else {
+      shopInventories[sid] = restockShop(shopInventories[sid], sid, deepest);
+    }
+  }
+
+  return {
+    ...state,
+    currentDungeon: 'town' as any,
+    currentFloor: 0,
+    returnFloor: state.currentFloor,
+    floors,
+    hero: { ...state.hero, position: { x: 12, y: 10 } },
+    town: { ...state.town, shopInventories, deepestFloor: deepest },
+    messages: [...state.messages, { text: 'You arrive in town.', severity: 'important' as const, turn: state.turn }],
+  };
+}
+
+function returnToDungeon(state: GameState): GameState {
+  const targetFloor = state.returnFloor;
+  const floorKey = `mine-${targetFloor}`;
+  const floor = state.floors[floorKey];
+
+  if (!floor) {
+    return addMessage(state, 'There is nowhere to return to.', 'system');
+  }
+
+  let arrivalPos = { x: 0, y: 0 };
+  for (let y = 0; y < floor.height; y++) {
+    for (let x = 0; x < floor.width; x++) {
+      if (floor.tiles[y][x].type === 'stairs-up') {
+        arrivalPos = { x, y };
+        break;
+      }
+    }
+    if (arrivalPos.x !== 0 || arrivalPos.y !== 0) break;
+  }
+
+  return {
+    ...state,
+    currentDungeon: 'mine',
+    currentFloor: targetFloor,
+    hero: { ...state.hero, position: arrivalPos },
+    messages: [...state.messages, { text: `You return to dungeon level ${targetFloor + 1}.`, severity: 'important' as const, turn: state.turn }],
+  };
 }
 
 function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 'descend'): GameState {

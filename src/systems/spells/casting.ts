@@ -5,6 +5,8 @@ import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-ite
 import { getMonstersForDepth } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
 import { queueAnimation } from '../../rendering/animation-queue';
+import { generateTownMap } from '../town/TownMap';
+import { initShopInventory, restockShop } from '../town/Shops';
 import {
   buildBoltAnimation,
   buildBallAnimation,
@@ -132,8 +134,12 @@ function resolveSpellEffect(
         hero: { ...state.hero, activeEffects: newEffects },
       };
     }
-    case 'rune-of-return':
-      return addMsg(state, `A rune of return glows beneath your feet.`, 'system');
+    case 'rune-of-return': {
+      if (state.currentDungeon === 'town') {
+        return addMsg(state, 'You are already in town.', 'system');
+      }
+      return teleportToTownFromSpell(state);
+    }
     case 'teleport':
       return resolveTeleport(state);
 
@@ -694,6 +700,39 @@ function resolveLight(state: GameState): GameState {
   return {
     ...addMsg(state, `The area around ${state.hero.name} brightens.`, 'important'),
     floors: { ...state.floors, [floorKey]: newFloor },
+  };
+}
+
+// ============================================================
+// Town teleport (rune of return)
+// ============================================================
+
+const SHOP_IDS_SPELL = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
+
+function teleportToTownFromSpell(state: GameState): GameState {
+  let floors = { ...state.floors };
+  const townKey = 'town-0';
+  if (!floors[townKey]) {
+    const { floor: townFloor } = generateTownMap();
+    floors = { ...floors, [townKey]: townFloor };
+  }
+  const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
+  let shopInventories = { ...state.town.shopInventories };
+  for (const sid of SHOP_IDS_SPELL) {
+    if (!shopInventories[sid] || shopInventories[sid].length === 0) {
+      shopInventories[sid] = initShopInventory(sid, deepest);
+    } else {
+      shopInventories[sid] = restockShop(shopInventories[sid], sid, deepest);
+    }
+  }
+  return {
+    ...addMsg(state, 'You are transported to town.', 'important'),
+    currentDungeon: 'town' as any,
+    currentFloor: 0,
+    returnFloor: state.currentFloor,
+    floors,
+    hero: { ...state.hero, position: { x: 12, y: 10 } },
+    town: { ...state.town, shopInventories, deepestFloor: deepest },
   };
 }
 

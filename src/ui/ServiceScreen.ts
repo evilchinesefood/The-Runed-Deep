@@ -1,0 +1,184 @@
+// ============================================================
+// Service screen — temple, sage, bank, inn
+// ============================================================
+
+import type { GameState } from '../core/types';
+import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
+import {
+  templeHealHP, templeHealMP, templeRemoveCurse, templeCurePoison,
+  sageIdentifyOne, sageIdentifyAll,
+  bankDeposit, bankWithdraw,
+  innRest,
+} from '../systems/town/Services';
+import { getDisplayName } from '../systems/inventory/display-name';
+
+const BUILDING_NAMES: Record<string, string> = {
+  temple: 'Temple of Odin',
+  sage: 'The Sage',
+  bank: 'Bank',
+  inn: 'The Inn',
+};
+
+function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
+  btn.disabled = disabled;
+  btn.style.opacity = disabled ? '0.4' : '1';
+  btn.style.cursor = disabled ? 'not-allowed' : 'pointer';
+}
+
+function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('Services');
+
+  const missingHP = state.hero.maxHp - state.hero.hp;
+  const missingMP = state.hero.maxMp - state.hero.mp;
+  const healHPCost = 3 + Math.ceil(missingHP * 0.5);
+  const healMPCost = 3 + Math.ceil(missingMP * 0.75);
+  const hasCursed = Object.values(state.hero.equipment).some(i => i && i.cursed);
+  const isPoisoned = state.hero.activeEffects.some(e => e.id === 'poisoned');
+
+  const items: [string, number, boolean, () => GameState][] = [
+    [`Heal HP — ${healHPCost} copper`, healHPCost, missingHP <= 0 || state.hero.copper < healHPCost, () => templeHealHP(state)],
+    [`Restore MP — ${healMPCost} copper`, healMPCost, missingMP <= 0 || state.hero.copper < healMPCost, () => templeHealMP(state)],
+    ['Remove Curse — 50 copper', 50, !hasCursed || state.hero.copper < 50, () => templeRemoveCurse(state)],
+    ['Cure Poison — 25 copper', 25, !isPoisoned || state.hero.copper < 25, () => templeCurePoison(state)],
+  ];
+
+  for (const [label, , disabled, action] of items) {
+    const btn = createButton(label);
+    Object.assign(btn.style, { display: 'block', width: '100%', marginBottom: '6px', textAlign: 'left' });
+    greyBtn(btn, disabled);
+    btn.addEventListener('click', () => onUpdate(action()));
+    panel.appendChild(btn);
+  }
+
+  return panel;
+}
+
+function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('Identify Items');
+
+  const unidentInv = state.hero.inventory.filter(i => !i.identified);
+  const eq = state.hero.equipment;
+  const slots = Object.keys(eq) as (keyof typeof eq)[];
+  const unidentEq = slots.filter(s => eq[s] && !eq[s]!.identified).map(s => eq[s]!);
+  const allUnident = [...unidentInv, ...unidentEq];
+
+  if (allUnident.length === 0) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic', marginBottom: '8px' }, 'All items are identified.'));
+  } else {
+    for (const item of allUnident) {
+      const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
+      row.appendChild(el('div', { flex: '1', fontSize: '13px', color: '#ccc' }, getDisplayName(item)));
+      const btn = createButton('Identify 30cp', 'sm');
+      const disabled = state.hero.copper < 30;
+      greyBtn(btn, disabled);
+      btn.addEventListener('click', () => onUpdate(sageIdentifyOne(state, item.id)));
+      row.appendChild(btn);
+      panel.appendChild(row);
+    }
+  }
+
+  const totalCost = 25 * allUnident.length;
+  const allBtn = createButton(`Identify All — ${totalCost} copper`);
+  Object.assign(allBtn.style, { display: 'block', width: '100%', marginTop: '8px' });
+  greyBtn(allBtn, allUnident.length === 0 || state.hero.copper < totalCost);
+  allBtn.addEventListener('click', () => onUpdate(sageIdentifyAll(state)));
+  panel.appendChild(allBtn);
+
+  return panel;
+}
+
+function buildBank(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('Banking');
+
+  panel.appendChild(el('div', { display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }, ''));
+  const onHand = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '4px' }, `On hand: ${state.hero.copper} copper`);
+  const inBank = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '12px' }, `In bank: ${state.town.bankBalance} copper`);
+  panel.appendChild(onHand);
+  panel.appendChild(inBank);
+
+  const btnRow = el('div', { display: 'flex', gap: '8px' });
+
+  const depBtn = createButton('Deposit All');
+  greyBtn(depBtn, state.hero.copper <= 0);
+  depBtn.addEventListener('click', () => onUpdate(bankDeposit(state, state.hero.copper)));
+  btnRow.appendChild(depBtn);
+
+  const wdBtn = createButton('Withdraw All');
+  greyBtn(wdBtn, state.town.bankBalance <= 0);
+  wdBtn.addEventListener('click', () => onUpdate(bankWithdraw(state, state.town.bankBalance)));
+  btnRow.appendChild(wdBtn);
+
+  panel.appendChild(btnRow);
+  return panel;
+}
+
+function buildInn(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('Rest');
+
+  const alreadyFull = state.hero.hp >= state.hero.maxHp && state.hero.mp >= state.hero.maxMp;
+  const canAfford = state.hero.copper >= 20;
+
+  const btn = createButton('Rest for the Night — 20 copper', 'primary');
+  Object.assign(btn.style, { display: 'block', width: '100%', marginTop: '4px' });
+  greyBtn(btn, alreadyFull || !canAfford);
+  btn.addEventListener('click', () => onUpdate(innRest(state)));
+  panel.appendChild(btn);
+
+  if (alreadyFull) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', marginTop: '6px', fontStyle: 'italic' }, 'You are already fully rested.'));
+  }
+
+  return panel;
+}
+
+export function createServiceScreen(
+  initialState: GameState,
+  buildingId: string,
+  onUpdate: (newState: GameState) => void,
+  onClose: () => void,
+): HTMLElement & { cleanup: () => void } {
+  let state = initialState;
+  const title = BUILDING_NAMES[buildingId] ?? buildingId;
+
+  const screen = createScreen() as HTMLElement & { cleanup: () => void };
+
+  function render(): void {
+    screen.replaceChildren();
+
+    const bar = createTitleBar(title, onClose);
+    screen.appendChild(bar);
+
+    const copper = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
+    copper.textContent = `Copper: ${state.hero.copper}`;
+    screen.appendChild(copper);
+
+    function handleUpdate(next: GameState): void {
+      state = next;
+      onUpdate(next);
+      render();
+    }
+
+    let content: HTMLElement;
+    switch (buildingId) {
+      case 'temple':  content = buildTemple(state, handleUpdate); break;
+      case 'sage':    content = buildSage(state, handleUpdate); break;
+      case 'bank':    content = buildBank(state, handleUpdate); break;
+      case 'inn':     content = buildInn(state, handleUpdate); break;
+      default:
+        content = createPanel('Unknown Service');
+        content.appendChild(el('div', { color: '#888' }, 'No services available here.'));
+    }
+
+    screen.appendChild(content);
+    screen.appendChild(el('div', { color: '#555', fontSize: '11px', marginTop: '4px' }, 'Press Esc to close'));
+  }
+
+  render();
+
+  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+  document.addEventListener('keydown', onKey);
+
+  screen.cleanup = () => document.removeEventListener('keydown', onKey);
+
+  return screen;
+}

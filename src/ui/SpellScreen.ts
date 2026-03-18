@@ -18,7 +18,8 @@ export function createSpellScreen(
   let hotkeys = [...h.spellHotkeys];
 
   const screen = createScreen();
-  screen.style.minHeight = '100vh';
+  screen.style.maxHeight = '100vh';
+  screen.style.overflowY = 'auto';
 
   // Title bar with MP display
   const titleBar = createTitleBar('Spells', () => { cleanup(); onClose(); });
@@ -48,9 +49,14 @@ export function createSpellScreen(
       row.appendChild(el('span', { color: '#888', width: '16px', textAlign: 'center', fontFamily: 'monospace' }, String(i + 1)));
       row.appendChild(el('span', { flex: '1', color: spell ? '#ddd' : '#444' }, spell ? spell.name : '— empty —'));
       if (spell) {
-        const removeBtn = el('span', {
-          color: '#f64', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
-        }, '[X]');
+        const removeBtn = el('div', {
+          color: '#fff', cursor: 'pointer', fontSize: '12px',
+          background: '#622', border: '1px solid #844', borderRadius: '4px',
+          padding: '2px 10px', userSelect: 'none', fontWeight: 'bold',
+          transition: 'background 0.1s',
+        }, 'Remove');
+        removeBtn.addEventListener('mouseenter', () => { removeBtn.style.background = '#833'; });
+        removeBtn.addEventListener('mouseleave', () => { removeBtn.style.background = '#622'; });
         removeBtn.addEventListener('click', () => {
           hotkeys.splice(i, 1);
           onUpdateHotkeys([...hotkeys]);
@@ -145,9 +151,14 @@ export function createSpellScreen(
 
         // Hotkey toggle button
         if (inHotkeys) {
-          const removeBtn = el('span', {
-            color: '#f64', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
-          }, '[-]');
+          const removeBtn = el('div', {
+            color: '#fff', cursor: 'pointer', fontSize: '11px',
+            background: '#622', border: '1px solid #844', borderRadius: '4px',
+            padding: '2px 8px', userSelect: 'none', fontWeight: 'bold',
+            transition: 'background 0.1s', flexShrink: '0',
+          }, '\u2212'); // minus sign
+          removeBtn.addEventListener('mouseenter', () => { removeBtn.style.background = '#833'; });
+          removeBtn.addEventListener('mouseleave', () => { removeBtn.style.background = '#622'; });
           removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             hotkeys = hotkeys.filter(id => id !== spellId);
@@ -157,9 +168,14 @@ export function createSpellScreen(
           });
           row.appendChild(removeBtn);
         } else if (canAdd) {
-          const addBtn = el('span', {
-            color: '#4f4', cursor: 'pointer', fontSize: '11px', padding: '0 4px',
-          }, '[+]');
+          const addBtn = el('div', {
+            color: '#fff', cursor: 'pointer', fontSize: '11px',
+            background: '#264', border: '1px solid #486', borderRadius: '4px',
+            padding: '2px 8px', userSelect: 'none', fontWeight: 'bold',
+            transition: 'background 0.1s', flexShrink: '0',
+          }, '+');
+          addBtn.addEventListener('mouseenter', () => { addBtn.style.background = '#386'; });
+          addBtn.addEventListener('mouseleave', () => { addBtn.style.background = '#264'; });
           addBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             hotkeys.push(spellId);
@@ -169,7 +185,7 @@ export function createSpellScreen(
           });
           row.appendChild(addBtn);
         } else {
-          row.appendChild(el('span', { width: '28px' }, ''));
+          row.appendChild(el('span', { width: '32px' }, ''));
         }
 
         if (canCast) {

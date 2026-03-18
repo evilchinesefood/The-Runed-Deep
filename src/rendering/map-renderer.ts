@@ -151,14 +151,16 @@ export class MapRenderer {
         // Use lit (blue) floor sprite for floor-like tiles with permanent light
         const floorSprite = (isLit && isFloorLike) ? 'lit-dgn' : tile.sprite;
 
-        // Overlay tiles (stairs, doors, revealed traps) render on ground layer
+        // Overlay tiles (stairs, doors, revealed traps, buildings) render on ground layer
         // so they stay visible under hero/monsters
         const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
           || tile.type === 'door-closed' || tile.type === 'door-open' || tile.type === 'door-locked'
+          || tile.type === 'building'
           || (tile.type === 'trap' && tile.trapRevealed);
 
         if (isOverlayTile) {
-          cell.floor.className = isLit ? 'lit-dgn' : 'dark-dgn';
+          const underlaySprite = tile.type === 'building' ? 'grass' : (isLit ? 'lit-dgn' : 'dark-dgn');
+          cell.floor.className = underlaySprite;
           cell.floor.style.opacity = opacity;
           cell.ground.className = tile.sprite;
           cell.ground.style.display = 'block';

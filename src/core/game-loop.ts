@@ -44,8 +44,8 @@ export class GameLoop {
       newState = this.tickActiveEffects(newState);
     }
 
-    // 4. Process monster turns (when in game screen and a turn-consuming action happened)
-    if (newState.screen === 'game' && newState.turn > this.state.turn) {
+    // 4. Process monster turns (when in game screen, a turn-consuming action happened, and not in town)
+    if (newState.screen === 'game' && newState.turn > this.state.turn && newState.currentDungeon !== 'town') {
       newState = this.processMonsterTurns(newState);
     }
 

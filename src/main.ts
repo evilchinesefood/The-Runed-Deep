@@ -11,6 +11,8 @@ import { createDeathScreen } from './ui/death-screen';
 import { createHelpScreen } from './ui/help-screen';
 import { createMapScreen } from './ui/MapScreen';
 import { createSpellScreen } from './ui/SpellScreen';
+import { createShopScreen } from './ui/ShopScreen';
+import { createServiceScreen } from './ui/ServiceScreen';
 import { findPath } from './utils/Pathfinding';
 import { generateFloor } from './systems/dungeon/generator';
 import { SPELL_BY_ID } from './data/spells';
@@ -184,7 +186,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
       currentFloor: 0,
       currentDungeon: 'mine',
       floors: { 'mine-0': testFloor },
-      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0 },
+      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0, deepestFloor: 10 },
       messages: [
         { text: '=== SPELL TEST ARENA ===', severity: 'important', turn: 0 },
         { text: 'All 30 spells available. 500 MP. Monsters placed for testing.', severity: 'system', turn: 0 },
@@ -196,6 +198,8 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
       gameTime: 0,
       difficulty: 'easy',
       rngSeed: Date.now(),
+      returnFloor: 0,
+      activeBuildingId: '',
     };
     gameLoop.setState(testState);
   }
@@ -224,9 +228,15 @@ function render(state: GameState): void {
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
       if (floor) {
-        const isBlinded = state.hero.activeEffects.some(e => e.id === 'blinded');
-        const fovRadius = isBlinded ? 1 : 4;
-        computeFov(floor, state.hero.position.x, state.hero.position.y, fovRadius);
+        if (state.currentDungeon !== 'town') {
+          const isBlinded = state.hero.activeEffects.some(e => e.id === 'blinded');
+          const fovRadius = isBlinded ? 1 : 4;
+          computeFov(floor, state.hero.position.x, state.hero.position.y, fovRadius);
+        } else {
+          for (let y = 0; y < floor.height; y++)
+            for (let x = 0; x < floor.width; x++)
+              floor.visible[y][x] = true;
+        }
       }
 
       mapRenderer?.render(state);
@@ -410,6 +420,42 @@ function switchScreen(state: GameState): void {
       });
       addScreenCleanup(helpScreen.cleanup);
       root.appendChild(helpScreen);
+      break;
+    }
+
+    case 'shop': {
+      input.setEnabled(false);
+      const shopId = gameLoop.getState().activeBuildingId;
+      const renderShop = () => {
+        const currentState = gameLoop.getState();
+        const shopScreen = createShopScreen(
+          currentState,
+          shopId,
+          (newState) => { gameLoop.setState(newState); root.replaceChildren(); renderShop(); },
+          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+        );
+        addScreenCleanup(shopScreen.cleanup);
+        root.replaceChildren(shopScreen);
+      };
+      renderShop();
+      break;
+    }
+
+    case 'service': {
+      input.setEnabled(false);
+      const buildingId = gameLoop.getState().activeBuildingId;
+      const renderService = () => {
+        const currentState = gameLoop.getState();
+        const svcScreen = createServiceScreen(
+          currentState,
+          buildingId,
+          (newState) => { gameLoop.setState(newState); root.replaceChildren(); renderService(); },
+          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+        );
+        addScreenCleanup(svcScreen.cleanup);
+        root.replaceChildren(svcScreen);
+      };
+      renderService();
       break;
     }
 
