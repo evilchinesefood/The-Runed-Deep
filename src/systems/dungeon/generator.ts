@@ -1,5 +1,7 @@
-import type { Floor, Tile, Vector2, Difficulty } from '../../core/types';
+import type { Floor, Tile, Vector2, Difficulty, PlacedItem } from '../../core/types';
 import { spawnMonsters } from '../monsters/spawning';
+import { getItemsForDepth } from '../../data/items';
+import { createItemFromTemplate, createCopperDrop } from '../items/loot';
 
 interface Room {
   x: number;
@@ -40,6 +42,27 @@ function createStairsTile(direction: 'up' | 'down'): Tile {
     sprite: direction === 'up' ? 'stairs-up' : 'stairs-down',
     walkable: true,
     transparent: true,
+  };
+}
+
+// Trap definitions with sprites and damage
+const TRAP_TYPES = [
+  { id: 'pit', sprite: 'pit-trap', damage: [3, 8], message: 'You fall into a pit!' },
+  { id: 'arrow', sprite: 'arrow-trap', damage: [2, 6], message: 'An arrow shoots from the wall!' },
+  { id: 'fire', sprite: 'fire-trap', damage: [4, 10], message: 'Flames erupt beneath you!' },
+  { id: 'dart', sprite: 'dart-trap', damage: [1, 4], message: 'A dart flies from a hidden slot!' },
+  { id: 'portal', sprite: 'portal-trap', damage: [0, 0], message: 'A portal pulls you across the room!' },
+  { id: 'acid', sprite: 'acid-trap', damage: [3, 9], message: 'Acid sprays from the floor!' },
+];
+
+function createTrapTile(trapType: string): Tile {
+  return {
+    type: 'trap',
+    sprite: 'dark-dgn', // looks like floor until revealed
+    walkable: true,
+    transparent: true,
+    trapType,
+    trapRevealed: false,
   };
 }
 
@@ -160,9 +183,14 @@ export function generateFloor(
   };
 
   // Spawn monsters appropriate for this depth
-  // Depth = floorNum + 1 (floor 0 is depth 1)
   const effectiveDepth = floorNum + 1;
   floor.monsters = spawnMonsters(floor, effectiveDepth, playerStart, rand, difficulty);
+
+  // Place items/treasure in rooms
+  floor.items = placeGroundItems(floor, rooms, effectiveDepth, playerStart, rand);
+
+  // Place traps in corridors and rooms (not on stairs or player start)
+  placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
 
   return { floor, playerStart };
 }
@@ -253,4 +281,101 @@ function isDoorworthy(tiles: Tile[][], pos: Vector2, _room: Room): boolean {
     && !(up?.walkable) && !(down?.walkable);
 
   return verticalPassage || horizontalPassage;
+}
+
+// ============================================================
+// Ground item placement
+// ============================================================
+
+function placeGroundItems(
+  floor: Floor,
+  rooms: Room[],
+  depth: number,
+  playerStart: Vector2,
+  rand: () => number,
+): PlacedItem[] {
+  const items: PlacedItem[] = [];
+  const candidates = getItemsForDepth(depth);
+  if (candidates.length === 0) return items;
+
+  // Each room has a chance to contain 0-2 items
+  for (let r = 0; r < rooms.length; r++) {
+    const room = rooms[r];
+    // 80-90% chance empty, 10-15% chance 1 item, ~5% chance 2 items
+    const roll = rand();
+    const itemCount = roll < 0.85 ? 0 : roll < 0.95 ? 1 : 2;
+
+    for (let i = 0; i < itemCount; i++) {
+      // Pick random floor position in room, not on stairs or player start
+      let tries = 0;
+      while (tries < 10) {
+        const x = Math.floor(room.x + rand() * room.w);
+        const y = Math.floor(room.y + rand() * room.h);
+        const tile = floor.tiles[y]?.[x];
+        if (tile?.type === 'floor' && !(x === playerStart.x && y === playerStart.y)) {
+          // 25% chance copper, 75% chance item
+          if (rand() < 0.25) {
+            items.push({ item: createCopperDrop(depth), position: { x, y } });
+          } else {
+            const tpl = candidates[Math.floor(rand() * candidates.length)];
+            const item = createItemFromTemplate(tpl, depth);
+            // Most ground items are unidentified; 15% chance to be pre-identified
+            if (item.category !== 'currency' && rand() > 0.15) {
+              item.identified = false;
+            }
+            items.push({ item, position: { x, y } });
+          }
+          break;
+        }
+        tries++;
+      }
+    }
+  }
+
+  return items;
+}
+
+// ============================================================
+// Trap placement
+// ============================================================
+
+function placeTraps(
+  floor: Floor,
+  _rooms: Room[],
+  depth: number,
+  playerStart: Vector2,
+  rand: () => number,
+): void {
+  // Number of traps scales with depth: 1-2 on early floors, up to 4-6 on deep floors
+  const trapCount = Math.floor(1 + depth * 0.3 + rand() * 2);
+
+  // Collect valid trap positions (floor tiles, not stairs, not player start, not doors)
+  const validPositions: Vector2[] = [];
+  for (let y = 1; y < floor.height - 1; y++) {
+    for (let x = 1; x < floor.width - 1; x++) {
+      const tile = floor.tiles[y][x];
+      if (tile.type === 'floor'
+        && !(x === playerStart.x && y === playerStart.y)
+        && !floor.items.some(i => i.position.x === x && i.position.y === y)) {
+        validPositions.push({ x, y });
+      }
+    }
+  }
+
+  // Shuffle and pick
+  for (let i = validPositions.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [validPositions[i], validPositions[j]] = [validPositions[j], validPositions[i]];
+  }
+
+  const count = Math.min(trapCount, validPositions.length);
+  for (let i = 0; i < count; i++) {
+    const pos = validPositions[i];
+    // Pick trap type — portal traps only appear on deeper floors
+    const available = depth < 5
+      ? TRAP_TYPES.filter(t => t.id !== 'portal')
+      : TRAP_TYPES;
+    const trap = available[Math.floor(rand() * available.length)];
+    floor.tiles[pos.y][pos.x] = createTrapTile(trap.id);
+  }
 }

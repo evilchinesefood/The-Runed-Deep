@@ -21,21 +21,30 @@ export function processPickupItem(state: GameState): GameState {
     };
   }
 
-  const picked = itemsHere[0];
+  // Pick up ALL items at this position
   const messages: Message[] = [];
   let hero = { ...state.hero };
+  let inventory = [...hero.inventory];
+  let copper = hero.copper;
 
-  if (picked.item.category === 'currency') {
-    const amount = picked.item.properties['amount'] ?? picked.item.value;
-    hero = { ...hero, copper: hero.copper + amount };
-    messages.push({ text: `Picked up ${picked.item.name}.`, severity: 'normal', turn: state.turn });
-  } else {
-    hero = { ...hero, inventory: [...hero.inventory, picked.item] };
-    messages.push({ text: `Picked up ${picked.item.name}.`, severity: 'normal', turn: state.turn });
+  for (const placed of itemsHere) {
+    if (placed.item.category === 'currency') {
+      const amount = placed.item.properties['amount'] ?? placed.item.value;
+      copper += amount;
+      messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
+    } else {
+      inventory.push(placed.item);
+      messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
+    }
   }
 
-  const newItems = floor.items.filter(i => i !== picked);
-  const newFloor = { ...floor, items: newItems };
+  hero = { ...hero, inventory, copper };
+
+  // Remove all picked items from floor
+  const remaining = floor.items.filter(
+    i => i.position.x !== pos.x || i.position.y !== pos.y
+  );
+  const newFloor = { ...floor, items: remaining };
 
   return {
     ...state,

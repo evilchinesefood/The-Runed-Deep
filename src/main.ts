@@ -150,7 +150,14 @@ function render(state: GameState): void {
   }
 }
 
+// Screen cleanup registry — called on every screen switch
+const screenCleanups: (() => void)[] = [];
+function addScreenCleanup(fn: () => void): void { screenCleanups.push(fn); }
+
 function switchScreen(state: GameState): void {
+  // Run all cleanup functions from previous screen
+  while (screenCleanups.length > 0) screenCleanups.pop()!();
+
   root.replaceChildren();
   root.dataset.screen = state.screen;
   mapRenderer = null;
@@ -243,17 +250,20 @@ function switchScreen(state: GameState): void {
     }
 
     case 'character-info': {
-      input.setEnabled(true);
+      input.setEnabled(false);
       const infoScreen = createCharacterInfoScreen(gameLoop.getState(), () => {
         gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
       });
+      addScreenCleanup(infoScreen.cleanup);
       root.appendChild(infoScreen);
       break;
     }
 
     case 'inventory': {
-      input.setEnabled(true);
+      input.setEnabled(false);
+      let invCleanup: (() => void) | null = null;
       const renderInventory = () => {
+        if (invCleanup) invCleanup();
         const invScreen = createInventoryScreen(
           gameLoop.getState(),
           action => {
@@ -263,6 +273,8 @@ function switchScreen(state: GameState): void {
           },
           () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
         );
+        invCleanup = invScreen.cleanup;
+        addScreenCleanup(() => { if (invCleanup) invCleanup(); });
         root.replaceChildren(invScreen);
       };
       renderInventory();
@@ -270,10 +282,11 @@ function switchScreen(state: GameState): void {
     }
 
     case 'help': {
-      input.setEnabled(true);
+      input.setEnabled(false);
       const helpScreen = createHelpScreen(() => {
         gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
       });
+      addScreenCleanup(helpScreen.cleanup);
       root.appendChild(helpScreen);
       break;
     }

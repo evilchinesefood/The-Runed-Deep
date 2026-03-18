@@ -209,10 +209,8 @@ export class InputManager {
           }
           break;
         case 'Slash':
-          if (e.shiftKey) { // ? key
-            e.preventDefault();
-            this.emit({ type: 'setScreen', screen: 'help' });
-          }
+          e.preventDefault();
+          this.emit({ type: 'setScreen', screen: 'help' });
           break;
         case 'Escape':
           e.preventDefault();

@@ -95,7 +95,7 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number): I
   };
 }
 
-function createCopperDrop(depth: number): Item {
+export function createCopperDrop(depth: number): Item {
   const amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
   return {
     id: `item-${nextItemId++}`,

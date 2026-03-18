@@ -112,7 +112,7 @@ export function createInventoryScreen(
   state: GameState,
   onAction: (action: GameAction) => void,
   onClose: () => void,
-): HTMLElement {
+): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
   let selectedIdx = 0;
 
@@ -404,6 +404,6 @@ export function createInventoryScreen(
 
   document.addEventListener('keydown', keyHandler);
   const cleanup = () => { document.removeEventListener('keydown', keyHandler); hideItemTooltip(); };
-
-  return screen;
+  (screen as HTMLElement & { cleanup: () => void }).cleanup = cleanup;
+  return screen as HTMLElement & { cleanup: () => void };
 }

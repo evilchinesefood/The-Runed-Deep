@@ -46,7 +46,7 @@ function sectionHeader(text: string): HTMLElement {
 export function createCharacterInfoScreen(
   state: GameState,
   onClose: () => void,
-): HTMLElement {
+): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
 
   const screen = el('div', {
@@ -181,13 +181,15 @@ export function createCharacterInfoScreen(
   const keyHandler = (e: KeyboardEvent) => {
     if (e.code === 'Escape' || e.code === 'KeyC') {
       e.preventDefault();
-      document.removeEventListener('keydown', keyHandler);
+      cleanup();
       onClose();
     }
   };
   document.addEventListener('keydown', keyHandler);
 
-  return screen;
+  const cleanup = () => { document.removeEventListener('keydown', keyHandler); };
+  (screen as HTMLElement & { cleanup: () => void }).cleanup = cleanup;
+  return screen as HTMLElement & { cleanup: () => void };
 }
 
 function renderEquipmentSummary(hero: Hero): HTMLElement {

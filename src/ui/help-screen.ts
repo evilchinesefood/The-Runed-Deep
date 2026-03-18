@@ -12,7 +12,7 @@ const KEYS: [string, string][] = [
   ['', ''],
   // Actions
   ['G', 'Pick up item'],
-  ['. (period)', 'Rest (wait one turn)'],
+  ['. (period)', 'Wait (recover HP/MP over time)'],
   ['S', 'Search nearby'],
   ['> or < or Enter', 'Use stairs'],
   ['', ''],
@@ -32,7 +32,7 @@ const KEYS: [string, string][] = [
   ['F9', 'Debug: Spell test arena'],
 ];
 
-export function createHelpScreen(onClose: () => void): HTMLElement {
+export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: () => void } {
   const screen = el('div', {
     display: 'flex',
     flexDirection: 'column',
@@ -126,6 +126,6 @@ export function createHelpScreen(onClose: () => void): HTMLElement {
   };
   document.addEventListener('keydown', keyHandler);
   const cleanup = () => { document.removeEventListener('keydown', keyHandler); };
-
-  return screen;
+  (screen as HTMLElement & { cleanup: () => void }).cleanup = cleanup;
+  return screen as HTMLElement & { cleanup: () => void };
 }

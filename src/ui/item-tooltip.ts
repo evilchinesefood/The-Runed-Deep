@@ -177,6 +177,20 @@ export function showItemTooltip(item: Item, x: number, y: number): void {
   positionTooltip(tip, x, y);
 }
 
+export function showPileTooltip(items: Item[], x: number, y: number): void {
+  const tip = getTooltip();
+  tip.replaceChildren();
+  tip.appendChild(d('div', { fontSize: '14px', fontWeight: 'bold', color: '#fc4', marginBottom: '4px' }, `Treasure Pile (${items.length} items)`));
+  for (const item of items.slice(0, 8)) {
+    tip.appendChild(d('div', { fontSize: '12px', color: '#ccc', paddingLeft: '6px' }, `· ${getDisplayName(item)}`));
+  }
+  if (items.length > 8) {
+    tip.appendChild(d('div', { fontSize: '11px', color: '#888', paddingLeft: '6px' }, `...and ${items.length - 8} more`));
+  }
+  tip.appendChild(d('div', { fontSize: '11px', color: '#888', marginTop: '4px' }, 'Press G to pick up all'));
+  positionTooltip(tip, x, y);
+}
+
 export function hideItemTooltip(): void {
   if (tooltipEl) tooltipEl.style.display = 'none';
 }

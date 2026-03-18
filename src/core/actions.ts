@@ -1,4 +1,4 @@
-import type { GameState, GameAction, Direction, Vector2, Message } from './types';
+import type { GameState, GameAction, Direction, Vector2, Message, Hero, Floor } from './types';
 import { generateFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
 import { castSpell } from '../systems/spells/casting';
@@ -82,11 +82,24 @@ function processMove(state: GameState, direction: Direction): GameState {
     return playerAttacksMonster(state, monsterAtTarget.id);
   }
 
+  // Move hero
+  let hero = { ...state.hero, position: newPos };
+  const messages = [...state.messages];
+  let floors = state.floors;
+
+  // Check for trap at new position
+  const tileAtNew = floor.tiles[newPos.y][newPos.x];
+  if (tileAtNew.type === 'trap' && tileAtNew.trapType) {
+    const result = triggerTrap(tileAtNew, hero, newPos, floor, floorKey, messages, state.turn + 1);
+    hero = result.hero;
+    floors = { ...state.floors, [floorKey]: result.floor };
+  }
+
   // Check for items at new position
-  const itemsAtPos = floor.items.filter(
+  const currentFloor = floors[floorKey] ?? floor;
+  const itemsAtPos = currentFloor.items.filter(
     i => i.position.x === newPos.x && i.position.y === newPos.y
   );
-  const messages = [...state.messages];
   if (itemsAtPos.length === 1) {
     messages.push({
       text: `You see ${itemsAtPos[0].item.name} on the ground. (G to pick up)`,
@@ -95,7 +108,7 @@ function processMove(state: GameState, direction: Direction): GameState {
     });
   } else if (itemsAtPos.length > 1) {
     messages.push({
-      text: `You see ${itemsAtPos.length} items on the ground. (G to pick up)`,
+      text: `You see a treasure pile with ${itemsAtPos.length} items. (G to pick up all)`,
       severity: 'normal' as const,
       turn: state.turn + 1,
     });
@@ -103,7 +116,8 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   return {
     ...state,
-    hero: { ...state.hero, position: newPos },
+    hero,
+    floors,
     messages,
     turn: state.turn + 1,
   };
@@ -176,7 +190,7 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   const depthLabel = targetFloor + 1;
   const verb = direction === 'descend' ? 'descends to' : 'ascends to';
 
-  const newState: GameState = {
+  let newState: GameState = {
     ...state,
     hero: { ...state.hero, position: arrivalPos },
     currentFloor: targetFloor,
@@ -189,9 +203,74 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   };
 
   // Auto-save on floor change
-  saveGame(newState, 1);
+  const saved = saveGame(newState, 1);
+  if (saved) {
+    newState = {
+      ...newState,
+      messages: [
+        ...newState.messages,
+        { text: 'Game auto-saved.', severity: 'system' as const, turn: newState.turn },
+      ],
+    };
+  }
 
   return newState;
+}
+
+// Trap data matching generator definitions
+const TRAP_DATA: Record<string, { damage: [number, number]; message: string; sprite: string }> = {
+  pit:    { damage: [3, 8],  message: 'You fall into a pit!', sprite: 'pit-trap' },
+  arrow:  { damage: [2, 6],  message: 'An arrow shoots from the wall!', sprite: 'arrow-trap' },
+  fire:   { damage: [4, 10], message: 'Flames erupt beneath you!', sprite: 'fire-trap' },
+  dart:   { damage: [1, 4],  message: 'A dart flies from a hidden slot!', sprite: 'dart-trap' },
+  portal: { damage: [0, 0],  message: 'A portal pulls you across the room!', sprite: 'portal-trap' },
+  acid:   { damage: [3, 9],  message: 'Acid sprays from the floor!', sprite: 'acid-trap' },
+};
+
+function triggerTrap(
+  tile: { trapType?: string; trapRevealed?: boolean },
+  hero: Hero,
+  pos: Vector2,
+  floor: Floor,
+  _floorKey: string,
+  messages: Message[],
+  turn: number,
+): { hero: Hero; floor: Floor } {
+  const trap = TRAP_DATA[tile.trapType ?? ''];
+  if (!trap) return { hero, floor };
+
+  // Reveal the trap
+  const newTiles = floor.tiles.map(row => [...row]);
+  newTiles[pos.y][pos.x] = {
+    ...newTiles[pos.y][pos.x],
+    trapRevealed: true,
+    sprite: trap.sprite,
+  };
+  const newFloor = { ...floor, tiles: newTiles };
+
+  // Portal trap: teleport to random floor position
+  if (tile.trapType === 'portal') {
+    messages.push({ text: trap.message, severity: 'important', turn });
+    for (let tries = 0; tries < 200; tries++) {
+      const x = Math.floor(Math.random() * floor.width);
+      const y = Math.floor(Math.random() * floor.height);
+      const t = floor.tiles[y]?.[x];
+      if (t?.walkable && t.type !== 'trap' && !floor.monsters.some(m => m.position.x === x && m.position.y === y)) {
+        hero = { ...hero, position: { x, y } };
+        messages.push({ text: 'You are teleported!', severity: 'important', turn });
+        break;
+      }
+    }
+    return { hero, floor: newFloor };
+  }
+
+  // Damage traps
+  const dmg = trap.damage[0] + Math.floor(Math.random() * (trap.damage[1] - trap.damage[0] + 1));
+  const newHp = Math.max(0, hero.hp - dmg);
+  messages.push({ text: `${trap.message} You take ${dmg} damage. (${newHp}/${hero.maxHp} HP)`, severity: 'combat', turn });
+  hero = { ...hero, hp: newHp };
+
+  return { hero, floor: newFloor };
 }
 
 function processSave(state: GameState): GameState {
@@ -208,8 +287,33 @@ function addMessage(state: GameState, text: string, severity: Message['severity'
 }
 
 function processRest(state: GameState): GameState {
+  let hero = { ...state.hero };
+  const messages = [...state.messages];
+  const gains: string[] = [];
+
+  // Recover 1 HP per wait if below max
+  if (hero.hp < hero.maxHp) {
+    hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 1) };
+    gains.push('+1 HP');
+  }
+
+  // Recover 1 MP every 2 turns of waiting
+  if (hero.mp < hero.maxMp && state.turn % 2 === 0) {
+    hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 1) };
+    gains.push('+1 MP');
+  }
+
+  const gainText = gains.length > 0 ? ` (${gains.join(', ')})` : '';
+  messages.push({
+    text: `You waited.${gainText}`,
+    severity: 'system' as const,
+    turn: state.turn,
+  });
+
   return {
     ...state,
+    hero,
+    messages,
     turn: state.turn + 1,
   };
 }

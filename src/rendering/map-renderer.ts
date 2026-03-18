@@ -1,5 +1,5 @@
 import type { GameState, Vector2 } from '../core/types';
-import { showItemTooltip, hideItemTooltip } from '../ui/item-tooltip';
+import { showItemTooltip, showPileTooltip, hideItemTooltip } from '../ui/item-tooltip';
 
 const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
@@ -7,7 +7,8 @@ const VIEWPORT_TILES_Y = 15;
 
 interface TileCell {
   floor: HTMLElement;    // Bottom layer: terrain tile
-  entity: HTMLElement;   // Top layer: monster, hero, or item (transparent bg)
+  ground: HTMLElement;   // Middle layer: items/traps on floor (transparent bg)
+  entity: HTMLElement;   // Top layer: monster, hero (transparent bg)
 }
 
 export class MapRenderer {
@@ -48,12 +49,17 @@ export class MapRenderer {
         floorEl.style.cssText = posStyle;
         this.mapContainer.appendChild(floorEl);
 
-        // Entity layer (top, transparent background)
+        // Ground layer (middle — items/traps, transparent bg)
+        const groundEl = document.createElement('div');
+        groundEl.style.cssText = posStyle + 'background-color:transparent;';
+        this.mapContainer.appendChild(groundEl);
+
+        // Entity layer (top — hero/monsters, transparent bg)
         const entityEl = document.createElement('div');
         entityEl.style.cssText = posStyle + 'background-color:transparent;';
         this.mapContainer.appendChild(entityEl);
 
-        this.cells[y][x] = { floor: floorEl, entity: entityEl };
+        this.cells[y][x] = { floor: floorEl, ground: groundEl, entity: entityEl };
       }
     }
   }
@@ -73,11 +79,13 @@ export class MapRenderer {
       const tileVisible = floor.visible[worldPos.y]?.[worldPos.x] || floor.lit[worldPos.y]?.[worldPos.x];
       if (!tileVisible) { hideItemTooltip(); return; }
 
-      const groundItem = floor.items.find(
+      const groundItems = floor.items.filter(
         i => i.position.x === worldPos.x && i.position.y === worldPos.y
       );
-      if (groundItem) {
-        showItemTooltip(groundItem.item, e.clientX, e.clientY);
+      if (groundItems.length > 1) {
+        showPileTooltip(groundItems.map(g => g.item), e.clientX, e.clientY);
+      } else if (groundItems.length === 1) {
+        showItemTooltip(groundItems[0].item, e.clientX, e.clientY);
       } else {
         hideItemTooltip();
       }
@@ -103,9 +111,11 @@ export class MapRenderer {
         const worldY = cameraY + vy;
         const cell = this.cells[vy][vx];
 
-        // Reset both layers
+        // Reset all layers
         cell.floor.className = '';
         cell.floor.style.background = '';
+        cell.ground.className = '';
+        cell.ground.style.display = 'none';
         cell.entity.className = '';
         cell.entity.style.display = 'none';
 
@@ -139,24 +149,40 @@ export class MapRenderer {
         // Use lit (blue) floor sprite only for floor tiles with permanent light
         const floorSprite = (isLit && isFloorTile) ? 'lit-dgn' : tile.sprite;
 
-        // Tiles like stairs and doors are overlays on top of the base floor
+        // Overlay tiles (stairs, doors, revealed traps) render on ground layer
+        // so they stay visible under hero/monsters
         const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down'
-          || tile.type === 'door-closed' || tile.type === 'door-open';
+          || tile.type === 'door-closed' || tile.type === 'door-open'
+          || (tile.type === 'trap' && tile.trapRevealed);
 
         if (isOverlayTile) {
           cell.floor.className = isLit ? 'lit-dgn' : 'dark-dgn';
           cell.floor.style.opacity = opacity;
-          cell.entity.className = tile.sprite;
-          cell.entity.style.display = 'block';
-          cell.entity.style.opacity = opacity;
+          cell.ground.className = tile.sprite;
+          cell.ground.style.display = 'block';
+          cell.ground.style.opacity = opacity;
         } else {
           cell.floor.className = floorSprite;
           cell.floor.style.opacity = opacity;
         }
 
-        // If visible or permanently lit, show entities (hero/monsters/items)
+        // If visible or permanently lit, show ground objects and entities
         if (visible || isLit) {
-          // Hero
+          // Ground layer: items on floor and revealed traps
+          const itemsHere = floor.items.filter(
+            i => i.position.x === worldX && i.position.y === worldY
+          );
+          if (itemsHere.length > 1) {
+            cell.ground.className = 'treasure-pile';
+            cell.ground.style.display = 'block';
+            cell.ground.style.opacity = '1';
+          } else if (itemsHere.length === 1) {
+            cell.ground.className = itemsHere[0].item.sprite;
+            cell.ground.style.display = 'block';
+            cell.ground.style.opacity = '1';
+          }
+
+          // Entity layer: hero > monster (items already on ground layer)
           if (worldX === state.hero.position.x && worldY === state.hero.position.y) {
             cell.entity.className = state.hero.gender === 'male' ? 'male-hero' : 'female-hero';
             cell.entity.style.display = 'block';
@@ -164,23 +190,11 @@ export class MapRenderer {
             continue;
           }
 
-          // Monsters
           const monster = floor.monsters.find(
             m => m.position.x === worldX && m.position.y === worldY
           );
           if (monster) {
             cell.entity.className = monster.sprite;
-            cell.entity.style.display = 'block';
-            cell.entity.style.opacity = '1';
-            continue;
-          }
-
-          // Items on ground
-          const item = floor.items.find(
-            i => i.position.x === worldX && i.position.y === worldY
-          );
-          if (item) {
-            cell.entity.className = item.item.sprite;
             cell.entity.style.display = 'block';
             cell.entity.style.opacity = '1';
             continue;
