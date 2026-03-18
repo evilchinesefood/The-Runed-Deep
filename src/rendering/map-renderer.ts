@@ -114,8 +114,10 @@ export class MapRenderer {
         // Reset all layers
         cell.floor.className = '';
         cell.floor.style.background = '';
+        cell.floor.style.opacity = '';
         cell.ground.className = '';
         cell.ground.style.display = 'none';
+        cell.ground.style.opacity = '';
         cell.entity.className = '';
         cell.entity.style.display = 'none';
 

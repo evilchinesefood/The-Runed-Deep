@@ -28,6 +28,7 @@ function makeMonster(templateId: string, name: string, sprite: string, x: number
     abilities: [],
     sleeping: false,
     slowed: false,
+    fleeing: 0,
   };
 }
 

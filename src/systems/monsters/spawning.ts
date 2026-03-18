@@ -68,6 +68,7 @@ export function createMonster(
     abilities: [...template.abilities],
     sleeping: false,
     slowed: false,
+    fleeing: 0,
   };
 }
 

@@ -167,6 +167,7 @@ export interface Monster {
   abilities: string[];
   sleeping: boolean;
   slowed: boolean;
+  fleeing: number;  // turns remaining in flee mode, 0 = not fleeing
 }
 
 export type MonsterAI = 'melee' | 'ranged' | 'caster' | 'thief' | 'summoner';
@@ -266,11 +267,9 @@ export interface GameState {
 
 export type GameAction =
   | { type: 'move'; direction: Direction }
-  | { type: 'attack'; target: Vector2 }
   | { type: 'castSpell'; spellId: string; direction?: Direction; target?: Vector2 }
   | { type: 'pickupItem' }
   | { type: 'useStairs' }
-  | { type: 'openDoor'; position: Vector2 }
   | { type: 'rest' }
   | { type: 'search' }
   | { type: 'useItem'; itemId: string }

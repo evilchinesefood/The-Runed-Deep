@@ -2,6 +2,7 @@ import type { GameState, Hero, Monster, Message, Floor } from '../../core/types'
 import { queueAnimation } from '../../rendering/animation-queue';
 import type { SpellAnimation } from '../../rendering/animations';
 import { generateLoot } from '../items/loot';
+import { processMonsterAbility } from '../monsters/ai';
 
 // ============================================================
 // Dice rolling
@@ -100,10 +101,18 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     return applyMessages(state, messages);
   }
 
-  // Damage
+  // Physical-immune check (slimes — heavily reduced damage)
+  const isPhysicalImmune = monster.abilities.includes('physical-immune');
   const rawDamage = calcPlayerDamage(state.hero);
-  // Monsters have an armor stat from their template
-  const damage = Math.max(1, rawDamage);
+  let damage = Math.max(1, rawDamage);
+  if (isPhysicalImmune) {
+    damage = Math.max(1, Math.floor(damage * 0.1)); // 90% reduction
+    messages.push({
+      text: `Your weapon barely affects the ${monster.name}!`,
+      severity: 'combat',
+      turn: state.turn,
+    });
+  }
 
   // Hit flash on the monster
   queueAnimation([{
@@ -218,10 +227,17 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
     turn: state.turn,
   });
 
-  return {
+  let result: GameState = {
     ...applyMessages(state, messages),
-    hero: { ...state.hero, hp: newHp },
+    hero: { ...state.hero, hp: Math.max(0, newHp) },
   };
+
+  // Process on-hit abilities (poison, drain, steal, elemental touch)
+  if (monster.abilities.length > 0 && newHp > 0) {
+    result = processMonsterAbility(result, monster);
+  }
+
+  return result;
 }
 
 function applyMessages(state: GameState, messages: Message[]): GameState {

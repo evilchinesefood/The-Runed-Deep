@@ -87,8 +87,13 @@ function resolveSpellEffect(
       return resolveHeal(state, spell, 0.60, 30);
     case 'healing':
       return resolveHeal(state, spell, 1.0, 999);
-    case 'neutralize-poison':
-      return addMsg(state, `${state.hero.name} is cleansed of poison.`, 'system');
+    case 'neutralize-poison': {
+      const cleaned = state.hero.activeEffects.filter(e => e.id !== 'poisoned');
+      return {
+        ...addMsg(state, `${state.hero.name} is cleansed of poison.`, 'important'),
+        hero: { ...state.hero, activeEffects: cleaned },
+      };
+    }
 
     // ── Defense spells ──────────────────────────────────
     case 'shield':
@@ -113,8 +118,16 @@ function resolveSpellEffect(
     // ── Movement spells ─────────────────────────────────
     case 'phase-door':
       return resolvePhaseDoor(state, direction);
-    case 'levitation':
-      return addMsg(state, `${state.hero.name} begins to levitate. Traps will not trigger.`, 'system');
+    case 'levitation': {
+      const newEffects = [
+        ...state.hero.activeEffects.filter(e => e.id !== 'levitation'),
+        { id: 'levitation', name: 'Levitation', turnsRemaining: 50 },
+      ];
+      return {
+        ...addMsg(state, `${state.hero.name} begins to float!`, 'important'),
+        hero: { ...state.hero, activeEffects: newEffects },
+      };
+    }
     case 'rune-of-return':
       return addMsg(state, `A rune of return glows beneath your feet.`, 'system');
     case 'teleport':
@@ -564,8 +577,7 @@ function resolveDetectTraps(state: GameState): GameState {
   let trapsFound = 0;
   const tiles = floor.tiles.map(row => row.map(t => {
     if (t.type === 'trap' && !t.trapRevealed) {
-      const dist = Math.abs(0) // all traps for now
-      if (dist >= 0) { trapsFound++; return { ...t, trapRevealed: true }; }
+      trapsFound++; return { ...t, trapRevealed: true };
     }
     return t;
   }));

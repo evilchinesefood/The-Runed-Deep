@@ -49,12 +49,12 @@ export class GameLoop {
       newState = this.processMonsterTurns(newState);
     }
 
-    // 4. Check for player death
+    // 5. Check for player death
     if (newState.screen === 'game' && newState.hero.hp <= 0) {
       newState = { ...newState, screen: 'death' };
     }
 
-    // 4. Update state and render
+    // 6. Update state and render
     this.state = newState;
     this.onStateChange?.(newState);
     this.onRender(newState);
@@ -71,6 +71,15 @@ export class GameLoop {
     );
 
     let messages = [...state.messages];
+
+    // Poison damage tick (before expiry check — poison hurts while active)
+    const poisoned = hero.activeEffects.find(e => e.id === 'poisoned' && e.turnsRemaining > 1);
+    if (poisoned) {
+      const poisonDmg = 3;
+      hero = { ...hero, hp: Math.max(0, hero.hp - poisonDmg) };
+      messages = [...messages, { text: `Poison deals ${poisonDmg} damage! (${hero.hp}/${hero.maxHp} HP)`, severity: 'combat' as const, turn: state.turn }];
+    }
+
     for (const e of expired) {
       messages = [...messages, { text: `${e.name} has worn off.`, severity: 'system' as const, turn: state.turn }];
 
