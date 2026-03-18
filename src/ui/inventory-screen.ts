@@ -354,6 +354,19 @@ export function createInventoryScreen(
   footer.appendChild(el('span', undefined, `Weight: ${totalWeight.toFixed(1)} kg`));
   footer.appendChild(el('span', undefined, `Copper: ${h.copper}`));
   footer.appendChild(el('span', undefined, `Items: ${h.inventory.length}`));
+
+  const pack = h.equipment.pack;
+  if (pack) {
+    const packTpl = ITEM_BY_ID[pack.templateId];
+    if (packTpl?.weightCapacity) {
+      const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
+      const cap = packTpl.weightCapacity;
+      const pct = Math.round((invWeight / cap) * 100);
+      const color = pct > 90 ? '#f44' : pct > 70 ? '#fa0' : '#aaa';
+      footer.appendChild(el('span', { color }, `Pack: ${pct}%`));
+    }
+  }
+
   screen.appendChild(footer);
 
   // ── Keyboard handler ───────────────────────────────────────

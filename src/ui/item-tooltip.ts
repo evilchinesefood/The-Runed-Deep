@@ -68,6 +68,13 @@ function buildTooltipContent(item: Item): HTMLElement {
   if (item.properties['twoHanded']) catText += ' (Two-Handed)';
   container.appendChild(d('div', { color: '#888', marginBottom: '4px' }, catText));
 
+  // Material tier
+  const tier = tpl?.materialTier;
+  if (tier) {
+    const tierColors: Record<string, string> = { elven: '#8f8', meteoric: '#f8f' };
+    container.appendChild(d('div', { color: tierColors[tier] ?? '#aaa', fontSize: '11px', marginBottom: '4px', fontStyle: 'italic' }, `${tier.charAt(0).toUpperCase() + tier.slice(1)} craftsmanship`));
+  }
+
   // Stats
   const statsBox = d('div', { marginBottom: '4px' });
   let hasStats = false;
@@ -123,6 +130,12 @@ function buildTooltipContent(item: Item): HTMLElement {
   // Charges
   if (item.properties['charges'] !== undefined) {
     statsBox.appendChild(statLine(`Charges: ${item.properties['charges']}`));
+    hasStats = true;
+  }
+
+  // Container capacity
+  if (tpl?.weightCapacity) {
+    statsBox.appendChild(statLine(`Capacity: ${(tpl.weightCapacity / 1000).toFixed(0)} kg`));
     hasStats = true;
   }
 

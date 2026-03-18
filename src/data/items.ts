@@ -28,6 +28,10 @@ export interface ItemTemplate {
   healPct?: number;        // heal as % of max HP
   spellId?: string;        // for spellbooks/wands
   charges?: number;        // for wands
+  // Material / container
+  materialTier?: string;
+  weightCapacity?: number; // max carry weight in grams
+  bulkCapacity?: number;   // max bulk in grams
 }
 
 // ── Weapons ───────────────────────────────────────────────
@@ -65,6 +69,44 @@ const WEAPONS: ItemTemplate[] = [
     weight: 3000, value: 100, depthMin: 20, depthMax: 38, damageMin: 5, damageMax: 15, accuracy: 1 },
   { id: 'two-handed-sword', name: 'Two-Handed Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
     weight: 4500, value: 120, depthMin: 24, depthMax: 99, damageMin: 6, damageMax: 18, accuracy: 0, twoHanded: true },
+];
+
+// ── Elven Weapons ─────────────────────────────────────────
+
+const ELVEN_WEAPONS: ItemTemplate[] = [
+  { id: 'elven-long-sword', name: 'Elven Long Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
+    weight: 1500, value: 200, depthMin: 15, depthMax: 99, damageMin: 4, damageMax: 12, accuracy: 3, materialTier: 'elven' },
+  { id: 'elven-dagger', name: 'Elven Dagger', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
+    weight: 300, value: 120, depthMin: 12, depthMax: 99, damageMin: 2, damageMax: 8, accuracy: 4, materialTier: 'elven' },
+  { id: 'elven-spear', name: 'Elven Spear', category: 'weapon', sprite: 'spear-enchanted', equipSlot: 'weapon',
+    weight: 1800, value: 150, depthMin: 14, depthMax: 99, damageMin: 3, damageMax: 10, accuracy: 3, materialTier: 'elven' },
+];
+
+const ELVEN_ARMOR: ItemTemplate[] = [
+  { id: 'elven-chain-mail', name: 'Elven Chain Mail', category: 'armor', sprite: 'metal-armour-enchanted', equipSlot: 'body',
+    weight: 6000, value: 300, depthMin: 16, depthMax: 99, ac: 8, materialTier: 'elven' },
+  { id: 'elven-shield', name: 'Elven Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
+    weight: 2500, value: 180, depthMin: 14, depthMax: 99, ac: 4, materialTier: 'elven' },
+  { id: 'elven-helmet', name: 'Elven Helmet', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
+    weight: 1000, value: 120, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
+];
+
+// ── Meteoric Steel Weapons & Armor ────────────────────────
+
+const METEORIC_WEAPONS: ItemTemplate[] = [
+  { id: 'meteoric-long-sword', name: 'Meteoric Steel Long Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
+    weight: 2200, value: 500, depthMin: 25, depthMax: 99, damageMin: 6, damageMax: 16, accuracy: 2, materialTier: 'meteoric' },
+  { id: 'meteoric-battle-axe', name: 'Meteoric Battle Axe', category: 'weapon', sprite: 'axe-enchanted', equipSlot: 'weapon',
+    weight: 3500, value: 450, depthMin: 28, depthMax: 99, damageMin: 7, damageMax: 18, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
+  { id: 'meteoric-war-hammer', name: 'Meteoric War Hammer', category: 'weapon', sprite: 'hammer-enchanted', equipSlot: 'weapon',
+    weight: 3000, value: 400, depthMin: 26, depthMax: 99, damageMin: 6, damageMax: 16, accuracy: 0, materialTier: 'meteoric' },
+];
+
+const METEORIC_ARMOR: ItemTemplate[] = [
+  { id: 'meteoric-plate-mail', name: 'Meteoric Plate Mail', category: 'armor', sprite: 'metal-armour-enchanted', equipSlot: 'body',
+    weight: 12000, value: 800, depthMin: 28, depthMax: 99, ac: 15, materialTier: 'meteoric' },
+  { id: 'meteoric-shield', name: 'Meteoric Steel Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
+    weight: 4000, value: 350, depthMin: 26, depthMax: 99, ac: 7, materialTier: 'meteoric' },
 ];
 
 // ── Armor ─────────────────────────────────────────────────
@@ -204,12 +246,56 @@ const CURRENCY: ItemTemplate[] = [
     weight: 50, value: 0, depthMin: 1, depthMax: 99 },
 ];
 
+// ── Containers ────────────────────────────────────────────
+
+const CONTAINERS: ItemTemplate[] = [
+  { id: 'small-pack', name: 'Small Pack', category: 'container', sprite: 'bag', equipSlot: 'pack',
+    weight: 500, value: 20, depthMin: 1, depthMax: 99, weightCapacity: 15000, bulkCapacity: 3000 },
+  { id: 'large-pack', name: 'Large Pack', category: 'container', sprite: 'pack', equipSlot: 'pack',
+    weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 30000, bulkCapacity: 6000 },
+  { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
+    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 100000, bulkCapacity: 50000 },
+  { id: 'leather-belt', name: 'Leather Belt', category: 'belt', sprite: 'belt', equipSlot: 'belt',
+    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
+  { id: 'belt-of-wands', name: 'Belt of Wand Quiver', category: 'belt', sprite: 'belt-wand-quiver', equipSlot: 'belt',
+    weight: 400, value: 40, depthMin: 8, depthMax: 99, ac: 0, weightCapacity: 2000, bulkCapacity: 500 },
+  { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
+    weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 5000, bulkCapacity: 1000 },
+];
+
+// ── Worthless / Flavor Items ───────────────────────────────
+
+const WORTHLESS: ItemTemplate[] = [
+  { id: 'ring-adornment', name: 'Ring of Adornment', category: 'ring', sprite: 'ring', equipSlot: 'ringLeft',
+    weight: 50, value: 5, depthMin: 1, depthMax: 99, ac: 0 },
+  { id: 'blank-scroll', name: 'Blank Scroll', category: 'scroll', sprite: 'scroll',
+    weight: 50, value: 2, depthMin: 1, depthMax: 99 },
+  { id: 'broken-sword', name: 'Broken Sword', category: 'misc', sprite: 'broken-sword',
+    weight: 1000, value: 3, depthMin: 1, depthMax: 99 },
+  { id: 'broken-shield', name: 'Broken Shield', category: 'misc', sprite: 'broken-shield',
+    weight: 1500, value: 3, depthMin: 1, depthMax: 99 },
+  { id: 'broken-helmet', name: 'Broken Helmet', category: 'misc', sprite: 'broken-helmet',
+    weight: 800, value: 2, depthMin: 1, depthMax: 99 },
+  { id: 'tattered-cloak', name: 'Tattered Cloak', category: 'misc', sprite: 'broken-cloak',
+    weight: 400, value: 2, depthMin: 1, depthMax: 99 },
+  { id: 'old-boots', name: 'Old Boots', category: 'misc', sprite: 'broken-boot',
+    weight: 600, value: 2, depthMin: 1, depthMax: 99 },
+  { id: 'apple', name: 'Apple', category: 'misc', sprite: 'apple',
+    weight: 150, value: 1, depthMin: 1, depthMax: 99 },
+  { id: 'parchment', name: 'Worn Parchment', category: 'misc', sprite: 'parchment',
+    weight: 30, value: 1, depthMin: 1, depthMax: 99 },
+];
+
 // ============================================================
 // Exports
 // ============================================================
 
 export const ALL_ITEM_TEMPLATES: ItemTemplate[] = [
   ...WEAPONS,
+  ...ELVEN_WEAPONS,
+  ...ELVEN_ARMOR,
+  ...METEORIC_WEAPONS,
+  ...METEORIC_ARMOR,
   ...ARMOR,
   ...SHIELDS,
   ...HELMETS,
@@ -219,6 +305,8 @@ export const ALL_ITEM_TEMPLATES: ItemTemplate[] = [
   ...SPELLBOOKS,
   ...WANDS,
   ...CURRENCY,
+  ...CONTAINERS,
+  ...WORTHLESS,
 ];
 
 export const ITEM_BY_ID: Record<string, ItemTemplate> = Object.fromEntries(
