@@ -2,6 +2,7 @@ import type { GameState, Item, Message, Hero, Direction } from '../../core/types
 import { recomputeDerivedStats } from '../character/derived-stats';
 import { ITEM_BY_ID } from '../../data/items';
 import { castSpell } from '../spells/casting';
+import { teleportToTown } from '../../core/actions';
 
 export function processUseItem(state: GameState, itemId: string): GameState {
   const idx = state.hero.inventory.findIndex(i => i.id === itemId);
@@ -95,6 +96,14 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     state = result.state;
   } else if (item.templateId === 'scroll-remove-curse') {
     hero = removeCurseFromFirst(hero, messages, state.turn);
+  } else if (item.templateId === 'scroll-rune-of-return') {
+    if (state.currentDungeon === 'town') {
+      messages.push({ text: 'You are already in town.', severity: 'system', turn: state.turn });
+    } else {
+      hero = removeFromInventory(hero, idx);
+      state = teleportToTown({ ...state, hero });
+      return { ...state, turn: state.turn + 1 };
+    }
   } else {
     messages.push({ text: `You read the ${item.name}. Nothing happens.`, severity: 'normal', turn: state.turn });
   }

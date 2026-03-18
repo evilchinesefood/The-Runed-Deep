@@ -20,7 +20,7 @@ const KEYS: [string, string][] = [
   ['', ''],
   // Spells
   ['Z', 'Open full spell list'],
-  ['1-9', 'Quick-cast spell (by slot)'],
+  ['1-7', 'Quick-cast spell (by hotkey slot)'],
   ['Click spell bar', 'Select spell to cast'],
   ['Direction key / Click map', 'Aim directional spell'],
   ['', ''],

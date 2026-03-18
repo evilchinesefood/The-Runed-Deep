@@ -283,7 +283,7 @@ export type GameAction =
   | { type: 'equipItem'; itemId: string }
   | { type: 'unequipItem'; slot: EquipSlot }
   | { type: 'dropItem'; itemId: string }
-  | { type: 'enterBuilding'; buildingId: string }
+  | { type: 'enterBuilding' }
   | { type: 'buyItem'; shopId: string; itemId: string }
   | { type: 'sellItem'; shopId: string; itemId: string }
   | { type: 'save' }

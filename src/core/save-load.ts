@@ -61,6 +61,12 @@ export function loadGame(slot: number = 1): GameState | null {
       screen: 'game',
     };
 
+    // Migration: add defaults for fields added after initial release
+    state.returnFloor ??= 0;
+    state.activeBuildingId ??= '';
+    if (!state.hero.spellHotkeys) state.hero.spellHotkeys = [];
+    if (!state.town.deepestFloor && state.town.deepestFloor !== 0) state.town.deepestFloor = 0;
+
     return state;
   } catch (e) {
     console.error('Failed to load game:', e);

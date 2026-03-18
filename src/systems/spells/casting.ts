@@ -400,17 +400,26 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
   const color = element === 'cold' ? '#4af' : element === 'fire' ? '#f64' : '#ff4';
   queueAnimation(buildBuffAnimation(state.hero.position, color));
   const hero = state.hero;
+  const alreadyActive = hero.activeEffects.some(e => e.id === spell.id);
+  // Always refresh duration
   const newEffects = [
     ...hero.activeEffects.filter(e => e.id !== spell.id),
     { id: spell.id, name: spell.name, turnsRemaining: 50 },
   ];
+  // Only add resistance if not already active (prevents stacking on re-cast)
   const newResistances = { ...hero.resistances };
-  if (element === 'cold') newResistances.cold = Math.min(75, newResistances.cold + 50);
-  else if (element === 'fire') newResistances.fire = Math.min(75, newResistances.fire + 50);
-  else if (element === 'lightning') newResistances.lightning = Math.min(75, newResistances.lightning + 50);
+  if (!alreadyActive) {
+    if (element === 'cold') newResistances.cold = Math.min(75, newResistances.cold + 50);
+    else if (element === 'fire') newResistances.fire = Math.min(75, newResistances.fire + 50);
+    else if (element === 'lightning') newResistances.lightning = Math.min(75, newResistances.lightning + 50);
+  }
+
+  const msg = alreadyActive
+    ? `${hero.name} refreshes resistance to ${element}. (50 turns)`
+    : `${hero.name} gains resistance to ${element} for 50 turns.`;
 
   return {
-    ...addMsg(state, `${hero.name} gains resistance to ${element} for 50 turns.`, 'important'),
+    ...addMsg(state, msg, 'important'),
     hero: { ...hero, activeEffects: newEffects, resistances: newResistances },
   };
 }

@@ -477,17 +477,12 @@ function processMelee(state: GameState, floorKey: string, idx: number): GameStat
       const stepY = dy === 0 ? 0 : dy > 0 ? 1 : -1;
       const chargePos = { x: hero.position.x - stepX, y: hero.position.y - stepY };
       if (walkable(floor, chargePos.x, chargePos.y) && noMonster(floor, chargePos.x, chargePos.y, idx)) {
+        // Move monster to charge position (with original damage — don't persist the boost)
         let s = updateMonster(state, floorKey, idx, { ...monster, position: chargePos });
         s = addMsg(s, `The ${monster.name} charges!`, 'combat');
+        // Attack with a temporary boosted copy (not written back to state)
         const boosted = { ...monster, position: chargePos, damage: [Math.floor(monster.damage[0] * 1.5), Math.floor(monster.damage[1] * 1.5)] as [number, number] };
-        const newFloor = s.floors[floorKey];
-        if (newFloor) {
-          const newIdx = newFloor.monsters.findIndex(m => m.id === monster.id);
-          if (newIdx >= 0) {
-            s = updateMonster(s, floorKey, newIdx, boosted);
-            return monsterAttacksPlayer(s, boosted);
-          }
-        }
+        return monsterAttacksPlayer(s, boosted);
       }
     }
   }
@@ -653,7 +648,7 @@ function processSummoner(state: GameState, floorKey: string, idx: number): GameS
 
   // Summon every 4-5 turns
   const summonAbilities = monster.abilities.filter(a => a.startsWith('summon-'));
-  if (summonAbilities.length > 0 && dist <= 12 && state.turn % rollRange(4, 5) === 0) {
+  if (summonAbilities.length > 0 && dist <= 12 && state.turn % 5 === 0) {
     const ability = summonAbilities[Math.floor(Math.random() * summonAbilities.length)];
     let s = spawnNearSummoner(state, floorKey, idx, ability);
     // Also try a ranged attack this turn
@@ -716,6 +711,7 @@ export function processAllMonsterTurns(state: GameState): GameState {
 
     const monster = curFloor.monsters[idx];
     if (monster.hp <= 0 || monster.sleeping) continue;
+    if (monster.slowed && state.turn % 2 === 0) continue; // skip every other turn
 
     switch (monster.ai) {
       case 'melee':    cur = processMelee(cur, floorKey, idx);    break;

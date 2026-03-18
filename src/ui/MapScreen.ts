@@ -13,6 +13,11 @@ const TILE_COLORS: Record<string, string> = {
   'stairs-up': '#4f4',
   'stairs-down': '#f44',
   trap: '#555',
+  grass: '#383',
+  path: '#665',
+  building: '#a86',
+  water: '#338',
+  rock: '#555',
 };
 
 export function createMapScreen(

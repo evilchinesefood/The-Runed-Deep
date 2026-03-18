@@ -81,14 +81,24 @@ export interface CombatResult {
  */
 export function playerAttacksMonster(state: GameState, monsterId: string): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
-  const floor = state.floors[floorKey];
+  let floor = state.floors[floorKey];
   if (!floor) return state;
 
   const monsterIndex = floor.monsters.findIndex(m => m.id === monsterId);
   if (monsterIndex === -1) return state;
 
-  const monster = floor.monsters[monsterIndex];
+  let monster = floor.monsters[monsterIndex];
   const messages: Message[] = [];
+
+  // Wake sleeping monsters when attacked
+  if (monster.sleeping) {
+    const awakened = { ...monster, sleeping: false };
+    const newMonsters = [...floor.monsters];
+    newMonsters[monsterIndex] = awakened;
+    floor = { ...floor, monsters: newMonsters };
+    state = { ...state, floors: { ...state.floors, [floorKey]: floor } };
+    monster = awakened;
+  }
 
   // Hit check
   const hitChance = calcHitChance(state.hero.attributes.dexterity + state.hero.equipAccuracyBonus, Math.floor(monster.speed * 30));

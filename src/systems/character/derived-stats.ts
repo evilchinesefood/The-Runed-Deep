@@ -52,7 +52,11 @@ export function computeTotalArmorValue(dexterity: number, equipment: Equipment):
 export function recomputeDerivedStats(hero: Hero): Hero {
   const maxHp = computeMaxHp(hero.attributes.constitution, hero.level);
   const maxMp = computeMaxMp(hero.attributes.intelligence, hero.level);
-  const armorValue = computeTotalArmorValue(hero.attributes.dexterity, hero.equipment);
+  let armorValue = computeTotalArmorValue(hero.attributes.dexterity, hero.equipment);
+
+  // Preserve Shield spell bonus
+  const hasShield = hero.activeEffects?.some(e => e.id === 'shield');
+  if (hasShield) armorValue += 4;
 
   // Weapon bonuses
   let equipDamageBonus = 0;

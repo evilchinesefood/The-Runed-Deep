@@ -32,10 +32,14 @@ export function processPickupItem(state: GameState): GameState {
   const packTpl = packItem ? ITEM_BY_ID[packItem.templateId] : null;
   const packCap = packTpl?.weightCapacity ?? null;
 
+  // Track picked up item IDs
+  const pickedIds = new Set<string>();
+
   for (const placed of itemsHere) {
     if (placed.item.category === 'currency') {
       const amount = placed.item.properties['amount'] ?? placed.item.value;
       copper += amount;
+      pickedIds.add(placed.item.id);
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
     } else {
       if (packCap !== null) {
@@ -46,15 +50,16 @@ export function processPickupItem(state: GameState): GameState {
         }
       }
       inventory.push(placed.item);
+      pickedIds.add(placed.item.id);
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
     }
   }
 
   hero = { ...hero, inventory, copper };
 
-  // Remove all picked items from floor
+  // Only remove items that were actually picked up
   const remaining = floor.items.filter(
-    i => i.position.x !== pos.x || i.position.y !== pos.y
+    i => !(i.position.x === pos.x && i.position.y === pos.y && pickedIds.has(i.item.id))
   );
   const newFloor = { ...floor, items: remaining };
 
