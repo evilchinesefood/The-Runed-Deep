@@ -16,7 +16,8 @@ const FLOOR_WIDTH = 50;
 const FLOOR_HEIGHT = 40;
 const MIN_ROOM_SIZE = 4;
 const MAX_ROOM_SIZE = 10;
-const ROOM_ATTEMPTS = 20;
+const ROOM_ATTEMPTS = 35;
+const MIN_ROOMS = 3;
 
 function seededRandom(seed: number): () => number {
   let s = seed;
@@ -98,11 +99,24 @@ export function generateFloor(
   hasStairsDown: boolean = true,
   difficulty: Difficulty = 'intermediate',
 ): { floor: Floor; playerStart: Vector2 } {
-  // Set tileset based on dungeon tier
-  activeTileset = getTileset(getDungeonForFloor(floorNum));
-
   const bossFloor = generateBossFloor(dungeonId, floorNum, floorNum + 1, difficulty);
   if (bossFloor) return bossFloor;
+
+  // Retry generation up to 5 times if floor fails validation
+  for (let retry = 0; retry < 5; retry++) {
+    const result = generateFloorAttempt(dungeonId, floorNum, seed + retry * 7919, hasStairsUp, hasStairsDown, difficulty);
+    if (result) return result;
+  }
+  // Last resort: generate with no validation
+  return generateFloorAttempt(dungeonId, floorNum, seed + 99999, hasStairsUp, hasStairsDown, difficulty, true)!;
+}
+
+function generateFloorAttempt(
+  dungeonId: string, floorNum: number, seed: number,
+  hasStairsUp: boolean, hasStairsDown: boolean, difficulty: Difficulty,
+  skipValidation = false,
+): { floor: Floor; playerStart: Vector2 } | null {
+  activeTileset = getTileset(getDungeonForFloor(floorNum));
 
   const rand = seededRandom(seed + floorNum * 1000);
   const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min;
@@ -222,7 +236,55 @@ export function generateFloor(
   // Place traps in corridors and rooms (not on stairs or player start)
   placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
 
+  // Validate floor quality
+  if (!skipValidation) {
+    // Must have minimum room count
+    if (rooms.length < MIN_ROOMS) return null;
+
+    // Both stairs must exist
+    let hasUp = false, hasDown = false;
+    let stairsUpPos: Vector2 | null = null;
+    let stairsDownPos: Vector2 | null = null;
+    for (let y = 0; y < FLOOR_HEIGHT; y++) {
+      for (let x = 0; x < FLOOR_WIDTH; x++) {
+        if (tiles[y][x].type === 'stairs-up') { hasUp = true; stairsUpPos = { x, y }; }
+        if (tiles[y][x].type === 'stairs-down') { hasDown = true; stairsDownPos = { x, y }; }
+      }
+    }
+    if (hasStairsUp && !hasUp) return null;
+    if (hasStairsDown && !hasDown) return null;
+
+    // Stairs must be reachable from each other (simple flood fill)
+    if (stairsUpPos && stairsDownPos) {
+      if (!tilesConnected(tiles, stairsUpPos, stairsDownPos, FLOOR_WIDTH, FLOOR_HEIGHT)) return null;
+    }
+  }
+
   return { floor, playerStart };
+}
+
+/** Flood-fill reachability check between two walkable positions */
+function tilesConnected(tiles: Tile[][], from: Vector2, to: Vector2, w: number, h: number): boolean {
+  const visited = new Set<string>();
+  const queue: Vector2[] = [from];
+  visited.add(`${from.x},${from.y}`);
+
+  while (queue.length > 0) {
+    const pos = queue.shift()!;
+    if (pos.x === to.x && pos.y === to.y) return true;
+
+    for (const [dx, dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+      const nx = pos.x + dx;
+      const ny = pos.y + dy;
+      const key = `${nx},${ny}`;
+      if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+      if (visited.has(key)) continue;
+      if (!tiles[ny][nx].walkable) continue;
+      visited.add(key);
+      queue.push({ x: nx, y: ny });
+    }
+  }
+  return false;
 }
 
 function carveRoom(tiles: Tile[][], room: Room): void {
