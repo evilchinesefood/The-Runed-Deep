@@ -140,6 +140,9 @@ export class InputManager {
 
   private setupKeyboard(): void {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
+      // Prevent Tab default (browser focus) immediately
+      if (e.code === 'Tab') e.preventDefault();
+
       if (!this.enabled) return;
 
       // If in spell targeting mode, handle direction/escape
