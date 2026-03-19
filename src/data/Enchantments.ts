@@ -25,11 +25,24 @@ export const ENCHANTMENT_BY_ID: Record<string, SpecialEnchantment> = Object.from
   ENCHANTMENTS.map(e => [e.id, e])
 );
 
+/** Roll special enchantments for an item. Chance and count scale with depth. */
 export function rollSpecialEnchantments(depth: number, isTierItem: boolean): string[] {
-  const chance = isTierItem ? 0.15 : (depth >= 20 ? 0.05 : 0);
+  // Chance scales with depth:
+  // Tier items: 15% base + 1% per floor above 15 (caps at 40%)
+  // Regular items: 0% until floor 15, then 2% + 0.5% per floor above 15 (caps at 15%)
+  let chance: number;
+  if (isTierItem) {
+    chance = Math.min(0.40, 0.15 + Math.max(0, depth - 15) * 0.01);
+  } else {
+    chance = depth >= 15 ? Math.min(0.15, 0.02 + (depth - 15) * 0.005) : 0;
+  }
   if (Math.random() > chance) return [];
 
-  const count = 2 + Math.floor(Math.random() * 4); // 2-5
+  // Count scales with depth: base 2, +1 per 10 floors, max 5
+  const baseCount = 2;
+  const bonusCount = Math.floor(depth / 10);
+  const count = Math.min(5, baseCount + bonusCount);
+
   const pool = [...ENCHANTMENTS];
   const result: string[] = [];
 

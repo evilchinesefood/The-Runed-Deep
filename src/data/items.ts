@@ -80,6 +80,12 @@ const ELVEN_WEAPONS: ItemTemplate[] = [
     weight: 300, value: 120, depthMin: 12, depthMax: 99, damageMin: 2, damageMax: 8, accuracy: 4, materialTier: 'elven' },
   { id: 'elven-spear', name: 'Elven Spear', category: 'weapon', sprite: 'spear-enchanted', equipSlot: 'weapon',
     weight: 1800, value: 150, depthMin: 14, depthMax: 99, damageMin: 3, damageMax: 10, accuracy: 3, materialTier: 'elven' },
+  { id: 'elven-mace', name: 'Elven Mace', category: 'weapon', sprite: 'mace-enchanted', equipSlot: 'weapon',
+    weight: 2200, value: 180, depthMin: 14, depthMax: 99, damageMin: 4, damageMax: 11, accuracy: 2, materialTier: 'elven' },
+  { id: 'elven-axe', name: 'Elven Axe', category: 'weapon', sprite: 'axe-enchanted', equipSlot: 'weapon',
+    weight: 2200, value: 190, depthMin: 15, depthMax: 99, damageMin: 4, damageMax: 12, accuracy: 2, materialTier: 'elven' },
+  { id: 'elven-hammer', name: 'Elven Hammer', category: 'weapon', sprite: 'hammer-enchanted', equipSlot: 'weapon',
+    weight: 2500, value: 175, depthMin: 14, depthMax: 99, damageMin: 5, damageMax: 13, accuracy: 1, materialTier: 'elven' },
 ];
 
 const ELVEN_ARMOR: ItemTemplate[] = [
@@ -106,6 +112,12 @@ const METEORIC_WEAPONS: ItemTemplate[] = [
     weight: 3500, value: 450, depthMin: 28, depthMax: 99, damageMin: 7, damageMax: 18, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
   { id: 'meteoric-war-hammer', name: 'Meteoric War Hammer', category: 'weapon', sprite: 'hammer-enchanted', equipSlot: 'weapon',
     weight: 3000, value: 400, depthMin: 26, depthMax: 99, damageMin: 6, damageMax: 16, accuracy: 0, materialTier: 'meteoric' },
+  { id: 'meteoric-flail', name: 'Meteoric Flail', category: 'weapon', sprite: 'flail-enchanted', equipSlot: 'weapon',
+    weight: 3200, value: 420, depthMin: 27, depthMax: 99, damageMin: 6, damageMax: 17, accuracy: 0, materialTier: 'meteoric' },
+  { id: 'meteoric-morning-star', name: 'Meteoric Morning Star', category: 'weapon', sprite: 'morning-star-enchanted', equipSlot: 'weapon',
+    weight: 3500, value: 440, depthMin: 27, depthMax: 99, damageMin: 7, damageMax: 17, accuracy: 1, materialTier: 'meteoric' },
+  { id: 'meteoric-two-handed-sword', name: 'Meteoric Two-Handed Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
+    weight: 4000, value: 600, depthMin: 30, depthMax: 99, damageMin: 8, damageMax: 22, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
 ];
 
 const METEORIC_ARMOR: ItemTemplate[] = [
@@ -329,9 +341,22 @@ export const ITEM_BY_ID: Record<string, ItemTemplate> = Object.fromEntries(
 
 /**
  * Get item templates that can appear at the given depth.
+ * Tier items are weighted higher on deeper floors.
  */
 export function getItemsForDepth(depth: number): ItemTemplate[] {
-  return ALL_ITEM_TEMPLATES.filter(
+  const available = ALL_ITEM_TEMPLATES.filter(
     t => depth >= t.depthMin && depth <= t.depthMax && t.category !== 'currency'
   );
+
+  // On deeper floors, duplicate tier items in the pool to increase their chance
+  // Floor 15+: tier items appear 2x, Floor 25+: 3x, Floor 30+: 4x, Floor 35+: 5x
+  if (depth >= 15) {
+    const tierItems = available.filter(t => t.materialTier);
+    const dupes = depth >= 35 ? 4 : depth >= 30 ? 3 : depth >= 25 ? 2 : 1;
+    for (let d = 0; d < dupes; d++) {
+      available.push(...tierItems);
+    }
+  }
+
+  return available;
 }
