@@ -352,17 +352,15 @@ export function createInventoryScreen(
   footer.appendChild(el('span', undefined, `Gold: ${h.copper}`));
   footer.appendChild(el('span', undefined, `Items: ${h.inventory.length}`));
 
+  // Show carry capacity (base 10kg + pack bonus)
+  const BASE_CARRY = 10000;
   const pack = h.equipment.pack;
-  if (pack) {
-    const packTpl = ITEM_BY_ID[pack.templateId];
-    if (packTpl?.weightCapacity) {
-      const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
-      const cap = packTpl.weightCapacity;
-      const pct = Math.round((invWeight / cap) * 100);
-      const color = pct > 90 ? '#f44' : pct > 70 ? '#fa0' : '#aaa';
-      footer.appendChild(el('span', { color }, `Pack: ${pct}%`));
-    }
-  }
+  const packTpl = pack ? ITEM_BY_ID[pack.templateId] : null;
+  const totalCap = BASE_CARRY + (packTpl?.weightCapacity ?? 0);
+  const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
+  const pct = Math.round((invWeight / totalCap) * 100);
+  const capColor = pct > 90 ? '#f44' : pct > 70 ? '#fa0' : '#aaa';
+  footer.appendChild(el('span', { color: capColor }, `Carry: ${(invWeight / 1000).toFixed(1)}/${(totalCap / 1000).toFixed(0)}kg`));
 
   screen.appendChild(footer);
 

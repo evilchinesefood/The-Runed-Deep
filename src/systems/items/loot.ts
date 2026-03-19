@@ -62,6 +62,7 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number, ng
   if (template.healPct !== undefined) properties['healPct'] = template.healPct;
   if (template.charges !== undefined) properties['charges'] = template.charges;
   if (template.twoHanded) properties['twoHanded'] = 1;
+  if (template.weightCapacity !== undefined) properties['weightCapacity'] = template.weightCapacity;
 
   // Build display name
   let name = template.name;

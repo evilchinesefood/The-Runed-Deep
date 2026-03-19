@@ -287,6 +287,16 @@ const CONTAINERS: ItemTemplate[] = [
     weight: 400, value: 40, depthMin: 8, depthMax: 99, ac: 0, weightCapacity: 2000, bulkCapacity: 500 },
   { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
     weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 5000, bulkCapacity: 1000 },
+  // Elven tier containers
+  { id: 'elven-pack', name: 'Elven Pack', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
+    weight: 300, value: 250, depthMin: 14, depthMax: 99, weightCapacity: 50000, bulkCapacity: 15000, materialTier: 'elven' },
+  { id: 'elven-purse', name: 'Elven Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
+    weight: 50, value: 100, depthMin: 14, depthMax: 99, weightCapacity: 10000, bulkCapacity: 3000, materialTier: 'elven' },
+  // Meteoric tier containers
+  { id: 'meteoric-pack', name: 'Meteoric Pack', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
+    weight: 200, value: 600, depthMin: 26, depthMax: 99, weightCapacity: 80000, bulkCapacity: 30000, materialTier: 'meteoric' },
+  { id: 'meteoric-purse', name: 'Meteoric Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
+    weight: 30, value: 300, depthMin: 26, depthMax: 99, weightCapacity: 20000, bulkCapacity: 8000, materialTier: 'meteoric' },
 ];
 
 // ── Worthless / Flavor Items ───────────────────────────────

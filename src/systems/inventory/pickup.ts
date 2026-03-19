@@ -30,9 +30,12 @@ export function processPickupItem(state: GameState): GameState {
   let inventory = [...hero.inventory];
   let copper = hero.copper;
 
+  // Base carry capacity 10kg (10000g), pack adds to it
+  const BASE_CARRY = 10000;
   const packItem = hero.equipment.pack;
   const packTpl = packItem ? ITEM_BY_ID[packItem.templateId] : null;
-  const packCap = packTpl?.weightCapacity ?? null;
+  const packWeight = packItem?.properties['weightCapacity'] ?? packTpl?.weightCapacity ?? 0;
+  const packCap = BASE_CARRY + packWeight;
 
   // Track picked up item IDs
   const pickedIds = new Set<string>();
@@ -45,12 +48,10 @@ export function processPickupItem(state: GameState): GameState {
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
       Sound.goldPickup();
     } else {
-      if (packCap !== null) {
-        const currentWeight = inventory.reduce((s, i) => s + i.weight, 0);
-        if (currentWeight + placed.item.weight > packCap) {
-          messages.push({ text: 'Your pack is too full!', severity: 'important', turn: state.turn });
-          continue;
-        }
+      const currentWeight = inventory.reduce((s, i) => s + i.weight, 0);
+      if (currentWeight + placed.item.weight > packCap) {
+        messages.push({ text: 'Your pack is too full!', severity: 'important', turn: state.turn });
+        continue;
       }
       inventory.push(placed.item);
       pickedIds.add(placed.item.id);
