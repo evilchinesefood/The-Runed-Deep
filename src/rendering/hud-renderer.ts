@@ -130,6 +130,37 @@ export class HudRenderer {
     );
     this.statsEl.appendChild(floorInfo);
 
+    // Status effect icons
+    if (h.activeEffects.length > 0) {
+      const effectRow = el('div', { display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '4px' });
+      const effectStyles: Record<string, [string, string]> = {
+        'shield': ['🛡', '#48f'],
+        'resist-cold': ['❄', '#4af'],
+        'resist-fire': ['🔥', '#f64'],
+        'resist-lightning': ['⚡', '#ff4'],
+        'poisoned': ['☠', '#4f4'],
+        'paralyzed': ['⛓', '#f84'],
+        'blinded': ['👁', '#888'],
+        'levitation': ['🪶', '#aaf'],
+        'light': ['💡', '#ff8'],
+      };
+      for (const eff of h.activeEffects) {
+        const [icon, color] = effectStyles[eff.id] ?? ['✦', '#aaa'];
+        const badge = el('span', {
+          fontSize: '10px',
+          color,
+          background: '#1a1a1a',
+          border: `1px solid ${color}33`,
+          borderRadius: '3px',
+          padding: '1px 4px',
+          whiteSpace: 'nowrap',
+        }, `${icon} ${eff.turnsRemaining}`);
+        badge.title = `${eff.name} (${eff.turnsRemaining} turns)`;
+        effectRow.appendChild(badge);
+      }
+      this.statsEl.appendChild(effectRow);
+    }
+
   }
 
   private renderSpellBar(state: GameState): void {

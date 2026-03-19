@@ -206,20 +206,38 @@ function processMove(state: GameState, direction: Direction): GameState {
     }
   }
 
-  // Check for items at new position
-  const currentFloor = floors[floorKey] ?? floor;
+  // Auto-pickup gold, notify for other items
+  let currentFloor = floors[floorKey] ?? floor;
   const itemsAtPos = currentFloor.items.filter(
     i => i.position.x === newPos.x && i.position.y === newPos.y
   );
-  if (itemsAtPos.length === 1) {
+  const goldItems = itemsAtPos.filter(i => i.item.category === 'currency');
+  const nonGoldItems = itemsAtPos.filter(i => i.item.category !== 'currency');
+
+  // Auto-pickup all gold
+  if (goldItems.length > 0) {
+    let goldTotal = 0;
+    for (const g of goldItems) {
+      goldTotal += g.item.properties['amount'] ?? g.item.value;
+    }
+    hero = { ...hero, copper: hero.copper + goldTotal };
+    currentFloor = { ...currentFloor, items: currentFloor.items.filter(i =>
+      !(i.position.x === newPos.x && i.position.y === newPos.y && i.item.category === 'currency')
+    )};
+    floors = { ...floors, [floorKey]: currentFloor };
+    messages.push({ text: `Picked up ${goldTotal} gold.`, severity: 'normal' as const, turn: state.turn + 1 });
+    Sound.goldPickup();
+  }
+
+  if (nonGoldItems.length === 1) {
     messages.push({
-      text: `You see ${itemsAtPos[0].item.name} on the ground. (G to pick up)`,
+      text: `You see ${nonGoldItems[0].item.name} on the ground. (G to pick up)`,
       severity: 'normal' as const,
       turn: state.turn + 1,
     });
-  } else if (itemsAtPos.length > 1) {
+  } else if (nonGoldItems.length > 1) {
     messages.push({
-      text: `You see a treasure pile with ${itemsAtPos.length} items. (G to pick up all)`,
+      text: `You see ${nonGoldItems.length} items on the ground. (G to pick up all)`,
       severity: 'normal' as const,
       turn: state.turn + 1,
     });

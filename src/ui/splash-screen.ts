@@ -16,15 +16,8 @@ export function createSplashScreen(
   const logo = document.createElement('img');
   logo.src = '/assets/logo.png';
   logo.alt = 'Castle of the Winds';
-  logo.style.cssText = 'max-width:100%;height:auto;margin-bottom:24px;';
+  logo.style.cssText = 'max-width:100%;height:auto;margin-bottom:40px;';
   splash.appendChild(logo);
-
-  splash.appendChild(el('h1', {
-    fontSize: '36px',
-    color: '#c90',
-    margin: '0 0 40px',
-    textShadow: '2px 2px 4px #000',
-  }, 'Castle of the Winds'));
 
   // Buttons
   const buttons = el('div', { display: 'flex', gap: '20px', marginBottom: '30px' });
