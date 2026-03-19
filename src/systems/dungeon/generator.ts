@@ -2,6 +2,7 @@ import type { Floor, Tile, Vector2, Difficulty, PlacedItem } from '../../core/ty
 import { spawnMonsters } from '../monsters/spawning';
 import { getItemsForDepth } from '../../data/items';
 import { createItemFromTemplate, createCopperDrop } from '../items/loot';
+import { generateBossFloor } from './BossFloors';
 
 interface Room {
   x: number;
@@ -92,6 +93,9 @@ export function generateFloor(
   hasStairsDown: boolean = true,
   difficulty: Difficulty = 'intermediate',
 ): { floor: Floor; playerStart: Vector2 } {
+  const bossFloor = generateBossFloor(dungeonId, floorNum, floorNum + 1, difficulty);
+  if (bossFloor) return bossFloor;
+
   const rand = seededRandom(seed + floorNum * 1000);
   const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min;
 
