@@ -7,13 +7,13 @@ export interface Tileset {
   floor: string;
   wall: string;
   litFloor: string;
-  wallFilter: string; // CSS filter for wall color tinting
+  wallTint: string; // CSS background-color for multiply blend tinting
 }
 
 export const TILESETS: Record<string, Tileset> = {
-  mine:     { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallFilter: '' },
-  fortress: { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallFilter: 'hue-rotate(200deg) brightness(0.7) saturate(1.5)' },
-  castle:   { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallFilter: 'hue-rotate(340deg) brightness(0.8) saturate(1.3)' },
+  mine:     { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '' },
+  fortress: { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '#6688bb' },
+  castle:   { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '#bb7755' },
 };
 
 /** Get the dungeon ID for a given floor number (0-indexed) */

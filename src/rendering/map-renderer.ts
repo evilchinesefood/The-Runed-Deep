@@ -119,6 +119,8 @@ export class MapRenderer {
         cell.floor.style.opacity = '';
         cell.floor.style.transform = '';
         cell.floor.style.filter = '';
+        cell.floor.style.backgroundColor = '';
+        cell.floor.style.backgroundBlendMode = '';
         cell.ground.className = '';
         cell.ground.style.display = 'none';
         cell.ground.style.opacity = '';
@@ -186,9 +188,10 @@ export class MapRenderer {
           cell.floor.className = floorSprite;
           cell.floor.style.opacity = opacity;
           cell.floor.style.transform = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
-          // Tint walls based on dungeon tier
-          if (isWall && tileset?.wallFilter) {
-            cell.floor.style.filter = tileset.wallFilter;
+          // Tint walls based on dungeon tier using color overlay
+          if (isWall && tileset?.wallTint) {
+            cell.floor.style.backgroundColor = tileset.wallTint;
+            cell.floor.style.backgroundBlendMode = 'multiply';
           }
         }
 
