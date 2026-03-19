@@ -17,6 +17,7 @@ const KEYS: [string, string][] = [
   ['Z', 'Spell list / Hotkey management'],
   ['M', 'Full floor map'],
   ['F1', 'This help screen'],
+  ['F2', 'Achievements'],
   ['Esc', 'Close current screen / Return to game'],
   ['', ''],
   // Spells

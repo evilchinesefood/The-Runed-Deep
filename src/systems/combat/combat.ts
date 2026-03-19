@@ -4,6 +4,7 @@ import type { SpellAnimation } from '../../rendering/animations';
 import { generateLoot } from '../items/loot';
 import { processMonsterAbility } from '../monsters/ai';
 import { Sound } from '../Sound';
+import { trackMonsterKill, trackFloorDamage } from '../Achievements';
 
 function hasEnchant(equipment: Equipment, id: string): boolean {
   return Object.values(equipment).some(
@@ -223,6 +224,9 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       turn: state.turn + 1,
     };
 
+    // Track achievement
+    trackMonsterKill(monster.templateId, monster.xpValue >= 250);
+
     // Victory condition — Surtur slain
     if (monster.templateId === 'surtur') {
       return { ...resultState, screen: 'victory' };
@@ -310,6 +314,9 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
       floors = { ...state.floors, [floorKey]: bloodFloor };
     }
   }
+
+  const fk = `${state.currentDungeon}-${state.currentFloor}`;
+  trackFloorDamage(fk, damage);
 
   let result: GameState = {
     ...applyMessages(state, messages),

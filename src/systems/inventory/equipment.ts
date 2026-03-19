@@ -2,6 +2,7 @@ import type { GameState, EquipSlot, Message } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
 import { recomputeDerivedStats } from '../character/derived-stats';
 import { Sound } from '../Sound';
+import { trackEquipmentCheck } from '../Achievements';
 
 function msg(text: string, turn: number, severity: Message['severity'] = 'normal'): Message {
   return { text, severity, turn };
@@ -84,6 +85,8 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   messages.push(msg(`Equipped ${equippedItem.name}.`, state.turn));
 
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
+
+  trackEquipmentCheck(updatedHero.equipment as unknown as Record<string, unknown>);
 
   Sound.equip();
   return {

@@ -243,6 +243,10 @@ export class InputManager {
           e.preventDefault();
           this.emit({ type: 'setScreen', screen: 'help' });
           break;
+        case 'F2':
+          e.preventDefault();
+          this.emit({ type: 'setScreen', screen: 'achievements' as any });
+          break;
         case 'Tab':
           e.preventDefault();
           this.onAutoExplore?.();

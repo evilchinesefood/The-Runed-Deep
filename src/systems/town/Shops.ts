@@ -5,6 +5,7 @@
 import type { GameState, Item } from '../../core/types';
 import { ALL_ITEM_TEMPLATES, getItemsForDepth } from '../../data/items';
 import { createItemFromTemplate } from '../items/loot';
+import { trackGoldSpent } from '../Achievements';
 
 export interface ShopDef {
   id: string;
@@ -87,6 +88,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
   }
 
   const newShopInv = shopInv.filter((_, i) => i !== idx);
+  trackGoldSpent(price);
   return addMsg({
     ...state,
     hero: {

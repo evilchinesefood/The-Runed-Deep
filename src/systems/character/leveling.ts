@@ -3,6 +3,7 @@ import { computeMaxHp, computeMaxMp, recomputeDerivedStats } from './derived-sta
 import { SPELLS } from '../../data/spells';
 import { getDifficultyConfig } from '../../data/difficulty';
 import { Sound } from '../Sound';
+import { trackLevelUp } from '../Achievements';
 
 // ============================================================
 // XP Thresholds
@@ -192,6 +193,7 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     hero = { ...recomputeDerivedStats(hero), maxHp: hero.maxHp, maxMp: hero.maxMp, hp: hero.hp, mp: hero.mp };
 
     Sound.levelUp();
+    trackLevelUp(hero.level);
     messages.push({
       text: `*** ${hero.name} has reached level ${hero.level}! ***`,
       severity: 'important',

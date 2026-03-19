@@ -30,8 +30,12 @@ import { createEmptyEquipment, createDefaultResistances } from './core/game-stat
 import { TouchControls } from './ui/TouchControls';
 import { injectTheme } from './ui/Theme';
 import { Sound } from './systems/Sound';
+import { setOnUnlockCallback, trackNewGamePlus, trackFloorExplored } from './systems/Achievements';
+import { showAchievementToast } from './ui/AchievementToast';
+import { createAchievementsScreen } from './ui/AchievementsScreen';
 
 injectTheme();
+setOnUnlockCallback(showAchievementToast);
 
 const root = document.getElementById('game-root')!;
 
@@ -424,6 +428,7 @@ function render(state: GameState): void {
           const isBlinded = state.hero.activeEffects.some(e => e.id === 'blinded');
           const fovRadius = isBlinded ? 1 : 4;
           computeFov(floor, state.hero.position.x, state.hero.position.y, fovRadius);
+          trackFloorExplored(floor.explored, floor.width, floor.height, floor.tiles);
         } else {
           for (let y = 0; y < floor.height; y++)
             for (let x = 0; x < floor.width; x++)
@@ -674,6 +679,7 @@ function switchScreen(state: GameState): void {
       const victoryScreen = createVictoryScreen(
         gameLoop.getState(),
         () => {
+          trackNewGamePlus();
           const s = gameLoop.getState();
           const nextDifficulty = getNextDifficulty(s.difficulty);
           const ngCount = s.ngPlusCount + 1;
@@ -717,6 +723,16 @@ function switchScreen(state: GameState): void {
           gameLoop.setState(freshState);
         }
       });
+      break;
+    }
+
+    case 'achievements': {
+      input.setEnabled(false);
+      const achScreen = createAchievementsScreen(() => {
+        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+      });
+      addScreenCleanup(achScreen.cleanup);
+      root.appendChild(achScreen);
       break;
     }
 

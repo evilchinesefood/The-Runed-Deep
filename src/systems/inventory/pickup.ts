@@ -1,6 +1,7 @@
 import type { GameState, Message } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
 import { Sound } from '../Sound';
+import { trackItemPickup, trackItemFound } from '../Achievements';
 
 export function processPickupItem(state: GameState): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
@@ -55,6 +56,8 @@ export function processPickupItem(state: GameState): GameState {
       pickedIds.add(placed.item.id);
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
       Sound.pickup();
+      trackItemPickup();
+      if (placed.item.specialEnchantments) trackItemFound(placed.item.specialEnchantments);
     }
   }
 

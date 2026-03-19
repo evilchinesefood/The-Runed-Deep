@@ -10,6 +10,7 @@ import { processUseItem } from '../systems/inventory/use-item';
 import { generateTownMap, BUILDING_FLAVORS, TOWN_START_RETURN } from '../systems/town/TownMap';
 import { initShopInventory, restockShop } from '../systems/town/Shops';
 import { Sound } from '../systems/Sound';
+import { trackSecretDoorFound, trackFloorReached, trackFloorCleared } from '../systems/Achievements';
 
 function hasEnchant(equipment: Equipment, id: string): boolean {
   return Object.values(equipment).some(
@@ -431,6 +432,15 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
     arrivalPos = { x: Math.floor(targetFloorData.width / 2), y: Math.floor(targetFloorData.height / 2) };
   }
 
+  // Check if the floor being left was cleared
+  const oldFloorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const oldFloor = state.floors[oldFloorKey];
+  if (oldFloor && oldFloor.monsters.length === 0) {
+    trackFloorCleared(oldFloorKey, 0);
+  }
+
+  trackFloorReached(targetFloor);
+
   const depthLabel = targetFloor + 1;
   const verb = direction === 'descend' ? 'descends to' : 'ascends to';
   const messages = [
@@ -615,6 +625,7 @@ function processSearch(state: GameState): GameState {
         };
         messages.push({ text: 'You found a secret door!', severity: 'important' as const, turn: state.turn });
         found++;
+        trackSecretDoorFound();
       }
 
       // Reveal hidden traps

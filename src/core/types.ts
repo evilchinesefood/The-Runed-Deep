@@ -22,7 +22,8 @@ export type Screen =
   | 'shop'
   | 'service'
   | 'victory'
-  | 'death';
+  | 'death'
+  | 'achievements';
 
 export type Difficulty = 'easy' | 'intermediate' | 'hard' | 'impossible';
 
