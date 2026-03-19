@@ -1,7 +1,7 @@
 import type { GameState } from '../core/types';
 import { createScreen, createTitleBar, el } from './Theme';
 
-const CELL = 6; // pixels per tile on minimap
+const CELL = 12; // pixels per tile on minimap
 
 const TILE_COLORS: Record<string, string> = {
   floor: '#555',

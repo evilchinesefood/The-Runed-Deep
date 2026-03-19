@@ -11,6 +11,7 @@ export type Direction = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
 
 export type Screen =
   | 'splash'
+  | 'intro'
   | 'character-creation'
   | 'game'
   | 'inventory'

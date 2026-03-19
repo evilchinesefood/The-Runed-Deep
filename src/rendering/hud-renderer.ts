@@ -48,7 +48,7 @@ export class HudRenderer {
 
     this.messagesEl = el('div', {
       flex: '7',
-      height: '150px',
+      height: '160px',
       overflowY: 'auto',
       background: '#111',
       border: '1px solid #333',
@@ -109,14 +109,14 @@ export class HudRenderer {
     this.statsEl.appendChild(bar(mpPct, mpColor));
 
     const attrs = el('div', { fontSize: '11px', marginTop: '4px' },
-      `STR ${h.attributes.strength}  INT ${h.attributes.intelligence}  CON ${h.attributes.constitution}  DEX ${h.attributes.dexterity}`
+      `STR ${h.attributes.strength} | INT ${h.attributes.intelligence} | CON ${h.attributes.constitution} | DEX ${h.attributes.dexterity}`
     );
     this.statsEl.appendChild(attrs);
 
     const xpNeeded = xpToNextLevel(h, state.difficulty);
     const xpDisplay = xpNeeded === Infinity ? 'MAX' : `${h.xp} (${xpNeeded} to next)`;
     const info = el('div', { fontSize: '11px', marginTop: '2px' },
-      `AC: ${h.armorValue}  Turn: ${state.turn}`
+      `AC: ${h.armorValue} | Turn: ${state.turn}`
     );
     this.statsEl.appendChild(info);
 
@@ -125,8 +125,8 @@ export class HudRenderer {
     );
     this.statsEl.appendChild(xpRow);
 
-    const floorInfo = el('div', { fontSize: '11px', marginTop: '2px' },
-      `Floor: ${state.currentFloor + 1}  Copper: ${h.copper}`
+    const floorInfo = el('div', { fontSize: '11px', marginTop: '4px' },
+      `Floor: ${state.currentFloor + 1}     Gold: ${h.copper}`
     );
     this.statsEl.appendChild(floorInfo);
 

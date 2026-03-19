@@ -30,16 +30,14 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
 
   const missingHP = state.hero.maxHp - state.hero.hp;
   const missingMP = state.hero.maxMp - state.hero.mp;
-  const healHPCost = 3 + Math.ceil(missingHP * 0.5);
-  const healMPCost = 3 + Math.ceil(missingMP * 0.75);
   const hasCursed = Object.values(state.hero.equipment).some(i => i && i.cursed);
   const isPoisoned = state.hero.activeEffects.some(e => e.id === 'poisoned');
 
   const items: [string, number, boolean, () => GameState][] = [
-    [`Heal HP — ${healHPCost} copper`, healHPCost, missingHP <= 0 || state.hero.copper < healHPCost, () => templeHealHP(state)],
-    [`Restore MP — ${healMPCost} copper`, healMPCost, missingMP <= 0 || state.hero.copper < healMPCost, () => templeHealMP(state)],
+    ['Heal HP (free)', 0, missingHP <= 0, () => templeHealHP(state)],
+    ['Restore MP (free)', 0, missingMP <= 0, () => templeHealMP(state)],
     ['Remove Curse — 50 copper', 50, !hasCursed || state.hero.copper < 50, () => templeRemoveCurse(state)],
-    ['Cure Poison — 25 copper', 25, !isPoisoned || state.hero.copper < 25, () => templeCurePoison(state)],
+    ['Cure Poison (free)', 0, !isPoisoned, () => templeCurePoison(state)],
   ];
 
   for (const [label, , disabled, action] of items) {
@@ -116,11 +114,10 @@ function buildInn(state: GameState, onUpdate: (s: GameState) => void): HTMLEleme
   const panel = createPanel('Rest');
 
   const alreadyFull = state.hero.hp >= state.hero.maxHp && state.hero.mp >= state.hero.maxMp;
-  const canAfford = state.hero.copper >= 20;
 
-  const btn = createButton('Rest for the Night — 20 copper', 'primary');
+  const btn = createButton('Rest for the Night (free)', 'primary');
   Object.assign(btn.style, { display: 'block', width: '100%', marginTop: '4px' });
-  greyBtn(btn, alreadyFull || !canAfford);
+  greyBtn(btn, alreadyFull);
   btn.addEventListener('click', () => onUpdate(innRest(state)));
   panel.appendChild(btn);
 
@@ -149,7 +146,7 @@ export function createServiceScreen(
     screen.appendChild(bar);
 
     const copper = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
-    copper.textContent = `Copper: ${state.hero.copper}`;
+    copper.textContent = `Gold: ${state.hero.copper}`;
     screen.appendChild(copper);
 
     function handleUpdate(next: GameState): void {

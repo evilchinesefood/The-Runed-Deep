@@ -108,7 +108,7 @@ export function createShopScreen(
     const shopInv = state.town.shopInventories[shopId] ?? [];
 
     const titleBar = createTitleBar(`${shopName}`, onClose);
-    const copperLabel = el('div', { color: '#c90', fontSize: '13px' }, `Copper: ${copper}`);
+    const copperLabel = el('div', { color: '#c90', fontSize: '13px' }, `Gold: ${copper}`);
     titleBar.insertBefore(copperLabel, titleBar.lastChild);
     screen.appendChild(titleBar);
 

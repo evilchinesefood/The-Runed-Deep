@@ -408,11 +408,26 @@ function placeGroundItems(
   if (candidates.length === 0) return items;
 
   // Each room has a chance to contain 0-2 items
+  // Rooms with secret doors get much higher treasure chance
   for (let r = 0; r < rooms.length; r++) {
     const room = rooms[r];
-    // 80-90% chance empty, 10-15% chance 1 item, ~5% chance 2 items
+
+    // Check if room has any adjacent secret doors
+    let hasSecret = false;
+    for (let ry = room.y - 1; ry <= room.y + room.h; ry++) {
+      for (let rx = room.x - 1; rx <= room.x + room.w; rx++) {
+        if (ry >= 0 && ry < floor.height && rx >= 0 && rx < floor.width) {
+          if (floor.tiles[ry][rx].type === 'door-secret') hasSecret = true;
+        }
+      }
+    }
+
     const roll = rand();
-    const itemCount = roll < 0.85 ? 0 : roll < 0.95 ? 1 : 2;
+    // Secret rooms: 70% chance 1-2 items, 30% chance 3 items
+    // Normal rooms: 85% empty, 10% 1 item, 5% 2 items
+    const itemCount = hasSecret
+      ? (roll < 0.30 ? 3 : roll < 0.70 ? 2 : 1)
+      : (roll < 0.85 ? 0 : roll < 0.95 ? 1 : 2);
 
     for (let i = 0; i < itemCount; i++) {
       // Pick random floor position in room, not on stairs or player start

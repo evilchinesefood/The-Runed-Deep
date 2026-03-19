@@ -100,7 +100,7 @@ export function createCopperDrop(depth: number): Item {
   return {
     id: `item-${nextItemId++}`,
     templateId: 'copper-coins',
-    name: `${amount} Copper`,
+    name: `${amount} Gold`,
     category: 'currency',
     sprite: 'coins-copper',
     weight: amount * 5,

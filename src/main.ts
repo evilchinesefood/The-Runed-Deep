@@ -13,6 +13,9 @@ import { createMapScreen } from './ui/MapScreen';
 import { createSpellScreen } from './ui/SpellScreen';
 import { createShopScreen } from './ui/ShopScreen';
 import { createServiceScreen } from './ui/ServiceScreen';
+import { createIntroScreen } from './ui/IntroScreen';
+import { generateTownMap, TOWN_START_INITIAL } from './systems/town/TownMap';
+import { initShopInventory } from './systems/town/Shops';
 import { findPath } from './utils/Pathfinding';
 import { generateFloor } from './systems/dungeon/generator';
 import { SPELL_BY_ID } from './data/spells';
@@ -335,27 +338,44 @@ function switchScreen(state: GameState): void {
       );
       break;
 
+    case 'intro':
+      input.setEnabled(false);
+      root.appendChild(createIntroScreen(() => {
+        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+      }));
+      break;
+
     case 'character-creation':
       input.setEnabled(false);
       createCharacterCreationScreen(root, result => {
         try {
           const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell, result.difficulty);
 
-          // Generate the first dungeon floor
-          const { floor, playerStart } = generateFloor('mine', 0, Date.now(), true, true, result.difficulty);
-          hero.position = playerStart;
+          // Generate first dungeon floor (for when player enters the mine)
+          const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, result.difficulty);
+
+          // Generate town and start player near temple
+          const { floor: townFloor } = generateTownMap();
+          hero.position = { ...TOWN_START_INITIAL };
+
+          // Initialize shop inventories
+          const shopIds = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
+          const shopInventories: Record<string, import('./core/types').Item[]> = {};
+          for (const sid of shopIds) shopInventories[sid] = initShopInventory(sid, 1);
 
           const newState: GameState = {
             ...gameLoop.getState(),
-            screen: 'game',
+            screen: 'intro',
             hero,
             difficulty: result.difficulty,
-            currentDungeon: 'mine',
+            currentDungeon: 'town',
             currentFloor: 0,
-            floors: { 'mine-0': floor },
+            floors: { 'mine-0': dungeonFloor, 'town-0': townFloor },
+            town: { id: 'hamlet', shopInventories, bankBalance: 0, deepestFloor: 1 },
             messages: [
-              { text: `${result.name} enters the Abandoned Mine...`, severity: 'important', turn: 0 },
-              { text: 'Use arrow keys or numpad to move. Press ? for help.', severity: 'system', turn: 0 },
+              { text: `Welcome to Bjarnarhaven, ${result.name}.`, severity: 'important', turn: 0 },
+              { text: 'Explore the town. When ready, enter the mine to the north.', severity: 'system', turn: 0 },
+              { text: 'Press ? or / for help with controls.', severity: 'system', turn: 0 },
             ],
           };
 

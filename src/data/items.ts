@@ -244,7 +244,7 @@ const WANDS: ItemTemplate[] = [
 // ── Currency ──────────────────────────────────────────────
 
 const CURRENCY: ItemTemplate[] = [
-  { id: 'copper-coins', name: 'Copper Coins', category: 'currency', sprite: 'coins-copper',
+  { id: 'copper-coins', name: 'Gold Coins', category: 'currency', sprite: 'coins-gold',
     weight: 50, value: 0, depthMin: 1, depthMax: 99 },
 ];
 

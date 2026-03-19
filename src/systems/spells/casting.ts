@@ -5,7 +5,7 @@ import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-ite
 import { getMonstersForDepth } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
 import { queueAnimation } from '../../rendering/animation-queue';
-import { generateTownMap } from '../town/TownMap';
+import { generateTownMap, TOWN_START_RETURN } from '../town/TownMap';
 import { initShopInventory, restockShop } from '../town/Shops';
 import {
   buildBoltAnimation,
@@ -738,7 +738,7 @@ function teleportToTownFromSpell(state: GameState): GameState {
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
-    hero: { ...state.hero, position: { x: 12, y: 8 } },
+    hero: { ...state.hero, position: { ...TOWN_START_RETURN } },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
   };
 }

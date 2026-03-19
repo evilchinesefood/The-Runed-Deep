@@ -392,7 +392,7 @@ export function processMonsterAbility(state: GameState, monster: Monster): GameS
         if (Math.random() < 0.50 && s.hero.copper > 0) {
           const stolen = Math.min(s.hero.copper, rollRange(10, 50));
           s = { ...s, hero: { ...s.hero, copper: s.hero.copper - stolen } };
-          s = addMsg(s, `${monster.name} steals ${stolen} copper!`, 'important');
+          s = addMsg(s, `${monster.name} steals ${stolen} gold!`, 'important');
         }
         break;
       }
@@ -616,7 +616,7 @@ function processThief(state: GameState, floorKey: string, idx: number): GameStat
     if (Math.random() < 0.50 && s.hero.copper > 0) {
       const stolen = Math.min(s.hero.copper, rollRange(10, 50));
       s = { ...s, hero: { ...s.hero, copper: s.hero.copper - stolen } };
-      s = addMsg(s, `${monster.name} steals ${stolen} copper!`, 'important');
+      s = addMsg(s, `${monster.name} steals ${stolen} gold!`, 'important');
       // After stealing, flee
       const curFloor = s.floors[floorKey];
       if (curFloor) {

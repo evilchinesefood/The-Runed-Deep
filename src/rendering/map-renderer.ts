@@ -172,8 +172,8 @@ export class MapRenderer {
             cell.ground.style.display = 'block';
             cell.ground.style.opacity = opacity;
           }
-        } else if (tile.sprite === 'town-wall-corner') {
-          // Fence corners: grass underneath, corner sprite on ground layer
+        } else if (tile.sprite === 'town-wall-corner' || tile.sprite === 'town-wall') {
+          // Town fence: grass underneath, fence sprite on ground layer
           cell.floor.className = 'grass';
           cell.floor.style.opacity = opacity;
           cell.ground.className = tile.sprite;

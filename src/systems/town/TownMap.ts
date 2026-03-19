@@ -108,7 +108,9 @@ for (const b of TOWN_BUILDINGS) {
 }
 
 const DUNGEON_ENTRANCE = { x: 12, y: 1 };
-const PLAYER_START: Vector2 = { x: 12, y: 8 };
+export const TOWN_START_INITIAL: Vector2 = { x: 12, y: 17 };  // first visit: near temple
+export const TOWN_START_RETURN: Vector2 = { x: 12, y: 2 };    // returning from dungeon: near entrance
+const PLAYER_START: Vector2 = TOWN_START_INITIAL;
 
 export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   const tiles: Tile[][] = Array.from({ length: H }, () =>
@@ -124,10 +126,10 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   for (let x = 1; x < W - 1; x++) { tiles[0][x] = { ...HWALL }; tiles[H - 1][x] = { ...HWALL }; }
   // East and west borders (vertical — default orientation)
   for (let y = 1; y < H - 1; y++) { tiles[y][0] = { ...VWALL }; tiles[y][W - 1] = { ...VWALL }; }
-  // Corners — top-left is correct, others flipped 180°
+  // Corners — top-left correct, top-right 90°, bottom-left 90°, bottom-right 180°
   tiles[0][0] = { ...CORNER };
-  tiles[0][W - 1] = { ...CORNER, rotate: 180 };
-  tiles[H - 1][0] = { ...CORNER, rotate: 180 };
+  tiles[0][W - 1] = { ...CORNER, rotate: 90 };
+  tiles[H - 1][0] = { ...CORNER, rotate: 360 };
   tiles[H - 1][W - 1] = { ...CORNER, rotate: 180 };
 
   // Place building footprints as walls

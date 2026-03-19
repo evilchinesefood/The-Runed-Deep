@@ -7,7 +7,7 @@ import { processPickupItem } from '../systems/inventory/pickup';
 import { processDropItem } from '../systems/inventory/drop';
 import { processEquipItem, processUnequipItem } from '../systems/inventory/equipment';
 import { processUseItem } from '../systems/inventory/use-item';
-import { generateTownMap, BUILDING_FLAVORS } from '../systems/town/TownMap';
+import { generateTownMap, BUILDING_FLAVORS, TOWN_START_RETURN } from '../systems/town/TownMap';
 import { initShopInventory, restockShop } from '../systems/town/Shops';
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
@@ -215,13 +215,20 @@ function processMove(state: GameState, direction: Direction): GameState {
     });
   }
 
-  // Notify when stepping onto a building entrance
+  // Notify when stepping onto a building entrance or dungeon entrance
   const movedTile = (floors[floorKey] ?? floor).tiles[newPos.y]?.[newPos.x];
   if (movedTile?.type === 'building' && movedTile.buildingId) {
     const info = BUILDING_FLAVORS[movedTile.buildingId];
     const bName = info?.name ?? movedTile.buildingId;
     messages.push({
       text: `You are at ${bName}. (Press Enter or E to go inside)`,
+      severity: 'normal' as const,
+      turn: state.turn + 1,
+    });
+  } else if (movedTile?.type === 'stairs-down' && state.currentDungeon === 'town') {
+    const targetFloor = state.returnFloor + 1;
+    messages.push({
+      text: `The entrance to the Abandoned Mine. Floor ${targetFloor} awaits. (Press Enter or E to enter)`,
       severity: 'normal' as const,
       turn: state.turn + 1,
     });
@@ -318,7 +325,7 @@ export function teleportToTown(state: GameState): GameState {
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
-    hero: { ...state.hero, position: { x: 12, y: 8 } },
+    hero: { ...state.hero, position: { ...TOWN_START_RETURN } },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
     messages: [...state.messages, { text: 'You arrive in town.', severity: 'important' as const, turn: state.turn }],
   };
@@ -493,34 +500,39 @@ function addMessage(state: GameState, text: string, severity: Message['severity'
 }
 
 function processRest(state: GameState): GameState {
+  // Wait for a random 1-10 turns — more rest = more recovery but more danger
+  const waitTurns = Math.floor(Math.random() * 10) + 1;
   let hero = { ...state.hero };
-  const messages = [...state.messages];
+  let hpGain = 0;
+  let mpGain = 0;
+
+  for (let t = 0; t < waitTurns; t++) {
+    if (hero.hp < hero.maxHp) {
+      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 1) };
+      hpGain++;
+    }
+    if (hero.mp < hero.maxMp && (state.turn + t) % 2 === 0) {
+      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 1) };
+      mpGain++;
+    }
+  }
+
   const gains: string[] = [];
-
-  // Recover 1 HP per wait if below max
-  if (hero.hp < hero.maxHp) {
-    hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 1) };
-    gains.push('+1 HP');
-  }
-
-  // Recover 1 MP every 2 turns of waiting
-  if (hero.mp < hero.maxMp && state.turn % 2 === 0) {
-    hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 1) };
-    gains.push('+1 MP');
-  }
-
+  if (hpGain > 0) gains.push(`+${hpGain} HP`);
+  if (mpGain > 0) gains.push(`+${mpGain} MP`);
   const gainText = gains.length > 0 ? ` (${gains.join(', ')})` : '';
-  messages.push({
-    text: `You waited.${gainText}`,
+
+  const messages = [...state.messages, {
+    text: `You waited ${waitTurns} turn${waitTurns > 1 ? 's' : ''}.${gainText}`,
     severity: 'system' as const,
     turn: state.turn,
-  });
+  }];
 
   return {
     ...state,
     hero,
     messages,
-    turn: state.turn + 1,
+    turn: state.turn + waitTurns,
   };
 }
 

@@ -114,7 +114,7 @@ export function createInventoryScreen(
   screen.style.minHeight = '100vh';
 
   // ── Title bar ──────────────────────────────────────────────
-  screen.appendChild(createTitleBar('EQUIPMENT', () => { cleanup(); onClose(); }));
+  screen.appendChild(createTitleBar('Equipment', () => { cleanup(); onClose(); }));
 
   // ── Equipment panel: paperdoll + slot legend ─────────────────
   const equipPanel = createPanel();
@@ -215,13 +215,55 @@ export function createInventoryScreen(
 
   // ── Inventory panel ────────────────────────────────────────
   const invPanel = createPanel('INVENTORY');
-  invPanel.style.maxHeight = '260px';
+  invPanel.style.maxHeight = '300px';
   invPanel.style.overflowY = 'auto';
+
+  // Sort controls
+  type SortMode = 'newest' | 'oldest' | 'identified' | 'type';
+  let sortMode: SortMode = 'newest';
+
+  const sortBar = el('div', { display: 'flex', gap: '4px', marginBottom: '6px', flexWrap: 'wrap' });
+  const sortModes: [SortMode, string][] = [
+    ['newest', 'Newest'], ['oldest', 'Oldest'], ['identified', 'Identified'], ['type', 'By Type'],
+  ];
+  const sortButtons: HTMLElement[] = [];
+  for (const [mode, label] of sortModes) {
+    const sb = el('div', {
+      padding: '2px 8px', fontSize: '11px', cursor: 'pointer', borderRadius: '3px',
+      userSelect: 'none', transition: 'background 0.1s',
+    });
+    sb.textContent = label;
+    sb.addEventListener('click', () => { sortMode = mode; updateSortButtons(); renderInvRows(); });
+    sortBar.appendChild(sb);
+    sortButtons.push(sb);
+  }
+  function updateSortButtons(): void {
+    sortButtons.forEach((sb, i) => {
+      const active = sortModes[i][0] === sortMode;
+      sb.style.background = active ? '#446' : '#222';
+      sb.style.color = active ? '#aaf' : '#888';
+      sb.style.border = active ? '1px solid #558' : '1px solid #333';
+    });
+  }
+  updateSortButtons();
+  invPanel.appendChild(sortBar);
+
+  function getSortedInventory(): typeof h.inventory {
+    const inv = [...h.inventory];
+    switch (sortMode) {
+      case 'newest': return inv.reverse();
+      case 'oldest': return inv;
+      case 'identified': return inv.sort((a, b) => (a.identified === b.identified ? 0 : a.identified ? -1 : 1));
+      case 'type': return inv.sort((a, b) => a.category.localeCompare(b.category));
+      default: return inv;
+    }
+  }
 
   let invRows: HTMLElement[] = [];
 
   const renderInvRows = () => {
-    while (invPanel.children.length > 1) invPanel.removeChild(invPanel.lastChild!);
+    // Keep header + sort bar, remove the rest
+    while (invPanel.children.length > 2) invPanel.removeChild(invPanel.lastChild!);
     invRows = [];
 
     if (h.inventory.length === 0) {
@@ -232,8 +274,9 @@ export function createInventoryScreen(
       return;
     }
 
-    for (let i = 0; i < h.inventory.length; i++) {
-      const item = h.inventory[i];
+    const sorted = getSortedInventory();
+    for (let i = 0; i < sorted.length; i++) {
+      const item = sorted[i];
       const tpl = ITEM_BY_ID[item.templateId];
       const isSelected = i === selectedIdx;
 
@@ -299,7 +342,7 @@ export function createInventoryScreen(
   const footer = el('div', { width: '100%' });
   footer.className = 'footer';
   footer.appendChild(el('span', undefined, `Weight: ${totalWeight.toFixed(1)} kg`));
-  footer.appendChild(el('span', undefined, `Copper: ${h.copper}`));
+  footer.appendChild(el('span', undefined, `Gold: ${h.copper}`));
   footer.appendChild(el('span', undefined, `Items: ${h.inventory.length}`));
 
   const pack = h.equipment.pack;
