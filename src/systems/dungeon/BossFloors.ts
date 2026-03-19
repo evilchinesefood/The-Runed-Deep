@@ -8,17 +8,20 @@ import { getBossForFloor, MONSTER_BY_ID } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
 import { getItemsForDepth } from '../../data/items';
 import { createItemFromTemplate } from '../items/loot';
+import { getDungeonForFloor, TILESETS, type Tileset } from './generator';
 
 const BOSS_FLOORS = new Set([15, 20, 25, 30, 33, 36, 40]);
 
-// ── Tile factories ────────────────────────────────────────
+// ── Tile factories (use active tileset) ───────────────────
+
+let ts: Tileset = TILESETS['mine'];
 
 function wall(): Tile {
-  return { type: 'wall', sprite: 'rock', walkable: false, transparent: false };
+  return { type: 'wall', sprite: ts.wall, walkable: false, transparent: false };
 }
 
 function floor(): Tile {
-  return { type: 'floor', sprite: 'dark-dgn', walkable: true, transparent: true };
+  return { type: 'floor', sprite: ts.floor, walkable: true, transparent: true };
 }
 
 function stairsUp(): Tile {
@@ -30,7 +33,7 @@ function stairsDown(): Tile {
 }
 
 function trap(trapType: string): Tile {
-  return { type: 'trap', sprite: 'dark-dgn', walkable: true, transparent: true, trapType, trapRevealed: false };
+  return { type: 'trap', sprite: ts.floor, walkable: true, transparent: true, trapType, trapRevealed: false };
 }
 
 // ── Grid helpers ──────────────────────────────────────────
@@ -669,6 +672,7 @@ export function generateBossFloor(
   difficulty: Difficulty,
 ): { floor: Floor; playerStart: Vector2 } | null {
   if (!BOSS_FLOORS.has(floorNum)) return null;
+  ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS['mine'];
 
   switch (floorNum) {
     case 15: return buildFloor15(dungeonId, depth, difficulty);

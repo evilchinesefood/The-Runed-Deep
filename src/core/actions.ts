@@ -1,5 +1,5 @@
 import type { GameState, GameAction, Direction, Vector2, Message, Hero, Floor } from './types';
-import { generateFloor } from '../systems/dungeon/generator';
+import { generateFloor, getDungeonForFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
 import { castSpell } from '../systems/spells/casting';
 import { saveGame } from './save-load';
@@ -333,7 +333,8 @@ export function teleportToTown(state: GameState): GameState {
 
 function returnToDungeon(state: GameState): GameState {
   const targetFloor = state.returnFloor;
-  const floorKey = `mine-${targetFloor}`;
+  const targetDungeon = getDungeonForFloor(targetFloor);
+  const floorKey = `${targetDungeon}-${targetFloor}`;
   const floor = state.floors[floorKey];
 
   if (!floor) {
@@ -353,7 +354,7 @@ function returnToDungeon(state: GameState): GameState {
 
   return {
     ...state,
-    currentDungeon: 'mine',
+    currentDungeon: targetDungeon,
     currentFloor: targetFloor,
     hero: { ...state.hero, position: arrivalPos },
     messages: [...state.messages, { text: `You return to dungeon level ${targetFloor + 1}.`, severity: 'important' as const, turn: state.turn }],
@@ -361,13 +362,15 @@ function returnToDungeon(state: GameState): GameState {
 }
 
 function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 'descend'): GameState {
-  const targetKey = `${state.currentDungeon}-${targetFloor}`;
+  // Determine dungeon tier for this floor
+  const targetDungeon = getDungeonForFloor(targetFloor);
+  const targetKey = `${targetDungeon}-${targetFloor}`;
   let floors = { ...state.floors };
 
   // Generate floor if it doesn't exist yet
   if (!floors[targetKey]) {
     const { floor: newFloor } = generateFloor(
-      state.currentDungeon,
+      targetDungeon,
       targetFloor,
       state.rngSeed,
       true,   // has stairs up
@@ -380,8 +383,6 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   const targetFloorData = floors[targetKey];
 
   // Find the matching stairs on the target floor
-  // Going down → arrive at stairs-up on the next floor
-  // Going up → arrive at stairs-down on the previous floor
   const arrivalStairType = direction === 'descend' ? 'stairs-up' : 'stairs-down';
   let arrivalPos: Vector2 | null = null;
 
@@ -395,24 +396,40 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
     if (arrivalPos) break;
   }
 
-  // Fallback: if no matching stairs found, use center of first room
   if (!arrivalPos) {
     arrivalPos = { x: Math.floor(targetFloorData.width / 2), y: Math.floor(targetFloorData.height / 2) };
   }
 
   const depthLabel = targetFloor + 1;
   const verb = direction === 'descend' ? 'descends to' : 'ascends to';
+  const messages = [
+    ...state.messages,
+    { text: `${state.hero.name} ${verb} level ${depthLabel}.`, severity: 'important' as const, turn: state.turn },
+  ];
+
+  // Tier transition messages
+  const prevDungeon = getDungeonForFloor(state.currentFloor);
+  if (targetDungeon !== prevDungeon) {
+    const tierNames: Record<string, string> = {
+      mine: 'the Abandoned Mine',
+      fortress: 'the Underground Fortress',
+      castle: 'the Castle of the Winds',
+    };
+    messages.push({
+      text: `You enter ${tierNames[targetDungeon] ?? targetDungeon}. The air grows heavier.`,
+      severity: 'important' as const,
+      turn: state.turn,
+    });
+  }
 
   let newState: GameState = {
     ...state,
     hero: { ...state.hero, position: arrivalPos },
+    currentDungeon: targetDungeon,
     currentFloor: targetFloor,
     floors,
     turn: state.turn + 1,
-    messages: [
-      ...state.messages,
-      { text: `${state.hero.name} ${verb} level ${depthLabel}.`, severity: 'important', turn: state.turn },
-    ],
+    messages,
   };
 
   // Auto-save on floor change

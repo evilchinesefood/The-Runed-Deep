@@ -26,12 +26,39 @@ function seededRandom(seed: number): () => number {
   };
 }
 
+// ── Tileset per dungeon tier ─────────────────────────────
+export interface Tileset {
+  floor: string;
+  wall: string;
+  litFloor: string;
+}
+
+export const TILESETS: Record<string, Tileset> = {
+  mine:     { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn' },
+  fortress: { floor: 'dark-dgn', wall: 'wall-dark-dgn', litFloor: 'lit-dgn' },
+  castle:   { floor: 'dark-dgn', wall: 'castle-wall', litFloor: 'lit-dgn' },
+};
+
+/** Get the dungeon ID for a given floor number (0-indexed) */
+export function getDungeonForFloor(floorNum: number): 'mine' | 'fortress' | 'castle' {
+  const depth = floorNum + 1;
+  if (depth <= 13) return 'mine';
+  if (depth <= 26) return 'fortress';
+  return 'castle';
+}
+
+function getTileset(dungeonId: string): Tileset {
+  return TILESETS[dungeonId] ?? TILESETS['mine'];
+}
+
+let activeTileset: Tileset = TILESETS['mine'];
+
 function createWallTile(): Tile {
-  return { type: 'wall', sprite: 'rock', walkable: false, transparent: false };
+  return { type: 'wall', sprite: activeTileset.wall, walkable: false, transparent: false };
 }
 
 function createFloorTile(): Tile {
-  return { type: 'floor', sprite: 'dark-dgn', walkable: true, transparent: true };
+  return { type: 'floor', sprite: activeTileset.floor, walkable: true, transparent: true };
 }
 
 function createDoorTile(): Tile {
@@ -43,7 +70,7 @@ function createLockedDoorTile(): Tile {
 }
 
 function createSecretDoorTile(): Tile {
-  return { type: 'door-secret', sprite: 'rock', walkable: false, transparent: false };
+  return { type: 'door-secret', sprite: activeTileset.wall, walkable: false, transparent: false };
 }
 
 function createStairsTile(direction: 'up' | 'down'): Tile {
@@ -68,7 +95,7 @@ const TRAP_TYPES = [
 function createTrapTile(trapType: string): Tile {
   return {
     type: 'trap',
-    sprite: 'dark-dgn', // looks like floor until revealed
+    sprite: activeTileset.floor, // looks like floor until revealed
     walkable: true,
     transparent: true,
     trapType,
@@ -93,6 +120,9 @@ export function generateFloor(
   hasStairsDown: boolean = true,
   difficulty: Difficulty = 'intermediate',
 ): { floor: Floor; playerStart: Vector2 } {
+  // Set tileset based on dungeon tier
+  activeTileset = getTileset(getDungeonForFloor(floorNum));
+
   const bossFloor = generateBossFloor(dungeonId, floorNum, floorNum + 1, difficulty);
   if (bossFloor) return bossFloor;
 
