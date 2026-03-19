@@ -93,7 +93,8 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   trackEquipmentCheck(updatedHero.equipment as unknown as Record<string, unknown>);
 
   Sound.equip();
-  showGameToast(`Equipped ${equippedItem.name}`, 'success');
+  const slotNames: Record<string, string> = { weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body', cloak: 'Cloak', bracers: 'Arms', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet', ringLeft: 'Ring L', ringRight: 'Ring R', amulet: 'Neck', pack: 'Pack', purse: 'Purse' };
+  showGameToast(`Equipped ${equippedItem.name} → ${slotNames[slot] ?? slot}`, 'success');
   return {
     ...state,
     hero: updatedHero,
