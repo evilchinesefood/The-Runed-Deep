@@ -102,7 +102,7 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     } else {
       hero = removeFromInventory(hero, idx);
       state = teleportToTown({ ...state, hero });
-      return { ...state, turn: state.turn + 1 };
+      return { ...state, screen: 'game', turn: state.turn + 1 };
     }
   } else {
     messages.push({ text: `You read the ${item.name}. Nothing happens.`, severity: 'normal', turn: state.turn });

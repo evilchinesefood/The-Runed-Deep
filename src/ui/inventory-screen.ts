@@ -81,7 +81,7 @@ function createEquipSlot(
     height: '32px',
     cursor: item ? 'pointer' : 'default',
     border: item ? '1px solid #555' : '1px solid #333',
-    background: item ? 'rgba(0,0,0,0.7)' : 'rgba(80,80,80,0.5)',
+    background: 'rgba(80,80,80,0.5)',
     borderRadius: '2px',
     boxSizing: 'border-box',
   });

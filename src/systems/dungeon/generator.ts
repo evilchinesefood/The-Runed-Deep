@@ -187,10 +187,15 @@ export function generateFloor(
     playerStart = { x: sx, y: sy };
   }
 
-  if (hasStairsDown && rooms.length > 1) {
+  if (hasStairsDown && rooms.length > 0) {
     const r = rooms[rooms.length - 1];
-    const sx = Math.floor(r.x + r.w / 2);
-    const sy = Math.floor(r.y + r.h / 2);
+    let sx = Math.floor(r.x + r.w / 2);
+    let sy = Math.floor(r.y + r.h / 2);
+    // If stairs-up is already at this position (single room), offset
+    if (tiles[sy][sx].type === 'stairs-up') {
+      sx = Math.min(r.x + r.w - 1, sx + 2);
+      sy = Math.min(r.y + r.h - 1, sy + 2);
+    }
     tiles[sy][sx] = createStairsTile('down');
   }
 
