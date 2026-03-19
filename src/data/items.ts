@@ -280,7 +280,7 @@ const CONTAINERS: ItemTemplate[] = [
   { id: 'large-pack', name: 'Large Pack', category: 'container', sprite: 'pack', equipSlot: 'pack',
     weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 30000, bulkCapacity: 6000 },
   { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
-    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 100000, bulkCapacity: 50000 },
+    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 200000, bulkCapacity: 80000 },
   { id: 'leather-belt', name: 'Leather Belt', category: 'belt', sprite: 'belt', equipSlot: 'belt',
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
   { id: 'belt-of-wands', name: 'Belt of Wand Quiver', category: 'belt', sprite: 'belt-wand-quiver', equipSlot: 'belt',
