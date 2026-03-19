@@ -9,7 +9,7 @@ const H = 26;
 
 const GRASS: Tile = { type: 'grass', sprite: 'grass', walkable: true, transparent: true };
 const PATH: Tile = { type: 'path', sprite: 'path', walkable: true, transparent: true };
-const WALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
+// WALL used as base for border construction below
 
 export interface TownBuilding {
   id: string;
@@ -24,6 +24,7 @@ export interface TownBuilding {
   sprite: string;
   spriteW: number;
   spriteH: number;
+  rotate?: number; // CSS rotation in degrees (0, 90, 180, 270)
 }
 
 // Sprite reference:
@@ -82,14 +83,14 @@ export const TOWN_BUILDINGS: TownBuilding[] = [
   {
     id: 'sage', name: 'The Sage',
     flavor: 'Ancient knowledge to reveal the secrets of your treasures.',
-    x: 20, y: 11, w: 2, h: 2, entranceX: 22, entranceY: 12,
-    sprite: 'hut-fire', spriteW: 64, spriteH: 64,
+    x: 20, y: 11, w: 2, h: 2, entranceX: 19, entranceY: 12,
+    sprite: 'hut', spriteW: 64, spriteH: 64, rotate: 180,
   },
   {
     id: 'magic-shop', name: 'Magic Shop',
     flavor: 'Arcane tomes and enchanted wands of great power.',
-    x: 20, y: 16, w: 2, h: 3, entranceX: 22, entranceY: 17,
-    sprite: 'house-right', spriteW: 64, spriteH: 96,
+    x: 20, y: 16, w: 2, h: 3, entranceX: 19, entranceY: 17,
+    sprite: 'house-right', spriteW: 64, spriteH: 96, rotate: 180,
   },
 
   // === Temple at south center (entrance on top/north side) ===
@@ -114,9 +115,20 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     Array.from({ length: W }, () => ({ ...GRASS }))
   );
 
-  // Border walls
-  for (let x = 0; x < W; x++) { tiles[0][x] = { ...WALL }; tiles[H - 1][x] = { ...WALL }; }
-  for (let y = 0; y < H; y++) { tiles[y][0] = { ...WALL }; tiles[y][W - 1] = { ...WALL }; }
+  // Border walls with proper orientation
+  const HWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false, rotate: 90 };
+  const VWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
+  const CORNER: Tile = { type: 'wall', sprite: 'town-wall-corner', walkable: false, transparent: false };
+
+  // North and south borders (horizontal — rotated 90°)
+  for (let x = 1; x < W - 1; x++) { tiles[0][x] = { ...HWALL }; tiles[H - 1][x] = { ...HWALL }; }
+  // East and west borders (vertical — default orientation)
+  for (let y = 1; y < H - 1; y++) { tiles[y][0] = { ...VWALL }; tiles[y][W - 1] = { ...VWALL }; }
+  // Corners — top-left is correct, others flipped 180°
+  tiles[0][0] = { ...CORNER };
+  tiles[0][W - 1] = { ...CORNER, rotate: 180 };
+  tiles[H - 1][0] = { ...CORNER, rotate: 180 };
+  tiles[H - 1][W - 1] = { ...CORNER, rotate: 180 };
 
   // Place building footprints as walls
   for (const b of TOWN_BUILDINGS) {
@@ -127,7 +139,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     }
     // Top-left for sprite overlay
     if (b.y >= 0 && b.y < H && b.x >= 0 && b.x < W) {
-      tiles[b.y][b.x] = { type: 'building', sprite: b.sprite, walkable: false, transparent: true, buildingId: b.id };
+      tiles[b.y][b.x] = { type: 'building', sprite: b.sprite, walkable: false, transparent: true, buildingId: b.id, rotate: b.rotate ?? 0 };
     }
     // Entrance tile
     if (b.entranceY >= 0 && b.entranceY < H && b.entranceX >= 0 && b.entranceX < W) {
@@ -143,8 +155,8 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   };
 
   // === Paths ===
-  // Main vertical spine
-  for (let y = 1; y < H - 1; y++) sp(tiles, 12, y);
+  // Main vertical spine (stop at temple entrance, don't extend past)
+  for (let y = 1; y <= 18; y++) sp(tiles, 12, y);
 
   // Left branches to entrances
   for (let x = 5; x <= 12; x++) sp(tiles, x, 3);   // weapon shop
@@ -155,11 +167,11 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   // Right branches to entrances
   for (let x = 12; x <= 18; x++) sp(tiles, x, 3);  // armor shop
   for (let x = 12; x <= 20; x++) sp(tiles, x, 9);  // inn
-  for (let x = 12; x <= 22; x++) sp(tiles, x, 12); // sage
-  for (let x = 12; x <= 22; x++) sp(tiles, x, 17); // magic shop
+  for (let x = 12; x <= 19; x++) sp(tiles, x, 12); // sage
+  for (let x = 12; x <= 19; x++) sp(tiles, x, 17); // magic shop
 
   // Temple entrance
-  sp(tiles, 12, 15);
+  sp(tiles, 12, 18);
 
   const explored = Array.from({ length: H }, () => Array(W).fill(true));
   const visible = Array.from({ length: H }, () => Array(W).fill(true));

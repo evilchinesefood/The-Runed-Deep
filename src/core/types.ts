@@ -203,6 +203,7 @@ export interface Tile {
   trapType?: string;
   trapRevealed?: boolean;
   buildingId?: string;
+  rotate?: number;
 }
 
 export interface PlacedItem {

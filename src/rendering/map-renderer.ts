@@ -116,9 +116,11 @@ export class MapRenderer {
         cell.floor.className = '';
         cell.floor.style.background = '';
         cell.floor.style.opacity = '';
+        cell.floor.style.transform = '';
         cell.ground.className = '';
         cell.ground.style.display = 'none';
         cell.ground.style.opacity = '';
+        cell.ground.style.transform = '';
         cell.entity.className = '';
         cell.entity.style.display = 'none';
 
@@ -163,12 +165,24 @@ export class MapRenderer {
           const underlaySprite = tile.type === 'building' ? 'grass' : (isLit ? 'lit-dgn' : 'dark-dgn');
           cell.floor.className = underlaySprite;
           cell.floor.style.opacity = opacity;
+          // Buildings render via overlay system, not tile grid
+          if (tile.type !== 'building' || tile.walkable) {
+            cell.ground.className = tile.sprite;
+            cell.ground.style.display = 'block';
+            cell.ground.style.opacity = opacity;
+          }
+        } else if (tile.sprite === 'town-wall-corner') {
+          // Fence corners: grass underneath, corner sprite on ground layer
+          cell.floor.className = 'grass';
+          cell.floor.style.opacity = opacity;
           cell.ground.className = tile.sprite;
           cell.ground.style.display = 'block';
           cell.ground.style.opacity = opacity;
+          cell.ground.style.transform = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
         } else {
           cell.floor.className = floorSprite;
           cell.floor.style.opacity = opacity;
+          cell.floor.style.transform = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
         }
 
         // If visible or permanently lit, show ground objects and entities
@@ -257,6 +271,7 @@ export class MapRenderer {
 
         const div = document.createElement('div');
         div.className = tile.sprite;
+        const rot = tile.rotate ?? 0;
         div.style.cssText = `
           position:absolute;
           left:${screenX}px;
@@ -265,6 +280,7 @@ export class MapRenderer {
           height:${sh}px;
           pointer-events:none;
           z-index:5;
+          ${rot ? `transform:rotate(${rot}deg);transform-origin:center center;` : ''}
         `;
         this.mapContainer.appendChild(div);
         this.buildingOverlays.push(div);
