@@ -181,7 +181,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     newMonsters.splice(monsterIndex, 1);
 
     // Loot drop
-    const loot = generateLoot(state.currentFloor, monster.position);
+    const loot = generateLoot(state.currentFloor, monster.position, state.ngPlusCount);
     let newItems = [...floor.items];
     if (loot) {
       newItems.push({ item: loot, position: { ...monster.position } });
@@ -199,7 +199,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       newFloor = { ...newFloor, decals: [...newFloor.decals, { x: monster.position.x, y: monster.position.y }] };
     }
 
-    return {
+    const resultState: GameState = {
       ...applyMessages(state, messages),
       hero: {
         ...state.hero,
@@ -208,6 +208,13 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       floors: { ...state.floors, [floorKey]: newFloor },
       turn: state.turn + 1,
     };
+
+    // Victory condition — Surtur slain
+    if (monster.templateId === 'surtur') {
+      return { ...resultState, screen: 'victory' };
+    }
+
+    return resultState;
   } else {
     // Monster survives
     messages.push({

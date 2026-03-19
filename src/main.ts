@@ -14,6 +14,7 @@ import { createSpellScreen } from './ui/SpellScreen';
 import { createShopScreen } from './ui/ShopScreen';
 import { createServiceScreen } from './ui/ServiceScreen';
 import { createIntroScreen } from './ui/IntroScreen';
+import { createVictoryScreen } from './ui/VictoryScreen';
 import { generateTownMap, TOWN_START_INITIAL } from './systems/town/TownMap';
 import { initShopInventory } from './systems/town/Shops';
 import { findPath } from './utils/Pathfinding';
@@ -111,6 +112,12 @@ function stepAutoPath(): void {
   }
 }
 
+function getNextDifficulty(current: string): import('./core/types').Difficulty {
+  const order: import('./core/types').Difficulty[] = ['easy', 'intermediate', 'hard', 'impossible'];
+  const idx = order.indexOf(current as import('./core/types').Difficulty);
+  return order[Math.min(order.length - 1, idx + 1)];
+}
+
 function dxdyToDirection(dx: number, dy: number): import('./core/types').Direction | null {
   const map: Record<string, import('./core/types').Direction> = {
     '0,-1': 'N', '1,-1': 'NE', '1,0': 'E', '1,1': 'SE',
@@ -203,6 +210,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
       rngSeed: Date.now(),
       returnFloor: 0,
       activeBuildingId: '',
+      ngPlusCount: 0,
     };
     gameLoop.setState(testState);
   }
@@ -259,6 +267,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
       rngSeed: Date.now(),
       returnFloor: 0,
       activeBuildingId: '',
+      ngPlusCount: 0,
     };
     gameLoop.setState(testState);
   }
@@ -532,6 +541,47 @@ function switchScreen(state: GameState): void {
         root.replaceChildren(svcScreen);
       };
       renderService();
+      break;
+    }
+
+    case 'victory': {
+      input.setEnabled(false);
+      touchControls.hide();
+      const victoryScreen = createVictoryScreen(
+        gameLoop.getState(),
+        () => {
+          const s = gameLoop.getState();
+          const nextDifficulty = getNextDifficulty(s.difficulty);
+          const ngCount = s.ngPlusCount + 1;
+
+          const { floor: townFloor } = generateTownMap();
+          const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, nextDifficulty);
+
+          const ngState: GameState = {
+            ...s,
+            screen: 'game',
+            currentDungeon: 'town',
+            currentFloor: 0,
+            floors: { 'mine-0': dungeonFloor, 'town-0': townFloor },
+            difficulty: nextDifficulty,
+            ngPlusCount: ngCount,
+            returnFloor: 0,
+            messages: [
+              { text: `=== NEW GAME PLUS ${ngCount} ===`, severity: 'important', turn: s.turn },
+              { text: `Difficulty increased to ${nextDifficulty}. Loot quality improved.`, severity: 'system', turn: s.turn },
+              { text: 'The dungeon has been reborn. Surtur stirs once more...', severity: 'important', turn: s.turn },
+            ],
+            town: { ...s.town, shopInventories: {}, deepestFloor: 1 },
+          };
+          ngState.hero.position = { x: 12, y: 17 };
+          gameLoop.setState(ngState);
+        },
+        () => {
+          const freshState = createInitialGameState();
+          gameLoop.setState(freshState);
+        },
+      );
+      root.appendChild(victoryScreen);
       break;
     }
 

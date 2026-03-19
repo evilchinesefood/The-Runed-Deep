@@ -26,15 +26,13 @@ export const ENCHANTMENT_BY_ID: Record<string, SpecialEnchantment> = Object.from
 );
 
 /** Roll special enchantments for an item. Chance and count scale with depth. */
-export function rollSpecialEnchantments(depth: number, isTierItem: boolean): string[] {
-  // Chance scales with depth:
-  // Tier items: 15% base + 1% per floor above 15 (caps at 40%)
-  // Regular items: 0% until floor 15, then 2% + 0.5% per floor above 15 (caps at 15%)
+export function rollSpecialEnchantments(depth: number, isTierItem: boolean, ngPlus: number = 0): string[] {
+  const ngBonus = ngPlus * 0.15;
   let chance: number;
   if (isTierItem) {
-    chance = Math.min(0.40, 0.15 + Math.max(0, depth - 15) * 0.01);
+    chance = Math.min(0.60, 0.15 + Math.max(0, depth - 15) * 0.01 + ngBonus);
   } else {
-    chance = depth >= 15 ? Math.min(0.15, 0.02 + (depth - 15) * 0.005) : 0;
+    chance = depth >= 15 ? Math.min(0.35, 0.02 + (depth - 15) * 0.005 + ngBonus) : ngBonus > 0 ? Math.min(0.20, ngBonus) : 0;
   }
   if (Math.random() > chance) return [];
 
@@ -52,5 +50,29 @@ export function rollSpecialEnchantments(depth: number, isTierItem: boolean): str
     pool.splice(idx, 1);
   }
 
+  // In NG+, enchantments have 20% chance to be critical (doubled effect)
+  if (ngPlus > 0) {
+    return result.map(id => Math.random() < 0.20 ? `${id}:critical` : id);
+  }
+
   return result;
+}
+
+/** Check if an item's enchantment list contains an enchantment. Returns multiplier: 0=none, 1=normal, 2=critical */
+export function getEnchantStrength(enchants: string[] | undefined, id: string): number {
+  if (!enchants) return 0;
+  if (enchants.includes(`${id}:critical`)) return 2;
+  if (enchants.includes(id)) return 1;
+  return 0;
+}
+
+/** Sum enchantment strength across all equipped items. */
+export function getEquipEnchantTotal(equipment: Record<string, any>, enchId: string): number {
+  let total = 0;
+  for (const item of Object.values(equipment)) {
+    if (item?.specialEnchantments) {
+      total += getEnchantStrength(item.specialEnchantments as string[], enchId);
+    }
+  }
+  return total;
 }

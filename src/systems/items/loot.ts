@@ -12,7 +12,7 @@ let nextItemId = 1;
  * Generate a random loot drop for a killed monster.
  * Returns null if no drop (based on drop chance).
  */
-export function generateLoot(depth: number, _position: Vector2): Item | null {
+export function generateLoot(depth: number, _position: Vector2, ngPlus: number = 0): Item | null {
   // Drop chance: 30% base, increases slightly with depth
   const dropChance = 0.30 + depth * 0.005;
   if (Math.random() > dropChance) return null;
@@ -26,14 +26,14 @@ export function generateLoot(depth: number, _position: Vector2): Item | null {
   if (candidates.length === 0) return null;
 
   const template = candidates[Math.floor(Math.random() * candidates.length)];
-  return createItemFromTemplate(template, depth);
+  return createItemFromTemplate(template, depth, ngPlus);
 }
 
 /**
  * Create an Item instance from a template.
  * May add random enchantments on deeper floors.
  */
-export function createItemFromTemplate(template: ItemTemplate, depth: number): Item {
+export function createItemFromTemplate(template: ItemTemplate, depth: number, ngPlus: number = 0): Item {
   const id = `item-${nextItemId++}`;
 
   // Enchantment chance increases with depth
@@ -96,7 +96,7 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number): I
   };
 
   const isTier = !!(ITEM_BY_ID[template.id]?.materialTier);
-  const specials = rollSpecialEnchantments(depth, isTier);
+  const specials = rollSpecialEnchantments(depth, isTier, ngPlus);
   if (specials.length > 0) {
     const suffixes = ['of Power', 'of the Ancients', 'of Legends', 'of the Gods', 'of Valor'];
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];

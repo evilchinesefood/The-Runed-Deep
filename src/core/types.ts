@@ -21,6 +21,7 @@ export type Screen =
   | 'help'
   | 'shop'
   | 'service'
+  | 'victory'
   | 'death';
 
 export type Difficulty = 'easy' | 'intermediate' | 'hard' | 'impossible';
@@ -270,6 +271,7 @@ export interface GameState {
   rngSeed: number;
   returnFloor: number;
   activeBuildingId: string;
+  ngPlusCount: number;
 }
 
 // ============================================================

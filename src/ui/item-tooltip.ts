@@ -152,10 +152,14 @@ function buildTooltipContent(item: Item): HTMLElement {
   // Special enchantments
   if (item.specialEnchantments && item.specialEnchantments.length > 0) {
     const enchBox = d('div', { marginBottom: '4px' });
-    for (const eid of item.specialEnchantments) {
+    for (const rawEid of item.specialEnchantments) {
+      const isCrit = rawEid.endsWith(':critical');
+      const eid = isCrit ? rawEid.replace(':critical', '') : rawEid;
       const ench = ENCHANTMENT_BY_ID[eid];
       if (ench) {
-        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `★ ${ench.name}: ${ench.description}`));
+        const prefix = isCrit ? '★★' : '★';
+        const suffix = isCrit ? ' (Critical - 2x)' : '';
+        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${ench.description}${suffix}`));
       }
     }
     container.appendChild(enchBox);

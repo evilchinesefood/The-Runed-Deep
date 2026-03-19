@@ -50,15 +50,18 @@ export function computeTotalArmorValue(dexterity: number, equipment: Equipment):
  * Call this after any attribute change, level-up, or equipment change.
  */
 export function recomputeDerivedStats(hero: Hero): Hero {
-  // Special enchantment attribute bonuses from equipment
+  // Special enchantment attribute bonuses from equipment (handles critical variants)
   let bonusStr = 0, bonusInt = 0, bonusCon = 0, bonusDex = 0;
   for (const slot of Object.values(hero.equipment)) {
     if (!slot?.specialEnchantments) continue;
     for (const e of slot.specialEnchantments) {
-      if (e === 'str-bonus') bonusStr += 10;
-      if (e === 'int-bonus') bonusInt += 10;
-      if (e === 'con-bonus') bonusCon += 10;
-      if (e === 'dex-bonus') bonusDex += 10;
+      const isCrit = (e as string).endsWith(':critical');
+      const mult = isCrit ? 2 : 1;
+      const base = isCrit ? (e as string).replace(':critical', '') : e;
+      if (base === 'str-bonus') bonusStr += 10 * mult;
+      if (base === 'int-bonus') bonusInt += 10 * mult;
+      if (base === 'con-bonus') bonusCon += 10 * mult;
+      if (base === 'dex-bonus') bonusDex += 10 * mult;
     }
   }
   const effCon = hero.attributes.constitution + bonusCon;
