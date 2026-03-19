@@ -119,8 +119,8 @@ function processContextAction(state: GameState): GameState {
     }
   }
 
-  // Nothing to do → wait
-  return processRest(state);
+  // Nothing to do — E doesn't wait, only Q does
+  return addMessage(state, 'Nothing to interact with here.', 'system');
 }
 
 function processMove(state: GameState, direction: Direction): GameState {
@@ -560,7 +560,48 @@ function addMessage(state: GameState, text: string, severity: Message['severity'
 }
 
 function processRest(state: GameState): GameState {
-  // Wait for a random 1-10 turns — more rest = more recovery but more danger
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+
+  // Check for nearby enemies — fail if within 5 tiles
+  if (floor) {
+    const nearbyMonster = floor.monsters.find(m => {
+      const dist = Math.max(Math.abs(m.position.x - state.hero.position.x), Math.abs(m.position.y - state.hero.position.y));
+      return dist <= 5;
+    });
+    if (nearbyMonster) {
+      const dist = Math.max(
+        Math.abs(nearbyMonster.position.x - state.hero.position.x),
+        Math.abs(nearbyMonster.position.y - state.hero.position.y),
+      );
+      // Close enemy: chance to get ambushed (30% if adjacent, 15% if 2-3 tiles)
+      const ambushChance = dist <= 1 ? 0.30 : dist <= 3 ? 0.15 : 0;
+      if (Math.random() < ambushChance) {
+        return {
+          ...state,
+          messages: [...state.messages, {
+            text: `A ${nearbyMonster.name} catches you off guard while resting!`,
+            severity: 'combat' as const,
+            turn: state.turn,
+          }],
+          turn: state.turn + 2, // monsters get extra turns
+        };
+      }
+      // Even if no ambush, waiting ends early with warning
+      return {
+        ...state,
+        hero: { ...state.hero, hp: Math.min(state.hero.maxHp, state.hero.hp + 1) },
+        messages: [...state.messages, {
+          text: `You rest briefly but sense danger nearby. (+1 HP)`,
+          severity: 'system' as const,
+          turn: state.turn,
+        }],
+        turn: state.turn + 1,
+      };
+    }
+  }
+
+  // Safe to rest — random 1-10 turns
   const waitTurns = Math.floor(Math.random() * 10) + 1;
   let hero = { ...state.hero };
   let hpGain = 0;

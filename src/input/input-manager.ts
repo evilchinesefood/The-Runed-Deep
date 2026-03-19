@@ -140,8 +140,13 @@ export class InputManager {
 
   private setupKeyboard(): void {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Prevent Tab default (browser focus) immediately
-      if (e.code === 'Tab') e.preventDefault();
+      // Handle Tab before anything else (browser intercepts it)
+      if (e.code === 'Tab') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.enabled) this.onAutoExplore?.();
+        return;
+      }
 
       if (!this.enabled) return;
 

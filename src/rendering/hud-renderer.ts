@@ -126,7 +126,7 @@ export class HudRenderer {
     this.statsEl.appendChild(xpRow);
 
     const floorInfo = el('div', { fontSize: '11px', marginTop: '4px' },
-      `${state.currentDungeon !== 'town' ? `Floor: ${state.currentFloor + 1}` : 'Town'}     Gold: ${h.copper}`
+      `${state.currentDungeon !== 'town' ? `Floor: ${state.currentFloor + 1}` : 'Town'} | Gold: ${h.copper}`
     );
     this.statsEl.appendChild(floorInfo);
 

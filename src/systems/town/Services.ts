@@ -59,7 +59,7 @@ export function templeCurePoison(state: GameState): GameState {
 // ── Sage ─────────────────────────────────────────────────
 
 export function sageIdentifyOne(state: GameState, itemId: string): GameState {
-  const cost = 30;
+  const cost = 8;
   const err = checkCopper(state, cost);
   if (err) return err;
 
@@ -92,7 +92,7 @@ export function sageIdentifyAll(state: GameState): GameState {
   const count = unidentInv.length + unidentEqSlots.length;
   if (count === 0) return addMsg(state, 'All your items are already identified.', 'system');
 
-  const cost = 25 * count;
+  const cost = 6 * count;
   const err = checkCopper(state, cost);
   if (err) return err;
 

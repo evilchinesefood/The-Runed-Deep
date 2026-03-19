@@ -66,8 +66,8 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
     for (const item of allUnident) {
       const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
       row.appendChild(el('div', { flex: '1', fontSize: '13px', color: '#ccc' }, getDisplayName(item)));
-      const btn = createButton('Identify 30g', 'sm');
-      const disabled = state.hero.copper < 30;
+      const btn = createButton('Identify 8g', 'sm');
+      const disabled = state.hero.copper < 8;
       greyBtn(btn, disabled);
       btn.addEventListener('click', () => onUpdate(sageIdentifyOne(state, item.id)));
       row.appendChild(btn);
@@ -75,7 +75,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
     }
   }
 
-  const totalCost = 25 * allUnident.length;
+  const totalCost = 6 * allUnident.length;
   const allBtn = createButton(`Identify All — ${totalCost} gold`);
   Object.assign(allBtn.style, { display: 'block', width: '100%', marginTop: '8px' });
   greyBtn(allBtn, allUnident.length === 0 || state.hero.copper < totalCost);
