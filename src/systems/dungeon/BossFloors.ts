@@ -8,7 +8,7 @@ import { getBossForFloor, MONSTER_BY_ID } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
 import { getItemsForDepth } from '../../data/items';
 import { createItemFromTemplate } from '../items/loot';
-import { getDungeonForFloor, TILESETS, type Tileset } from './generator';
+import { getDungeonForFloor, TILESETS, type Tileset } from './Tilesets';
 
 const BOSS_FLOORS = new Set([15, 20, 25, 30, 33, 36, 40]);
 
