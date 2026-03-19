@@ -45,7 +45,12 @@ export class GameLoop {
     }
 
     // 4. Process monster turns (when in game screen, a turn-consuming action happened, and not in town)
-    if (newState.screen === 'game' && newState.turn > this.state.turn && newState.currentDungeon !== 'town') {
+    // Speed boost: skip monster turn every 3rd turn if hero has speed-boost equipped
+    const hasSpeedBoost = Object.values(newState.hero.equipment).some(
+      i => i?.specialEnchantments?.includes('speed-boost')
+    );
+    const skipMonsters = hasSpeedBoost && newState.turn % 3 === 0;
+    if (newState.screen === 'game' && newState.turn > this.state.turn && newState.currentDungeon !== 'town' && !skipMonsters) {
       newState = this.processMonsterTurns(newState);
     }
 
@@ -62,6 +67,22 @@ export class GameLoop {
 
   private tickActiveEffects(state: GameState): GameState {
     let hero = { ...state.hero };
+    let messages = [...state.messages];
+
+    // Equipment regen enchantments
+    const hasRegenHp = Object.values(hero.equipment).some(
+      i => i?.specialEnchantments?.includes('regen-hp')
+    );
+    const hasRegenMp = Object.values(hero.equipment).some(
+      i => i?.specialEnchantments?.includes('regen-mp')
+    );
+    if (hasRegenHp && state.turn % 2 === 0 && hero.hp < hero.maxHp) {
+      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 1) };
+    }
+    if (hasRegenMp && state.turn % 3 === 0 && hero.mp < hero.maxMp) {
+      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 1) };
+    }
+
     const remaining = hero.activeEffects
       .map(e => ({ ...e, turnsRemaining: e.turnsRemaining - 1 }))
       .filter(e => e.turnsRemaining > 0);
@@ -69,8 +90,6 @@ export class GameLoop {
     const expired = hero.activeEffects.filter(
       e => !remaining.find(r => r.id === e.id)
     );
-
-    let messages = [...state.messages];
 
     // Poison damage tick (before expiry check — poison hurts while active)
     const poisoned = hero.activeEffects.find(e => e.id === 'poisoned' && e.turnsRemaining > 1);

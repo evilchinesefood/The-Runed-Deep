@@ -1,5 +1,6 @@
 import type { Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
+import { ENCHANTMENT_BY_ID } from '../data/Enchantments';
 import { getDisplayName } from '../systems/inventory/display-name';
 
 let tooltipEl: HTMLElement | null = null;
@@ -148,6 +149,18 @@ function buildTooltipContent(item: Item): HTMLElement {
 
   if (hasStats) container.appendChild(statsBox);
 
+  // Special enchantments
+  if (item.specialEnchantments && item.specialEnchantments.length > 0) {
+    const enchBox = d('div', { marginBottom: '4px' });
+    for (const eid of item.specialEnchantments) {
+      const ench = ENCHANTMENT_BY_ID[eid];
+      if (ench) {
+        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `★ ${ench.name}: ${ench.description}`));
+      }
+    }
+    container.appendChild(enchBox);
+  }
+
   // Cursed
   if (item.cursed && item.identified) {
     container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed — cannot be unequipped'));
@@ -188,6 +201,9 @@ export function showItemTooltip(item: Item, x: number, y: number): void {
     tip.appendChild(d('div', { fontSize: '14px', fontWeight: 'bold', color: '#ddd', marginBottom: '4px' }, getDisplayName(item)));
     tip.appendChild(d('div', { color: '#888' }, categoryLabel(item)));
     tip.appendChild(d('div', { color: '#886', fontStyle: 'italic', marginTop: '4px' }, 'Unidentified'));
+    if (item.specialEnchantments && item.specialEnchantments.length > 0) {
+      tip.appendChild(d('div', { color: '#a8f', fontStyle: 'italic', fontSize: '11px', marginTop: '2px' }, 'Has magical properties'));
+    }
     tip.appendChild(d('div', { color: '#666', marginTop: '4px', fontSize: '11px' }, `${(item.weight / 1000).toFixed(1)} kg`));
   } else {
     tip.appendChild(buildTooltipContent(item));

@@ -3,7 +3,8 @@
 // ============================================================
 
 import type { Item, Vector2 } from '../../core/types';
-import { getItemsForDepth, type ItemTemplate } from '../../data/items';
+import { getItemsForDepth, ITEM_BY_ID, type ItemTemplate } from '../../data/items';
+import { rollSpecialEnchantments } from '../../data/Enchantments';
 
 let nextItemId = 1;
 
@@ -79,7 +80,7 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number): I
     }
   }
 
-  return {
+  const base: Item = {
     id,
     templateId: template.id,
     name,
@@ -88,11 +89,21 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number): I
     weight: template.weight,
     bulk: Math.floor(template.weight / 5),
     value: Math.max(1, template.value + enchantment * 20),
-    identified: !cursed && enchantment === 0, // unidentified if enchanted/cursed
+    identified: !cursed && enchantment === 0,
     cursed,
     enchantment,
     properties,
   };
+
+  const isTier = !!(ITEM_BY_ID[template.id]?.materialTier);
+  const specials = rollSpecialEnchantments(depth, isTier);
+  if (specials.length > 0) {
+    const suffixes = ['of Power', 'of the Ancients', 'of Legends', 'of the Gods', 'of Valor'];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    return { ...base, name: `${base.name} ${suffix}`, specialEnchantments: specials };
+  }
+
+  return base;
 }
 
 export function createCopperDrop(depth: number): Item {

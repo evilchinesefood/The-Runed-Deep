@@ -327,7 +327,10 @@ export function processMonsterAbility(state: GameState, monster: Monster): GameS
     switch (ability) {
 
       case 'poison': {
-        if (Math.random() < 0.30) {
+        const isPoisonImmune = Object.values(s.hero.equipment).some(
+          i => i?.specialEnchantments?.includes('poison-immune')
+        );
+        if (!isPoisonImmune && Math.random() < 0.30) {
           const alreadyPoisoned = s.hero.activeEffects.some(e => e.id === 'poisoned');
           if (!alreadyPoisoned) {
             const effects = [

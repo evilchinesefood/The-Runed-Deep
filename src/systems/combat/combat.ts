@@ -157,6 +157,17 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
 
   const newHp = monster.hp - damage;
 
+  // Life steal
+  const hasLifeSteal = Object.values(state.hero.equipment).some(
+    i => i?.specialEnchantments?.includes('life-steal')
+  );
+  if (hasLifeSteal && damage > 0) {
+    const heal = Math.max(1, Math.floor(damage * 0.15));
+    const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
+    state = { ...state, hero: { ...state.hero, hp: healedHp } };
+    messages.push({ text: `Life steal heals you for ${heal} HP.`, severity: 'combat', turn: state.turn });
+  }
+
   if (newHp <= 0) {
     // Monster dies
     messages.push({
@@ -283,6 +294,34 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
     hero: { ...state.hero, hp: Math.max(0, newHp) },
     floors,
   };
+
+  // Reflect damage (Thorns enchantment)
+  const hasReflect = Object.values(state.hero.equipment).some(
+    i => i?.specialEnchantments?.includes('reflect-damage')
+  );
+  if (hasReflect && damage > 0) {
+    const reflectDmg = Math.max(1, Math.floor(damage * 0.20));
+    const floorKey2 = `${result.currentDungeon}-${result.currentFloor}`;
+    const floor2 = result.floors[floorKey2];
+    if (floor2) {
+      const mIdx = floor2.monsters.findIndex(m => m.id === monster.id);
+      if (mIdx >= 0) {
+        const m = floor2.monsters[mIdx];
+        const mNewHp = m.hp - reflectDmg;
+        const newMonsters = [...floor2.monsters];
+        if (mNewHp <= 0) {
+          newMonsters.splice(mIdx, 1);
+        } else {
+          newMonsters[mIdx] = { ...m, hp: mNewHp };
+        }
+        result = {
+          ...result,
+          floors: { ...result.floors, [floorKey2]: { ...floor2, monsters: newMonsters } },
+          messages: [...result.messages, { text: `Thorns reflect ${reflectDmg} damage back at the ${monster.name}!`, severity: 'combat' as const, turn: result.turn }],
+        };
+      }
+    }
+  }
 
   // Process on-hit abilities (poison, drain, steal, elemental touch)
   if (monster.abilities.length > 0 && newHp > 0) {

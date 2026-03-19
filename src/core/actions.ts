@@ -189,7 +189,10 @@ function processMove(state: GameState, direction: Direction): GameState {
   const tileAtNew = floor.tiles[newPos.y][newPos.x];
   if (tileAtNew.type === 'trap' && tileAtNew.trapType) {
     const isLevitating = state.hero.activeEffects.some(e => e.id === 'levitation');
-    if (!isLevitating) {
+    const isTrapImmune = Object.values(state.hero.equipment).some(
+      i => i?.specialEnchantments?.includes('trap-immune')
+    );
+    if (!isLevitating && !isTrapImmune) {
       const result = triggerTrap(tileAtNew, hero, newPos, floor, floorKey, messages, state.turn + 1);
       hero = result.hero;
       floors = { ...state.floors, [floorKey]: result.floor };

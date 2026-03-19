@@ -50,9 +50,24 @@ export function computeTotalArmorValue(dexterity: number, equipment: Equipment):
  * Call this after any attribute change, level-up, or equipment change.
  */
 export function recomputeDerivedStats(hero: Hero): Hero {
-  const maxHp = computeMaxHp(hero.attributes.constitution, hero.level);
-  const maxMp = computeMaxMp(hero.attributes.intelligence, hero.level);
-  let armorValue = computeTotalArmorValue(hero.attributes.dexterity, hero.equipment);
+  // Special enchantment attribute bonuses from equipment
+  let bonusStr = 0, bonusInt = 0, bonusCon = 0, bonusDex = 0;
+  for (const slot of Object.values(hero.equipment)) {
+    if (!slot?.specialEnchantments) continue;
+    for (const e of slot.specialEnchantments) {
+      if (e === 'str-bonus') bonusStr += 10;
+      if (e === 'int-bonus') bonusInt += 10;
+      if (e === 'con-bonus') bonusCon += 10;
+      if (e === 'dex-bonus') bonusDex += 10;
+    }
+  }
+  const effCon = hero.attributes.constitution + bonusCon;
+  const effInt = hero.attributes.intelligence + bonusInt;
+  const effDex = hero.attributes.dexterity + bonusDex;
+
+  const maxHp = computeMaxHp(effCon, hero.level);
+  const maxMp = computeMaxMp(effInt, hero.level);
+  let armorValue = computeTotalArmorValue(effDex, hero.equipment);
 
   // Preserve Shield spell bonus
   const hasShield = hero.activeEffects?.some(e => e.id === 'shield');

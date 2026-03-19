@@ -89,6 +89,12 @@ const ELVEN_ARMOR: ItemTemplate[] = [
     weight: 2500, value: 180, depthMin: 14, depthMax: 99, ac: 4, materialTier: 'elven' },
   { id: 'elven-helmet', name: 'Elven Helmet', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
     weight: 1000, value: 120, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
+  { id: 'elven-bracers', name: 'Elven Bracers', category: 'bracers', sprite: 'bracers-enchanted', equipSlot: 'bracers',
+    weight: 600, value: 300, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
+  { id: 'elven-boots', name: 'Elven Boots', category: 'boots', sprite: 'boots-enchanted', equipSlot: 'boots',
+    weight: 700, value: 400, depthMin: 13, depthMax: 99, ac: 2, materialTier: 'elven' },
+  { id: 'elven-cloak', name: 'Elven Cloak', category: 'cloak', sprite: 'cloak-enchanted', equipSlot: 'cloak',
+    weight: 600, value: 500, depthMin: 15, depthMax: 99, ac: 3, materialTier: 'elven' },
 ];
 
 // ── Meteoric Steel Weapons & Armor ────────────────────────
@@ -107,6 +113,12 @@ const METEORIC_ARMOR: ItemTemplate[] = [
     weight: 12000, value: 800, depthMin: 28, depthMax: 99, ac: 15, materialTier: 'meteoric' },
   { id: 'meteoric-shield', name: 'Meteoric Steel Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
     weight: 4000, value: 350, depthMin: 26, depthMax: 99, ac: 7, materialTier: 'meteoric' },
+  { id: 'meteoric-helm', name: 'Meteoric Helm', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
+    weight: 2500, value: 400, depthMin: 26, depthMax: 99, ac: 5, materialTier: 'meteoric' },
+  { id: 'meteoric-gauntlets', name: 'Meteoric Gauntlets', category: 'gauntlets', sprite: 'gauntlet-enchanted', equipSlot: 'gauntlets',
+    weight: 1200, value: 350, depthMin: 27, depthMax: 99, ac: 4, materialTier: 'meteoric' },
+  { id: 'meteoric-boots', name: 'Meteoric Boots', category: 'boots', sprite: 'boots-enchanted', equipSlot: 'boots',
+    weight: 2000, value: 350, depthMin: 28, depthMax: 99, ac: 4, materialTier: 'meteoric' },
 ];
 
 // ── Armor ─────────────────────────────────────────────────

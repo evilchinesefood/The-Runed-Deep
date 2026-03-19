@@ -297,6 +297,12 @@ function applySpellDamageToMonster(
   const monster = floor.monsters[monsterIdx];
   let damage = rollRange(minDmg, maxDmg);
 
+  // Spell damage enchantment bonus
+  const hasSpellDmg = Object.values(state.hero.equipment).some(
+    i => i?.specialEnchantments?.includes('spell-damage')
+  );
+  if (hasSpellDmg) damage = Math.round(damage * 1.3);
+
   // Apply elemental resistance
   const resistance = getElementResistance(monster, element);
   if (resistance >= 100) {

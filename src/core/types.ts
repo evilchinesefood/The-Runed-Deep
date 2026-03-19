@@ -149,6 +149,7 @@ export interface Item {
   enchantment: number;        // +/- modifier
   properties: Record<string, number>;
   contents?: Item[];          // for containers
+  specialEnchantments?: string[]; // e.g. ['life-steal', 'fire-resist', 'regen-hp']
 }
 
 // ============================================================
