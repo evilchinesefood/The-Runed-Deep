@@ -103,6 +103,9 @@
 .amulet-cursed {
 	background: url('../../assets/items.png') -32px -128px;
 }
+.amulet-enchanted {
+	background: url('../../assets/items.png') -0px -128px;
+}
 .amulet-resist-fire {
 	background: url('../../assets/items.png') -64px -128px;
 }
@@ -336,6 +339,12 @@
 	background: url('../../assets/items.png') -0px -672px;
 }
 .belt-wand-quiver {
+	background: url('../../assets/items.png') -32px -672px;
+}
+.belt-wand-quiver-enchanted {
+	background: url('../../assets/items.png') -32px -672px;
+}
+.belt-wand-quiver-cursed {
 	background: url('../../assets/items.png') -32px -672px;
 }
 .belt-enchanted {

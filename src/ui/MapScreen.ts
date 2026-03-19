@@ -10,8 +10,8 @@ const TILE_COLORS: Record<string, string> = {
   'door-open': '#a86',
   'door-locked': '#a64',
   'door-secret': '#888', // looks like wall until found
-  'stairs-up': '#4f4',
-  'stairs-down': '#f44',
+  'stairs-up': '#ff0',
+  'stairs-down': '#ff0',
   trap: '#555',
   grass: '#383',
   path: '#665',
@@ -115,6 +115,7 @@ export function createMapScreen(
   });
   const legendItems: [string, string][] = [
     ['#4f4', 'You'],
+    ['#ff0', 'Stairs'],
     ['#555', 'Floor'],
     ['#888', 'Wall'],
     ['#447', 'Lit'],
