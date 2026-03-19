@@ -1,6 +1,6 @@
 import type { GameState, Vector2 } from '../core/types';
 import { showItemTooltip, showPileTooltip, hideItemTooltip } from '../ui/item-tooltip';
-// Building sprite rendering reads from floor tile data at runtime
+import { getDungeonForFloor, getTileset } from '../systems/dungeon/Tilesets';
 
 const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
@@ -105,6 +105,7 @@ export class MapRenderer {
 
     const cameraX = state.hero.position.x - Math.floor(VIEWPORT_TILES_X / 2);
     const cameraY = state.hero.position.y - Math.floor(VIEWPORT_TILES_Y / 2);
+    const tileset = state.currentDungeon !== 'town' ? getTileset(getDungeonForFloor(state.currentFloor)) : null;
 
     for (let vy = 0; vy < VIEWPORT_TILES_Y; vy++) {
       for (let vx = 0; vx < VIEWPORT_TILES_X; vx++) {
@@ -117,6 +118,7 @@ export class MapRenderer {
         cell.floor.style.background = '';
         cell.floor.style.opacity = '';
         cell.floor.style.transform = '';
+        cell.floor.style.filter = '';
         cell.ground.className = '';
         cell.ground.style.display = 'none';
         cell.ground.style.opacity = '';
@@ -184,6 +186,10 @@ export class MapRenderer {
           cell.floor.className = floorSprite;
           cell.floor.style.opacity = opacity;
           cell.floor.style.transform = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
+          // Tint walls based on dungeon tier
+          if (isWall && tileset?.wallFilter) {
+            cell.floor.style.filter = tileset.wallFilter;
+          }
         }
 
         // If visible or permanently lit, show ground objects and entities

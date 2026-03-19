@@ -9,6 +9,7 @@ const KEY_TO_DIRECTION: Record<string, Direction> = {
   ArrowUp: 'N', ArrowDown: 'S', ArrowLeft: 'W', ArrowRight: 'E',
   Numpad8: 'N', Numpad9: 'NE', Numpad6: 'E', Numpad3: 'SE',
   Numpad2: 'S', Numpad1: 'SW', Numpad4: 'W', Numpad7: 'NW',
+  KeyW: 'N', KeyD: 'E', KeyS: 'S', KeyA: 'W',
   KeyK: 'N', KeyL: 'E', KeyJ: 'S', KeyH: 'W',
   KeyY: 'NW', KeyU: 'NE', KeyB: 'SW', KeyN: 'SE',
 };
@@ -164,9 +165,9 @@ export class InputManager {
         return; // Ignore other keys in spell mode
       }
 
-      // Movement
+      // Movement (skip WASD when ctrl is held for Ctrl+S save)
       const direction = KEY_TO_DIRECTION[e.code];
-      if (direction) {
+      if (direction && !e.ctrlKey) {
         e.preventDefault();
         this.emit({ type: 'move', direction });
         return;
