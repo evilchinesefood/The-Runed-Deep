@@ -16,9 +16,16 @@ function sectionHeader(text: string): HTMLElement {
 }
 
 function itemNameColor(item: Item): string {
-  if (item.cursed && item.identified) return '#f44';
-  if (item.identified && item.enchantment > 0) return '#4af';
-  return '#ccc';
+  if (!item.identified) return '#888';           // lighter gray for unidentified
+  if (item.cursed) return '#f44';                // red for cursed
+  if (item.enchantment > 0) return '#4af';       // blue for enchanted
+  return '#fff';                                  // white for normal identified
+}
+
+function itemDisplayLabel(item: Item): string {
+  const name = getDisplayName(item);
+  if (!item.identified) return `${name} (unidentified)`;
+  return name;
 }
 
 function btn(label: string, onClick: () => void): HTMLElement {
@@ -187,7 +194,7 @@ export function createInventoryScreen(
     row.appendChild(el('span', { color: '#666', width: '65px', flexShrink: '0' }, label));
 
     if (item) {
-      const nameSpan = el('span', { color: itemNameColor(item) }, getDisplayName(item));
+      const nameSpan = el('span', { color: itemNameColor(item) }, itemDisplayLabel(item));
       row.appendChild(nameSpan);
 
       if (item.properties['ac']) {
@@ -298,7 +305,7 @@ export function createInventoryScreen(
       // Name
       row.appendChild(el('span', {
         flex: '1', fontSize: '13px', color: itemNameColor(item),
-      }, getDisplayName(item)));
+      }, itemDisplayLabel(item)));
 
       // Weight
       row.appendChild(el('span', {
