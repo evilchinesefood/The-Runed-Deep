@@ -171,6 +171,7 @@ export interface Monster {
   sleeping: boolean;
   slowed: boolean;
   fleeing: number;  // turns remaining in flee mode, 0 = not fleeing
+  bled: boolean;    // has already left a blood splatter
 }
 
 export type MonsterAI = 'melee' | 'ranged' | 'caster' | 'thief' | 'summoner';
@@ -216,6 +217,7 @@ export interface Floor {
   tiles: Tile[][];
   monsters: Monster[];
   items: PlacedItem[];
+  decals: Vector2[];        // permanent blood splatters
   explored: boolean[][];
   visible: boolean[][];
   lit: boolean[][];         // permanently illuminated tiles (from Light spell)

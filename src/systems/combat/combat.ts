@@ -5,6 +5,29 @@ import { generateLoot } from '../items/loot';
 import { processMonsterAbility } from '../monsters/ai';
 
 // ============================================================
+// Blood splatters
+// ============================================================
+
+/** Add a blood decal for a monster — only once per monster */
+function maybeAddMonsterBlood(floor: Floor, monster: Monster, monsterIndex: number): Floor {
+  if (monster.bled) return floor;
+  if (monster.hp > monster.maxHp * 0.25 && monster.hp > 0) return floor;
+  if (Math.random() > 0.75) return floor;
+  // Mark monster as having bled
+  const monsters = [...floor.monsters];
+  monsters[monsterIndex] = { ...monsters[monsterIndex], bled: true };
+  return { ...floor, monsters, decals: [...floor.decals, { x: monster.position.x, y: monster.position.y }] };
+}
+
+/** Add a blood decal for the player — once per position */
+function maybeAddPlayerBlood(floor: Floor, pos: { x: number; y: number }, hp: number, maxHp: number): Floor {
+  if (hp > maxHp * 0.25) return floor;
+  if (Math.random() > 0.75) return floor;
+  if (floor.decals.some(d => d.x === pos.x && d.y === pos.y)) return floor;
+  return { ...floor, decals: [...floor.decals, { x: pos.x, y: pos.y }] };
+}
+
+// ============================================================
 // Dice rolling
 // ============================================================
 
@@ -158,7 +181,12 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       });
     }
 
-    const newFloor: Floor = { ...floor, monsters: newMonsters, items: newItems };
+    let newFloor: Floor = { ...floor, monsters: newMonsters, items: newItems };
+    // Blood on death (always)
+    // Blood on death (always, monster is already removed from array so just add decal)
+    if (Math.random() < 0.75) {
+      newFloor = { ...newFloor, decals: [...newFloor.decals, { x: monster.position.x, y: monster.position.y }] };
+    }
 
     return {
       ...applyMessages(state, messages),
@@ -180,7 +208,9 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     const updatedMonster = { ...monster, hp: newHp };
     const newMonsters = [...floor.monsters];
     newMonsters[monsterIndex] = updatedMonster;
-    const newFloor: Floor = { ...floor, monsters: newMonsters };
+    let newFloor: Floor = { ...floor, monsters: newMonsters };
+    // Blood splatter when monster is badly wounded
+    newFloor = maybeAddMonsterBlood(newFloor, updatedMonster, monsterIndex);
 
     return {
       ...applyMessages(state, messages),
@@ -237,9 +267,21 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
     turn: state.turn,
   });
 
+  // Blood splatter when player is badly wounded
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const curFloor = state.floors[floorKey];
+  let floors = state.floors;
+  if (curFloor) {
+    const bloodFloor = maybeAddPlayerBlood(curFloor, state.hero.position, Math.max(0, newHp), state.hero.maxHp);
+    if (bloodFloor !== curFloor) {
+      floors = { ...state.floors, [floorKey]: bloodFloor };
+    }
+  }
+
   let result: GameState = {
     ...applyMessages(state, messages),
     hero: { ...state.hero, hp: Math.max(0, newHp) },
+    floors,
   };
 
   // Process on-hit abilities (poison, drain, steal, elemental touch)

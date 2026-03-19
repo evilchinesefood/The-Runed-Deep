@@ -191,6 +191,7 @@ export function generateFloor(
     tiles,
     monsters: [],
     items: [],
+    decals: [],
     explored,
     visible,
     lit,

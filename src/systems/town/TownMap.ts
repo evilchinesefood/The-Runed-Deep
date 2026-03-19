@@ -178,7 +178,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   const lit = Array.from({ length: H }, () => Array(W).fill(true));
 
   return {
-    floor: { id: 'town-0', tiles, monsters: [], items: [], explored, visible, lit, width: W, height: H },
+    floor: { id: 'town-0', tiles, monsters: [], items: [], decals: [], explored, visible, lit, width: W, height: H },
     playerStart: PLAYER_START,
   };
 }

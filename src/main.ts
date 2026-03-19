@@ -203,9 +203,65 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     };
     gameLoop.setState(testState);
   }
+
+  // F10: Jump to any floor with a powered-up hero for boss testing
+  if (e.code === 'F10') {
+    e.preventDefault();
+    const input = prompt('Enter floor number (boss floors: 15, 20, 25, 30, 33, 36, 40):');
+    if (!input) return;
+    const targetFloor = parseInt(input) - 1; // convert to 0-indexed
+    if (isNaN(targetFloor) || targetFloor < 0) return;
+
+    const depth = targetFloor + 1;
+    const { floor: bossFloor, playerStart } = generateFloor('mine', targetFloor, Date.now(), true, true, 'easy');
+
+    // Scale hero stats to be viable for the target floor
+    const level = Math.max(10, Math.floor(depth * 0.8));
+    const statBase = Math.min(90, 50 + depth);
+    const hp = 100 + depth * 15;
+    const mp = 50 + depth * 10;
+
+    const testState: GameState = {
+      screen: 'game',
+      hero: {
+        name: 'Boss Tester',
+        gender: 'male',
+        position: playerStart,
+        attributes: { strength: statBase, intelligence: statBase, constitution: statBase, dexterity: statBase },
+        hp, maxHp: hp,
+        mp, maxMp: mp,
+        xp: 0, level,
+        equipment: createEmptyEquipment(),
+        inventory: [],
+        copper: 5000,
+        knownSpells: getAllSpellIds(),
+        spellHotkeys: getAllSpellIds().slice(0, 7),
+        activeEffects: [],
+        resistances: createDefaultResistances(),
+        armorValue: Math.floor(statBase / 10) + depth,
+        equipDamageBonus: Math.floor(depth / 3),
+        equipAccuracyBonus: Math.floor(depth / 4),
+      },
+      currentFloor: targetFloor,
+      currentDungeon: 'mine',
+      floors: { [`mine-${targetFloor}`]: bossFloor },
+      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0, deepestFloor: depth },
+      messages: [
+        { text: `=== BOSS TEST: Floor ${depth} ===`, severity: 'important', turn: 0 },
+        { text: `Level ${level} hero with ${hp} HP, ${mp} MP, all spells.`, severity: 'system', turn: 0 },
+      ],
+      turn: 0,
+      gameTime: 0,
+      difficulty: 'easy',
+      rngSeed: Date.now(),
+      returnFloor: 0,
+      activeBuildingId: '',
+    };
+    gameLoop.setState(testState);
+  }
 });
 
-// Screen cleanup registry — called on every screen switch
+// Screen cleanup — called on every screen switch
 const screenCleanups: (() => void)[] = [];
 function addScreenCleanup(fn: () => void): void { screenCleanups.push(fn); }
 

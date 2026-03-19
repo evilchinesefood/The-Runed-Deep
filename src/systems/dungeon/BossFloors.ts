@@ -177,7 +177,7 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -249,7 +249,7 @@ function buildFloor20(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -313,7 +313,7 @@ function buildFloor25(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -395,7 +395,7 @@ function buildFloor30(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -487,7 +487,7 @@ function buildFloor33(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -567,7 +567,7 @@ function buildFloor36(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };
@@ -654,7 +654,7 @@ function buildFloor40(dungeonId: string, depth: number, difficulty: Difficulty):
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      width: W, height: H,
+      decals: [], width: W, height: H,
     },
     playerStart,
   };

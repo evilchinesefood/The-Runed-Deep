@@ -151,6 +151,7 @@ export class MapRenderer {
           ? (visible ? '1' : '0.5')
           : ((visible || isLit) ? '1' : '0.5');
 
+        const hasBlood = floor.decals?.some(d => d.x === worldX && d.y === worldY) ?? false;
         // Use lit (blue) floor sprite for floor-like tiles with permanent light
         const floorSprite = (isLit && isFloorLike) ? 'lit-dgn' : tile.sprite;
 
@@ -187,7 +188,7 @@ export class MapRenderer {
 
         // If visible or permanently lit, show ground objects and entities
         if (visible || isLit) {
-          // Ground layer: items on floor and revealed traps
+          // Ground layer: blood decals, items on floor
           const itemsHere = floor.items.filter(
             i => i.position.x === worldX && i.position.y === worldY
           );
@@ -199,6 +200,10 @@ export class MapRenderer {
             cell.ground.className = itemsHere[0].item.sprite;
             cell.ground.style.display = 'block';
             cell.ground.style.opacity = '1';
+          } else if (hasBlood) {
+            cell.ground.className = 'blood-trap';
+            cell.ground.style.display = 'block';
+            cell.ground.style.opacity = '0.7';
           }
 
           // Entity layer: hero > monster (items already on ground layer)

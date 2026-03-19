@@ -29,6 +29,7 @@ function makeMonster(templateId: string, name: string, sprite: string, x: number
     sleeping: false,
     slowed: false,
     fleeing: 0,
+    bled: false,
   };
 }
 
@@ -122,7 +123,7 @@ export function generateTestFloor(): { floor: Floor; playerStart: { x: number; y
   return {
     floor: {
       id: 'test-0',
-      tiles, monsters, items,
+      tiles, monsters, items, decals: [],
       explored, visible, lit,
       width: W, height: H,
     },

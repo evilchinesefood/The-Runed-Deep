@@ -66,6 +66,10 @@ export function loadGame(slot: number = 1): GameState | null {
     state.activeBuildingId ??= '';
     if (!state.hero.spellHotkeys) state.hero.spellHotkeys = [];
     if (!state.town.deepestFloor && state.town.deepestFloor !== 0) state.town.deepestFloor = 0;
+    // Add decals array to any floors missing it
+    for (const key of Object.keys(state.floors)) {
+      if (!state.floors[key].decals) state.floors[key].decals = [];
+    }
 
     return state;
   } catch (e) {
