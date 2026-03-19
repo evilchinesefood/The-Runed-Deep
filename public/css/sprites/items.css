@@ -286,7 +286,19 @@
 .purse {
 	background: url('../../assets/items.png') -0px -608px;
 }
+.purse-enchanted {
+	background: url('../../assets/items.png') -0px -608px;
+}
+.purse-cursed {
+	background: url('../../assets/items.png') -0px -608px;
+}
 .bag {
+	background: url('../../assets/items.png') -32px -608px;
+}
+.bag-enchanted {
+	background: url('../../assets/items.png') -32px -608px;
+}
+.bag-cursed {
 	background: url('../../assets/items.png') -32px -608px;
 }
 .chest {
@@ -297,6 +309,9 @@
 }
 .pack-enchanted {
 	background: url('../../assets/items.png') -128px -608px;
+}
+.pack-cursed {
+	background: url('../../assets/items.png') -96px -608px;
 }
 
 /* Row 21 */
@@ -322,6 +337,12 @@
 }
 .belt-wand-quiver {
 	background: url('../../assets/items.png') -32px -672px;
+}
+.belt-enchanted {
+	background: url('../../assets/items.png') -0px -672px;
+}
+.belt-cursed {
+	background: url('../../assets/items.png') -0px -672px;
 }
 .belt-utility {
 	background: url('../../assets/items.png') -64px -672px;
