@@ -2,36 +2,37 @@ import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
 const KEYS: [string, string][] = [
   // Movement
-  ['Arrow Keys / Numpad / HJKL', 'Move (8 directions)'],
-  ['Numpad 7,9,1,3 / YUBN', 'Diagonal movement'],
+  ['W / A / S / D', 'Move (4 directions)'],
+  ['Arrow Keys / Numpad', 'Move (8 directions with diagonals)'],
   ['', ''],
   // Actions
   ['E', 'Context action (pickup / stairs / enter / search / wait)'],
+  ['Q', 'Wait (recover HP/MP, 1-10 random turns)'],
   ['G', 'Pick up item'],
-  ['. (period)', 'Wait (recover HP/MP over time)'],
-  ['S', 'Search nearby'],
   ['> or < or Enter', 'Use stairs / enter building'],
   ['', ''],
   // Screens
   ['I', 'Inventory / Equipment'],
   ['C', 'Character info'],
-  ['?', 'This help screen'],
+  ['Z', 'Spell list / Hotkey management'],
+  ['M', 'Full floor map'],
+  ['F1', 'This help screen'],
   ['Esc', 'Close current screen / Return to game'],
   ['', ''],
   // Spells
-  ['Z', 'Open full spell list'],
   ['1-7', 'Quick-cast spell (by hotkey slot)'],
   ['Click spell bar', 'Select spell to cast'],
   ['Direction key / Click map', 'Aim directional spell'],
   ['', ''],
   // Map & Navigation
-  ['M', 'Full floor map'],
+  ['Tab', 'Auto-explore (walk to nearest unexplored area)'],
   ['Click on map', 'Auto-walk to tile (pathfinding)'],
   ['', ''],
   // System
   ['Ctrl+S', 'Save game'],
   ['F8', 'Toggle sound on/off'],
   ['F9', 'Debug: Spell test arena'],
+  ['F10', 'Debug: Jump to any floor'],
 ];
 
 export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: () => void } {
@@ -83,7 +84,7 @@ export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: 
 
   // Keyboard handler
   const keyHandler = (e: KeyboardEvent) => {
-    if (e.code === 'Escape' || (e.code === 'Slash' && e.shiftKey)) {
+    if (e.code === 'Escape' || e.code === 'F1') {
       e.preventDefault();
       cleanup();
       onClose();

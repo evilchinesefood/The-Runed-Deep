@@ -10,8 +10,6 @@ const KEY_TO_DIRECTION: Record<string, Direction> = {
   Numpad8: 'N', Numpad9: 'NE', Numpad6: 'E', Numpad3: 'SE',
   Numpad2: 'S', Numpad1: 'SW', Numpad4: 'W', Numpad7: 'NW',
   KeyW: 'N', KeyD: 'E', KeyS: 'S', KeyA: 'W',
-  KeyK: 'N', KeyL: 'E', KeyJ: 'S', KeyH: 'W',
-  KeyY: 'NW', KeyU: 'NE', KeyB: 'SW', KeyN: 'SE',
 };
 
 export class InputManager {
@@ -23,6 +21,7 @@ export class InputManager {
   private onSpellModeChange: SpellModeCallback | null = null;
   private spellHotkeys: string[] = [];
   private onPathClick: PathClickCallback | null = null;
+  private onAutoExplore: (() => void) | null = null;
 
   constructor() {
     this.setupKeyboard();
@@ -52,6 +51,10 @@ export class InputManager {
 
   setPathClickCallback(cb: PathClickCallback): void {
     this.onPathClick = cb;
+  }
+
+  setAutoExploreCallback(cb: () => void): void {
+    this.onAutoExplore = cb;
   }
 
   isInSpellMode(): boolean {
@@ -210,13 +213,14 @@ export class InputManager {
           e.preventDefault();
           this.emit({ type: 'setScreen', screen: 'character-info' });
           break;
+        case 'KeyQ':
+          e.preventDefault();
+          this.emit({ type: 'rest' });
+          break;
         case 'Period':
           if (e.shiftKey) {
             e.preventDefault();
             this.emit({ type: 'useStairs' });
-          } else {
-            e.preventDefault();
-            this.emit({ type: 'rest' });
           }
           break;
         case 'Comma':
@@ -233,14 +237,15 @@ export class InputManager {
           if (e.ctrlKey) {
             e.preventDefault();
             this.emit({ type: 'save' });
-          } else {
-            e.preventDefault();
-            this.emit({ type: 'search' });
           }
           break;
-        case 'Slash':
+        case 'F1':
           e.preventDefault();
           this.emit({ type: 'setScreen', screen: 'help' });
+          break;
+        case 'Tab':
+          e.preventDefault();
+          this.onAutoExplore?.();
           break;
         case 'Escape':
           e.preventDefault();

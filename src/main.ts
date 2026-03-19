@@ -74,6 +74,122 @@ input.setPathClickCallback((target) => {
   stepAutoPath();
 });
 
+// Auto-explore: find nearest unexplored tile and walk toward it
+let autoExploring = false;
+
+input.setAutoExploreCallback(() => {
+  if (autoExploring) { autoExploring = false; autoPath = []; return; } // toggle off
+  autoExploring = true;
+  exploreNext();
+});
+
+function exploreNext(): void {
+  if (!autoExploring) return;
+  const state = gameLoop.getState();
+  if (state.screen !== 'game' || state.hero.hp <= 0 || state.currentDungeon === 'town') {
+    autoExploring = false;
+    return;
+  }
+
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) { autoExploring = false; return; }
+
+  // Stop if any monster is visible
+  const hasVisibleMonster = floor.monsters.some(m =>
+    floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
+  );
+  if (hasVisibleMonster) { autoExploring = false; return; }
+
+  // Stop if HP below 50%
+  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; return; }
+
+  // Find nearest unexplored walkable tile adjacent to an explored tile
+  const hero = state.hero.position;
+  let bestTarget: { x: number; y: number } | null = null;
+  let bestDist = Infinity;
+
+  for (let y = 0; y < floor.height; y++) {
+    for (let x = 0; x < floor.width; x++) {
+      if (floor.explored[y][x]) continue;
+      if (!floor.tiles[y][x].walkable) continue;
+      // Must be adjacent to an explored tile (frontier)
+      let frontier = false;
+      for (let dy = -1; dy <= 1 && !frontier; dy++) {
+        for (let dx = -1; dx <= 1 && !frontier; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height && floor.explored[ny][nx]) {
+            frontier = true;
+          }
+        }
+      }
+      if (!frontier) continue;
+      const dist = Math.abs(x - hero.x) + Math.abs(y - hero.y);
+      if (dist < bestDist) { bestDist = dist; bestTarget = { x, y }; }
+    }
+  }
+
+  if (!bestTarget) {
+    autoExploring = false;
+    return; // fully explored
+  }
+
+  const path = findPath(floor, hero, bestTarget);
+  if (path.length === 0) { autoExploring = false; return; }
+
+  autoPath = path;
+  stepAutoPathExplore();
+}
+
+function stepAutoPathExplore(): void {
+  if (!autoExploring || autoPath.length === 0) { autoExploring = false; return; }
+  if (animRenderer?.isPlaying()) {
+    autoWalkTimer = window.setTimeout(stepAutoPathExplore, 100);
+    return;
+  }
+
+  const state = gameLoop.getState();
+  if (state.screen !== 'game' || state.hero.hp <= 0) { autoExploring = false; autoPath = []; return; }
+
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) { autoExploring = false; return; }
+
+  // Stop conditions
+  const hasVisibleMonster = floor.monsters.some(m =>
+    floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
+  );
+  if (hasVisibleMonster) { autoExploring = false; autoPath = []; return; }
+  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; autoPath = []; return; }
+
+  // Check for items at current position
+  const itemsHere = floor.items.some(i =>
+    i.position.x === state.hero.position.x && i.position.y === state.hero.position.y
+  );
+  if (itemsHere) { autoExploring = false; autoPath = []; return; }
+
+  const next = autoPath[0];
+  const dx = next.x - state.hero.position.x;
+  const dy = next.y - state.hero.position.y;
+
+  const direction = dxdyToDirection(dx, dy);
+  if (direction) {
+    autoPath.shift();
+    gameLoop.handleAction({ type: 'move', direction });
+    playPendingAnimations();
+
+    if (autoPath.length > 0) {
+      autoWalkTimer = window.setTimeout(stepAutoPathExplore, 80);
+    } else {
+      // Path exhausted, find next unexplored target
+      setTimeout(exploreNext, 100);
+    }
+  } else {
+    autoExploring = false;
+    autoPath = [];
+  }
+}
+
 function stepAutoPath(): void {
   if (autoPath.length === 0) return;
   if (animRenderer?.isPlaying()) {
@@ -129,8 +245,9 @@ function dxdyToDirection(dx: number, dy: number): import('./core/types').Directi
 
 // Input handler — cancels auto-walk on manual movement
 input.setHandler(action => {
-  if (autoPath.length > 0 && action.type === 'move') {
+  if ((autoPath.length > 0 || autoExploring) && action.type === 'move') {
     autoPath = [];
+    autoExploring = false;
     if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
   }
   if (animRenderer?.isPlaying()) return;
