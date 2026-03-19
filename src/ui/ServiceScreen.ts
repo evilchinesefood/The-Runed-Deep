@@ -36,7 +36,7 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
   const items: [string, number, boolean, () => GameState][] = [
     ['Heal HP (free)', 0, missingHP <= 0, () => templeHealHP(state)],
     ['Restore MP (free)', 0, missingMP <= 0, () => templeHealMP(state)],
-    ['Remove Curse — 50 gold', 50, !hasCursed || state.hero.copper < 50, () => templeRemoveCurse(state)],
+    ['Remove Curse — 25 gold', 25, !hasCursed || state.hero.copper < 25, () => templeRemoveCurse(state)],
     ['Cure Poison (free)', 0, !isPoisoned, () => templeCurePoison(state)],
   ];
 

@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { GameState } from '../../core/types';
+import { ITEM_BY_ID } from '../../data/items';
 import { recomputeDerivedStats } from '../character/derived-stats';
 
 function addMsg(state: GameState, text: string, severity: 'normal' | 'important' | 'system' = 'important'): GameState {
@@ -35,7 +36,7 @@ export function templeHealMP(state: GameState): GameState {
 }
 
 export function templeRemoveCurse(state: GameState): GameState {
-  const cost = 50;
+  const cost = 25;
   const err = checkCopper(state, cost);
   if (err) return err;
 
@@ -46,8 +47,12 @@ export function templeRemoveCurse(state: GameState): GameState {
   if (!slot) return addMsg(state, 'You bear no cursed items.', 'system');
 
   const item = eq[slot]!;
-  const newItem = { ...item, cursed: false, identified: true };
-  return addMsg(spendCopper({ ...state, hero: { ...state.hero, equipment: { ...eq, [slot]: newItem } } }, cost), `The curse is lifted from your ${item.name}. (${cost} gold)`);
+  // Look up base template to restore original sprite and name
+  const tpl = ITEM_BY_ID[item.templateId];
+  const baseName = tpl ? tpl.name : item.name.replace(/ -\d+$/, '');
+  const baseSprite = tpl ? tpl.sprite : item.sprite.replace(/-cursed$/, '');
+  const newItem = { ...item, cursed: false, identified: true, enchantment: 0, name: baseName, sprite: baseSprite };
+  return addMsg(spendCopper({ ...state, hero: { ...state.hero, equipment: { ...eq, [slot]: newItem } } }, cost), `The curse is lifted from your ${baseName}. (${cost} gold)`);
 }
 
 export function templeCurePoison(state: GameState): GameState {

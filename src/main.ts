@@ -88,58 +88,67 @@ input.setAutoExploreCallback(() => {
 });
 
 function exploreNext(): void {
-  if (!autoExploring) return;
+  if (!autoExploring) { console.log('[EXPLORE] not exploring'); return; }
   const state = gameLoop.getState();
   if (state.screen !== 'game' || state.hero.hp <= 0 || state.currentDungeon === 'town') {
+    console.log('[EXPLORE] stopped:', state.screen, state.currentDungeon, state.hero.hp);
     autoExploring = false;
     return;
   }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
-  if (!floor) { autoExploring = false; return; }
+  if (!floor) { console.log('[EXPLORE] no floor'); autoExploring = false; return; }
 
   // Stop if any monster is visible
   const hasVisibleMonster = floor.monsters.some(m =>
     floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
   );
-  if (hasVisibleMonster) { autoExploring = false; return; }
+  if (hasVisibleMonster) { console.log('[EXPLORE] monster visible'); autoExploring = false; return; }
 
   // Stop if HP below 50%
-  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; return; }
+  if (state.hero.hp < state.hero.maxHp * 0.5) { console.log('[EXPLORE] low HP'); autoExploring = false; return; }
 
-  // Find nearest unexplored walkable tile adjacent to an explored tile
+  // Find nearest EXPLORED walkable tile that has an unexplored walkable neighbor
+  // (hero walks to the frontier, FOV reveals the next area)
   const hero = state.hero.position;
   let bestTarget: { x: number; y: number } | null = null;
   let bestDist = Infinity;
 
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
-      if (floor.explored[y][x]) continue;
-      if (!floor.tiles[y][x].walkable) continue;
-      // Must be adjacent to an explored tile (frontier)
-      let frontier = false;
-      for (let dy = -1; dy <= 1 && !frontier; dy++) {
-        for (let dx = -1; dx <= 1 && !frontier; dx++) {
+      if (!floor.explored[y][x]) continue; // must be explored
+      if (!floor.tiles[y][x].walkable) continue; // must be walkable
+      if (x === hero.x && y === hero.y) continue; // skip hero's current tile
+      // Must have at least one unexplored walkable neighbor
+      let hasFrontier = false;
+      for (let dy = -1; dy <= 1 && !hasFrontier; dy++) {
+        for (let dx = -1; dx <= 1 && !hasFrontier; dx++) {
+          if (dx === 0 && dy === 0) continue;
           const nx = x + dx, ny = y + dy;
-          if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height && floor.explored[ny][nx]) {
-            frontier = true;
+          if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
+            if (!floor.explored[ny][nx] && floor.tiles[ny][nx].walkable) {
+              hasFrontier = true;
+            }
           }
         }
       }
-      if (!frontier) continue;
+      if (!hasFrontier) continue;
       const dist = Math.abs(x - hero.x) + Math.abs(y - hero.y);
       if (dist < bestDist) { bestDist = dist; bestTarget = { x, y }; }
     }
   }
 
   if (!bestTarget) {
+    console.log('[EXPLORE] fully explored, no target');
     autoExploring = false;
-    return; // fully explored
+    return;
   }
 
+  console.log('[EXPLORE] target:', bestTarget, 'dist:', bestDist);
   const path = findPath(floor, hero, bestTarget);
-  if (path.length === 0) { autoExploring = false; return; }
+  console.log('[EXPLORE] path length:', path.length);
+  if (path.length === 0) { console.log('[EXPLORE] no path'); autoExploring = false; return; }
 
   autoPath = path;
   stepAutoPathExplore();
@@ -489,6 +498,17 @@ function switchScreen(state: GameState): void {
         try {
           const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell, result.difficulty);
 
+          // DEBUG: Add test items to starting inventory
+          hero.inventory = [
+            { id: 'test-1', templateId: 'long-sword', name: 'Long Sword +2', category: 'weapon', sprite: 'sword-enchanted', weight: 2000, bulk: 400, value: 100, identified: true, cursed: false, enchantment: 2, properties: { damageMin: 3, damageMax: 11, accuracy: 1 } },
+            { id: 'test-2', templateId: 'chain-mail', name: 'Chain Mail -1', category: 'armor', sprite: 'metal-armour-cursed', weight: 10000, bulk: 2000, value: 80, identified: false, cursed: true, enchantment: -1, properties: { ac: 7 } },
+            { id: 'test-3', templateId: 'small-iron-shield', name: 'Small Iron Shield', category: 'shield', sprite: 'metal-shield', weight: 3000, bulk: 600, value: 30, identified: true, cursed: false, enchantment: 0, properties: { ac: 2 } },
+            { id: 'test-4', templateId: 'leather-helmet', name: 'Leather Cap -2', category: 'helmet', sprite: 'leather-helmet-cursed', weight: 500, bulk: 100, value: 5, identified: false, cursed: true, enchantment: -2, properties: { ac: 1 } },
+            { id: 'test-5', templateId: 'scroll-identify', name: 'Scroll of Identify', category: 'scroll', sprite: 'scroll', weight: 50, bulk: 10, value: 30, identified: true, cursed: false, enchantment: 0, properties: {} },
+            { id: 'test-6', templateId: 'potion-heal-minor', name: 'Potion of Minor Healing', category: 'potion', sprite: 'potion-heal-minor', weight: 200, bulk: 40, value: 15, identified: true, cursed: false, enchantment: 0, properties: { healPct: 0.25, healAmount: 8 } },
+          ];
+          hero.copper = 500;
+
           // Generate first dungeon floor (for when player enters the mine)
           const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, result.difficulty);
 
@@ -513,7 +533,7 @@ function switchScreen(state: GameState): void {
             messages: [
               { text: `Welcome to Bjarnarhaven, ${result.name}.`, severity: 'important', turn: 0 },
               { text: 'Explore the town. When ready, enter the mine to the north.', severity: 'system', turn: 0 },
-              { text: 'Press ? or / for help with controls.', severity: 'system', turn: 0 },
+              { text: 'Press F1 for help with controls.', severity: 'system', turn: 0 },
             ],
           };
 

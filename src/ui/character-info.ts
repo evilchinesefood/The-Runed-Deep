@@ -1,4 +1,4 @@
-import type { GameState, Attributes, Hero } from '../core/types';
+import type { GameState, Attributes } from '../core/types';
 import { SPELL_BY_ID } from '../data/spells';
 import { xpToNextLevel, xpRequiredForLevel } from '../systems/character/leveling';
 import { createScreen, createPanel, createTitleBar, el } from './Theme';
@@ -59,9 +59,13 @@ export function createCharacterInfoScreen(
 
   const nameBlock = el('div');
   nameBlock.appendChild(el('div', { fontSize: '18px', fontWeight: 'bold' }, h.name));
-  nameBlock.appendChild(el('div', { fontSize: '12px', color: '#888' },
-    `Level ${h.level} ${h.gender === 'male' ? 'Male' : 'Female'} — ${capitalize(state.difficulty)} difficulty`
-  ));
+  const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
+  const diffColor = diffColors[state.difficulty] ?? '#888';
+  const ngLabel = state.ngPlusCount > 0 ? ` +${state.ngPlusCount}` : '';
+  const subRow = el('div', { fontSize: '12px', display: 'flex', gap: '6px' });
+  subRow.appendChild(el('span', { color: '#888' }, `Level ${h.level} ${h.gender === 'male' ? 'Male' : 'Female'}`));
+  subRow.appendChild(el('span', { color: diffColor, fontWeight: 'bold' }, `${capitalize(state.difficulty)}${ngLabel}`));
+  nameBlock.appendChild(subRow);
   heroSprite.appendChild(nameBlock);
   panel.appendChild(heroSprite);
 
@@ -135,12 +139,6 @@ export function createCharacterInfoScreen(
     }
   }
 
-  // ── Equipment Summary ───────────────────────────────────
-  panel.appendChild(sectionHeader('Equipment'));
-
-  const equipSlots = renderEquipmentSummary(h);
-  panel.appendChild(equipSlots);
-
   screen.appendChild(panel);
 
   // Keyboard listener for Escape
@@ -158,40 +156,6 @@ export function createCharacterInfoScreen(
   return screen as HTMLElement & { cleanup: () => void };
 }
 
-function renderEquipmentSummary(hero: Hero): HTMLElement {
-  const container = el('div', { fontSize: '12px' });
-
-  const slots: [string, keyof Hero['equipment']][] = [
-    ['Weapon', 'weapon'],
-    ['Shield', 'shield'],
-    ['Helmet', 'helmet'],
-    ['Body', 'body'],
-    ['Cloak', 'cloak'],
-    ['Bracers', 'bracers'],
-    ['Gauntlets', 'gauntlets'],
-    ['Belt', 'belt'],
-    ['Boots', 'boots'],
-    ['Ring (L)', 'ringLeft'],
-    ['Ring (R)', 'ringRight'],
-    ['Amulet', 'amulet'],
-  ];
-
-  for (const [label, slot] of slots) {
-    const item = hero.equipment[slot];
-    const row = el('div', { display: 'flex', gap: '8px', marginBottom: '2px' });
-    row.appendChild(el('span', { width: '80px', color: '#666' }, label));
-    if (item) {
-      const nameColor = item.cursed ? '#f44' : item.enchantment > 0 ? '#4af' : '#ccc';
-      const enchStr = item.enchantment !== 0 ? ` (${item.enchantment > 0 ? '+' : ''}${item.enchantment})` : '';
-      row.appendChild(el('span', { color: nameColor }, item.name + enchStr));
-    } else {
-      row.appendChild(el('span', { color: '#333' }, '— empty —'));
-    }
-    container.appendChild(row);
-  }
-
-  return container;
-}
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
