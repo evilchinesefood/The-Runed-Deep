@@ -1,4 +1,5 @@
 import type { GameState } from '../../core/types';
+import { showGameToast } from '../../ui/GameToast';
 
 export function processDropItem(state: GameState, itemId: string): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
@@ -15,6 +16,7 @@ export function processDropItem(state: GameState, itemId: string): GameState {
   const newItems = [...floor.items, { item, position: { ...state.hero.position } }];
   const newFloor = { ...floor, items: newItems };
 
+  showGameToast(`Dropped ${item.name}`, 'info');
   return {
     ...state,
     hero: { ...state.hero, inventory: newInventory },

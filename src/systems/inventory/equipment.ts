@@ -3,6 +3,7 @@ import { ITEM_BY_ID } from '../../data/items';
 import { recomputeDerivedStats } from '../character/derived-stats';
 import { Sound } from '../Sound';
 import { trackEquipmentCheck } from '../Achievements';
+import { showGameToast } from '../../ui/GameToast';
 
 function msg(text: string, turn: number, severity: Message['severity'] = 'normal'): Message {
   return { text, severity, turn };
@@ -15,6 +16,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
 
   const template = ITEM_BY_ID[item.templateId];
   if (!template || !template.equipSlot) {
+    showGameToast(`${item.name} cannot be equipped.`, 'warning');
     return {
       ...state,
       messages: [...state.messages, msg(`${item.name} cannot be equipped.`, state.turn, 'system')],
@@ -41,6 +43,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
         if (!shield.identified) {
           equipment = { ...equipment, shield: { ...shield, identified: true } };
         }
+        showGameToast('Your shield is cursed and cannot be removed!', 'error');
         return {
           ...state,
           hero: { ...hero, equipment },
@@ -64,6 +67,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
       if (revealed) {
         equipment = { ...equipment, [slot]: { ...existing, identified: true } };
       }
+      showGameToast(`${existing.name} is cursed and cannot be removed!`, 'error');
       return {
         ...state,
         hero: { ...hero, equipment },
@@ -89,6 +93,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   trackEquipmentCheck(updatedHero.equipment as unknown as Record<string, unknown>);
 
   Sound.equip();
+  showGameToast(`Equipped ${equippedItem.name}`, 'success');
   return {
     ...state,
     hero: updatedHero,
@@ -110,6 +115,7 @@ export function processUnequipItem(state: GameState, slot: EquipSlot): GameState
     } else {
       messages.push(msg(`${item.name} is cursed and cannot be removed!`, state.turn, 'important'));
     }
+    showGameToast(`${item.name} is cursed and cannot be removed!`, 'error');
     return {
       ...state,
       hero: { ...hero, equipment },
@@ -122,6 +128,7 @@ export function processUnequipItem(state: GameState, slot: EquipSlot): GameState
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
 
   Sound.equip();
+  showGameToast(`Unequipped ${item.name}`, 'info');
   return {
     ...state,
     hero: updatedHero,

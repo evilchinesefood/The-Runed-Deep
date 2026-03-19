@@ -2,6 +2,7 @@ import type { GameState, Message } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
 import { Sound } from '../Sound';
 import { trackItemPickup, trackItemFound } from '../Achievements';
+import { showGameToast } from '../../ui/GameToast';
 
 export function processPickupItem(state: GameState): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
@@ -51,6 +52,7 @@ export function processPickupItem(state: GameState): GameState {
       const currentWeight = inventory.reduce((s, i) => s + i.weight, 0);
       if (currentWeight + placed.item.weight > packCap) {
         messages.push({ text: 'Your pack is too full!', severity: 'important', turn: state.turn });
+        showGameToast('Your pack is too full!', 'warning');
         continue;
       }
       inventory.push(placed.item);
