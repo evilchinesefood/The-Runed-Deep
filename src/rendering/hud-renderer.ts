@@ -86,14 +86,37 @@ export class HudRenderer {
 
     this.statsEl.replaceChildren();
 
-    const nameRow = el('div', { marginBottom: '4px', display: 'flex', alignItems: 'baseline', gap: '6px' });
+    // Name + level + status icons row
+    const nameRow = el('div', { marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' });
     const strong = document.createElement('strong');
     strong.textContent = h.name;
     nameRow.appendChild(strong);
     nameRow.appendChild(el('span', { fontSize: '12px' }, `Lv.${h.level}`));
-    const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
-    const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
-    nameRow.appendChild(el('span', { fontSize: '10px', color: diffColors[state.difficulty] ?? '#888', marginLeft: 'auto' }, diffLabel));
+
+    // Status effect icons inline with name/level
+    if (h.activeEffects.length > 0) {
+      const effectStyles: Record<string, [string, string]> = {
+        'shield': ['🛡', '#48f'],
+        'resist-cold': ['❄', '#4af'],
+        'resist-fire': ['🔥', '#f64'],
+        'resist-lightning': ['⚡', '#ff4'],
+        'poisoned': ['☠', '#4f4'],
+        'paralyzed': ['⛓', '#f84'],
+        'blinded': ['👁', '#888'],
+        'levitation': ['🪶', '#aaf'],
+        'light': ['💡', '#ff8'],
+      };
+      for (const eff of h.activeEffects) {
+        const [icon, color] = effectStyles[eff.id] ?? ['✦', '#aaa'];
+        const badge = el('span', {
+          fontSize: '9px', color, background: '#1a1a1a',
+          border: `1px solid ${color}33`, borderRadius: '3px',
+          padding: '0px 3px', whiteSpace: 'nowrap',
+        }, `${icon}${eff.turnsRemaining}`);
+        badge.title = `${eff.name} (${eff.turnsRemaining} turns)`;
+        nameRow.appendChild(badge);
+      }
+    }
     this.statsEl.appendChild(nameRow);
 
     const hpLabel = el('div', {}, `HP: `);
@@ -130,36 +153,13 @@ export class HudRenderer {
     );
     this.statsEl.appendChild(floorInfo);
 
-    // Status effect icons
-    if (h.activeEffects.length > 0) {
-      const effectRow = el('div', { display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '4px' });
-      const effectStyles: Record<string, [string, string]> = {
-        'shield': ['🛡', '#48f'],
-        'resist-cold': ['❄', '#4af'],
-        'resist-fire': ['🔥', '#f64'],
-        'resist-lightning': ['⚡', '#ff4'],
-        'poisoned': ['☠', '#4f4'],
-        'paralyzed': ['⛓', '#f84'],
-        'blinded': ['👁', '#888'],
-        'levitation': ['🪶', '#aaf'],
-        'light': ['💡', '#ff8'],
-      };
-      for (const eff of h.activeEffects) {
-        const [icon, color] = effectStyles[eff.id] ?? ['✦', '#aaa'];
-        const badge = el('span', {
-          fontSize: '10px',
-          color,
-          background: '#1a1a1a',
-          border: `1px solid ${color}33`,
-          borderRadius: '3px',
-          padding: '1px 4px',
-          whiteSpace: 'nowrap',
-        }, `${icon} ${eff.turnsRemaining}`);
-        badge.title = `${eff.name} (${eff.turnsRemaining} turns)`;
-        effectRow.appendChild(badge);
-      }
-      this.statsEl.appendChild(effectRow);
-    }
+    // Difficulty + NG+ at bottom right
+    const diffColors: Record<string, string> = { easy: '#4c4', intermediate: '#fc4', hard: '#f84', impossible: '#f44' };
+    const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+    const ngLabel = state.ngPlusCount > 0 ? ` +${state.ngPlusCount}` : '';
+    const diffRow = el('div', { fontSize: '10px', marginTop: '2px', textAlign: 'right', color: diffColors[state.difficulty] ?? '#888' },
+      `${diffLabel}${ngLabel}`);
+    this.statsEl.appendChild(diffRow);
 
   }
 

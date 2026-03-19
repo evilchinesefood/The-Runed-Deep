@@ -35,7 +35,11 @@ export function processPickupItem(state: GameState): GameState {
   const BASE_CARRY = 10000;
   const packItem = hero.equipment.pack;
   const packTpl = packItem ? ITEM_BY_ID[packItem.templateId] : null;
-  const packWeight = packItem?.properties['weightCapacity'] ?? packTpl?.weightCapacity ?? 0;
+  let packWeight = packItem?.properties['weightCapacity'] ?? packTpl?.weightCapacity ?? 0;
+  // Cursed packs reduce capacity (enchantment * 3000g per level)
+  if (packItem && packItem.cursed && packItem.enchantment < 0) {
+    packWeight = Math.max(0, packWeight + packItem.enchantment * 3000);
+  }
   const packCap = BASE_CARRY + packWeight;
 
   // Track picked up item IDs

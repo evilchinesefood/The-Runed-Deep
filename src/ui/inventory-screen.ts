@@ -356,7 +356,11 @@ export function createInventoryScreen(
   const BASE_CARRY = 10000;
   const pack = h.equipment.pack;
   const packTpl = pack ? ITEM_BY_ID[pack.templateId] : null;
-  const totalCap = BASE_CARRY + (packTpl?.weightCapacity ?? 0);
+  let packWeight = packTpl?.weightCapacity ?? 0;
+  if (pack && pack.cursed && pack.enchantment < 0) {
+    packWeight = Math.max(0, packWeight + pack.enchantment * 3000);
+  }
+  const totalCap = BASE_CARRY + packWeight;
   const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
   const pct = Math.round((invWeight / totalCap) * 100);
   const capColor = pct > 90 ? '#f44' : pct > 70 ? '#fa0' : '#aaa';
