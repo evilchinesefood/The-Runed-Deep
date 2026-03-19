@@ -1,7 +1,19 @@
-import type { GameState, GameAction } from './types';
+import type { GameState, GameAction, Equipment } from './types';
 import { processAction } from './actions';
 import { processAllMonsterTurns } from '../systems/monsters/ai';
 import { checkAndApplyLevelUps } from '../systems/character/leveling';
+
+function hasEnchant(equipment: Equipment, id: string): boolean {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
+  );
+}
+
+function enchantMult(equipment: Equipment, id: string): number {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.includes(`${id}:critical`)
+  ) ? 2 : 1;
+}
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -46,10 +58,10 @@ export class GameLoop {
 
     // 4. Process monster turns (when in game screen, a turn-consuming action happened, and not in town)
     // Speed boost: skip monster turn every 3rd turn if hero has speed-boost equipped
-    const hasSpeedBoost = Object.values(newState.hero.equipment).some(
-      i => i?.specialEnchantments?.includes('speed-boost')
-    );
-    const skipMonsters = hasSpeedBoost && newState.turn % 3 === 0;
+    const hasSpeedBoost = hasEnchant(newState.hero.equipment, 'speed-boost');
+    const speedMult = enchantMult(newState.hero.equipment, 'speed-boost');
+    const skipModulo = speedMult >= 2 ? 2 : 3; // critical: skip every 2nd turn instead of 3rd
+    const skipMonsters = hasSpeedBoost && newState.turn % skipModulo === 0;
     if (newState.screen === 'game' && newState.turn > this.state.turn && newState.currentDungeon !== 'town' && !skipMonsters) {
       newState = this.processMonsterTurns(newState);
     }
@@ -70,17 +82,15 @@ export class GameLoop {
     let messages = [...state.messages];
 
     // Equipment regen enchantments
-    const hasRegenHp = Object.values(hero.equipment).some(
-      i => i?.specialEnchantments?.includes('regen-hp')
-    );
-    const hasRegenMp = Object.values(hero.equipment).some(
-      i => i?.specialEnchantments?.includes('regen-mp')
-    );
+    const hasRegenHp = hasEnchant(hero.equipment, 'regen-hp');
+    const hasRegenMp = hasEnchant(hero.equipment, 'regen-mp');
+    const regenHpMult = enchantMult(hero.equipment, 'regen-hp');
+    const regenMpMult = enchantMult(hero.equipment, 'regen-mp');
     if (hasRegenHp && state.turn % 2 === 0 && hero.hp < hero.maxHp) {
-      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 1) };
+      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + regenHpMult) };
     }
     if (hasRegenMp && state.turn % 3 === 0 && hero.mp < hero.maxMp) {
-      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 1) };
+      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + regenMpMult) };
     }
 
     const remaining = hero.activeEffects

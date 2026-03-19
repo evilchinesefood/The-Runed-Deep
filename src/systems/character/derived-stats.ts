@@ -85,9 +85,29 @@ export function recomputeDerivedStats(hero: Hero): Hero {
     equipAccuracyBonus = (weapon.properties['accuracy'] ?? 0) + weapon.enchantment;
   }
 
+  // Magic resistance from equipment enchantments
+  let magicResistBonus = 0;
+  for (const slot of Object.values(hero.equipment)) {
+    if (!slot?.specialEnchantments) continue;
+    for (const e of slot.specialEnchantments) {
+      if (e === 'magic-resist') magicResistBonus += 25;
+      if (e === 'magic-resist:critical') magicResistBonus += 50;
+    }
+  }
+
   // Clamp current HP/MP to new max (don't exceed, but don't reduce if already below)
   const hp = Math.min(hero.hp, maxHp);
   const mp = Math.min(hero.mp, maxMp);
+
+  // Apply magic resist bonus to all elemental resistances (cap at 75)
+  const baseResistances = hero.resistances;
+  const resistances = magicResistBonus > 0 ? {
+    cold:      Math.min(75, baseResistances.cold + magicResistBonus),
+    fire:      Math.min(75, baseResistances.fire + magicResistBonus),
+    lightning: Math.min(75, baseResistances.lightning + magicResistBonus),
+    acid:      Math.min(75, baseResistances.acid + magicResistBonus),
+    drain:     Math.min(75, baseResistances.drain + magicResistBonus),
+  } : baseResistances;
 
   return {
     ...hero,
@@ -98,6 +118,7 @@ export function recomputeDerivedStats(hero: Hero): Hero {
     armorValue,
     equipDamageBonus,
     equipAccuracyBonus,
+    resistances,
   };
 }
 

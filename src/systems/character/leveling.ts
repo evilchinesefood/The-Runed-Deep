@@ -1,5 +1,5 @@
 import type { GameState, Hero, Difficulty, Message } from '../../core/types';
-import { computeMaxHp, computeMaxMp, computeTotalArmorValue } from './derived-stats';
+import { computeMaxHp, computeMaxMp, recomputeDerivedStats } from './derived-stats';
 import { SPELLS } from '../../data/spells';
 import { getDifficultyConfig } from '../../data/difficulty';
 
@@ -187,8 +187,8 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     hero.maxMp = newMaxMp;
     hero.mp = Math.min(hero.mp + mpGain, newMaxMp);
 
-    // Recompute armor (level doesn't directly affect AC, but keep it consistent)
-    hero.armorValue = computeTotalArmorValue(hero.attributes.dexterity, hero.equipment);
+    // Recompute all derived stats (AC, resistances, etc.) using full stat system
+    hero = { ...recomputeDerivedStats(hero), maxHp: hero.maxHp, maxMp: hero.maxMp, hp: hero.hp, mp: hero.mp };
 
     messages.push({
       text: `*** ${hero.name} has reached level ${hero.level}! ***`,

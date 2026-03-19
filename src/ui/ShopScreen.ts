@@ -9,25 +9,9 @@ import { getDisplayName } from '../systems/inventory/display-name';
 import { attachItemTooltip, hideItemTooltip } from './item-tooltip';
 
 function spriteEl(sprite: string): HTMLElement {
-  const s = el('div', {
-    width: '32px',
-    height: '32px',
-    flexShrink: '0',
-    background: '#222',
-    border: '1px solid #333',
-    borderRadius: '3px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '10px',
-    color: '#666',
-    overflow: 'hidden',
-  });
-  const img = document.createElement('img');
-  img.src = `assets/sprites/${sprite}.png`;
-  img.style.cssText = 'width:100%;height:100%;image-rendering:pixelated;object-fit:contain;';
-  img.onerror = () => { s.textContent = sprite.slice(0, 2).toUpperCase(); };
-  s.appendChild(img);
+  const s = document.createElement('div');
+  s.style.cssText = 'width:32px;height:32px;flex-shrink:0;';
+  s.className = sprite;
   return s;
 }
 
@@ -79,7 +63,7 @@ function buildPanel(header: string, items: Item[], getPrice: (i: Item) => number
     for (const item of items) {
       const price = getPrice(item);
       const disabled = !canAfford(item);
-      const row = itemRow(item, `${price}cp`, btnLabel(item), disabled, () => onAction(item.id));
+      const row = itemRow(item, `${price}g`, btnLabel(item), disabled, () => onAction(item.id));
       list.appendChild(row);
     }
   }

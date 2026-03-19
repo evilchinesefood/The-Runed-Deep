@@ -36,7 +36,7 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
   const items: [string, number, boolean, () => GameState][] = [
     ['Heal HP (free)', 0, missingHP <= 0, () => templeHealHP(state)],
     ['Restore MP (free)', 0, missingMP <= 0, () => templeHealMP(state)],
-    ['Remove Curse — 50 copper', 50, !hasCursed || state.hero.copper < 50, () => templeRemoveCurse(state)],
+    ['Remove Curse — 50 gold', 50, !hasCursed || state.hero.copper < 50, () => templeRemoveCurse(state)],
     ['Cure Poison (free)', 0, !isPoisoned, () => templeCurePoison(state)],
   ];
 
@@ -66,7 +66,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
     for (const item of allUnident) {
       const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
       row.appendChild(el('div', { flex: '1', fontSize: '13px', color: '#ccc' }, getDisplayName(item)));
-      const btn = createButton('Identify 30cp', 'sm');
+      const btn = createButton('Identify 30g', 'sm');
       const disabled = state.hero.copper < 30;
       greyBtn(btn, disabled);
       btn.addEventListener('click', () => onUpdate(sageIdentifyOne(state, item.id)));
@@ -76,7 +76,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   }
 
   const totalCost = 25 * allUnident.length;
-  const allBtn = createButton(`Identify All — ${totalCost} copper`);
+  const allBtn = createButton(`Identify All — ${totalCost} gold`);
   Object.assign(allBtn.style, { display: 'block', width: '100%', marginTop: '8px' });
   greyBtn(allBtn, allUnident.length === 0 || state.hero.copper < totalCost);
   allBtn.addEventListener('click', () => onUpdate(sageIdentifyAll(state)));
@@ -89,8 +89,8 @@ function buildBank(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   const panel = createPanel('Banking');
 
   panel.appendChild(el('div', { display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }, ''));
-  const onHand = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '4px' }, `On hand: ${state.hero.copper} copper`);
-  const inBank = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '12px' }, `In bank: ${state.town.bankBalance} copper`);
+  const onHand = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '4px' }, `On hand: ${state.hero.copper} gold`);
+  const inBank = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '12px' }, `In bank: ${state.town.bankBalance} gold`);
   panel.appendChild(onHand);
   panel.appendChild(inBank);
 

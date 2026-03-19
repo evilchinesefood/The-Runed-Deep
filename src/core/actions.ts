@@ -1,4 +1,4 @@
-import type { GameState, GameAction, Direction, Vector2, Message, Hero, Floor } from './types';
+import type { GameState, GameAction, Direction, Vector2, Message, Hero, Floor, Equipment } from './types';
 import { generateFloor, getDungeonForFloor } from '../systems/dungeon/generator';
 import { playerAttacksMonster } from '../systems/combat/combat';
 import { castSpell } from '../systems/spells/casting';
@@ -9,6 +9,12 @@ import { processEquipItem, processUnequipItem } from '../systems/inventory/equip
 import { processUseItem } from '../systems/inventory/use-item';
 import { generateTownMap, BUILDING_FLAVORS, TOWN_START_RETURN } from '../systems/town/TownMap';
 import { initShopInventory, restockShop } from '../systems/town/Shops';
+
+function hasEnchant(equipment: Equipment, id: string): boolean {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
+  );
+}
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N:  { x: 0,  y: -1 },
@@ -189,9 +195,7 @@ function processMove(state: GameState, direction: Direction): GameState {
   const tileAtNew = floor.tiles[newPos.y][newPos.x];
   if (tileAtNew.type === 'trap' && tileAtNew.trapType) {
     const isLevitating = state.hero.activeEffects.some(e => e.id === 'levitation');
-    const isTrapImmune = Object.values(state.hero.equipment).some(
-      i => i?.specialEnchantments?.includes('trap-immune')
-    );
+    const isTrapImmune = hasEnchant(state.hero.equipment, 'trap-immune');
     if (!isLevitating && !isTrapImmune) {
       const result = triggerTrap(tileAtNew, hero, newPos, floor, floorKey, messages, state.turn + 1);
       hero = result.hero;
@@ -324,7 +328,7 @@ export function teleportToTown(state: GameState): GameState {
 
   return {
     ...state,
-    currentDungeon: 'town' as any,
+    currentDungeon: 'town' as const,
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,

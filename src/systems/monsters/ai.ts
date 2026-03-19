@@ -1,4 +1,4 @@
-import type { GameState, Floor, Vector2, Monster, Message } from '../../core/types';
+import type { GameState, Floor, Vector2, Monster, Message, Equipment } from '../../core/types';
 import { monsterAttacksPlayer } from '../combat/combat';
 import { queueAnimation } from '../../rendering/animation-queue';
 import { buildBoltAnimation, buildBallAnimation } from '../../rendering/animations';
@@ -6,6 +6,12 @@ import { recomputeDerivedStats } from '../character/derived-stats';
 import { getMonstersForDepth } from '../../data/monsters';
 import { createMonster } from './spawning';
 import { xpRequiredForLevel } from '../character/leveling';
+
+function hasEnchant(equipment: Equipment, id: string): boolean {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
+  );
+}
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -166,9 +172,10 @@ function moveToRange(
 // ── Summoning ────────────────────────────────────────────────
 
 const SUMMON_TYPE_MAP: Record<string, string[]> = {
-  'summon-monster': ['giant-rat', 'wild-dog', 'goblin', 'kobold'],
-  'summon-undead':  ['skeleton', 'walking-corpse', 'shadow'],
-  'summon-devil':   ['ice-devil', 'spiked-devil', 'horned-devil'],
+  'summon-monster':    ['giant-rat', 'wild-dog', 'goblin', 'kobold'],
+  'summon-undead':     ['skeleton', 'walking-corpse', 'shadow'],
+  'summon-devil':      ['ice-devil', 'spiked-devil', 'horned-devil'],
+  'summon-fire-giant': ['fire-giant'],
 };
 
 function spawnNearSummoner(state: GameState, floorKey: string, summonerIdx: number, ability: string): GameState {
@@ -254,6 +261,24 @@ export function monsterRangedAttack(state: GameState, monster: Monster, ability:
     return s;
   }
 
+  // ── Spell balls ──────────────────────────────────────────
+  const ballMatch = ability.match(/^cast-(fire|cold|lightning)-ball$/);
+  if (ballMatch) {
+    const elem = ballMatch[1] as keyof typeof hero.resistances;
+    const spellId = `${elem}-ball`;
+    const dmg = rollRange(8, 20) + Math.floor(depth / 2);
+    const resist = (hero.resistances[elem] ?? 0) / 100;
+    const finalDmg = Math.max(1, Math.round(dmg * (1 - resist)));
+
+    const anims = buildBallAnimation(spellId, monster.position, dir, hero.position, floor);
+    queueAnimation(anims);
+
+    const newHp = Math.max(0, hero.hp - finalDmg);
+    let s = addMsg(state, `${monster.name} hurls a ${elem} ball at you for ${finalDmg} damage!`);
+    s = { ...s, hero: { ...s.hero, hp: newHp } };
+    return s;
+  }
+
   // ── Physical ranged ──────────────────────────────────────
   if (ability === 'throw-boulder') {
     const dmg = rollRange(6, 14);
@@ -305,7 +330,7 @@ export function monsterRangedAttack(state: GameState, monster: Monster, ability:
   }
 
   // ── Summon abilities (used by summoner AI) ───────────────
-  const summonMatch = ability.match(/^summon-(monster|undead|devil)$/);
+  const summonMatch = ability.match(/^summon-(monster|undead|devil|fire-giant)$/);
   if (summonMatch) {
     const floorIdx = floor.monsters.indexOf(monster);
     return spawnNearSummoner(state, floorKey, floorIdx, ability);
@@ -327,9 +352,7 @@ export function processMonsterAbility(state: GameState, monster: Monster): GameS
     switch (ability) {
 
       case 'poison': {
-        const isPoisonImmune = Object.values(s.hero.equipment).some(
-          i => i?.specialEnchantments?.includes('poison-immune')
-        );
+        const isPoisonImmune = hasEnchant(s.hero.equipment, 'poison-immune');
         if (!isPoisonImmune && Math.random() < 0.30) {
           const alreadyPoisoned = s.hero.activeEffects.some(e => e.id === 'poisoned');
           if (!alreadyPoisoned) {

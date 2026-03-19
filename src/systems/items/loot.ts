@@ -113,7 +113,7 @@ export function createCopperDrop(depth: number): Item {
     templateId: 'copper-coins',
     name: `${amount} Gold`,
     category: 'currency',
-    sprite: 'coins-copper',
+    sprite: 'coins-gold',
     weight: amount * 5,
     bulk: amount,
     value: amount,

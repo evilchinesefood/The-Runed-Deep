@@ -83,7 +83,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
   const price = getBuyPrice(item, shopId);
 
   if (state.hero.copper < price) {
-    return addMsg(state, `You cannot afford that. (${price} copper needed)`, 'system');
+    return addMsg(state, `You cannot afford that. (${price} gold needed)`, 'system');
   }
 
   const newShopInv = shopInv.filter((_, i) => i !== idx);
@@ -98,7 +98,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
       ...state.town,
       shopInventories: { ...state.town.shopInventories, [shopId]: newShopInv },
     },
-  }, `You buy ${item.name} for ${price} copper.`);
+  }, `You buy ${item.name} for ${price} gold.`);
 }
 
 export function sellItem(state: GameState, shopId: string, itemId: string): GameState {
@@ -120,5 +120,5 @@ export function sellItem(state: GameState, shopId: string, itemId: string): Game
       ...state.town,
       shopInventories: { ...state.town.shopInventories, [shopId]: [...shopInv, item] },
     },
-  }, `You sell ${item.name} for ${price} copper.`);
+  }, `You sell ${item.name} for ${price} gold.`);
 }

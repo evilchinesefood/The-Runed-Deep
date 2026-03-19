@@ -1,12 +1,10 @@
-import type { GameState, Monster, Floor, Vector2, Message, Direction } from '../../core/types';
+import type { GameState, Monster, Floor, Vector2, Message, Direction, Equipment } from '../../core/types';
 import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
-import { getDirectionVector } from '../../core/actions';
+import { getDirectionVector, teleportToTown } from '../../core/actions';
 import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-item';
 import { getMonstersForDepth } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
 import { queueAnimation } from '../../rendering/animation-queue';
-import { generateTownMap, TOWN_START_RETURN } from '../town/TownMap';
-import { initShopInventory, restockShop } from '../town/Shops';
 import {
   buildBoltAnimation,
   buildBallAnimation,
@@ -15,6 +13,18 @@ import {
   buildTeleportAnimation,
   buildDetectAnimation,
 } from '../../rendering/animations';
+
+function hasEnchant(equipment: Equipment, id: string): boolean {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
+  );
+}
+
+function enchantMult(equipment: Equipment, id: string): number {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.includes(`${id}:critical`)
+  ) ? 2 : 1;
+}
 
 // ============================================================
 // Spell Casting
@@ -138,7 +148,7 @@ function resolveSpellEffect(
       if (state.currentDungeon === 'town') {
         return addMsg(state, 'You are already in town.', 'system');
       }
-      return teleportToTownFromSpell(state);
+      return teleportToTown(state);
     }
     case 'teleport':
       return resolveTeleport(state);
@@ -298,10 +308,10 @@ function applySpellDamageToMonster(
   let damage = rollRange(minDmg, maxDmg);
 
   // Spell damage enchantment bonus
-  const hasSpellDmg = Object.values(state.hero.equipment).some(
-    i => i?.specialEnchantments?.includes('spell-damage')
-  );
-  if (hasSpellDmg) damage = Math.round(damage * 1.3);
+  if (hasEnchant(state.hero.equipment, 'spell-damage')) {
+    const mult = enchantMult(state.hero.equipment, 'spell-damage') >= 2 ? 1.6 : 1.3;
+    damage = Math.round(damage * mult);
+  }
 
   // Apply elemental resistance
   const resistance = getElementResistance(monster, element);
@@ -322,11 +332,15 @@ function applySpellDamageToMonster(
     const newMonsters = [...floor.monsters];
     newMonsters.splice(monsterIdx, 1);
     const newFloor: Floor = { ...floor, monsters: newMonsters };
-    return {
+    const resultState: GameState = {
       ...addMsg(state, `${spell.name} hits the ${monster.name} for ${damage} ${element} damage, killing it! (+${monster.xpValue} XP)`, 'combat'),
       hero: { ...state.hero, mp: state.hero.mp, xp: state.hero.xp + monster.xpValue },
       floors: { ...state.floors, [floorKey]: newFloor },
     };
+    if (monster.templateId === 'surtur') {
+      return { ...resultState, screen: 'victory' };
+    }
+    return resultState;
   }
 
   const updatedMonster = { ...monster, hp: newHp };
@@ -715,37 +729,6 @@ function resolveLight(state: GameState): GameState {
   return {
     ...addMsg(state, `The area around ${state.hero.name} brightens.`, 'important'),
     floors: { ...state.floors, [floorKey]: newFloor },
-  };
-}
-
-// ============================================================
-// Town teleport (rune of return)
-// ============================================================
-
-const SHOP_IDS_SPELL = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
-
-function teleportToTownFromSpell(state: GameState): GameState {
-  let floors = { ...state.floors };
-  const townKey = 'town-0';
-  const { floor: townFloor } = generateTownMap();
-  floors = { ...floors, [townKey]: townFloor };
-  const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
-  let shopInventories = { ...state.town.shopInventories };
-  for (const sid of SHOP_IDS_SPELL) {
-    if (!shopInventories[sid] || shopInventories[sid].length === 0) {
-      shopInventories[sid] = initShopInventory(sid, deepest);
-    } else {
-      shopInventories[sid] = restockShop(shopInventories[sid], sid, deepest);
-    }
-  }
-  return {
-    ...addMsg(state, 'You are transported to town.', 'important'),
-    currentDungeon: 'town' as any,
-    currentFloor: 0,
-    returnFloor: state.currentFloor,
-    floors,
-    hero: { ...state.hero, position: { ...TOWN_START_RETURN } },
-    town: { ...state.town, shopInventories, deepestFloor: deepest },
   };
 }
 

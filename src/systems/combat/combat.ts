@@ -1,8 +1,20 @@
-import type { GameState, Hero, Monster, Message, Floor } from '../../core/types';
+import type { GameState, Hero, Monster, Message, Floor, Equipment } from '../../core/types';
 import { queueAnimation } from '../../rendering/animation-queue';
 import type { SpellAnimation } from '../../rendering/animations';
 import { generateLoot } from '../items/loot';
 import { processMonsterAbility } from '../monsters/ai';
+
+function hasEnchant(equipment: Equipment, id: string): boolean {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
+  );
+}
+
+function enchantMult(equipment: Equipment, id: string): number {
+  return Object.values(equipment).some(
+    i => i?.specialEnchantments?.includes(`${id}:critical`)
+  ) ? 2 : 1;
+}
 
 // ============================================================
 // Blood splatters
@@ -158,11 +170,9 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
   const newHp = monster.hp - damage;
 
   // Life steal
-  const hasLifeSteal = Object.values(state.hero.equipment).some(
-    i => i?.specialEnchantments?.includes('life-steal')
-  );
-  if (hasLifeSteal && damage > 0) {
-    const heal = Math.max(1, Math.floor(damage * 0.15));
+  if (hasEnchant(state.hero.equipment, 'life-steal') && damage > 0) {
+    const mult = enchantMult(state.hero.equipment, 'life-steal');
+    const heal = Math.max(1, Math.floor(damage * 0.15 * mult));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
     state = { ...state, hero: { ...state.hero, hp: healedHp } };
     messages.push({ text: `Life steal heals you for ${heal} HP.`, severity: 'combat', turn: state.turn });
@@ -303,11 +313,9 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   };
 
   // Reflect damage (Thorns enchantment)
-  const hasReflect = Object.values(state.hero.equipment).some(
-    i => i?.specialEnchantments?.includes('reflect-damage')
-  );
-  if (hasReflect && damage > 0) {
-    const reflectDmg = Math.max(1, Math.floor(damage * 0.20));
+  if (hasEnchant(state.hero.equipment, 'reflect-damage') && damage > 0) {
+    const reflectMult = enchantMult(state.hero.equipment, 'reflect-damage');
+    const reflectDmg = Math.max(1, Math.floor(damage * 0.20 * reflectMult));
     const floorKey2 = `${result.currentDungeon}-${result.currentFloor}`;
     const floor2 = result.floors[floorKey2];
     if (floor2) {
