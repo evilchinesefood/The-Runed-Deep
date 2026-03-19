@@ -1,6 +1,7 @@
 import { createScreen, el } from './Theme';
 import { calculateScore, addToLeaderboard } from '../systems/Scoring';
 import type { GameState } from '../core/types';
+import { Sound } from '../systems/Sound';
 
 export function createVictoryScreen(
   state: GameState,
@@ -28,6 +29,8 @@ export function createVictoryScreen(
     causeOfDeath: 'Victory — Surtur slain',
     timestamp: Date.now(),
   });
+
+  Sound.victory();
 
   const screen = createScreen();
   screen.style.minHeight = '100vh';

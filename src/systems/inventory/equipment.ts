@@ -1,6 +1,7 @@
 import type { GameState, EquipSlot, Message } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
 import { recomputeDerivedStats } from '../character/derived-stats';
+import { Sound } from '../Sound';
 
 function msg(text: string, turn: number, severity: Message['severity'] = 'normal'): Message {
   return { text, severity, turn };
@@ -84,6 +85,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
 
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
 
+  Sound.equip();
   return {
     ...state,
     hero: updatedHero,
@@ -116,6 +118,7 @@ export function processUnequipItem(state: GameState, slot: EquipSlot): GameState
   const inventory = [...hero.inventory, item];
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
 
+  Sound.equip();
   return {
     ...state,
     hero: updatedHero,

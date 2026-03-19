@@ -1,5 +1,6 @@
 import type { GameState, Monster, Floor, Vector2, Message, Direction, Equipment } from '../../core/types';
 import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
+import { Sound } from '../Sound';
 import { getDirectionVector, teleportToTown } from '../../core/actions';
 import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-item';
 import { getMonstersForDepth } from '../../data/monsters';
@@ -57,6 +58,12 @@ export function castSpell(
     ...state,
     hero: { ...state.hero, mp: state.hero.mp - cost },
   };
+
+  // Play sound based on spell type
+  if (['magic-arrow', 'cold-bolt', 'lightning-bolt', 'fire-bolt'].includes(spell.id)) Sound.spellBolt();
+  else if (['cold-ball', 'ball-lightning', 'fire-ball'].includes(spell.id)) Sound.spellBall();
+  else if (['heal-minor-wounds', 'heal-medium-wounds', 'heal-major-wounds', 'healing'].includes(spell.id)) Sound.spellHeal();
+  else if (['shield', 'resist-cold', 'resist-fire', 'resist-lightning'].includes(spell.id)) Sound.spellBuff();
 
   // Resolve effect
   newState = resolveSpellEffect(newState, spell, direction, target);

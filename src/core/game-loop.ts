@@ -2,6 +2,7 @@ import type { GameState, GameAction, Equipment } from './types';
 import { processAction } from './actions';
 import { processAllMonsterTurns } from '../systems/monsters/ai';
 import { checkAndApplyLevelUps } from '../systems/character/leveling';
+import { Sound } from '../systems/Sound';
 
 function hasEnchant(equipment: Equipment, id: string): boolean {
   return Object.values(equipment).some(
@@ -68,6 +69,7 @@ export class GameLoop {
 
     // 5. Check for player death
     if (newState.screen === 'game' && newState.hero.hp <= 0) {
+      Sound.playerDeath();
       newState = { ...newState, screen: 'death' };
     }
 

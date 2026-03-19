@@ -29,6 +29,7 @@ import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
 import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
 import { TouchControls } from './ui/TouchControls';
 import { injectTheme } from './ui/Theme';
+import { Sound } from './systems/Sound';
 
 injectTheme();
 
@@ -167,8 +168,14 @@ function playPendingAnimations(): void {
   });
 }
 
-// F9: Launch spell test arena
+// F8: Toggle sound / F9: spell test arena / F10: boss test
 document.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.code === 'F8') {
+    e.preventDefault();
+    Sound.toggle();
+    return;
+  }
+
   if (e.code === 'F9') {
     e.preventDefault();
     const { floor: testFloor, playerStart } = generateTestFloor();

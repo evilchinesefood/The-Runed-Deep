@@ -30,6 +30,7 @@ const KEYS: [string, string][] = [
   ['', ''],
   // System
   ['Ctrl+S', 'Save game'],
+  ['F8', 'Toggle sound on/off'],
   ['F9', 'Debug: Spell test arena'],
 ];
 

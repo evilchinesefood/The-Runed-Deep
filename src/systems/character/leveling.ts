@@ -2,6 +2,7 @@ import type { GameState, Hero, Difficulty, Message } from '../../core/types';
 import { computeMaxHp, computeMaxMp, recomputeDerivedStats } from './derived-stats';
 import { SPELLS } from '../../data/spells';
 import { getDifficultyConfig } from '../../data/difficulty';
+import { Sound } from '../Sound';
 
 // ============================================================
 // XP Thresholds
@@ -190,6 +191,7 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     // Recompute all derived stats (AC, resistances, etc.) using full stat system
     hero = { ...recomputeDerivedStats(hero), maxHp: hero.maxHp, maxMp: hero.maxMp, hp: hero.hp, mp: hero.mp };
 
+    Sound.levelUp();
     messages.push({
       text: `*** ${hero.name} has reached level ${hero.level}! ***`,
       severity: 'important',

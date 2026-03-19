@@ -3,6 +3,7 @@ import { queueAnimation } from '../../rendering/animation-queue';
 import type { SpellAnimation } from '../../rendering/animations';
 import { generateLoot } from '../items/loot';
 import { processMonsterAbility } from '../monsters/ai';
+import { Sound } from '../Sound';
 
 function hasEnchant(equipment: Equipment, id: string): boolean {
   return Object.values(equipment).some(
@@ -143,6 +144,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       severity: 'combat',
       turn: state.turn,
     });
+    Sound.meleeMiss();
     return applyMessages(state, messages);
   }
 
@@ -166,6 +168,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     color: '#fff',
     duration: 80,
   } as SpellAnimation]);
+  Sound.meleeHit();
 
   const newHp = monster.hp - damage;
 
@@ -185,6 +188,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
       severity: 'combat',
       turn: state.turn,
     });
+    Sound.monsterDeath();
 
     // Remove monster from floor, award XP
     const newMonsters = [...floor.monsters];
@@ -288,6 +292,7 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
     color: '#f44',
     duration: 80,
   } as SpellAnimation]);
+  Sound.playerHurt();
 
   messages.push({
     text: `The ${monster.name} hits ${state.hero.name} for ${damage} damage. (${Math.max(0, newHp)}/${state.hero.maxHp} HP)`,

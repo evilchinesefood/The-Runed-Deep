@@ -1,5 +1,6 @@
 import type { GameState, Message } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
+import { Sound } from '../Sound';
 
 export function processPickupItem(state: GameState): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
@@ -41,6 +42,7 @@ export function processPickupItem(state: GameState): GameState {
       copper += amount;
       pickedIds.add(placed.item.id);
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
+      Sound.goldPickup();
     } else {
       if (packCap !== null) {
         const currentWeight = inventory.reduce((s, i) => s + i.weight, 0);
@@ -52,6 +54,7 @@ export function processPickupItem(state: GameState): GameState {
       inventory.push(placed.item);
       pickedIds.add(placed.item.id);
       messages.push({ text: `Picked up ${placed.item.name}.`, severity: 'normal', turn: state.turn });
+      Sound.pickup();
     }
   }
 

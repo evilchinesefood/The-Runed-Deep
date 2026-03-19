@@ -9,6 +9,7 @@ import { processEquipItem, processUnequipItem } from '../systems/inventory/equip
 import { processUseItem } from '../systems/inventory/use-item';
 import { generateTownMap, BUILDING_FLAVORS, TOWN_START_RETURN } from '../systems/town/TownMap';
 import { initShopInventory, restockShop } from '../systems/town/Shops';
+import { Sound } from '../systems/Sound';
 
 function hasEnchant(equipment: Equipment, id: string): boolean {
   return Object.values(equipment).some(
@@ -145,6 +146,7 @@ function processMove(state: GameState, direction: Direction): GameState {
     newTiles[newPos.y][newPos.x] = {
       type: 'door-open', sprite: 'door-open', walkable: true, transparent: true,
     };
+    Sound.doorOpen();
     return {
       ...state,
       floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
@@ -161,6 +163,7 @@ function processMove(state: GameState, direction: Direction): GameState {
       newTiles[newPos.y][newPos.x] = {
         type: 'door-open', sprite: 'door-broken', walkable: true, transparent: true,
       };
+      Sound.doorOpen();
       return {
         ...state,
         floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
@@ -270,6 +273,7 @@ function processEnterBuilding(state: GameState): GameState {
     ? `You enter ${info.name}. ${info.flavor}`
     : `You enter the building.`;
 
+  Sound.doorOpen();
   return {
     ...state,
     screen,
@@ -291,11 +295,13 @@ function processUseStairs(state: GameState): GameState {
   }
 
   if (heroTile.type === 'stairs-down') {
+    Sound.stairs();
     if (state.currentDungeon === 'town') {
       return returnToDungeon(state);
     }
     return goToFloor(state, state.currentFloor + 1, 'descend');
   } else if (heroTile.type === 'stairs-up') {
+    Sound.stairs();
     if (state.currentFloor === 0) {
       return teleportToTown(state);
     }
@@ -476,6 +482,8 @@ function triggerTrap(
   const trap = TRAP_DATA[tile.trapType ?? ''];
   if (!trap) return { hero, floor };
 
+  Sound.trap();
+
   // Reveal the trap
   const newTiles = floor.tiles.map(row => [...row]);
   newTiles[pos.y][pos.x] = {
@@ -610,6 +618,8 @@ function processSearch(state: GameState): GameState {
 
   if (found === 0) {
     messages.push({ text: 'You search but find nothing.', severity: 'system' as const, turn: state.turn });
+  } else {
+    Sound.searchFound();
   }
 
   return {
