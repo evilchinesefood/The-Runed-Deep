@@ -44,7 +44,7 @@ export function createCharacterInfoScreen(
   const h = state.hero;
 
   const screen = createScreen();
-  screen.style.minHeight = '100vh';
+  screen.classList.add('screen-scrollable');
 
   screen.appendChild(createTitleBar('Character Info', onClose));
 

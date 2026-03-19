@@ -141,10 +141,12 @@ export class InputManager {
   private setupKeyboard(): void {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
       // Handle Tab before anything else (browser intercepts it)
-      if (e.code === 'Tab') {
+      if (e.key === 'Tab' || e.code === 'Tab') {
         e.preventDefault();
         e.stopPropagation();
-        if (this.enabled) this.onAutoExplore?.();
+        if (this.enabled && this.onAutoExplore) {
+          this.onAutoExplore();
+        }
         return;
       }
 
@@ -176,9 +178,9 @@ export class InputManager {
         return; // Ignore other keys in spell mode
       }
 
-      // Movement (skip WASD when ctrl is held for Ctrl+S save)
+      // Movement
       const direction = KEY_TO_DIRECTION[e.code];
-      if (direction && !e.ctrlKey) {
+      if (direction) {
         e.preventDefault();
         this.emit({ type: 'move', direction });
         return;
@@ -241,11 +243,9 @@ export class InputManager {
           e.preventDefault();
           this.emit({ type: 'useStairs' });
           break;
-        case 'KeyS':
-          if (e.ctrlKey) {
-            e.preventDefault();
-            this.emit({ type: 'save' });
-          }
+        case 'F3':
+          e.preventDefault();
+          this.emit({ type: 'save' });
           break;
         case 'F1':
           e.preventDefault();

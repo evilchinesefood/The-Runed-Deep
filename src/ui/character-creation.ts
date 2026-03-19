@@ -27,7 +27,7 @@ export function createCharacterCreationScreen(
   };
 
   const screen = createScreen();
-  screen.style.minHeight = '100vh';
+  screen.classList.add('screen-scrollable');
 
   // Title
   screen.appendChild(el('h2', {

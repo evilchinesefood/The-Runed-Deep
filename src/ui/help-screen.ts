@@ -6,7 +6,7 @@ const KEYS: [string, string][] = [
   ['Arrow Keys / Numpad', 'Move (8 directions with diagonals)'],
   ['', ''],
   // Actions
-  ['E', 'Context action (pickup / stairs / enter / search / wait)'],
+  ['E', 'Context action (pickup / stairs / enter / search)'],
   ['Q', 'Wait (recover HP/MP, 1-10 random turns)'],
   ['G', 'Pick up item'],
   ['> or < or Enter', 'Use stairs / enter building'],
@@ -30,15 +30,17 @@ const KEYS: [string, string][] = [
   ['Click on map', 'Auto-walk to tile (pathfinding)'],
   ['', ''],
   // System
-  ['Ctrl+S', 'Save game'],
-  ['F8', 'Toggle sound on/off'],
+  ['F3', 'Save game'],
+  ['F4', 'Toggle sound on/off'],
+  ['---', ''],
   ['F9', 'Debug: Spell test arena'],
   ['F10', 'Debug: Jump to any floor'],
+  ['F11', 'Debug: Teleport to town'],
 ];
 
 export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: () => void } {
   const screen = createScreen();
-  screen.style.minHeight = '100vh';
+  screen.classList.add('screen-scrollable');
 
   screen.appendChild(createTitleBar('Keyboard Controls', () => { cleanup(); onClose(); }));
 
@@ -48,6 +50,10 @@ export function createHelpScreen(onClose: () => void): HTMLElement & { cleanup: 
   for (const [key, desc] of KEYS) {
     if (key === '' && desc === '') {
       panel.appendChild(el('div', { height: '8px' }));
+      continue;
+    }
+    if (key === '---') {
+      panel.appendChild(el('hr', { border: 'none', borderTop: '1px solid #333', margin: '8px 0' }));
       continue;
     }
 

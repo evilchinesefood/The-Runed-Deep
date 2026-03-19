@@ -118,7 +118,7 @@ export function createInventoryScreen(
   let selectedIdx = 0;
 
   const screen = createScreen();
-  screen.style.minHeight = '100vh';
+  screen.classList.add('screen-scrollable');
 
   // ── Title bar ──────────────────────────────────────────────
   screen.appendChild(createTitleBar('Equipment', () => { cleanup(); onClose(); }));

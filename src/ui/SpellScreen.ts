@@ -18,8 +18,7 @@ export function createSpellScreen(
   let hotkeys = [...h.spellHotkeys];
 
   const screen = createScreen();
-  screen.style.maxHeight = '100vh';
-  screen.style.overflowY = 'auto';
+  screen.classList.add('screen-scrollable');
 
   // Title bar with MP display
   const titleBar = createTitleBar('Spells', () => { cleanup(); onClose(); });

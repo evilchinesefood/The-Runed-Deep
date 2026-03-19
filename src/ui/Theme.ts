@@ -101,6 +101,15 @@ export function injectTheme(): void {
       margin: 0 auto;
     }
 
+    /* Scrollable screen — hides scrollbar but allows scroll */
+    .screen-scrollable {
+      overflow-y: auto;
+      max-height: 100vh;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .screen-scrollable::-webkit-scrollbar { display: none; }
+
     /* Panel — standard card component */
     .panel {
       width: 100%;

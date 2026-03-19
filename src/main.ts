@@ -28,6 +28,7 @@ import type { GameState, Screen } from './core/types';
 import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
 import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
 import { TouchControls } from './ui/TouchControls';
+import { teleportToTown } from './core/actions';
 import { injectTheme } from './ui/Theme';
 import { Sound } from './systems/Sound';
 import { setOnUnlockCallback, trackNewGamePlus, trackFloorExplored } from './systems/Achievements';
@@ -88,26 +89,25 @@ input.setAutoExploreCallback(() => {
 });
 
 function exploreNext(): void {
-  if (!autoExploring) { console.log('[EXPLORE] not exploring'); return; }
+  if (!autoExploring) return;
   const state = gameLoop.getState();
   if (state.screen !== 'game' || state.hero.hp <= 0 || state.currentDungeon === 'town') {
-    console.log('[EXPLORE] stopped:', state.screen, state.currentDungeon, state.hero.hp);
     autoExploring = false;
     return;
   }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
-  if (!floor) { console.log('[EXPLORE] no floor'); autoExploring = false; return; }
+  if (!floor) { autoExploring = false; return; }
 
   // Stop if any monster is visible
   const hasVisibleMonster = floor.monsters.some(m =>
     floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
   );
-  if (hasVisibleMonster) { console.log('[EXPLORE] monster visible'); autoExploring = false; return; }
+  if (hasVisibleMonster) { autoExploring = false; return; }
 
   // Stop if HP below 50%
-  if (state.hero.hp < state.hero.maxHp * 0.5) { console.log('[EXPLORE] low HP'); autoExploring = false; return; }
+  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; return; }
 
   // Find nearest EXPLORED walkable tile that has an unexplored walkable neighbor
   // (hero walks to the frontier, FOV reveals the next area)
@@ -140,15 +140,12 @@ function exploreNext(): void {
   }
 
   if (!bestTarget) {
-    console.log('[EXPLORE] fully explored, no target');
     autoExploring = false;
     return;
   }
 
-  console.log('[EXPLORE] target:', bestTarget, 'dist:', bestDist);
   const path = findPath(floor, hero, bestTarget);
-  console.log('[EXPLORE] path length:', path.length);
-  if (path.length === 0) { console.log('[EXPLORE] no path'); autoExploring = false; return; }
+  if (path.length === 0) { autoExploring = false; return; }
 
   autoPath = path;
   stepAutoPathExplore();
@@ -298,9 +295,9 @@ function playPendingAnimations(): void {
   });
 }
 
-// F8: Toggle sound / F9: spell test arena / F10: boss test
+// F4: Toggle sound / F9: spell test arena / F10: boss test / F11: town teleport
 document.addEventListener('keydown', (e: KeyboardEvent) => {
-  if (e.code === 'F8') {
+  if (e.code === 'F4') {
     e.preventDefault();
     Sound.toggle();
     return;
@@ -408,6 +405,13 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     };
     gameLoop.setState(testState);
   }
+
+  // F11: Teleport to town
+  if (e.code === 'F11') {
+    e.preventDefault();
+    const state = gameLoop.getState();
+    gameLoop.setState(teleportToTown(state));
+  }
 });
 
 // Screen cleanup — called on every screen switch
@@ -497,17 +501,6 @@ function switchScreen(state: GameState): void {
       createCharacterCreationScreen(root, result => {
         try {
           const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell, result.difficulty);
-
-          // DEBUG: Add test items to starting inventory
-          hero.inventory = [
-            { id: 'test-1', templateId: 'long-sword', name: 'Long Sword +2', category: 'weapon', sprite: 'sword-enchanted', weight: 2000, bulk: 400, value: 100, identified: true, cursed: false, enchantment: 2, properties: { damageMin: 3, damageMax: 11, accuracy: 1 } },
-            { id: 'test-2', templateId: 'chain-mail', name: 'Chain Mail -1', category: 'armor', sprite: 'metal-armour-cursed', weight: 10000, bulk: 2000, value: 80, identified: false, cursed: true, enchantment: -1, properties: { ac: 7 } },
-            { id: 'test-3', templateId: 'small-iron-shield', name: 'Small Iron Shield', category: 'shield', sprite: 'metal-shield', weight: 3000, bulk: 600, value: 30, identified: true, cursed: false, enchantment: 0, properties: { ac: 2 } },
-            { id: 'test-4', templateId: 'leather-helmet', name: 'Leather Cap -2', category: 'helmet', sprite: 'leather-helmet-cursed', weight: 500, bulk: 100, value: 5, identified: false, cursed: true, enchantment: -2, properties: { ac: 1 } },
-            { id: 'test-5', templateId: 'scroll-identify', name: 'Scroll of Identify', category: 'scroll', sprite: 'scroll', weight: 50, bulk: 10, value: 30, identified: true, cursed: false, enchantment: 0, properties: {} },
-            { id: 'test-6', templateId: 'potion-heal-minor', name: 'Potion of Minor Healing', category: 'potion', sprite: 'potion-heal-minor', weight: 200, bulk: 40, value: 15, identified: true, cursed: false, enchantment: 0, properties: { healPct: 0.25, healAmount: 8 } },
-          ];
-          hero.copper = 500;
 
           // Generate first dungeon floor (for when player enters the mine)
           const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, result.difficulty);

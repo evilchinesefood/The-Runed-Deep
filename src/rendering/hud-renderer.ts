@@ -93,6 +93,15 @@ export class HudRenderer {
     nameRow.appendChild(strong);
     nameRow.appendChild(el('span', { fontSize: '12px' }, `Lv.${h.level}`));
 
+    // AC badge (first, before status effects)
+    const acBadge = el('span', {
+      fontSize: '9px', color: '#bbb', background: '#1a1a1a',
+      border: '1px solid #bbb33', borderRadius: '3px',
+      padding: '0px 3px', whiteSpace: 'nowrap',
+    }, `🛡${h.armorValue}`);
+    acBadge.title = `Armor Class: ${h.armorValue}`;
+    nameRow.appendChild(acBadge);
+
     // Status effect icons inline with name/level
     if (h.activeEffects.length > 0) {
       const effectStyles: Record<string, [string, string]> = {
@@ -131,25 +140,16 @@ export class HudRenderer {
     this.statsEl.appendChild(mpLabel);
     this.statsEl.appendChild(bar(mpPct, mpColor));
 
-    const attrs = el('div', { fontSize: '11px', marginTop: '4px' },
-      `STR ${h.attributes.strength} | INT ${h.attributes.intelligence} | CON ${h.attributes.constitution} | DEX ${h.attributes.dexterity}`
-    );
-    this.statsEl.appendChild(attrs);
-
     const xpNeeded = xpToNextLevel(h, state.difficulty);
     const xpDisplay = xpNeeded === Infinity ? 'MAX' : `${h.xp} (${xpNeeded} to next)`;
-    const info = el('div', { fontSize: '11px', marginTop: '2px' },
-      `AC: ${h.armorValue} | Turn: ${state.turn}`
-    );
-    this.statsEl.appendChild(info);
-
-    const xpRow = el('div', { fontSize: '11px', marginTop: '2px' },
+    const xpRow = el('div', { fontSize: '11px', marginTop: '4px' },
       `XP: ${xpDisplay}`
     );
     this.statsEl.appendChild(xpRow);
 
-    const floorInfo = el('div', { fontSize: '11px', marginTop: '4px' },
-      `${state.currentDungeon !== 'town' ? `Floor: ${state.currentFloor + 1}` : 'Town'} | Gold: ${h.copper}`
+    const floorLabel = state.currentDungeon !== 'town' ? `Floor: ${state.currentFloor + 1}` : 'Town';
+    const floorInfo = el('div', { fontSize: '11px', marginTop: '2px' },
+      `${floorLabel} | Turn: ${state.turn}`
     );
     this.statsEl.appendChild(floorInfo);
 
