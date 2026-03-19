@@ -1,6 +1,7 @@
 import type { GameState, Vector2 } from '../core/types';
 import { showItemTooltip, showPileTooltip, hideItemTooltip } from '../ui/item-tooltip';
 import { getDungeonForFloor, getTileset } from '../systems/dungeon/Tilesets';
+import { getDisplaySprite } from '../systems/inventory/display-name';
 
 const TILE_SIZE = 32;
 const VIEWPORT_TILES_X = 21;  // Odd number so player is centered
@@ -206,7 +207,7 @@ export class MapRenderer {
             cell.ground.style.display = 'block';
             cell.ground.style.opacity = '1';
           } else if (itemsHere.length === 1) {
-            cell.ground.className = itemsHere[0].item.sprite;
+            cell.ground.className = getDisplaySprite(itemsHere[0].item);
             cell.ground.style.display = 'block';
             cell.ground.style.opacity = '1';
           } else if (hasBlood) {

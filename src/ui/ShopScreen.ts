@@ -5,7 +5,7 @@
 import type { GameState, Item } from '../core/types';
 import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
 import { SHOP_DEFS, getBuyPrice, getSellPrice, buyItem, sellItem } from '../systems/town/Shops';
-import { getDisplayName } from '../systems/inventory/display-name';
+import { getDisplayName, getDisplaySprite } from '../systems/inventory/display-name';
 import { attachItemTooltip, hideItemTooltip } from './item-tooltip';
 
 function spriteEl(sprite: string): HTMLElement {
@@ -28,7 +28,7 @@ function itemRow(item: Item, priceLabel: string, btnText: string, btnDisabled: b
   row.addEventListener('mouseenter', () => { row.style.background = '#1a1a1a'; });
   row.addEventListener('mouseleave', () => { row.style.background = ''; });
 
-  row.appendChild(spriteEl(item.sprite));
+  row.appendChild(spriteEl(getDisplaySprite(item)));
 
   const name = el('div', { flex: '1', fontSize: '13px', color: '#ccc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, getDisplayName(item));
   row.appendChild(name);

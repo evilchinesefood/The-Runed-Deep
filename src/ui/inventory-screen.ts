@@ -1,6 +1,6 @@
 import type { GameState, GameAction, EquipSlot, Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
-import { getDisplayName } from '../systems/inventory/display-name';
+import { getDisplayName, getDisplaySprite } from '../systems/inventory/display-name';
 import { attachItemTooltip, hideItemTooltip } from './item-tooltip';
 import { createScreen, createPanel, createTitleBar, el } from './Theme';
 
@@ -94,7 +94,7 @@ function createEquipSlot(
       top: '0',
       left: '0',
     });
-    sprite.className = item.sprite;
+    sprite.className = getDisplaySprite(item);
     container.appendChild(sprite);
     container.addEventListener('click', onUnequip);
     container.addEventListener('mouseenter', () => { container.style.borderColor = '#c90'; });
@@ -299,7 +299,7 @@ export function createInventoryScreen(
 
       // Sprite
       const sprite = el('div', { width: '32px', height: '32px', flexShrink: '0' });
-      sprite.className = item.sprite + ' inventory-item';
+      sprite.className = getDisplaySprite(item) + ' inventory-item';
       row.appendChild(sprite);
 
       // Name

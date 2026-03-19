@@ -12,3 +12,15 @@ export function getDisplayName(item: Item): string {
   }
   return item.name;
 }
+
+/**
+ * Returns the sprite to show for an item.
+ * Unidentified items show the base template sprite (no cursed/enchanted variant).
+ */
+export function getDisplaySprite(item: Item): string {
+  if (!item.identified) {
+    const tpl = ITEM_BY_ID[item.templateId];
+    return tpl ? tpl.sprite : item.sprite;
+  }
+  return item.sprite;
+}
