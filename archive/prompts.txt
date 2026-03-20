@@ -1,1 +1,0 @@
-Using CSS, I want to take an image I have called tiles.png which is located at ../img/original/tiles.png, and break it up into even 32px by 32 px blocks. The image is  224px by 320px
