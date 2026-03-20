@@ -1,6 +1,6 @@
-import type { GameState } from './types';
+import type { GameState } from "./types";
 
-const SAVE_KEY_PREFIX = 'cotw-save-';
+const SAVE_KEY_PREFIX = "cotw-save-";
 const MAX_SLOTS = 3;
 
 export interface SaveSlotInfo {
@@ -23,7 +23,7 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
     // Save the game state (set screen back to 'game' so loading resumes gameplay)
     const saveState: GameState = {
       ...state,
-      screen: 'game',
+      screen: "game",
     };
 
     const saveData = {
@@ -36,7 +36,7 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
     return true;
   } catch (e) {
-    console.error('Failed to save game:', e);
+    console.error("Failed to save game:", e);
     return false;
   }
 }
@@ -58,23 +58,26 @@ export function loadGame(slot: number = 1): GameState | null {
     // Ensure screen is set to game
     const state: GameState = {
       ...saveData.state,
-      screen: 'game',
+      screen: "game",
     };
 
     // Migration: add defaults for fields added after initial release
     state.returnFloor ??= 0;
-    state.activeBuildingId ??= '';
+    state.activeBuildingId ??= "";
     if (!state.hero.spellHotkeys) state.hero.spellHotkeys = [];
-    if (!state.town.deepestFloor && state.town.deepestFloor !== 0) state.town.deepestFloor = 0;
+    state.town.deepestFloor ??= 0;
     state.ngPlusCount ??= 0;
-    // Add decals array to any floors missing it
+    // Add decals array and monster armor to any floors missing them
     for (const key of Object.keys(state.floors)) {
       if (!state.floors[key].decals) state.floors[key].decals = [];
+      for (const m of state.floors[key].monsters) {
+        if (m.armor === undefined) m.armor = 0;
+      }
     }
 
     return state;
   } catch (e) {
-    console.error('Failed to load game:', e);
+    console.error("Failed to load game:", e);
     return null;
   }
 }

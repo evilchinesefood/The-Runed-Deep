@@ -1,15 +1,22 @@
-import type { Floor, Tile, Vector2, Difficulty, PlacedItem } from '../../core/types';
-import { spawnMonsters } from '../monsters/spawning';
-import { getItemsForDepth } from '../../data/items';
-import { createItemFromTemplate, createCopperDrop } from '../items/loot';
-import { generateBossFloor } from './BossFloors';
+import type {
+  Floor,
+  Tile,
+  Vector2,
+  Difficulty,
+  PlacedItem,
+} from "../../core/types";
+import { spawnMonsters } from "../monsters/spawning";
+import { getItemsForDepth } from "../../data/items";
+import { createItemFromTemplate, createCopperDrop } from "../items/loot";
+import { generateBossFloor } from "./BossFloors";
+import { TRAP_TYPES as SHARED_TRAP_TYPES } from "../../data/Traps";
 
 interface Room {
   x: number;
   y: number;
   w: number;
   h: number;
-  shape: 'rect' | 'cross' | 'diamond' | 'circle' | 'deadend';
+  shape: "rect" | "cross" | "diamond" | "circle" | "deadend";
 }
 
 const FLOOR_WIDTH = 50;
@@ -27,53 +34,76 @@ function seededRandom(seed: number): () => number {
   };
 }
 
-import { type Tileset, TILESETS, getDungeonForFloor, getTileset } from './Tilesets';
-export { getDungeonForFloor, TILESETS, type Tileset } from './Tilesets';
+import {
+  type Tileset,
+  TILESETS,
+  getDungeonForFloor,
+  getTileset,
+} from "./Tilesets";
+export { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
 
-let activeTileset: Tileset = TILESETS['mine'];
+let activeTileset: Tileset = TILESETS["mine"];
 
 function createWallTile(): Tile {
-  return { type: 'wall', sprite: activeTileset.wall, walkable: false, transparent: false };
+  return {
+    type: "wall",
+    sprite: activeTileset.wall,
+    walkable: false,
+    transparent: false,
+  };
 }
 
 function createFloorTile(): Tile {
-  return { type: 'floor', sprite: activeTileset.floor, walkable: true, transparent: true };
+  return {
+    type: "floor",
+    sprite: activeTileset.floor,
+    walkable: true,
+    transparent: true,
+  };
 }
 
 function createDoorTile(): Tile {
-  return { type: 'door-closed', sprite: 'door-closed', walkable: false, transparent: false };
+  return {
+    type: "door-closed",
+    sprite: "door-closed",
+    walkable: false,
+    transparent: false,
+  };
 }
 
 function createLockedDoorTile(): Tile {
-  return { type: 'door-locked', sprite: 'door-closed', walkable: false, transparent: false };
+  return {
+    type: "door-locked",
+    sprite: "door-closed",
+    walkable: false,
+    transparent: false,
+  };
 }
 
 function createSecretDoorTile(): Tile {
-  return { type: 'door-secret', sprite: activeTileset.wall, walkable: false, transparent: false };
+  return {
+    type: "door-secret",
+    sprite: activeTileset.wall,
+    walkable: false,
+    transparent: false,
+  };
 }
 
-function createStairsTile(direction: 'up' | 'down'): Tile {
+function createStairsTile(direction: "up" | "down"): Tile {
   return {
-    type: direction === 'up' ? 'stairs-up' : 'stairs-down',
-    sprite: direction === 'up' ? 'stairs-up' : 'stairs-down',
+    type: direction === "up" ? "stairs-up" : "stairs-down",
+    sprite: direction === "up" ? "stairs-up" : "stairs-down",
     walkable: true,
     transparent: true,
   };
 }
 
 // Trap definitions with sprites and damage
-const TRAP_TYPES = [
-  { id: 'pit', sprite: 'pit-trap', damage: [3, 8], message: 'You fall into a pit!' },
-  { id: 'arrow', sprite: 'arrow-trap', damage: [2, 6], message: 'An arrow shoots from the wall!' },
-  { id: 'fire', sprite: 'fire-trap', damage: [4, 10], message: 'Flames erupt beneath you!' },
-  { id: 'dart', sprite: 'dart-trap', damage: [1, 4], message: 'A dart flies from a hidden slot!' },
-  { id: 'portal', sprite: 'portal-trap', damage: [0, 0], message: 'A portal pulls you across the room!' },
-  { id: 'acid', sprite: 'acid-trap', damage: [3, 9], message: 'Acid sprays from the floor!' },
-];
+const TRAP_TYPES = SHARED_TRAP_TYPES;
 
 function createTrapTile(trapType: string): Tile {
   return {
-    type: 'trap',
+    type: "trap",
     sprite: activeTileset.floor, // looks like floor until revealed
     walkable: true,
     transparent: true,
@@ -97,29 +127,54 @@ export function generateFloor(
   seed: number,
   hasStairsUp: boolean = true,
   hasStairsDown: boolean = true,
-  difficulty: Difficulty = 'intermediate',
+  difficulty: Difficulty = "intermediate",
 ): { floor: Floor; playerStart: Vector2 } {
-  const bossFloor = generateBossFloor(dungeonId, floorNum, floorNum + 1, difficulty);
+  const bossFloor = generateBossFloor(
+    dungeonId,
+    floorNum,
+    floorNum + 1,
+    difficulty,
+  );
   if (bossFloor) return bossFloor;
 
   // Retry generation up to 5 times if floor fails validation
   for (let retry = 0; retry < 5; retry++) {
-    const result = generateFloorAttempt(dungeonId, floorNum, seed + retry * 7919, hasStairsUp, hasStairsDown, difficulty);
+    const result = generateFloorAttempt(
+      dungeonId,
+      floorNum,
+      seed + retry * 7919,
+      hasStairsUp,
+      hasStairsDown,
+      difficulty,
+    );
     if (result) return result;
   }
   // Last resort: generate with no validation
-  return generateFloorAttempt(dungeonId, floorNum, seed + 99999, hasStairsUp, hasStairsDown, difficulty, true)!;
+  return generateFloorAttempt(
+    dungeonId,
+    floorNum,
+    seed + 99999,
+    hasStairsUp,
+    hasStairsDown,
+    difficulty,
+    true,
+  )!;
 }
 
 function generateFloorAttempt(
-  dungeonId: string, floorNum: number, seed: number,
-  hasStairsUp: boolean, hasStairsDown: boolean, difficulty: Difficulty,
+  dungeonId: string,
+  floorNum: number,
+  seed: number,
+  hasStairsUp: boolean,
+  hasStairsDown: boolean,
+  difficulty: Difficulty,
   skipValidation = false,
 ): { floor: Floor; playerStart: Vector2 } | null {
   activeTileset = getTileset(getDungeonForFloor(floorNum));
 
   const rand = seededRandom(seed + floorNum * 1000);
-  const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min;
+  const randInt = (min: number, max: number) =>
+    Math.floor(rand() * (max - min + 1)) + min;
 
   // Initialize grid with walls
   const tiles: Tile[][] = [];
@@ -141,22 +196,33 @@ function generateFloorAttempt(
   }
 
   // Generate rooms with random shapes
-  const shapes: Room['shape'][] = ['rect', 'rect', 'rect', 'cross', 'diamond', 'circle', 'deadend'];
+  const shapes: Room["shape"][] = [
+    "rect",
+    "rect",
+    "rect",
+    "cross",
+    "diamond",
+    "circle",
+    "deadend",
+  ];
   const rooms: Room[] = [];
   for (let attempt = 0; attempt < ROOM_ATTEMPTS; attempt++) {
     const shape = shapes[Math.floor(rand() * shapes.length)];
     // Dead-end rooms are small
-    const minS = shape === 'deadend' ? 3 : MIN_ROOM_SIZE;
-    const maxS = shape === 'deadend' ? 5 : MAX_ROOM_SIZE;
+    const minS = shape === "deadend" ? 3 : MIN_ROOM_SIZE;
+    const maxS = shape === "deadend" ? 5 : MAX_ROOM_SIZE;
     // Cross/diamond/circle need at least 5 to look right
-    const minShape = (shape === 'cross' || shape === 'diamond' || shape === 'circle') ? Math.max(minS, 5) : minS;
+    const minShape =
+      shape === "cross" || shape === "diamond" || shape === "circle"
+        ? Math.max(minS, 5)
+        : minS;
     const w = randInt(minShape, maxS);
     const h = randInt(minShape, maxS);
     const x = randInt(1, FLOOR_WIDTH - w - 1);
     const y = randInt(1, FLOOR_HEIGHT - h - 1);
     const room: Room = { x, y, w, h, shape };
 
-    if (rooms.every(r => !roomsOverlap(r, room))) {
+    if (rooms.every((r) => !roomsOverlap(r, room))) {
       rooms.push(room);
     }
   }
@@ -191,13 +257,16 @@ function generateFloorAttempt(
   }
 
   // Place stairs
-  let playerStart: Vector2 = { x: Math.floor(rooms[0].x + rooms[0].w / 2), y: Math.floor(rooms[0].y + rooms[0].h / 2) };
+  let playerStart: Vector2 = {
+    x: Math.floor(rooms[0].x + rooms[0].w / 2),
+    y: Math.floor(rooms[0].y + rooms[0].h / 2),
+  };
 
   if (hasStairsUp && rooms.length > 0) {
     const r = rooms[0];
     const sx = Math.floor(r.x + r.w / 2);
     const sy = Math.floor(r.y + r.h / 2);
-    tiles[sy][sx] = createStairsTile('up');
+    tiles[sy][sx] = createStairsTile("up");
     playerStart = { x: sx, y: sy };
   }
 
@@ -206,11 +275,11 @@ function generateFloorAttempt(
     let sx = Math.floor(r.x + r.w / 2);
     let sy = Math.floor(r.y + r.h / 2);
     // If stairs-up is already at this position (single room), offset
-    if (tiles[sy][sx].type === 'stairs-up') {
+    if (tiles[sy][sx].type === "stairs-up") {
       sx = Math.min(r.x + r.w - 1, sx + 2);
       sy = Math.min(r.y + r.h - 1, sy + 2);
     }
-    tiles[sy][sx] = createStairsTile('down');
+    tiles[sy][sx] = createStairsTile("down");
   }
 
   const floor: Floor = {
@@ -228,10 +297,22 @@ function generateFloorAttempt(
 
   // Spawn monsters appropriate for this depth
   const effectiveDepth = floorNum + 1;
-  floor.monsters = spawnMonsters(floor, effectiveDepth, playerStart, rand, difficulty);
+  floor.monsters = spawnMonsters(
+    floor,
+    effectiveDepth,
+    playerStart,
+    rand,
+    difficulty,
+  );
 
   // Place items/treasure in rooms
-  floor.items = placeGroundItems(floor, rooms, effectiveDepth, playerStart, rand);
+  floor.items = placeGroundItems(
+    floor,
+    rooms,
+    effectiveDepth,
+    playerStart,
+    rand,
+  );
 
   // Place traps in corridors and rooms (not on stairs or player start)
   placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
@@ -242,13 +323,20 @@ function generateFloorAttempt(
     if (rooms.length < MIN_ROOMS) return null;
 
     // Both stairs must exist
-    let hasUp = false, hasDown = false;
+    let hasUp = false,
+      hasDown = false;
     let stairsUpPos: Vector2 | null = null;
     let stairsDownPos: Vector2 | null = null;
     for (let y = 0; y < FLOOR_HEIGHT; y++) {
       for (let x = 0; x < FLOOR_WIDTH; x++) {
-        if (tiles[y][x].type === 'stairs-up') { hasUp = true; stairsUpPos = { x, y }; }
-        if (tiles[y][x].type === 'stairs-down') { hasDown = true; stairsDownPos = { x, y }; }
+        if (tiles[y][x].type === "stairs-up") {
+          hasUp = true;
+          stairsUpPos = { x, y };
+        }
+        if (tiles[y][x].type === "stairs-down") {
+          hasDown = true;
+          stairsDownPos = { x, y };
+        }
       }
     }
     if (hasStairsUp && !hasUp) return null;
@@ -256,7 +344,16 @@ function generateFloorAttempt(
 
     // Stairs must be reachable from each other (simple flood fill)
     if (stairsUpPos && stairsDownPos) {
-      if (!tilesConnected(tiles, stairsUpPos, stairsDownPos, FLOOR_WIDTH, FLOOR_HEIGHT)) return null;
+      if (
+        !tilesConnected(
+          tiles,
+          stairsUpPos,
+          stairsDownPos,
+          FLOOR_WIDTH,
+          FLOOR_HEIGHT,
+        )
+      )
+        return null;
     }
   }
 
@@ -264,7 +361,13 @@ function generateFloorAttempt(
 }
 
 /** Flood-fill reachability check between two walkable positions */
-function tilesConnected(tiles: Tile[][], from: Vector2, to: Vector2, w: number, h: number): boolean {
+function tilesConnected(
+  tiles: Tile[][],
+  from: Vector2,
+  to: Vector2,
+  w: number,
+  h: number,
+): boolean {
   const visited = new Set<string>();
   const queue: Vector2[] = [from];
   visited.add(`${from.x},${from.y}`);
@@ -273,7 +376,12 @@ function tilesConnected(tiles: Tile[][], from: Vector2, to: Vector2, w: number, 
     const pos = queue.shift()!;
     if (pos.x === to.x && pos.y === to.y) return true;
 
-    for (const [dx, dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+    for (const [dx, dy] of [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ]) {
       const nx = pos.x + dx;
       const ny = pos.y + dy;
       const key = `${nx},${ny}`;
@@ -288,9 +396,8 @@ function tilesConnected(tiles: Tile[][], from: Vector2, to: Vector2, w: number, 
 }
 
 function carveRoom(tiles: Tile[][], room: Room): void {
-
   switch (room.shape) {
-    case 'rect':
+    case "rect":
     default:
       for (let ry = room.y; ry < room.y + room.h; ry++) {
         for (let rx = room.x; rx < room.x + room.w; rx++) {
@@ -299,7 +406,7 @@ function carveRoom(tiles: Tile[][], room: Room): void {
       }
       break;
 
-    case 'cross': {
+    case "cross": {
       // Horizontal bar (full width, middle third height)
       const barH = Math.max(2, Math.floor(room.h / 3));
       const barTop = room.y + Math.floor((room.h - barH) / 2);
@@ -319,13 +426,13 @@ function carveRoom(tiles: Tile[][], room: Room): void {
       break;
     }
 
-    case 'diamond': {
+    case "diamond": {
       const hw = room.w / 2;
       const hh = room.h / 2;
       for (let ry = room.y; ry < room.y + room.h; ry++) {
         for (let rx = room.x; rx < room.x + room.w; rx++) {
-          const dx = Math.abs((rx - room.x) - hw + 0.5) / hw;
-          const dy = Math.abs((ry - room.y) - hh + 0.5) / hh;
+          const dx = Math.abs(rx - room.x - hw + 0.5) / hw;
+          const dy = Math.abs(ry - room.y - hh + 0.5) / hh;
           if (dx + dy <= 1.0) {
             tiles[ry][rx] = createFloorTile();
           }
@@ -334,13 +441,13 @@ function carveRoom(tiles: Tile[][], room: Room): void {
       break;
     }
 
-    case 'circle': {
+    case "circle": {
       const hw = room.w / 2;
       const hh = room.h / 2;
       for (let ry = room.y; ry < room.y + room.h; ry++) {
         for (let rx = room.x; rx < room.x + room.w; rx++) {
-          const dx = ((rx - room.x) - hw + 0.5) / hw;
-          const dy = ((ry - room.y) - hh + 0.5) / hh;
+          const dx = (rx - room.x - hw + 0.5) / hw;
+          const dy = (ry - room.y - hh + 0.5) / hh;
           if (dx * dx + dy * dy <= 1.0) {
             tiles[ry][rx] = createFloorTile();
           }
@@ -349,7 +456,7 @@ function carveRoom(tiles: Tile[][], room: Room): void {
       break;
     }
 
-    case 'deadend': {
+    case "deadend": {
       // Small room, only 1-2 tiles wide in one dimension
       const narrow = Math.min(room.w, room.h);
       const isVert = room.h > room.w;
@@ -371,7 +478,12 @@ function carveRoom(tiles: Tile[][], room: Room): void {
   }
 }
 
-function carveHorizontal(tiles: Tile[][], x1: number, x2: number, y: number): void {
+function carveHorizontal(
+  tiles: Tile[][],
+  x1: number,
+  x2: number,
+  y: number,
+): void {
   const minX = Math.min(x1, x2);
   const maxX = Math.max(x1, x2);
   for (let x = minX; x <= maxX; x++) {
@@ -381,7 +493,12 @@ function carveHorizontal(tiles: Tile[][], x1: number, x2: number, y: number): vo
   }
 }
 
-function carveVertical(tiles: Tile[][], y1: number, y2: number, x: number): void {
+function carveVertical(
+  tiles: Tile[][],
+  y1: number,
+  y2: number,
+  x: number,
+): void {
   const minY = Math.min(y1, y2);
   const maxY = Math.max(y1, y2);
   for (let y = minY; y <= maxY; y++) {
@@ -431,12 +548,12 @@ function placeDoors(tiles: Tile[][], room: Room, rand: () => number): void {
     // (has a room floor neighbor on one side and corridor floor on another)
     if (isDoorworthy(tiles, pos, room)) {
       const roll = rand();
-      if (roll < 0.30) {
-        tiles[pos.y][pos.x] = createDoorTile();        // 30% normal door
+      if (roll < 0.3) {
+        tiles[pos.y][pos.x] = createDoorTile(); // 30% normal door
       } else if (roll < 0.38) {
-        tiles[pos.y][pos.x] = createLockedDoorTile();   // 8% locked door
+        tiles[pos.y][pos.x] = createLockedDoorTile(); // 8% locked door
       } else if (roll < 0.44) {
-        tiles[pos.y][pos.x] = createSecretDoorTile();   // 6% secret door
+        tiles[pos.y][pos.x] = createSecretDoorTile(); // 6% secret door
       }
       // 56% no door (open passage)
     }
@@ -458,11 +575,17 @@ function isDoorworthy(tiles: Tile[][], pos: Vector2, _room: Room): boolean {
   const right = x < w - 1 ? tiles[y][x + 1] : null;
 
   // Vertical passage: floor above and below, walls left and right
-  const verticalPassage = (up?.walkable === true) && (down?.walkable === true)
-    && !(left?.walkable) && !(right?.walkable);
+  const verticalPassage =
+    up?.walkable === true &&
+    down?.walkable === true &&
+    !left?.walkable &&
+    !right?.walkable;
   // Horizontal passage: floor left and right, walls above and below
-  const horizontalPassage = (left?.walkable === true) && (right?.walkable === true)
-    && !(up?.walkable) && !(down?.walkable);
+  const horizontalPassage =
+    left?.walkable === true &&
+    right?.walkable === true &&
+    !up?.walkable &&
+    !down?.walkable;
 
   return verticalPassage || horizontalPassage;
 }
@@ -492,7 +615,7 @@ function placeGroundItems(
     for (let ry = room.y - 1; ry <= room.y + room.h; ry++) {
       for (let rx = room.x - 1; rx <= room.x + room.w; rx++) {
         if (ry >= 0 && ry < floor.height && rx >= 0 && rx < floor.width) {
-          if (floor.tiles[ry][rx].type === 'door-secret') hasSecret = true;
+          if (floor.tiles[ry][rx].type === "door-secret") hasSecret = true;
         }
       }
     }
@@ -501,8 +624,16 @@ function placeGroundItems(
     // Secret rooms: 70% chance 1-2 items, 30% chance 3 items
     // Normal rooms: 85% empty, 10% 1 item, 5% 2 items
     const itemCount = hasSecret
-      ? (roll < 0.30 ? 3 : roll < 0.70 ? 2 : 1)
-      : (roll < 0.85 ? 0 : roll < 0.95 ? 1 : 2);
+      ? roll < 0.3
+        ? 3
+        : roll < 0.7
+          ? 2
+          : 1
+      : roll < 0.85
+        ? 0
+        : roll < 0.95
+          ? 1
+          : 2;
 
     for (let i = 0; i < itemCount; i++) {
       // Pick random floor position in room, not on stairs or player start
@@ -511,7 +642,10 @@ function placeGroundItems(
         const x = Math.floor(room.x + rand() * room.w);
         const y = Math.floor(room.y + rand() * room.h);
         const tile = floor.tiles[y]?.[x];
-        if (tile?.type === 'floor' && !(x === playerStart.x && y === playerStart.y)) {
+        if (
+          tile?.type === "floor" &&
+          !(x === playerStart.x && y === playerStart.y)
+        ) {
           // 25% chance copper, 75% chance item
           if (rand() < 0.25) {
             items.push({ item: createCopperDrop(depth), position: { x, y } });
@@ -519,7 +653,7 @@ function placeGroundItems(
             const tpl = candidates[Math.floor(rand() * candidates.length)];
             const item = createItemFromTemplate(tpl, depth);
             // Most ground items are unidentified; 15% chance to be pre-identified
-            if (item.category !== 'currency' && rand() > 0.15) {
+            if (item.category !== "currency" && rand() > 0.15) {
               item.identified = false;
             }
             items.push({ item, position: { x, y } });
@@ -553,9 +687,11 @@ function placeTraps(
   for (let y = 1; y < floor.height - 1; y++) {
     for (let x = 1; x < floor.width - 1; x++) {
       const tile = floor.tiles[y][x];
-      if (tile.type === 'floor'
-        && !(x === playerStart.x && y === playerStart.y)
-        && !floor.items.some(i => i.position.x === x && i.position.y === y)) {
+      if (
+        tile.type === "floor" &&
+        !(x === playerStart.x && y === playerStart.y) &&
+        !floor.items.some((i) => i.position.x === x && i.position.y === y)
+      ) {
         validPositions.push({ x, y });
       }
     }
@@ -564,16 +700,18 @@ function placeTraps(
   // Shuffle and pick
   for (let i = validPositions.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    [validPositions[i], validPositions[j]] = [validPositions[j], validPositions[i]];
+    [validPositions[i], validPositions[j]] = [
+      validPositions[j],
+      validPositions[i],
+    ];
   }
 
   const count = Math.min(trapCount, validPositions.length);
   for (let i = 0; i < count; i++) {
     const pos = validPositions[i];
     // Pick trap type — portal traps only appear on deeper floors
-    const available = depth < 5
-      ? TRAP_TYPES.filter(t => t.id !== 'portal')
-      : TRAP_TYPES;
+    const available =
+      depth < 5 ? TRAP_TYPES.filter((t) => t.id !== "portal") : TRAP_TYPES;
     const trap = available[Math.floor(rand() * available.length)];
     floor.tiles[pos.y][pos.x] = createTrapTile(trap.id);
   }

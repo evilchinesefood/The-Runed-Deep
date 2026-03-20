@@ -1,14 +1,27 @@
-import type { Monster, Vector2, ElementalResistances, Floor, Difficulty } from '../../core/types';
-import { getMonstersForDepth, getNewestUnlockFloor, getBossForFloor, type MonsterTemplate } from '../../data/monsters';
-import { getDifficultyConfig } from '../../data/difficulty';
+import type {
+  Monster,
+  Vector2,
+  ElementalResistances,
+  Floor,
+  Difficulty,
+} from "../../core/types";
+import {
+  getMonstersForDepth,
+  getNewestUnlockFloor,
+  getBossForFloor,
+  type MonsterTemplate,
+} from "../../data/monsters";
+import { getDifficultyConfig } from "../../data/difficulty";
 
-let nextMonsterId = 1;
+let nextMonsterId = Date.now();
 
 function rollRange(min: number, max: number, rand: () => number): number {
   return Math.floor(rand() * (max - min + 1)) + min;
 }
 
-function fullResistances(partial: Partial<ElementalResistances>): ElementalResistances {
+function fullResistances(
+  partial: Partial<ElementalResistances>,
+): ElementalResistances {
   return {
     cold: partial.cold ?? 0,
     fire: partial.fire ?? 0,
@@ -39,7 +52,7 @@ export function createMonster(
   position: Vector2,
   depth: number,
   rand: () => number,
-  difficulty: Difficulty = 'intermediate',
+  difficulty: Difficulty = "intermediate",
 ): Monster {
   const { hpMult, dmgMult } = getFloorScaling(depth);
   const config = getDifficultyConfig(difficulty);
@@ -47,10 +60,15 @@ export function createMonster(
   const baseHp = rollRange(template.hp[0], template.hp[1], rand);
   const hp = Math.round(baseHp * hpMult * config.monsterHpMult);
 
-  const scaledDmgMin = Math.round(template.damage[0] * dmgMult * config.monsterDamageMult);
-  const scaledDmgMax = Math.round(template.damage[1] * dmgMult * config.monsterDamageMult);
+  const scaledDmgMin = Math.round(
+    template.damage[0] * dmgMult * config.monsterDamageMult,
+  );
+  const scaledDmgMax = Math.round(
+    template.damage[1] * dmgMult * config.monsterDamageMult,
+  );
 
-  const speed = Math.round(template.speed * config.monsterSpeedMult * 100) / 100;
+  const speed =
+    Math.round(template.speed * config.monsterSpeedMult * 100) / 100;
 
   return {
     id: `monster-${nextMonsterId++}`,
@@ -65,6 +83,7 @@ export function createMonster(
     xpValue: template.xpValue,
     resistances: fullResistances(template.resistances),
     ai: template.ai,
+    armor: template.armor,
     abilities: [...template.abilities],
     sleeping: false,
     slowed: false,
@@ -80,14 +99,17 @@ export function createMonster(
  * - Each floor of age reduces weight (older monsters fade out)
  * - Minimum weight of 1 so old monsters can still rarely appear
  */
-function pickTemplate(depth: number, rand: () => number): MonsterTemplate | null {
+function pickTemplate(
+  depth: number,
+  rand: () => number,
+): MonsterTemplate | null {
   const candidates = getMonstersForDepth(depth);
   if (candidates.length === 0) return null;
 
   const newestFloor = getNewestUnlockFloor(depth);
 
   // Weight each candidate: newer = higher weight
-  const weights = candidates.map(m => {
+  const weights = candidates.map((m) => {
     const age = newestFloor - m.unlockFloor; // 0 = brand new, higher = older
     // New monsters (age 0-2): weight 10
     // Recent (age 3-5): weight 5
@@ -119,7 +141,7 @@ function getSpawnablePositions(floor: Floor, playerStart: Vector2): Vector2[] {
     for (let x = 0; x < floor.width; x++) {
       const tile = floor.tiles[y][x];
       if (!tile.walkable) continue;
-      if (tile.type === 'stairs-up' || tile.type === 'stairs-down') continue;
+      if (tile.type === "stairs-up" || tile.type === "stairs-down") continue;
       if (x === playerStart.x && y === playerStart.y) continue;
 
       const dist = Math.abs(x - playerStart.x) + Math.abs(y - playerStart.y);
@@ -141,7 +163,7 @@ export function spawnMonsters(
   depth: number,
   playerStart: Vector2,
   rand: () => number,
-  difficulty: Difficulty = 'intermediate',
+  difficulty: Difficulty = "intermediate",
 ): Monster[] {
   const config = getDifficultyConfig(difficulty);
   const positions = getSpawnablePositions(floor, playerStart);
@@ -150,7 +172,7 @@ export function spawnMonsters(
   // Monster count scales with depth and difficulty
   const baseDensity = 3 + depth * 0.3;
   const density = baseDensity * config.spawnDensityMult;
-  const count = Math.max(2, Math.round(positions.length * density / 100));
+  const count = Math.max(2, Math.round((positions.length * density) / 100));
 
   // Shuffle positions
   for (let i = positions.length - 1; i > 0; i--) {

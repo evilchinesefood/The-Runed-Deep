@@ -1,11 +1,21 @@
-import type { GameState, Monster, Floor, Vector2, Message, Direction, Equipment } from '../../core/types';
-import { SPELL_BY_ID, type SpellDef } from '../../data/spells';
-import { Sound } from '../Sound';
-import { getDirectionVector, teleportToTown } from '../../core/actions';
-import { identifyFirstUnknown, removeCurseFromFirst } from '../inventory/use-item';
-import { getMonstersForDepth } from '../../data/monsters';
-import { createMonster } from '../monsters/spawning';
-import { queueAnimation } from '../../rendering/animation-queue';
+import type {
+  GameState,
+  Monster,
+  Floor,
+  Vector2,
+  Message,
+  Direction,
+} from "../../core/types";
+import { SPELL_BY_ID, type SpellDef } from "../../data/spells";
+import { Sound } from "../Sound";
+import { getDirectionVector, teleportToTown } from "../../core/actions";
+import {
+  identifyFirstUnknown,
+  removeCurseFromFirst,
+} from "../inventory/use-item";
+import { getMonstersForDepth } from "../../data/monsters";
+import { createMonster } from "../monsters/spawning";
+import { queueAnimation } from "../../rendering/animation-queue";
 import {
   buildBoltAnimation,
   buildBallAnimation,
@@ -13,19 +23,8 @@ import {
   buildBuffAnimation,
   buildTeleportAnimation,
   buildDetectAnimation,
-} from '../../rendering/animations';
-
-function hasEnchant(equipment: Equipment, id: string): boolean {
-  return Object.values(equipment).some(
-    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
-  );
-}
-
-function enchantMult(equipment: Equipment, id: string): number {
-  return Object.values(equipment).some(
-    i => i?.specialEnchantments?.includes(`${id}:critical`)
-  ) ? 2 : 1;
-}
+} from "../../rendering/animations";
+import { hasEnchant, enchantMult } from "../../utils/Enchants";
 
 // ============================================================
 // Spell Casting
@@ -42,15 +41,19 @@ export function castSpell(
   target?: Vector2,
 ): GameState {
   const spell = SPELL_BY_ID[spellId];
-  if (!spell) return addMsg(state, `Unknown spell.`, 'system');
+  if (!spell) return addMsg(state, `Unknown spell.`, "system");
 
   if (!state.hero.knownSpells.includes(spellId)) {
-    return addMsg(state, `You don't know that spell.`, 'system');
+    return addMsg(state, `You don't know that spell.`, "system");
   }
 
   const cost = Math.max(1, spell.manaCost);
   if (state.hero.mp < cost) {
-    return addMsg(state, `Not enough mana to cast ${spell.name}. (Need ${cost} MP)`, 'system');
+    return addMsg(
+      state,
+      `Not enough mana to cast ${spell.name}. (Need ${cost} MP)`,
+      "system",
+    );
   }
 
   // Deduct mana
@@ -60,10 +63,29 @@ export function castSpell(
   };
 
   // Play sound based on spell type
-  if (['magic-arrow', 'cold-bolt', 'lightning-bolt', 'fire-bolt'].includes(spell.id)) Sound.spellBolt();
-  else if (['cold-ball', 'ball-lightning', 'fire-ball'].includes(spell.id)) Sound.spellBall();
-  else if (['heal-minor-wounds', 'heal-medium-wounds', 'heal-major-wounds', 'healing'].includes(spell.id)) Sound.spellHeal();
-  else if (['shield', 'resist-cold', 'resist-fire', 'resist-lightning'].includes(spell.id)) Sound.spellBuff();
+  if (
+    ["magic-arrow", "cold-bolt", "lightning-bolt", "fire-bolt"].includes(
+      spell.id,
+    )
+  )
+    Sound.spellBolt();
+  else if (["cold-ball", "ball-lightning", "fire-ball"].includes(spell.id))
+    Sound.spellBall();
+  else if (
+    [
+      "heal-minor-wounds",
+      "heal-medium-wounds",
+      "heal-major-wounds",
+      "healing",
+    ].includes(spell.id)
+  )
+    Sound.spellHeal();
+  else if (
+    ["shield", "resist-cold", "resist-fire", "resist-lightning"].includes(
+      spell.id,
+    )
+  )
+    Sound.spellBuff();
 
   // Resolve effect
   newState = resolveSpellEffect(newState, spell, direction, target);
@@ -84,108 +106,120 @@ function resolveSpellEffect(
 ): GameState {
   switch (spell.id) {
     // ── Attack spells ───────────────────────────────────
-    case 'magic-arrow':
-      return resolveBolt(state, spell, direction, 1, 8, 'physical');
-    case 'cold-bolt':
-      return resolveBolt(state, spell, direction, 4, 16, 'cold');
-    case 'lightning-bolt':
-      return resolveBolt(state, spell, direction, 6, 24, 'lightning');
-    case 'fire-bolt':
-      return resolveBolt(state, spell, direction, 6, 24, 'fire');
-    case 'cold-ball':
-      return resolveBall(state, spell, direction, target, 8, 32, 'cold');
-    case 'ball-lightning':
-      return resolveBall(state, spell, direction, target, 10, 40, 'lightning');
-    case 'fire-ball':
-      return resolveBall(state, spell, direction, target, 12, 48, 'fire');
+    case "magic-arrow":
+      return resolveBolt(state, spell, direction, 1, 8, "physical");
+    case "cold-bolt":
+      return resolveBolt(state, spell, direction, 4, 16, "cold");
+    case "lightning-bolt":
+      return resolveBolt(state, spell, direction, 6, 24, "lightning");
+    case "fire-bolt":
+      return resolveBolt(state, spell, direction, 6, 24, "fire");
+    case "cold-ball":
+      return resolveBall(state, spell, direction, target, 8, 32, "cold");
+    case "ball-lightning":
+      return resolveBall(state, spell, direction, target, 10, 40, "lightning");
+    case "fire-ball":
+      return resolveBall(state, spell, direction, target, 12, 48, "fire");
 
     // ── Healing spells ──────────────────────────────────
-    case 'heal-minor-wounds':
+    case "heal-minor-wounds":
       return resolveHeal(state, spell, 0.15, 5);
-    case 'heal-medium-wounds':
+    case "heal-medium-wounds":
       return resolveHeal(state, spell, 0.35, 15);
-    case 'heal-major-wounds':
-      return resolveHeal(state, spell, 0.60, 30);
-    case 'healing':
+    case "heal-major-wounds":
+      return resolveHeal(state, spell, 0.6, 30);
+    case "healing":
       return resolveHeal(state, spell, 1.0, 999);
-    case 'neutralize-poison': {
-      const cleaned = state.hero.activeEffects.filter(e => e.id !== 'poisoned');
+    case "neutralize-poison": {
+      const cleaned = state.hero.activeEffects.filter(
+        (e) => e.id !== "poisoned",
+      );
       return {
-        ...addMsg(state, `${state.hero.name} is cleansed of poison.`, 'important'),
+        ...addMsg(
+          state,
+          `${state.hero.name} is cleansed of poison.`,
+          "important",
+        ),
         hero: { ...state.hero, activeEffects: cleaned },
       };
     }
 
     // ── Defense spells ──────────────────────────────────
-    case 'shield':
+    case "shield":
       return resolveShield(state, spell);
-    case 'resist-cold':
-    case 'resist-fire':
-    case 'resist-lightning':
+    case "resist-cold":
+    case "resist-fire":
+    case "resist-lightning":
       return resolveResist(state, spell);
 
     // ── Control spells ──────────────────────────────────
-    case 'sleep-monster': {
-      const t = target ?? (direction ? findTargetInDirection(state, direction) : undefined);
+    case "sleep-monster": {
+      const t =
+        target ??
+        (direction ? findTargetInDirection(state, direction) : undefined);
       return resolveSleepMonster(state, t);
     }
-    case 'slow-monster': {
-      const t = target ?? (direction ? findTargetInDirection(state, direction) : undefined);
+    case "slow-monster": {
+      const t =
+        target ??
+        (direction ? findTargetInDirection(state, direction) : undefined);
       return resolveSlowMonster(state, t);
     }
-    case 'transmogrify-monster': {
-      const t = target ?? (direction ? findTargetInDirection(state, direction) : undefined);
+    case "transmogrify-monster": {
+      const t =
+        target ??
+        (direction ? findTargetInDirection(state, direction) : undefined);
       return resolveTransmogrify(state, t);
     }
 
     // ── Movement spells ─────────────────────────────────
-    case 'phase-door':
+    case "phase-door":
       return resolvePhaseDoor(state, direction);
-    case 'levitation': {
+    case "levitation": {
       const newEffects = [
-        ...state.hero.activeEffects.filter(e => e.id !== 'levitation'),
-        { id: 'levitation', name: 'Levitation', turnsRemaining: 50 },
+        ...state.hero.activeEffects.filter((e) => e.id !== "levitation"),
+        { id: "levitation", name: "Levitation", turnsRemaining: 50 },
       ];
       return {
-        ...addMsg(state, `${state.hero.name} begins to float!`, 'important'),
+        ...addMsg(state, `${state.hero.name} begins to float!`, "important"),
         hero: { ...state.hero, activeEffects: newEffects },
       };
     }
-    case 'rune-of-return': {
-      if (state.currentDungeon === 'town') {
-        return addMsg(state, 'You are already in town.', 'system');
+    case "rune-of-return": {
+      if (state.currentDungeon === "town") {
+        return addMsg(state, "You are already in town.", "system");
       }
       return teleportToTown(state);
     }
-    case 'teleport':
+    case "teleport":
       return resolveTeleport(state);
 
     // ── Divination spells ───────────────────────────────
-    case 'detect-objects':
+    case "detect-objects":
       return resolveDetectObjects(state);
-    case 'detect-monsters':
+    case "detect-monsters":
       return resolveDetectMonsters(state);
-    case 'detect-traps':
+    case "detect-traps":
       return resolveDetectTraps(state);
-    case 'identify': {
+    case "identify": {
       const msgs: Message[] = [];
       const hero = identifyFirstUnknown(state.hero, msgs, state.turn);
       return { ...state, hero, messages: [...state.messages, ...msgs] };
     }
-    case 'clairvoyance':
+    case "clairvoyance":
       return resolveClairvoyance(state);
 
     // ── Misc spells ─────────────────────────────────────
-    case 'light':
+    case "light":
       return resolveLight(state);
-    case 'remove-curse': {
+    case "remove-curse": {
       const msgs: Message[] = [];
       const hero = removeCurseFromFirst(state.hero, msgs, state.turn);
       return { ...state, hero, messages: [...state.messages, ...msgs] };
     }
 
     default:
-      return addMsg(state, `${spell.name} fizzles.`, 'system');
+      return addMsg(state, `${spell.name} fizzles.`, "system");
   }
 }
 
@@ -201,7 +235,12 @@ function resolveBolt(
   maxDmg: number,
   element: string,
 ): GameState {
-  if (!direction) return addMsg(state, `You need to pick a direction for ${spell.name}.`, 'system');
+  if (!direction)
+    return addMsg(
+      state,
+      `You need to pick a direction for ${spell.name}.`,
+      "system",
+    );
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
@@ -217,19 +256,52 @@ function resolveBolt(
     y += delta.y;
 
     if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
-    if (!floor.tiles[y][x].transparent && floor.tiles[y][x].type === 'wall') break;
+    if (!floor.tiles[y][x].transparent && floor.tiles[y][x].type === "wall")
+      break;
 
     // Check for monster
-    const monsterIdx = floor.monsters.findIndex(m => m.position.x === x && m.position.y === y);
+    const monsterIdx = floor.monsters.findIndex(
+      (m) => m.position.x === x && m.position.y === y,
+    );
     if (monsterIdx !== -1) {
-      queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, { x, y }, floor));
-      return applySpellDamageToMonster(state, floorKey, monsterIdx, spell, minDmg, maxDmg, element);
+      queueAnimation(
+        buildBoltAnimation(
+          spell.id,
+          state.hero.position,
+          direction,
+          12,
+          { x, y },
+          floor,
+        ),
+      );
+      return applySpellDamageToMonster(
+        state,
+        floorKey,
+        monsterIdx,
+        spell,
+        minDmg,
+        maxDmg,
+        element,
+      );
     }
   }
 
   // Missed — still show the bolt flying
-  queueAnimation(buildBoltAnimation(spell.id, state.hero.position, direction, 12, undefined, floor));
-  return addMsg(state, `The ${spell.name} flies off into the darkness.`, 'combat');
+  queueAnimation(
+    buildBoltAnimation(
+      spell.id,
+      state.hero.position,
+      direction,
+      12,
+      undefined,
+      floor,
+    ),
+  );
+  return addMsg(
+    state,
+    `The ${spell.name} flies off into the darkness.`,
+    "combat",
+  );
 }
 
 // ============================================================
@@ -249,7 +321,12 @@ function resolveBall(
   if (!target && direction) {
     target = findTargetInDirection(state, direction);
   }
-  if (!target) return addMsg(state, `You need to pick a target for ${spell.name}.`, 'system');
+  if (!target)
+    return addMsg(
+      state,
+      `You need to pick a target for ${spell.name}.`,
+      "system",
+    );
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
@@ -257,15 +334,37 @@ function resolveBall(
 
   // Queue ball animation (projectile + explosion)
   if (direction) {
-    queueAnimation(buildBallAnimation(spell.id, state.hero.position, direction, target, floor));
+    queueAnimation(
+      buildBallAnimation(
+        spell.id,
+        state.hero.position,
+        direction,
+        target,
+        floor,
+      ),
+    );
   }
 
-  let currentState = addMsg(state, `${state.hero.name} casts ${spell.name}!`, 'combat');
+  let currentState = addMsg(
+    state,
+    `${state.hero.name} casts ${spell.name}!`,
+    "combat",
+  );
 
   // Direct hit on target tile
-  const directIdx = floor.monsters.findIndex(m => m.position.x === target.x && m.position.y === target.y);
+  const directIdx = floor.monsters.findIndex(
+    (m) => m.position.x === target.x && m.position.y === target.y,
+  );
   if (directIdx !== -1) {
-    currentState = applySpellDamageToMonster(currentState, floorKey, directIdx, spell, minDmg, maxDmg, element);
+    currentState = applySpellDamageToMonster(
+      currentState,
+      floorKey,
+      directIdx,
+      spell,
+      minDmg,
+      maxDmg,
+      element,
+    );
   }
 
   // Splash damage to adjacent 8 tiles (half damage)
@@ -276,18 +375,38 @@ function resolveBall(
       const ay = target.y + dy;
       const currentFloor = currentState.floors[floorKey];
       if (!currentFloor) continue;
-      const adjIdx = currentFloor.monsters.findIndex(m => m.position.x === ax && m.position.y === ay);
+      const adjIdx = currentFloor.monsters.findIndex(
+        (m) => m.position.x === ax && m.position.y === ay,
+      );
       if (adjIdx !== -1) {
-        currentState = applySpellDamageToMonster(currentState, floorKey, adjIdx, spell, Math.floor(minDmg / 2), Math.floor(maxDmg / 2), element);
+        currentState = applySpellDamageToMonster(
+          currentState,
+          floorKey,
+          adjIdx,
+          spell,
+          Math.floor(minDmg / 2),
+          Math.floor(maxDmg / 2),
+          element,
+        );
       }
       // Self-damage if hero is in splash
-      if (ax === currentState.hero.position.x && ay === currentState.hero.position.y) {
-        const selfDmg = rollRange(Math.floor(minDmg / 2), Math.floor(maxDmg / 2));
+      if (
+        ax === currentState.hero.position.x &&
+        ay === currentState.hero.position.y
+      ) {
+        const selfDmg = rollRange(
+          Math.floor(minDmg / 2),
+          Math.floor(maxDmg / 2),
+        );
         currentState = {
           ...currentState,
           hero: { ...currentState.hero, hp: currentState.hero.hp - selfDmg },
         };
-        currentState = addMsg(currentState, `${currentState.hero.name} is caught in the blast for ${selfDmg} damage!`, 'combat');
+        currentState = addMsg(
+          currentState,
+          `${currentState.hero.name} is caught in the blast for ${selfDmg} damage!`,
+          "combat",
+        );
       }
     }
   }
@@ -315,15 +434,20 @@ function applySpellDamageToMonster(
   let damage = rollRange(minDmg, maxDmg);
 
   // Spell damage enchantment bonus
-  if (hasEnchant(state.hero.equipment, 'spell-damage')) {
-    const mult = enchantMult(state.hero.equipment, 'spell-damage') >= 2 ? 1.6 : 1.3;
+  if (hasEnchant(state.hero.equipment, "spell-damage")) {
+    const mult =
+      enchantMult(state.hero.equipment, "spell-damage") >= 2 ? 1.6 : 1.3;
     damage = Math.round(damage * mult);
   }
 
   // Apply elemental resistance
   const resistance = getElementResistance(monster, element);
   if (resistance >= 100) {
-    return addMsg(state, `The ${monster.name} is immune to ${element}!`, 'combat');
+    return addMsg(
+      state,
+      `The ${monster.name} is immune to ${element}!`,
+      "combat",
+    );
   }
   if (resistance > 0) {
     damage = Math.round(damage * (1 - resistance / 100));
@@ -340,12 +464,20 @@ function applySpellDamageToMonster(
     newMonsters.splice(monsterIdx, 1);
     const newFloor: Floor = { ...floor, monsters: newMonsters };
     const resultState: GameState = {
-      ...addMsg(state, `${spell.name} hits the ${monster.name} for ${damage} ${element} damage, killing it! (+${monster.xpValue} XP)`, 'combat'),
-      hero: { ...state.hero, mp: state.hero.mp, xp: state.hero.xp + monster.xpValue },
+      ...addMsg(
+        state,
+        `${spell.name} hits the ${monster.name} for ${damage} ${element} damage, killing it! (+${monster.xpValue} XP)`,
+        "combat",
+      ),
+      hero: {
+        ...state.hero,
+        mp: state.hero.mp,
+        xp: state.hero.xp + monster.xpValue,
+      },
       floors: { ...state.floors, [floorKey]: newFloor },
     };
-    if (monster.templateId === 'surtur') {
-      return { ...resultState, screen: 'victory' };
+    if (monster.templateId === "surtur") {
+      return { ...resultState, screen: "victory" };
     }
     return resultState;
   }
@@ -355,19 +487,29 @@ function applySpellDamageToMonster(
   newMonsters[monsterIdx] = updatedMonster;
   const newFloor: Floor = { ...floor, monsters: newMonsters };
   return {
-    ...addMsg(state, `${spell.name} hits the ${monster.name} for ${damage} ${element} damage. (${newHp}/${monster.maxHp} HP)`, 'combat'),
+    ...addMsg(
+      state,
+      `${spell.name} hits the ${monster.name} for ${damage} ${element} damage. (${newHp}/${monster.maxHp} HP)`,
+      "combat",
+    ),
     floors: { ...state.floors, [floorKey]: newFloor },
   };
 }
 
 function getElementResistance(monster: Monster, element: string): number {
   switch (element) {
-    case 'cold': return monster.resistances.cold;
-    case 'fire': return monster.resistances.fire;
-    case 'lightning': return monster.resistances.lightning;
-    case 'acid': return monster.resistances.acid;
-    case 'drain': return monster.resistances.drain;
-    default: return 0; // physical
+    case "cold":
+      return monster.resistances.cold;
+    case "fire":
+      return monster.resistances.fire;
+    case "lightning":
+      return monster.resistances.lightning;
+    case "acid":
+      return monster.resistances.acid;
+    case "drain":
+      return monster.resistances.drain;
+    default:
+      return 0; // physical
   }
 }
 
@@ -375,20 +517,29 @@ function getElementResistance(monster: Monster, element: string): number {
 // Healing spells
 // ============================================================
 
-function resolveHeal(state: GameState, spell: SpellDef, pct: number, minHeal: number): GameState {
+function resolveHeal(
+  state: GameState,
+  spell: SpellDef,
+  pct: number,
+  minHeal: number,
+): GameState {
   const hero = state.hero;
   const healAmount = Math.max(minHeal, Math.floor(hero.maxHp * pct));
   const newHp = Math.min(hero.hp + healAmount, hero.maxHp);
   const healed = newHp - hero.hp;
 
   if (healed <= 0) {
-    return addMsg(state, `${hero.name} is already at full health.`, 'system');
+    return addMsg(state, `${hero.name} is already at full health.`, "system");
   }
 
   queueAnimation(buildHealAnimation(hero.position));
 
   return {
-    ...addMsg(state, `${spell.name} heals ${hero.name} for ${healed} HP. (${newHp}/${hero.maxHp})`, 'important'),
+    ...addMsg(
+      state,
+      `${spell.name} heals ${hero.name} for ${healed} HP. (${newHp}/${hero.maxHp})`,
+      "important",
+    ),
     hero: { ...hero, hp: newHp },
   };
 }
@@ -398,12 +549,12 @@ function resolveHeal(state: GameState, spell: SpellDef, pct: number, minHeal: nu
 // ============================================================
 
 function resolveShield(state: GameState, _spell: SpellDef): GameState {
-  queueAnimation(buildBuffAnimation(state.hero.position, '#48f'));
+  queueAnimation(buildBuffAnimation(state.hero.position, "#48f"));
   const hero = state.hero;
-  const alreadyActive = hero.activeEffects.some(e => e.id === 'shield');
+  const alreadyActive = hero.activeEffects.some((e) => e.id === "shield");
   const newEffects = [
-    ...hero.activeEffects.filter(e => e.id !== 'shield'),
-    { id: 'shield', name: 'Shield', turnsRemaining: 30 },
+    ...hero.activeEffects.filter((e) => e.id !== "shield"),
+    { id: "shield", name: "Shield", turnsRemaining: 30 },
   ];
 
   // Only add AC bonus if shield wasn't already active (prevents stacking)
@@ -413,7 +564,7 @@ function resolveShield(state: GameState, _spell: SpellDef): GameState {
     : `A magical shield surrounds ${hero.name}. (+4 AC for 30 turns)`;
 
   return {
-    ...addMsg(state, msg, 'important'),
+    ...addMsg(state, msg, "important"),
     hero: { ...hero, activeEffects: newEffects, armorValue: newAc },
   };
 }
@@ -423,22 +574,26 @@ function resolveShield(state: GameState, _spell: SpellDef): GameState {
 // ============================================================
 
 function resolveResist(state: GameState, spell: SpellDef): GameState {
-  const element = spell.id.replace('resist-', '');
-  const color = element === 'cold' ? '#4af' : element === 'fire' ? '#f64' : '#ff4';
+  const element = spell.id.replace("resist-", "");
+  const color =
+    element === "cold" ? "#4af" : element === "fire" ? "#f64" : "#ff4";
   queueAnimation(buildBuffAnimation(state.hero.position, color));
   const hero = state.hero;
-  const alreadyActive = hero.activeEffects.some(e => e.id === spell.id);
+  const alreadyActive = hero.activeEffects.some((e) => e.id === spell.id);
   // Always refresh duration
   const newEffects = [
-    ...hero.activeEffects.filter(e => e.id !== spell.id),
+    ...hero.activeEffects.filter((e) => e.id !== spell.id),
     { id: spell.id, name: spell.name, turnsRemaining: 50 },
   ];
   // Only add resistance if not already active (prevents stacking on re-cast)
   const newResistances = { ...hero.resistances };
   if (!alreadyActive) {
-    if (element === 'cold') newResistances.cold = Math.min(75, newResistances.cold + 50);
-    else if (element === 'fire') newResistances.fire = Math.min(75, newResistances.fire + 50);
-    else if (element === 'lightning') newResistances.lightning = Math.min(75, newResistances.lightning + 50);
+    if (element === "cold")
+      newResistances.cold = Math.min(75, newResistances.cold + 50);
+    else if (element === "fire")
+      newResistances.fire = Math.min(75, newResistances.fire + 50);
+    else if (element === "lightning")
+      newResistances.lightning = Math.min(75, newResistances.lightning + 50);
   }
 
   const msg = alreadyActive
@@ -446,7 +601,7 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
     : `${hero.name} gains resistance to ${element} for 50 turns.`;
 
   return {
-    ...addMsg(state, msg, 'important'),
+    ...addMsg(state, msg, "important"),
     hero: { ...hero, activeEffects: newEffects, resistances: newResistances },
   };
 }
@@ -455,48 +610,80 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
 // Sleep/Slow Monster
 // ============================================================
 
-function resolveSleepMonster(state: GameState, target: Vector2 | undefined): GameState {
-  if (!target) return addMsg(state, `You need to pick a target.`, 'system');
-  return applyStatusToMonster(state, target, 'sleeping', `falls asleep!`);
+function resolveSleepMonster(
+  state: GameState,
+  target: Vector2 | undefined,
+): GameState {
+  if (!target) return addMsg(state, `You need to pick a target.`, "system");
+  return applyStatusToMonster(state, target, "sleeping", `falls asleep!`);
 }
 
-function resolveSlowMonster(state: GameState, target: Vector2 | undefined): GameState {
-  if (!target) return addMsg(state, `You need to pick a target.`, 'system');
-  return applyStatusToMonster(state, target, 'slowed', `is slowed!`);
+function resolveSlowMonster(
+  state: GameState,
+  target: Vector2 | undefined,
+): GameState {
+  if (!target) return addMsg(state, `You need to pick a target.`, "system");
+  return applyStatusToMonster(state, target, "slowed", `is slowed!`);
 }
 
-function resolveTransmogrify(state: GameState, target: Vector2 | undefined): GameState {
-  if (!target) return addMsg(state, `You need to aim the spell.`, 'system');
+function resolveTransmogrify(
+  state: GameState,
+  target: Vector2 | undefined,
+): GameState {
+  if (!target) return addMsg(state, `You need to aim the spell.`, "system");
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
-  const idx = floor.monsters.findIndex(m => m.position.x === target.x && m.position.y === target.y);
-  if (idx === -1) return addMsg(state, `There's no monster there.`, 'system');
+  const idx = floor.monsters.findIndex(
+    (m) => m.position.x === target.x && m.position.y === target.y,
+  );
+  if (idx === -1) return addMsg(state, `There's no monster there.`, "system");
 
   const original = floor.monsters[idx];
   const weakDepth = Math.max(1, state.currentFloor - 4);
   const candidates = getMonstersForDepth(weakDepth);
-  if (candidates.length === 0) return addMsg(state, `The spell fizzles.`, 'system');
+  if (candidates.length === 0)
+    return addMsg(state, `The spell fizzles.`, "system");
 
   const template = candidates[Math.floor(Math.random() * candidates.length)];
-  const newMonster = createMonster(template, original.position, weakDepth, Math.random, state.difficulty);
+  const newMonster = createMonster(
+    template,
+    original.position,
+    weakDepth,
+    Math.random,
+    state.difficulty,
+  );
 
   const newMonsters = [...floor.monsters];
   newMonsters[idx] = newMonster;
   return {
-    ...addMsg(state, `The ${original.name} transforms into a ${newMonster.name}!`, 'important'),
-    floors: { ...state.floors, [floorKey]: { ...floor, monsters: newMonsters } },
+    ...addMsg(
+      state,
+      `The ${original.name} transforms into a ${newMonster.name}!`,
+      "important",
+    ),
+    floors: {
+      ...state.floors,
+      [floorKey]: { ...floor, monsters: newMonsters },
+    },
   };
 }
 
-function applyStatusToMonster(state: GameState, target: Vector2, status: 'sleeping' | 'slowed', msg: string): GameState {
+function applyStatusToMonster(
+  state: GameState,
+  target: Vector2,
+  status: "sleeping" | "slowed",
+  msg: string,
+): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
-  const idx = floor.monsters.findIndex(m => m.position.x === target.x && m.position.y === target.y);
-  if (idx === -1) return addMsg(state, `There's no monster there.`, 'system');
+  const idx = floor.monsters.findIndex(
+    (m) => m.position.x === target.x && m.position.y === target.y,
+  );
+  if (idx === -1) return addMsg(state, `There's no monster there.`, "system");
 
   const monster = floor.monsters[idx];
   const updated = { ...monster, [status]: true };
@@ -504,8 +691,11 @@ function applyStatusToMonster(state: GameState, target: Vector2, status: 'sleepi
   newMonsters[idx] = updated;
 
   return {
-    ...addMsg(state, `The ${monster.name} ${msg}`, 'combat'),
-    floors: { ...state.floors, [floorKey]: { ...floor, monsters: newMonsters } },
+    ...addMsg(state, `The ${monster.name} ${msg}`, "combat"),
+    floors: {
+      ...state.floors,
+      [floorKey]: { ...floor, monsters: newMonsters },
+    },
   };
 }
 
@@ -533,18 +723,27 @@ function resolvePhaseDoor(state: GameState, direction?: Direction): GameState {
       const ny = heroY + delta.y * i;
       if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) break;
       if (!floor.tiles[ny][nx].walkable) break;
-      if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;
+      if (
+        floor.monsters.some((m) => m.position.x === nx && m.position.y === ny)
+      )
+        continue;
       bestX = nx;
       bestY = ny;
     }
 
     if (bestX === heroX && bestY === heroY) {
-      return addMsg(state, `The phase door fizzles — no safe destination in that direction.`, 'system');
+      return addMsg(
+        state,
+        `The phase door fizzles — no safe destination in that direction.`,
+        "system",
+      );
     }
 
-    queueAnimation(buildTeleportAnimation(state.hero.position, { x: bestX, y: bestY }));
+    queueAnimation(
+      buildTeleportAnimation(state.hero.position, { x: bestX, y: bestY }),
+    );
     return {
-      ...addMsg(state, `${state.hero.name} phases through space!`, 'important'),
+      ...addMsg(state, `${state.hero.name} phases through space!`, "important"),
       hero: { ...state.hero, position: { x: bestX, y: bestY } },
     };
   }
@@ -560,16 +759,23 @@ function resolvePhaseDoor(state: GameState, direction?: Direction): GameState {
     const ny = heroY + dy;
     if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
     if (!floor.tiles[ny][nx].walkable) continue;
-    if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;
+    if (floor.monsters.some((m) => m.position.x === nx && m.position.y === ny))
+      continue;
 
-    queueAnimation(buildTeleportAnimation(state.hero.position, { x: nx, y: ny }));
+    queueAnimation(
+      buildTeleportAnimation(state.hero.position, { x: nx, y: ny }),
+    );
     return {
-      ...addMsg(state, `${state.hero.name} phases through space!`, 'important'),
+      ...addMsg(state, `${state.hero.name} phases through space!`, "important"),
       hero: { ...state.hero, position: { x: nx, y: ny } },
     };
   }
 
-  return addMsg(state, `The phase door fizzles — no safe destination found.`, 'system');
+  return addMsg(
+    state,
+    `The phase door fizzles — no safe destination found.`,
+    "system",
+  );
 }
 
 function resolveTeleport(state: GameState): GameState {
@@ -581,18 +787,22 @@ function resolveTeleport(state: GameState): GameState {
   const candidates: Vector2[] = [];
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
-      if (floor.tiles[y][x].walkable && !floor.monsters.some(m => m.position.x === x && m.position.y === y)) {
+      if (
+        floor.tiles[y][x].walkable &&
+        !floor.monsters.some((m) => m.position.x === x && m.position.y === y)
+      ) {
         candidates.push({ x, y });
       }
     }
   }
 
-  if (candidates.length === 0) return addMsg(state, `The teleport fizzles.`, 'system');
+  if (candidates.length === 0)
+    return addMsg(state, `The teleport fizzles.`, "system");
   const dest = candidates[Math.floor(Math.random() * candidates.length)];
 
   queueAnimation(buildTeleportAnimation(state.hero.position, dest));
   return {
-    ...addMsg(state, `${state.hero.name} teleports!`, 'important'),
+    ...addMsg(state, `${state.hero.name} teleports!`, "important"),
     hero: { ...state.hero, position: dest },
   };
 }
@@ -602,32 +812,41 @@ function resolveTeleport(state: GameState): GameState {
 // ============================================================
 
 function resolveDetectMonsters(state: GameState): GameState {
-  queueAnimation(buildDetectAnimation(state.hero.position, '#f44'));
+  queueAnimation(buildDetectAnimation(state.hero.position, "#f44"));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
   // Reveal all monster positions by marking their tiles as explored
-  const explored = floor.explored.map(row => [...row]);
+  const explored = floor.explored.map((row) => [...row]);
   for (const m of floor.monsters) {
-    if (m.position.y >= 0 && m.position.y < floor.height && m.position.x >= 0 && m.position.x < floor.width) {
+    if (
+      m.position.y >= 0 &&
+      m.position.y < floor.height &&
+      m.position.x >= 0 &&
+      m.position.x < floor.width
+    ) {
       explored[m.position.y][m.position.x] = true;
     }
   }
 
   return {
-    ...addMsg(state, `${state.hero.name} senses ${floor.monsters.length} monsters on this floor.`, 'important'),
+    ...addMsg(
+      state,
+      `${state.hero.name} senses ${floor.monsters.length} monsters on this floor.`,
+      "important",
+    ),
     floors: { ...state.floors, [floorKey]: { ...floor, explored } },
   };
 }
 
 function resolveDetectObjects(state: GameState): GameState {
-  queueAnimation(buildDetectAnimation(state.hero.position, '#ff0'));
+  queueAnimation(buildDetectAnimation(state.hero.position, "#ff0"));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
-  const explored = floor.explored.map(row => [...row]);
+  const explored = floor.explored.map((row) => [...row]);
   for (const item of floor.items) {
     if (item.position.y >= 0 && item.position.y < floor.height) {
       explored[item.position.y][item.position.x] = true;
@@ -635,7 +854,11 @@ function resolveDetectObjects(state: GameState): GameState {
   }
 
   return {
-    ...addMsg(state, `${state.hero.name} senses ${floor.items.length} items on this floor.`, 'important'),
+    ...addMsg(
+      state,
+      `${state.hero.name} senses ${floor.items.length} items on this floor.`,
+      "important",
+    ),
     floors: { ...state.floors, [floorKey]: { ...floor, explored } },
   };
 }
@@ -646,27 +869,36 @@ function resolveDetectTraps(state: GameState): GameState {
   if (!floor) return state;
 
   let trapsFound = 0;
-  const tiles = floor.tiles.map(row => row.map(t => {
-    if (t.type === 'trap' && !t.trapRevealed) {
-      trapsFound++; return { ...t, trapRevealed: true };
-    }
-    return t;
-  }));
+  const tiles = floor.tiles.map((row) =>
+    row.map((t) => {
+      if (t.type === "trap" && !t.trapRevealed) {
+        trapsFound++;
+        return { ...t, trapRevealed: true };
+      }
+      return t;
+    }),
+  );
 
   return {
-    ...addMsg(state, trapsFound > 0 ? `${state.hero.name} detects ${trapsFound} traps!` : `No traps detected nearby.`, 'important'),
+    ...addMsg(
+      state,
+      trapsFound > 0
+        ? `${state.hero.name} detects ${trapsFound} traps!`
+        : `No traps detected nearby.`,
+      "important",
+    ),
     floors: { ...state.floors, [floorKey]: { ...floor, tiles } },
   };
 }
 
 function resolveClairvoyance(state: GameState): GameState {
-  queueAnimation(buildDetectAnimation(state.hero.position, '#88f'));
+  queueAnimation(buildDetectAnimation(state.hero.position, "#88f"));
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
   // Reveal 10x10 area around the player
-  const explored = floor.explored.map(row => [...row]);
+  const explored = floor.explored.map((row) => [...row]);
   const px = state.hero.position.x;
   const py = state.hero.position.y;
 
@@ -681,7 +913,11 @@ function resolveClairvoyance(state: GameState): GameState {
   }
 
   return {
-    ...addMsg(state, `${state.hero.name}'s vision expands, revealing the surrounding area.`, 'important'),
+    ...addMsg(
+      state,
+      `${state.hero.name}'s vision expands, revealing the surrounding area.`,
+      "important",
+    ),
     floors: { ...state.floors, [floorKey]: { ...floor, explored } },
   };
 }
@@ -691,14 +927,14 @@ function resolveClairvoyance(state: GameState): GameState {
 // ============================================================
 
 function resolveLight(state: GameState): GameState {
-  queueAnimation(buildBuffAnimation(state.hero.position, '#ff8'));
+  queueAnimation(buildBuffAnimation(state.hero.position, "#ff8"));
 
   // Immediately light all visible floor tiles in extended FOV, no persistent effect
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
-  if (!floor) return addMsg(state, 'Nothing happens.', 'system');
+  if (!floor) return addMsg(state, "Nothing happens.", "system");
 
-  const newFloor = { ...floor, lit: floor.lit.map(row => [...row]) };
+  const newFloor = { ...floor, lit: floor.lit.map((row) => [...row]) };
 
   // Compute extended FOV and mark floor tiles as permanently lit
   const VIEW_RADIUS = 10;
@@ -706,7 +942,7 @@ function resolveLight(state: GameState): GameState {
   const py = state.hero.position.y;
 
   // Light player tile (floor and trap tiles — not walls)
-  const canLight = (t: string) => t === 'floor' || t === 'trap';
+  const canLight = (t: string) => t === "floor" || t === "trap";
   if (newFloor.tiles[py]?.[px] && canLight(newFloor.tiles[py][px].type)) {
     newFloor.lit[py][px] = true;
   }
@@ -725,7 +961,8 @@ function resolveLight(state: GameState): GameState {
       cy += dy;
       const tx = Math.floor(cx);
       const ty = Math.floor(cy);
-      if (tx < 0 || tx >= newFloor.width || ty < 0 || ty >= newFloor.height) break;
+      if (tx < 0 || tx >= newFloor.width || ty < 0 || ty >= newFloor.height)
+        break;
       if (canLight(newFloor.tiles[ty][tx].type)) {
         newFloor.lit[ty][tx] = true;
       }
@@ -734,7 +971,11 @@ function resolveLight(state: GameState): GameState {
   }
 
   return {
-    ...addMsg(state, `The area around ${state.hero.name} brightens.`, 'important'),
+    ...addMsg(
+      state,
+      `The area around ${state.hero.name} brightens.`,
+      "important",
+    ),
     floors: { ...state.floors, [floorKey]: newFloor },
   };
 }
@@ -747,7 +988,10 @@ function resolveLight(state: GameState): GameState {
  * Find the nearest monster in a given direction from the hero.
  * Traces a line up to 12 tiles and returns the first monster position found.
  */
-function findTargetInDirection(state: GameState, direction: Direction): Vector2 | undefined {
+function findTargetInDirection(
+  state: GameState,
+  direction: Direction,
+): Vector2 | undefined {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return undefined;
@@ -762,7 +1006,9 @@ function findTargetInDirection(state: GameState, direction: Direction): Vector2 
     if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) break;
     if (!floor.tiles[y][x].walkable) break;
 
-    const monster = floor.monsters.find(m => m.position.x === x && m.position.y === y);
+    const monster = floor.monsters.find(
+      (m) => m.position.x === x && m.position.y === y,
+    );
     if (monster) return { x, y };
   }
 
@@ -774,6 +1020,13 @@ function rollRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function addMsg(state: GameState, text: string, severity: Message['severity']): GameState {
-  return { ...state, messages: [...state.messages, { text, severity, turn: state.turn }] };
+function addMsg(
+  state: GameState,
+  text: string,
+  severity: Message["severity"],
+): GameState {
+  return {
+    ...state,
+    messages: [...state.messages, { text, severity, turn: state.turn }],
+  };
 }

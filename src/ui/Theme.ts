@@ -8,8 +8,8 @@ export function injectTheme(): void {
   if (injected) return;
   injected = true;
 
-  const style = document.createElement('style');
-  style.id = 'cotw-theme';
+  const style = document.createElement("style");
+  style.id = "cotw-theme";
   style.textContent = `
     :root {
       /* Colors */
@@ -47,9 +47,9 @@ export function injectTheme(): void {
       --sp-xl: 24px;
 
       /* Sizing */
-      --game-width: min(672px, calc(100vw - 32px));
-      --panel-width: min(550px, calc(100vw - 32px));
-      --panel-narrow: min(480px, calc(100vw - 32px));
+      --game-width: min(672px, calc(100vw - 16px));
+      --panel-width: min(550px, calc(100vw - 16px));
+      --panel-narrow: min(480px, calc(100vw - 16px));
 
       /* Font */
       --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
@@ -124,8 +124,7 @@ export function injectTheme(): void {
       font-size: var(--fs-sm);
       font-weight: bold;
       color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       margin-bottom: var(--sp-md);
       padding-bottom: var(--sp-xs);
       border-bottom: 1px solid var(--border);
@@ -143,6 +142,7 @@ export function injectTheme(): void {
       cursor: pointer;
       user-select: none;
       transition: background 0.1s, transform 0.1s;
+      min-height: 32px;
     }
     .btn:hover { background: var(--bg-button-hover); }
     .btn:active { background: var(--bg-button-active); transform: scale(0.96); }
@@ -165,8 +165,9 @@ export function injectTheme(): void {
     .btn-danger:hover { background: #522; }
 
     .btn-sm {
-      padding: 2px 8px;
+      padding: 4px 10px;
       font-size: 12px;
+      min-height: 28px;
     }
 
     /* Title bar — used at top of most screens */
@@ -209,7 +210,8 @@ export function injectTheme(): void {
     /* Footer */
     .footer {
       display: flex;
-      gap: var(--sp-xl);
+      gap: var(--sp-lg);
+      flex-wrap: wrap;
       font-size: var(--fs-md);
       color: var(--text-dim);
       width: 100%;
@@ -230,14 +232,42 @@ export function injectTheme(): void {
       padding-top: var(--sp-sm);
     }
 
-    /* Responsive adjustments */
+    /* Responsive — tablet */
+    @media (max-width: 720px) {
+      :root {
+        --sp-lg: 14px;
+        --sp-xl: 20px;
+        --fs-title: 20px;
+      }
+      .footer { gap: var(--sp-sm); }
+    }
+
+    /* Responsive — large phone */
     @media (max-width: 480px) {
       :root {
-        --sp-lg: 12px;
-        --sp-xl: 16px;
+        --sp-lg: 10px;
+        --sp-xl: 14px;
         --fs-title: 18px;
         --fs-lg: 14px;
+        --fs-md: 13px;
+        --fs-sm: 11px;
       }
+      .btn { padding: 8px 14px; min-height: 36px; }
+      .btn-sm { padding: 6px 10px; min-height: 32px; font-size: 12px; }
+      .btn-primary { padding: 12px 24px; }
+      .panel { padding: var(--sp-sm); }
+    }
+
+    /* Responsive — small phone */
+    @media (max-width: 380px) {
+      :root {
+        --sp-lg: 8px;
+        --sp-xl: 12px;
+        --fs-title: 16px;
+        --fs-lg: 13px;
+      }
+      .screen { padding: var(--sp-sm); }
+      .btn { padding: 8px 10px; font-size: 12px; }
     }
   `;
   document.head.appendChild(style);
@@ -245,7 +275,11 @@ export function injectTheme(): void {
 
 // ── Helper functions ───────────────────────────────────────
 
-export function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
+export function el(
+  tag: string,
+  styles?: Partial<CSSStyleDeclaration>,
+  text?: string,
+): HTMLElement {
   const e = document.createElement(tag);
   if (styles) Object.assign(e.style, styles);
   if (text !== undefined) e.textContent = text;
@@ -253,46 +287,52 @@ export function el(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: st
 }
 
 export function createScreen(): HTMLElement {
-  const s = document.createElement('div');
-  s.className = 'screen';
+  const s = document.createElement("div");
+  s.className = "screen";
   return s;
 }
 
 export function createPanel(headerText?: string): HTMLElement {
-  const p = document.createElement('div');
-  p.className = 'panel';
+  const p = document.createElement("div");
+  p.className = "panel";
   if (headerText) {
-    const h = document.createElement('div');
-    h.className = 'panel-header';
+    const h = document.createElement("div");
+    h.className = "panel-header";
     h.textContent = headerText;
     p.appendChild(h);
   }
   return p;
 }
 
-export function createTitleBar(title: string, onClose?: () => void): HTMLElement {
-  const bar = document.createElement('div');
-  bar.className = 'title-bar';
-  const h2 = document.createElement('h2');
+export function createTitleBar(
+  title: string,
+  onClose?: () => void,
+): HTMLElement {
+  const bar = document.createElement("div");
+  bar.className = "title-bar";
+  const h2 = document.createElement("h2");
   h2.textContent = title;
   bar.appendChild(h2);
   if (onClose) {
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Close (Esc)';
-    btn.addEventListener('click', onClose);
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "Close (Esc)";
+    btn.addEventListener("click", onClose);
     bar.appendChild(btn);
   }
   return bar;
 }
 
-export function createButton(text: string, variant: 'default' | 'primary' | 'danger' | 'sm' = 'default'): HTMLButtonElement {
-  const btn = document.createElement('button');
+export function createButton(
+  text: string,
+  variant: "default" | "primary" | "danger" | "sm" = "default",
+): HTMLButtonElement {
+  const btn = document.createElement("button");
   btn.textContent = text;
-  const classes = ['btn'];
-  if (variant === 'primary') classes.push('btn-primary');
-  if (variant === 'danger') classes.push('btn-danger');
-  if (variant === 'sm') classes.push('btn-sm');
-  btn.className = classes.join(' ');
+  const classes = ["btn"];
+  if (variant === "primary") classes.push("btn-primary");
+  if (variant === "danger") classes.push("btn-danger");
+  if (variant === "sm") classes.push("btn-sm");
+  btn.className = classes.join(" ");
   return btn;
 }

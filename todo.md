@@ -28,7 +28,7 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Input abstraction layer: keyboard, mouse, touch → `GameAction` union type
 - [x] Basic DOM renderer: draw a tile grid using existing CSS classes
 - [x] Message log system
-- [x] Save/load via JSON serialization to localStorage (3 slots, auto-save on stairs, Ctrl+S manual)
+- [x] Save/load via JSON serialization to localStorage (3 slots, auto-save on stairs, F3 manual)
 
 ---
 
@@ -41,7 +41,7 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Difficulty selection (Easy, Intermediate, Hard, Impossible)
 - [x] Starting spell selection (6 Level 1 spells)
 - [x] Stat preview showing derived HP/MP/AC
-- [x] Character info screen (C key) with attributes, spells, equipment, resistances
+- [x] Character info screen (C key) with attributes, spells, resistances, difficulty + NG+ display
 
 ### 2.2 Character System
 - [x] Four attributes: Strength, Intelligence, Constitution, Dexterity
@@ -55,31 +55,32 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] XP progress shown in HUD and character info
 
 ### 2.3 Dungeon Generation
-- [x] Room generation (rectangular — basic)
-- [ ] Additional room types (cross, diamond, circular, dead-end)
+- [x] Room generation (5 shapes: rectangular, cross, diamond, circular, dead-end)
 - [x] Corridor generation connecting rooms
 - [x] Stairs placement (up/down)
 - [x] Door placement (in wall gaps between rooms and corridors)
-- [ ] Locked and secret doors
-- [ ] Trap placement (pit, arrow, portal, fire, acid, dart, etc.)
-- [ ] Item/treasure placement on ground
+- [x] Locked and secret doors
+- [x] Trap placement (pit, arrow, portal, fire, acid, dart, etc.)
+- [x] Item/treasure placement on ground
 - [x] Monster spawning per floor depth (61 types, progressive unlock, weighted)
 - [x] Floor persistence (generated once per seed, remembered in state)
+- [x] Retry/validation system (min 3 rooms, both stairs exist, flood-fill connectivity)
 
 ### 2.4 Map & Exploration
-- [x] Tile-based map rendering (32x32 CSS sprites, two-layer floor+entity)
-- [x] 8-directional movement (keyboard arrows/numpad/vim keys)
+- [x] Tile-based map rendering (32x32 CSS sprites, three-layer floor+ground+entity)
+- [x] 8-directional movement (keyboard arrows/numpad/WASD)
 - [x] Field of view / line of sight (raycasting, radius 4 normal / 10 with Light)
 - [x] Fog of war (unexplored = black, explored = dimmed, lit = full brightness)
 - [x] Permanent room lighting via Light spell
 - [x] Scroll-to-follow camera centered on player
 - [x] Stair navigation (> to descend, < to ascend, Enter on stairs)
-- [ ] Click/tap-to-move with pathfinding
-- [ ] Minimap / full map view
+- [x] Click/tap-to-move with A* pathfinding
+- [x] Minimap / full map view (M key)
+- [x] Tab auto-explore (walk to nearest unexplored frontier)
 
 ---
 
-## Phase 3: Combat — MOSTLY COMPLETE
+## Phase 3: Combat & Items — COMPLETE
 
 ### 3.1 Combat System
 - [x] Melee attack (walk into enemy tile)
@@ -87,51 +88,51 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Damage calculation (STR + weapon damage)
 - [x] Armor reduction on monster attacks
 - [x] Monster death → XP award
-- [x] Player death → RIP screen with tombstone
+- [x] Player death → RIP screen with tombstone + scoring
 - [x] Monster turn AI (move toward player within 20 tiles, attack when adjacent)
 - [x] Per-floor difficulty scaling (+8% HP, +5% damage per floor)
-- [x] Progressive monster unlock (1-2 new types per floor, weighted spawning)
+- [x] Progressive monster unlock (1-2 new types per floor across 40 floors)
 - [x] Boss monsters on specific floors
 - [x] Combat hit flash animations (white on monster, red on hero)
 - [x] Centralized difficulty config (Easy/Intermediate/Hard/Impossible)
-- [ ] Speed system (encumbrance affects turn order)
 - [x] Loot drops on monster death
+- [x] Blood decals on kill
 
-### 3.2 Item System — MOSTLY COMPLETE
-- [x] Item database: weapons, armor, shields, helmets, cloaks, boots, rings, amulets, belts, bracers, gauntlets
+### 3.2 Item System
+- [x] Item database: 80+ templates — weapons, armor, shields, helmets, cloaks, boots, rings, amulets, belts, bracers, gauntlets
 - [x] Item properties: base stats, weight, bulk, value
 - [x] Enchantments (+accuracy, +damage, +AC, resistances, attribute bonuses)
+- [x] 13 special enchantments with critical variants for NG+
 - [x] Cursed items (negative effects, can't unequip until Remove Curse)
-- [x] Unidentified items (display generic name until identified)
-- [ ] Material tiers: regular, elven, meteoric steel
+- [x] Unidentified items (display generic name/sprite until identified)
+- [x] Material tiers: regular, elven, meteoric steel
 - [x] Consumables: potions, scrolls (healing, stat gain, identify, teleport, remove curse)
-- [ ] Spellbooks, wands, staffs (charges-based items)
-- [ ] Worthless items (Ring of Adornment, Blank Scroll, etc.)
+- [x] Spellbooks (teach spells permanently)
+- [x] Wands (charges-based casting)
+- [x] Worthless items (Ring of Adornment, Blank Scroll, etc.)
+- [x] Containers: packs (weight+bulk limit), purses (money), belts
 
-### 3.3 Inventory & Equipment — MOSTLY COMPLETE
+### 3.3 Inventory & Equipment
 - [x] Equipment slots: weapon, shield, helmet, body armor, cloak, bracers, gauntlets, belt, boots, ring x2, amulet, pack, purse
 - [x] Equip/unequip with stat recalculation
-- [x] Weight and bulk tracking (silent — encumbrance affects speed TBD)
-- [ ] Container system: packs (weight+bulk limit), chests, belts (slot-based), purses (money only)
-- [ ] Pack of Holding (magic compression)
-- [ ] Drag-drop inventory management (mouse + touch)
-- [x] Item pickup (G key), drop
-- [ ] Item throw
-- [x] Currency: copper pieces
-- [x] Paperdoll inventory screen (I key)
-- [x] Item use: potions and scrolls
+- [x] Weight and bulk tracking with carry capacity (10kg base + pack bonus)
+- [x] Cursed packs reduce carrying capacity
+- [x] Item pickup (G key / E key / auto-pickup gold), drop
+- [x] Currency: copper pieces (gold)
+- [x] Paperdoll inventory screen (I key) with sort modes
+- [x] Item use: potions, scrolls, spellbooks
 - [x] Identify spell and scroll working
-- [x] Remove Curse spell and scroll working
-- [ ] Weight/encumbrance affecting movement speed
+- [x] Remove Curse spell, scroll, and temple service working
+- [x] Item tooltips on hover
 
 ---
 
-## Phase 4: Magic — MOSTLY COMPLETE
+## Phase 4: Magic — COMPLETE
 
 ### 4.1 Spell System (30 Spells)
 
 **Attack spells:**
-- [x] Magic Arrow (L1, 1 MP) — directional bolt with animation
+- [x] Magic Arrow (L1, 1 MP) — directional bolt
 - [x] Cold Bolt (L2, 2 MP) — directional bolt, cold element
 - [x] Lightning Bolt (L3, 3 MP) — directional bolt, lightning element
 - [x] Fire Bolt (L3, 3 MP) — directional bolt, fire element
@@ -140,30 +141,27 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Fire Ball (L4, 5 MP) — AoE, fire element
 
 **Healing spells:**
-- [x] Heal Minor Wounds — 15% HP with green pulse
-- [x] Heal Medium Wounds — 35% HP
-- [x] Heal Major Wounds — 60% HP
-- [x] Healing / full restore — 100% HP
+- [x] Heal Minor/Medium/Major Wounds + full Healing
 - [x] Neutralize Poison
 
 **Defense spells:**
-- [x] Shield — +4 AC for 30 turns (no stacking, refreshes duration)
-- [x] Resist Cold/Lightning/Fire — +50% resist for 50 turns (removed on expiry)
+- [x] Shield — +4 AC for 30 turns
+- [x] Resist Cold/Lightning/Fire — +50% resist for 50 turns
 
 **Control spells:**
 - [x] Sleep Monster — directional targeting
 - [x] Slow Monster — directional targeting
-- [ ] Transmogrify Monster — not yet implemented
+- [x] Transmogrify Monster — polymorphs to random type
 
 **Movement spells:**
 - [x] Phase Door — directional teleport up to 6 tiles
-- [x] Levitation — message only (trap avoidance not yet)
-- [x] Rune of Return — message only (town not yet)
+- [x] Levitation — float over traps
+- [x] Rune of Return — teleport to town and back
 - [x] Teleport — random position on floor
 
 **Divination spells:**
 - [x] Detect Objects/Monsters/Traps — reveals positions
-- [x] Identify — identifies first unidentified item in inventory/equipment
+- [x] Identify — identifies first unidentified item
 - [x] Clairvoyance — reveals 10x10 area
 
 **Misc spells:**
@@ -171,66 +169,68 @@ Full rewrite from compiled Elm to TypeScript + Vite. DOM-based rendering reusing
 - [x] Remove Curse — removes curse from first cursed equipped item
 
 **Spell mechanics:**
-- [x] Mana cost system, bolt/ball targeting, spell bar (keys 1-9)
+- [x] Mana cost system, bolt/ball targeting, spell bar (keys 1-7)
 - [x] Click-to-cast (click spell bar then click map direction)
+- [x] Spell hotkey management (Z key)
 - [x] Directional sprite rotation on projectiles
 - [x] Projectile animations stop at walls
 - [x] Active effect duration tracking with expiry + stat reversal
 - [x] Elemental resistance calculations
-- [ ] Spellbook items teach spells permanently
-- [ ] Wand/staff charges for non-learnable spells
 
 ### 4.2 Monster System
 - [x] 61 non-boss + 7 boss monsters with full stats
 - [x] Progressive unlock (1-2 new types per floor across 40 floors)
-- [x] Basic melee AI, weighted spawning, difficulty scaling
-- [ ] Ranged AI: spellcasting monsters
-- [ ] Special abilities: drain stats, steal money, summon allies, poison
-- [ ] Physical-immune monsters (slimes — must use magic)
+- [x] 5 AI types: melee, ranged, caster, thief, summoner
+- [x] Special abilities: drain stats, steal money, summon allies, poison, phase-through-walls
+- [x] Physical-immune monsters (slimes — must use magic)
+- [x] Flee, charge, regenerate behaviors
+- [x] Sleeping monster wake-up on damage
 
 ---
 
-## Phase 5: Town & Economy — NOT STARTED
-- [ ] Town map with building sprites
-- [ ] Weapon/Armor/General/Magic shops
-- [ ] Junk store (Olaf's)
-- [ ] Temple of Odin (healing, remove curse)
-- [ ] Sage (item identification)
-- [ ] Bank, Inn
-- [ ] Rune of Return (town ↔ dungeon teleport)
+## Phase 5: Town & Economy — COMPLETE
+- [x] Town map with multi-tile building sprites and entrance tiles
+- [x] Weapon/Armor/General/Magic shops with buy/sell UI
+- [x] Junk store (Olaf's)
+- [x] Temple of Odin (heal HP/MP free, cure poison free, remove curse 25g)
+- [x] Sage (identify one 8g, identify all 6g/item)
+- [x] Bank (deposit/withdraw), Inn (free rest)
+- [x] Rune of Return (town ↔ dungeon teleport)
+- [x] Shop inventory restocking on town visit
 
 ---
 
-## Phase 6: Story & Progression — NOT STARTED
-- [x] Boss data defined
-- [ ] Pre-designed boss floors with rewards
-- [ ] Dungeon progression (Mine → Fortress → Castle)
-- [ ] Story text / parchment scraps
-- [ ] Three towns with increasing services
-- [ ] Opening sequence
+## Phase 6: Story & Progression — COMPLETE
+- [x] Boss data defined (7 bosses with themed minions and loot)
+- [x] Pre-designed boss floor layouts (floors 15, 20, 25, 30, 33, 36, 40)
+- [x] Dungeon tilesets: Mine (no tint), Fortress (blue-steel), Castle (warm brown-red)
+- [x] getDungeonForFloor: floors 1-13 mine, 14-26 fortress, 27-40 castle
+- [x] Dungeon progression integration in gameplay (tilesets auto-applied in generator.ts)
+- [x] Story text / opening sequence (3-page IntroScreen.ts after character creation)
+- [x] Victory condition (defeat Surtur on floor 40 → victory screen, checked in combat.ts + casting.ts)
+- [x] Victory screen with NG+ transition
 
 ---
 
-## Phase 7: Polish & Completeness
-
-### 7.1 UI
-- [x] Character info screen, spell bar, death screen
+## Phase 7: Polish & Completeness — COMPLETE
+- [x] Character info screen with difficulty colors + NG+ display
 - [x] Spell animations (projectiles, explosions, pulses, flashes)
-- [ ] Spell selection UI (full list beyond 9)
-- [ ] Context menus, tooltips
-- [ ] Difficulty indicator in HUD
+- [x] Spell selection UI (Z key, hotkey management)
+- [x] Item tooltips on hover
+- [x] HUD: HP/MP bars, XP, AC badge, Floor/Turn, status effect badges
+- [x] Touch controls (D-pad + action buttons)
+- [x] Save/load (3 slots, auto-save on stairs, F3 manual save)
+- [x] Scoring / leaderboard
+- [x] Achievement system (18 achievements, localStorage persistence)
+- [x] Sound effects (Web Audio API, 18 synthesized sounds, F4 toggle)
+- [x] New Game Plus with scaling difficulty and critical enchantments
+- [x] Auto-explore (Tab key)
+- [x] Toast notifications for game events
+- [x] Scrollable screens for mobile (character creation, info, inventory, help, spells)
+- [x] Help screen with keybinding reference
+- [ ] Options menu for sound settings
 
-### 7.2 Touch Controls
-- [x] Swipe gestures for movement
-- [ ] Virtual d-pad, tap-to-move, long-press context
+---
 
-### 7.3 Game Features
-- [x] Save/load (3 slots, auto-save on stairs, Ctrl+S)
-- [x] Difficulty scaling (centralized config, affects all monster stats)
-- [ ] Trap detection, triggering, disarming
-- [ ] Secret doors
-- [ ] Rest/sleep to recover HP/MP
-- [ ] Scoring / leaderboard
-
-### 7.4 Mobile & Responsive
-- [ ] Responsive layout, portrait/landscape, touch inventory
+## Remaining Work
+- [ ] Options menu for sound/display settings

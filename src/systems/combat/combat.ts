@@ -1,43 +1,51 @@
-import type { GameState, Hero, Monster, Message, Floor, Equipment } from '../../core/types';
-import { queueAnimation } from '../../rendering/animation-queue';
-import type { SpellAnimation } from '../../rendering/animations';
-import { generateLoot } from '../items/loot';
-import { processMonsterAbility } from '../monsters/ai';
-import { Sound } from '../Sound';
-import { trackMonsterKill, trackFloorDamage } from '../Achievements';
-
-function hasEnchant(equipment: Equipment, id: string): boolean {
-  return Object.values(equipment).some(
-    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
-  );
-}
-
-function enchantMult(equipment: Equipment, id: string): number {
-  return Object.values(equipment).some(
-    i => i?.specialEnchantments?.includes(`${id}:critical`)
-  ) ? 2 : 1;
-}
+import type {
+  GameState,
+  Hero,
+  Monster,
+  Message,
+  Floor,
+} from "../../core/types";
+import { queueAnimation } from "../../rendering/animation-queue";
+import type { SpellAnimation } from "../../rendering/animations";
+import { generateLoot } from "../items/loot";
+import { processMonsterAbility } from "../monsters/ai";
+import { Sound } from "../Sound";
+import { trackMonsterKill, trackFloorDamage } from "../Achievements";
+import { hasEnchant, enchantMult } from "../../utils/Enchants";
 
 // ============================================================
 // Blood splatters
 // ============================================================
 
 /** Add a blood decal for a monster — only once per monster */
-function maybeAddMonsterBlood(floor: Floor, monster: Monster, monsterIndex: number): Floor {
+function maybeAddMonsterBlood(
+  floor: Floor,
+  monster: Monster,
+  monsterIndex: number,
+): Floor {
   if (monster.bled) return floor;
   if (monster.hp > monster.maxHp * 0.25 && monster.hp > 0) return floor;
   if (Math.random() > 0.75) return floor;
   // Mark monster as having bled
   const monsters = [...floor.monsters];
   monsters[monsterIndex] = { ...monsters[monsterIndex], bled: true };
-  return { ...floor, monsters, decals: [...floor.decals, { x: monster.position.x, y: monster.position.y }] };
+  return {
+    ...floor,
+    monsters,
+    decals: [...floor.decals, { x: monster.position.x, y: monster.position.y }],
+  };
 }
 
 /** Add a blood decal for the player — once per position */
-function maybeAddPlayerBlood(floor: Floor, pos: { x: number; y: number }, hp: number, maxHp: number): Floor {
+function maybeAddPlayerBlood(
+  floor: Floor,
+  pos: { x: number; y: number },
+  hp: number,
+  maxHp: number,
+): Floor {
   if (hp > maxHp * 0.25) return floor;
   if (Math.random() > 0.75) return floor;
-  if (floor.decals.some(d => d.x === pos.x && d.y === pos.y)) return floor;
+  if (floor.decals.some((d) => d.x === pos.x && d.y === pos.y)) return floor;
   return { ...floor, decals: [...floor.decals, { x: pos.x, y: pos.y }] };
 }
 
@@ -81,10 +89,14 @@ function calcPlayerDamage(hero: Hero): number {
   let base = strBonus + rollDice(1, 3); // fist damage
 
   if (weapon) {
-    const weaponDmg = weapon.properties['damageMin'] && weapon.properties['damageMax']
-      ? rollDice(weapon.properties['damageMin'], weapon.properties['damageMax'])
-      : rollDice(1, 4);
-    base = strBonus + weaponDmg + weapon.enchantment;
+    const weaponDmg =
+      weapon.properties["damageMin"] && weapon.properties["damageMax"]
+        ? rollDice(
+            weapon.properties["damageMin"],
+            weapon.properties["damageMax"],
+          )
+        : rollDice(1, 4);
+    base = strBonus + weaponDmg + hero.equipDamageBonus;
   }
 
   return Math.max(1, base);
@@ -116,12 +128,15 @@ export interface CombatResult {
 /**
  * Player attacks a monster. Returns updated state.
  */
-export function playerAttacksMonster(state: GameState, monsterId: string): GameState {
+export function playerAttacksMonster(
+  state: GameState,
+  monsterId: string,
+): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   let floor = state.floors[floorKey];
   if (!floor) return state;
 
-  const monsterIndex = floor.monsters.findIndex(m => m.id === monsterId);
+  const monsterIndex = floor.monsters.findIndex((m) => m.id === monsterId);
   if (monsterIndex === -1) return state;
 
   let monster = floor.monsters[monsterIndex];
@@ -138,11 +153,14 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
   }
 
   // Hit check
-  const hitChance = calcHitChance(state.hero.attributes.dexterity + state.hero.equipAccuracyBonus, Math.floor(monster.speed * 30));
+  const hitChance = calcHitChance(
+    state.hero.attributes.dexterity + state.hero.equipAccuracyBonus,
+    Math.floor(monster.speed * 30),
+  );
   if (!doesHit(hitChance)) {
     messages.push({
       text: `${state.hero.name} misses the ${monster.name}.`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
     Sound.meleeMiss();
@@ -150,43 +168,49 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
   }
 
   // Physical-immune check (slimes — heavily reduced damage)
-  const isPhysicalImmune = monster.abilities.includes('physical-immune');
+  const isPhysicalImmune = monster.abilities.includes("physical-immune");
   const rawDamage = calcPlayerDamage(state.hero);
-  let damage = Math.max(1, rawDamage);
+  let damage = applyArmor(Math.max(1, rawDamage), monster.armor);
   if (isPhysicalImmune) {
     damage = Math.max(1, Math.floor(damage * 0.1)); // 90% reduction
     messages.push({
       text: `Your weapon barely affects the ${monster.name}!`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
   }
 
   // Hit flash on the monster
-  queueAnimation([{
-    type: 'flash',
-    position: { ...monster.position },
-    color: '#fff',
-    duration: 80,
-  } as SpellAnimation]);
+  queueAnimation([
+    {
+      type: "flash",
+      position: { ...monster.position },
+      color: "#fff",
+      duration: 80,
+    } as SpellAnimation,
+  ]);
   Sound.meleeHit();
 
   const newHp = monster.hp - damage;
 
   // Life steal
-  if (hasEnchant(state.hero.equipment, 'life-steal') && damage > 0) {
-    const mult = enchantMult(state.hero.equipment, 'life-steal');
+  if (hasEnchant(state.hero.equipment, "life-steal") && damage > 0) {
+    const mult = enchantMult(state.hero.equipment, "life-steal");
     const heal = Math.max(1, Math.floor(damage * 0.15 * mult));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
     state = { ...state, hero: { ...state.hero, hp: healedHp } };
-    messages.push({ text: `Life steal heals you for ${heal} HP.`, severity: 'combat', turn: state.turn });
+    messages.push({
+      text: `Life steal heals you for ${heal} HP.`,
+      severity: "combat",
+      turn: state.turn,
+    });
   }
 
   if (newHp <= 0) {
     // Monster dies
     messages.push({
       text: `${state.hero.name} hits the ${monster.name} for ${damage} damage, killing it! (+${monster.xpValue} XP)`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
     Sound.monsterDeath();
@@ -196,13 +220,17 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     newMonsters.splice(monsterIndex, 1);
 
     // Loot drop
-    const loot = generateLoot(state.currentFloor, monster.position, state.ngPlusCount);
+    const loot = generateLoot(
+      state.currentFloor,
+      monster.position,
+      state.ngPlusCount,
+    );
     let newItems = [...floor.items];
     if (loot) {
       newItems.push({ item: loot, position: { ...monster.position } });
       messages.push({
         text: `The ${monster.name} dropped ${loot.name}.`,
-        severity: 'normal',
+        severity: "normal",
         turn: state.turn,
       });
     }
@@ -211,7 +239,13 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     // Blood on death (always)
     // Blood on death (always, monster is already removed from array so just add decal)
     if (Math.random() < 0.75) {
-      newFloor = { ...newFloor, decals: [...newFloor.decals, { x: monster.position.x, y: monster.position.y }] };
+      newFloor = {
+        ...newFloor,
+        decals: [
+          ...newFloor.decals,
+          { x: monster.position.x, y: monster.position.y },
+        ],
+      };
     }
 
     const resultState: GameState = {
@@ -228,8 +262,8 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     trackMonsterKill(monster.templateId, monster.xpValue >= 250);
 
     // Victory condition — Surtur slain
-    if (monster.templateId === 'surtur') {
-      return { ...resultState, screen: 'victory' };
+    if (monster.templateId === "surtur") {
+      return { ...resultState, screen: "victory" };
     }
 
     return resultState;
@@ -237,7 +271,7 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
     // Monster survives
     messages.push({
       text: `${state.hero.name} hits the ${monster.name} for ${damage} damage. (${newHp}/${monster.maxHp} HP)`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
 
@@ -259,7 +293,10 @@ export function playerAttacksMonster(state: GameState, monsterId: string): GameS
 /**
  * Monster attacks the player. Returns updated state.
  */
-export function monsterAttacksPlayer(state: GameState, monster: Monster): GameState {
+export function monsterAttacksPlayer(
+  state: GameState,
+  monster: Monster,
+): GameState {
   const messages: Message[] = [];
 
   // Hit check — monster "dex" approximated from speed
@@ -269,7 +306,7 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   if (!doesHit(hitChance)) {
     messages.push({
       text: `The ${monster.name} misses ${state.hero.name}.`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
     return applyMessages(state, messages);
@@ -281,7 +318,7 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   if (damage === 0) {
     messages.push({
       text: `The ${monster.name} hits ${state.hero.name}, but the armor absorbs the blow.`,
-      severity: 'combat',
+      severity: "combat",
       turn: state.turn,
     });
     return applyMessages(state, messages);
@@ -290,17 +327,19 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   const newHp = state.hero.hp - damage;
 
   // Hit flash on the hero
-  queueAnimation([{
-    type: 'flash',
-    position: { ...state.hero.position },
-    color: '#f44',
-    duration: 80,
-  } as SpellAnimation]);
+  queueAnimation([
+    {
+      type: "flash",
+      position: { ...state.hero.position },
+      color: "#f44",
+      duration: 80,
+    } as SpellAnimation,
+  ]);
   Sound.playerHurt();
 
   messages.push({
     text: `The ${monster.name} hits ${state.hero.name} for ${damage} damage. (${Math.max(0, newHp)}/${state.hero.maxHp} HP)`,
-    severity: 'combat',
+    severity: "combat",
     turn: state.turn,
   });
 
@@ -309,7 +348,12 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   const curFloor = state.floors[floorKey];
   let floors = state.floors;
   if (curFloor) {
-    const bloodFloor = maybeAddPlayerBlood(curFloor, state.hero.position, Math.max(0, newHp), state.hero.maxHp);
+    const bloodFloor = maybeAddPlayerBlood(
+      curFloor,
+      state.hero.position,
+      Math.max(0, newHp),
+      state.hero.maxHp,
+    );
     if (bloodFloor !== curFloor) {
       floors = { ...state.floors, [floorKey]: bloodFloor };
     }
@@ -325,33 +369,88 @@ export function monsterAttacksPlayer(state: GameState, monster: Monster): GameSt
   };
 
   // Reflect damage (Thorns enchantment)
-  if (hasEnchant(state.hero.equipment, 'reflect-damage') && damage > 0) {
-    const reflectMult = enchantMult(state.hero.equipment, 'reflect-damage');
-    const reflectDmg = Math.max(1, Math.floor(damage * 0.20 * reflectMult));
+  let monsterKilledByThorns = false;
+  if (hasEnchant(state.hero.equipment, "reflect-damage") && damage > 0) {
+    const reflectMult = enchantMult(state.hero.equipment, "reflect-damage");
+    const reflectDmg = Math.max(1, Math.floor(damage * 0.2 * reflectMult));
     const floorKey2 = `${result.currentDungeon}-${result.currentFloor}`;
     const floor2 = result.floors[floorKey2];
     if (floor2) {
-      const mIdx = floor2.monsters.findIndex(m => m.id === monster.id);
+      const mIdx = floor2.monsters.findIndex((m) => m.id === monster.id);
       if (mIdx >= 0) {
         const m = floor2.monsters[mIdx];
         const mNewHp = m.hp - reflectDmg;
         const newMonsters = [...floor2.monsters];
         if (mNewHp <= 0) {
+          // Monster killed by Thorns — award XP, drop loot, check victory
+          monsterKilledByThorns = true;
           newMonsters.splice(mIdx, 1);
+          Sound.monsterDeath();
+          trackMonsterKill(monster.templateId, monster.xpValue >= 250);
+          const loot = generateLoot(
+            result.currentFloor,
+            m.position,
+            result.ngPlusCount,
+          );
+          let newItems = [...floor2.items];
+          const thornsMsgs: Message[] = [
+            {
+              text: `Thorns reflect ${reflectDmg} damage back at the ${monster.name}, killing it! (+${monster.xpValue} XP)`,
+              severity: "combat" as const,
+              turn: result.turn,
+            },
+          ];
+          if (loot) {
+            newItems.push({ item: loot, position: { ...m.position } });
+            thornsMsgs.push({
+              text: `The ${monster.name} dropped ${loot.name}.`,
+              severity: "normal" as const,
+              turn: result.turn,
+            });
+          }
+          let newFloor2 = { ...floor2, monsters: newMonsters, items: newItems };
+          if (Math.random() < 0.75) {
+            newFloor2 = {
+              ...newFloor2,
+              decals: [
+                ...newFloor2.decals,
+                { x: m.position.x, y: m.position.y },
+              ],
+            };
+          }
+          result = {
+            ...result,
+            hero: { ...result.hero, xp: result.hero.xp + monster.xpValue },
+            floors: { ...result.floors, [floorKey2]: newFloor2 },
+            messages: [...result.messages, ...thornsMsgs],
+          };
+          if (monster.templateId === "surtur") {
+            return { ...result, screen: "victory" };
+          }
         } else {
           newMonsters[mIdx] = { ...m, hp: mNewHp };
+          result = {
+            ...result,
+            floors: {
+              ...result.floors,
+              [floorKey2]: { ...floor2, monsters: newMonsters },
+            },
+            messages: [
+              ...result.messages,
+              {
+                text: `Thorns reflect ${reflectDmg} damage back at the ${monster.name}!`,
+                severity: "combat" as const,
+                turn: result.turn,
+              },
+            ],
+          };
         }
-        result = {
-          ...result,
-          floors: { ...result.floors, [floorKey2]: { ...floor2, monsters: newMonsters } },
-          messages: [...result.messages, { text: `Thorns reflect ${reflectDmg} damage back at the ${monster.name}!`, severity: 'combat' as const, turn: result.turn }],
-        };
       }
     }
   }
 
-  // Process on-hit abilities (poison, drain, steal, elemental touch)
-  if (monster.abilities.length > 0 && newHp > 0) {
+  // Process on-hit abilities (poison, drain, steal, elemental touch) — skip if monster died to Thorns
+  if (!monsterKilledByThorns && monster.abilities.length > 0 && newHp > 0) {
     result = processMonsterAbility(result, monster);
   }
 

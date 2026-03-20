@@ -7,29 +7,29 @@ export interface Vector2 {
   y: number;
 }
 
-export type Direction = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
+export type Direction = "N" | "NE" | "E" | "SE" | "S" | "SW" | "W" | "NW";
 
 export type Screen =
-  | 'splash'
-  | 'intro'
-  | 'character-creation'
-  | 'game'
-  | 'inventory'
-  | 'character-info'
-  | 'spells'
-  | 'map'
-  | 'help'
-  | 'shop'
-  | 'service'
-  | 'victory'
-  | 'death'
-  | 'achievements';
+  | "splash"
+  | "intro"
+  | "character-creation"
+  | "game"
+  | "inventory"
+  | "character-info"
+  | "spells"
+  | "map"
+  | "help"
+  | "shop"
+  | "service"
+  | "victory"
+  | "death"
+  | "achievements";
 
-export type Difficulty = 'easy' | 'intermediate' | 'hard' | 'impossible';
+export type Difficulty = "easy" | "intermediate" | "hard" | "impossible";
 
-export type Gender = 'male' | 'female';
+export type Gender = "male" | "female";
 
-export type Element = 'cold' | 'fire' | 'lightning' | 'acid' | 'drain';
+export type Element = "cold" | "fire" | "lightning" | "acid" | "drain";
 
 // ============================================================
 // Character
@@ -51,20 +51,20 @@ export interface ElementalResistances {
 }
 
 export type EquipSlot =
-  | 'weapon'
-  | 'shield'
-  | 'helmet'
-  | 'body'
-  | 'cloak'
-  | 'bracers'
-  | 'gauntlets'
-  | 'belt'
-  | 'boots'
-  | 'ringLeft'
-  | 'ringRight'
-  | 'amulet'
-  | 'pack'
-  | 'purse';
+  | "weapon"
+  | "shield"
+  | "helmet"
+  | "body"
+  | "cloak"
+  | "bracers"
+  | "gauntlets"
+  | "belt"
+  | "boots"
+  | "ringLeft"
+  | "ringRight"
+  | "amulet"
+  | "pack"
+  | "purse";
 
 export interface Equipment {
   weapon: Item | null;
@@ -117,40 +117,40 @@ export interface Hero {
 // ============================================================
 
 export type ItemCategory =
-  | 'weapon'
-  | 'armor'
-  | 'shield'
-  | 'helmet'
-  | 'cloak'
-  | 'bracers'
-  | 'gauntlets'
-  | 'belt'
-  | 'boots'
-  | 'ring'
-  | 'amulet'
-  | 'potion'
-  | 'scroll'
-  | 'spellbook'
-  | 'wand'
-  | 'staff'
-  | 'container'
-  | 'currency'
-  | 'misc';
+  | "weapon"
+  | "armor"
+  | "shield"
+  | "helmet"
+  | "cloak"
+  | "bracers"
+  | "gauntlets"
+  | "belt"
+  | "boots"
+  | "ring"
+  | "amulet"
+  | "potion"
+  | "scroll"
+  | "spellbook"
+  | "wand"
+  | "staff"
+  | "container"
+  | "currency"
+  | "misc";
 
 export interface Item {
   id: string;
   templateId: string;
   name: string;
   category: ItemCategory;
-  sprite: string;             // CSS class name
-  weight: number;             // grams
-  bulk: number;               // cubic cm
-  value: number;              // copper pieces
+  sprite: string; // CSS class name
+  weight: number; // grams
+  bulk: number; // cubic cm
+  value: number; // copper pieces
   identified: boolean;
   cursed: boolean;
-  enchantment: number;        // +/- modifier
+  enchantment: number; // +/- modifier
   properties: Record<string, number>;
-  contents?: Item[];          // for containers
+  contents?: Item[]; // for containers
   specialEnchantments?: string[]; // e.g. ['life-steal', 'fire-resist', 'regen-hp']
 }
 
@@ -166,45 +166,46 @@ export interface Monster {
   position: Vector2;
   hp: number;
   maxHp: number;
-  damage: [number, number];   // [min, max] per hit
+  damage: [number, number]; // [min, max] per hit
   speed: number;
   xpValue: number;
   resistances: ElementalResistances;
   ai: MonsterAI;
   abilities: string[];
+  armor: number;
   sleeping: boolean;
   slowed: boolean;
-  fleeing: number;  // turns remaining in flee mode, 0 = not fleeing
-  bled: boolean;    // has already left a blood splatter
+  fleeing: number; // turns remaining in flee mode, 0 = not fleeing
+  bled: boolean; // has already left a blood splatter
 }
 
-export type MonsterAI = 'melee' | 'ranged' | 'caster' | 'thief' | 'summoner';
+export type MonsterAI = "melee" | "ranged" | "caster" | "thief" | "summoner";
 
 // ============================================================
 // Map / Dungeon
 // ============================================================
 
 export type TileType =
-  | 'floor'
-  | 'wall'
-  | 'door-closed'
-  | 'door-open'
-  | 'door-locked'
-  | 'door-secret'
-  | 'stairs-up'
-  | 'stairs-down'
-  | 'water'
-  | 'grass'
-  | 'path'
-  | 'rock'
-  | 'building'
-  | 'trap';
+  | "floor"
+  | "wall"
+  | "door-closed"
+  | "door-open"
+  | "door-locked"
+  | "door-secret"
+  | "stairs-up"
+  | "stairs-down"
+  | "water"
+  | "grass"
+  | "path"
+  | "rock"
+  | "building"
+  | "trap";
 
 export interface Tile {
   type: TileType;
   sprite: string;
   walkable: boolean;
-  transparent: boolean;       // for line of sight
+  transparent: boolean; // for line of sight
   trapType?: string;
   trapRevealed?: boolean;
   buildingId?: string;
@@ -221,15 +222,15 @@ export interface Floor {
   tiles: Tile[][];
   monsters: Monster[];
   items: PlacedItem[];
-  decals: Vector2[];        // permanent blood splatters
+  decals: Vector2[]; // permanent blood splatters
   explored: boolean[][];
   visible: boolean[][];
-  lit: boolean[][];         // permanently illuminated tiles (from Light spell)
+  lit: boolean[][]; // permanently illuminated tiles (from Light spell)
   width: number;
   height: number;
 }
 
-export type DungeonId = 'mine' | 'fortress' | 'castle' | 'town';
+export type DungeonId = "mine" | "fortress" | "castle" | "town";
 
 // ============================================================
 // Town
@@ -246,7 +247,7 @@ export interface TownState {
 // Messages
 // ============================================================
 
-export type MessageSeverity = 'normal' | 'important' | 'combat' | 'system';
+export type MessageSeverity = "normal" | "important" | "combat" | "system";
 
 export interface Message {
   text: string;
@@ -263,11 +264,11 @@ export interface GameState {
   hero: Hero;
   currentFloor: number;
   currentDungeon: DungeonId;
-  floors: Record<string, Floor>;  // key: "dungeonId-floorNum"
+  floors: Record<string, Floor>; // key: "dungeonId-floorNum"
   town: TownState;
   messages: Message[];
   turn: number;
-  gameTime: number;               // in-game seconds
+  gameTime: number; // in-game seconds
   difficulty: Difficulty;
   rngSeed: number;
   returnFloor: number;
@@ -280,21 +281,26 @@ export interface GameState {
 // ============================================================
 
 export type GameAction =
-  | { type: 'move'; direction: Direction }
-  | { type: 'castSpell'; spellId: string; direction?: Direction; target?: Vector2 }
-  | { type: 'pickupItem' }
-  | { type: 'useStairs' }
-  | { type: 'contextAction' }
-  | { type: 'rest' }
-  | { type: 'search' }
-  | { type: 'useItem'; itemId: string }
-  | { type: 'equipItem'; itemId: string }
-  | { type: 'unequipItem'; slot: EquipSlot }
-  | { type: 'dropItem'; itemId: string }
-  | { type: 'enterBuilding' }
-  | { type: 'buyItem'; shopId: string; itemId: string }
-  | { type: 'sellItem'; shopId: string; itemId: string }
-  | { type: 'save' }
-  | { type: 'load' }
-  | { type: 'newGame' }
-  | { type: 'setScreen'; screen: Screen };
+  | { type: "move"; direction: Direction }
+  | {
+      type: "castSpell";
+      spellId: string;
+      direction?: Direction;
+      target?: Vector2;
+    }
+  | { type: "pickupItem" }
+  | { type: "useStairs" }
+  | { type: "contextAction" }
+  | { type: "rest" }
+  | { type: "search" }
+  | { type: "useItem"; itemId: string }
+  | { type: "equipItem"; itemId: string }
+  | { type: "unequipItem"; slot: EquipSlot }
+  | { type: "dropItem"; itemId: string }
+  | { type: "enterBuilding" }
+  | { type: "buyItem"; shopId: string; itemId: string }
+  | { type: "sellItem"; shopId: string; itemId: string }
+  | { type: "save" }
+  | { type: "load" }
+  | { type: "newGame" }
+  | { type: "setScreen"; screen: Screen };

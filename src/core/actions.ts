@@ -1,31 +1,49 @@
-import type { GameState, GameAction, Direction, Vector2, Message, Hero, Floor, Equipment } from './types';
-import { generateFloor, getDungeonForFloor } from '../systems/dungeon/generator';
-import { playerAttacksMonster } from '../systems/combat/combat';
-import { castSpell } from '../systems/spells/casting';
-import { saveGame } from './save-load';
-import { processPickupItem } from '../systems/inventory/pickup';
-import { processDropItem } from '../systems/inventory/drop';
-import { processEquipItem, processUnequipItem } from '../systems/inventory/equipment';
-import { processUseItem } from '../systems/inventory/use-item';
-import { generateTownMap, BUILDING_FLAVORS, TOWN_START_RETURN } from '../systems/town/TownMap';
-import { initShopInventory, restockShop } from '../systems/town/Shops';
-import { Sound } from '../systems/Sound';
-import { trackSecretDoorFound, trackFloorReached, trackFloorCleared } from '../systems/Achievements';
-
-function hasEnchant(equipment: Equipment, id: string): boolean {
-  return Object.values(equipment).some(
-    i => i?.specialEnchantments?.some((e: string) => e === id || e === `${id}:critical`)
-  );
-}
+import type {
+  GameState,
+  GameAction,
+  Direction,
+  Vector2,
+  Message,
+  Hero,
+  Floor,
+} from "./types";
+import {
+  generateFloor,
+  getDungeonForFloor,
+} from "../systems/dungeon/generator";
+import { playerAttacksMonster } from "../systems/combat/combat";
+import { castSpell } from "../systems/spells/casting";
+import { saveGame } from "./save-load";
+import { processPickupItem } from "../systems/inventory/pickup";
+import { processDropItem } from "../systems/inventory/drop";
+import {
+  processEquipItem,
+  processUnequipItem,
+} from "../systems/inventory/equipment";
+import { processUseItem } from "../systems/inventory/use-item";
+import {
+  generateTownMap,
+  BUILDING_FLAVORS,
+  TOWN_START_RETURN,
+} from "../systems/town/TownMap";
+import { initShopInventory, restockShop } from "../systems/town/Shops";
+import { Sound } from "../systems/Sound";
+import {
+  trackSecretDoorFound,
+  trackFloorReached,
+  trackFloorCleared,
+} from "../systems/Achievements";
+import { hasEnchant } from "../utils/Enchants";
+import { TRAP_DATA } from "../data/Traps";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
-  N:  { x: 0,  y: -1 },
-  NE: { x: 1,  y: -1 },
-  E:  { x: 1,  y: 0 },
-  SE: { x: 1,  y: 1 },
-  S:  { x: 0,  y: 1 },
+  N: { x: 0, y: -1 },
+  NE: { x: 1, y: -1 },
+  E: { x: 1, y: 0 },
+  SE: { x: 1, y: 1 },
+  S: { x: 0, y: 1 },
   SW: { x: -1, y: 1 },
-  W:  { x: -1, y: 0 },
+  W: { x: -1, y: 0 },
   NW: { x: -1, y: -1 },
 };
 
@@ -35,46 +53,56 @@ export function getDirectionVector(dir: Direction): Vector2 {
 
 export function processAction(state: GameState, action: GameAction): GameState {
   // Paralyzed heroes cannot move
-  if (action.type === 'move' && state.hero.activeEffects.some(e => e.id === 'paralyzed')) {
+  if (
+    action.type === "move" &&
+    state.hero.activeEffects.some((e) => e.id === "paralyzed")
+  ) {
     return {
       ...state,
-      messages: [...state.messages, { text: 'You are paralyzed and cannot move!', severity: 'important' as const, turn: state.turn }],
+      messages: [
+        ...state.messages,
+        {
+          text: "You are paralyzed and cannot move!",
+          severity: "important" as const,
+          turn: state.turn,
+        },
+      ],
       turn: state.turn + 1,
     };
   }
 
   switch (action.type) {
-    case 'move':
+    case "move":
       return processMove(state, action.direction);
-    case 'castSpell':
+    case "castSpell":
       return processCastSpell(state, action);
-    case 'useStairs':
+    case "useStairs":
       return processUseStairs(state);
-    case 'setScreen':
+    case "setScreen":
       return { ...state, screen: action.screen };
-    case 'save':
+    case "save":
       return processSave(state);
-    case 'rest':
+    case "rest":
       return processRest(state);
-    case 'contextAction':
+    case "contextAction":
       return processContextAction(state);
-    case 'pickupItem':
+    case "pickupItem":
       return processPickupItem(state);
-    case 'dropItem':
+    case "dropItem":
       return processDropItem(state, action.itemId);
-    case 'equipItem':
+    case "equipItem":
       return processEquipItem(state, action.itemId);
-    case 'unequipItem':
+    case "unequipItem":
       return processUnequipItem(state, action.slot);
-    case 'useItem':
+    case "useItem":
       return processUseItem(state, action.itemId);
-    case 'search':
+    case "search":
       return processSearch(state);
-    case 'enterBuilding': {
+    case "enterBuilding": {
       return processEnterBuilding(state);
     }
-    case 'newGame':
-      return { ...state, screen: 'character-creation' };
+    case "newGame":
+      return { ...state, screen: "character-creation" };
     default:
       return state;
   }
@@ -90,17 +118,19 @@ function processContextAction(state: GameState): GameState {
   const tile = floor.tiles[pos.y][pos.x];
 
   // Building → enter it
-  if (tile.type === 'building' && tile.buildingId) {
+  if (tile.type === "building" && tile.buildingId) {
     return processEnterBuilding(state);
   }
 
   // Stairs → use them
-  if (tile.type === 'stairs-up' || tile.type === 'stairs-down') {
+  if (tile.type === "stairs-up" || tile.type === "stairs-down") {
     return processUseStairs(state);
   }
 
   // Items on ground → pick up
-  const itemsHere = floor.items.filter(i => i.position.x === pos.x && i.position.y === pos.y);
+  const itemsHere = floor.items.filter(
+    (i) => i.position.x === pos.x && i.position.y === pos.y,
+  );
   if (itemsHere.length > 0) {
     return processPickupItem(state);
   }
@@ -113,14 +143,18 @@ function processContextAction(state: GameState): GameState {
       const ny = pos.y + dy;
       if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
       const adj = floor.tiles[ny][nx];
-      if (adj.type === 'door-closed' || adj.type === 'door-locked' || adj.type === 'door-secret') {
+      if (
+        adj.type === "door-closed" ||
+        adj.type === "door-locked" ||
+        adj.type === "door-secret"
+      ) {
         return processSearch(state);
       }
     }
   }
 
   // Nothing to do — E doesn't wait, only Q does
-  return addMessage(state, 'Nothing to interact with here.', 'system');
+  return addMessage(state, "Nothing to interact with here.", "system");
 }
 
 function processMove(state: GameState, direction: Direction): GameState {
@@ -135,46 +169,78 @@ function processMove(state: GameState, direction: Direction): GameState {
   if (!floor) return state;
 
   // Bounds check
-  if (newPos.x < 0 || newPos.x >= floor.width || newPos.y < 0 || newPos.y >= floor.height) {
+  if (
+    newPos.x < 0 ||
+    newPos.x >= floor.width ||
+    newPos.y < 0 ||
+    newPos.y >= floor.height
+  ) {
     return state;
   }
 
   const tile = floor.tiles[newPos.y][newPos.x];
 
   // Bump into closed door → open it
-  if (tile.type === 'door-closed') {
-    const newTiles = floor.tiles.map(row => [...row]);
+  if (tile.type === "door-closed") {
+    const newTiles = floor.tiles.map((row) => [...row]);
     newTiles[newPos.y][newPos.x] = {
-      type: 'door-open', sprite: 'door-open', walkable: true, transparent: true,
+      type: "door-open",
+      sprite: "door-open",
+      walkable: true,
+      transparent: true,
     };
     Sound.doorOpen();
     return {
       ...state,
       floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
-      messages: [...state.messages, { text: 'You open the door.', severity: 'normal' as const, turn: state.turn }],
+      messages: [
+        ...state.messages,
+        {
+          text: "You open the door.",
+          severity: "normal" as const,
+          turn: state.turn,
+        },
+      ],
       turn: state.turn + 1,
     };
   }
 
   // Bump into locked door → STR check to force open
-  if (tile.type === 'door-locked') {
+  if (tile.type === "door-locked") {
     const strCheck = Math.random() * 100 < state.hero.attributes.strength;
     if (strCheck) {
-      const newTiles = floor.tiles.map(row => [...row]);
+      const newTiles = floor.tiles.map((row) => [...row]);
       newTiles[newPos.y][newPos.x] = {
-        type: 'door-open', sprite: 'door-broken', walkable: true, transparent: true,
+        type: "door-open",
+        sprite: "door-broken",
+        walkable: true,
+        transparent: true,
       };
       Sound.doorOpen();
       return {
         ...state,
         floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
-        messages: [...state.messages, { text: 'You force the locked door open!', severity: 'important' as const, turn: state.turn }],
+        messages: [
+          ...state.messages,
+          {
+            text: "You force the locked door open!",
+            severity: "important" as const,
+            turn: state.turn,
+          },
+        ],
         turn: state.turn + 1,
       };
     }
     return {
       ...state,
-      messages: [...state.messages, { text: 'The door is locked. You fail to force it open.', severity: 'normal' as const, turn: state.turn }],
+      messages: [
+        ...state.messages,
+        {
+          text: "The door is locked. You fail to force it open.",
+          severity: "normal" as const,
+          turn: state.turn,
+        },
+      ],
       turn: state.turn + 1,
     };
   }
@@ -183,7 +249,7 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   // Check for monster at target position — attack it
   const monsterAtTarget = floor.monsters.find(
-    m => m.position.x === newPos.x && m.position.y === newPos.y
+    (m) => m.position.x === newPos.x && m.position.y === newPos.y,
   );
 
   if (monsterAtTarget) {
@@ -197,11 +263,21 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   // Check for trap at new position
   const tileAtNew = floor.tiles[newPos.y][newPos.x];
-  if (tileAtNew.type === 'trap' && tileAtNew.trapType) {
-    const isLevitating = state.hero.activeEffects.some(e => e.id === 'levitation');
-    const isTrapImmune = hasEnchant(state.hero.equipment, 'trap-immune');
+  if (tileAtNew.type === "trap" && tileAtNew.trapType) {
+    const isLevitating = state.hero.activeEffects.some(
+      (e) => e.id === "levitation",
+    );
+    const isTrapImmune = hasEnchant(state.hero.equipment, "trap-immune");
     if (!isLevitating && !isTrapImmune) {
-      const result = triggerTrap(tileAtNew, hero, newPos, floor, floorKey, messages, state.turn + 1);
+      const result = triggerTrap(
+        tileAtNew,
+        hero,
+        newPos,
+        floor,
+        floorKey,
+        messages,
+        state.turn + 1,
+      );
       hero = result.hero;
       floors = { ...state.floors, [floorKey]: result.floor };
     }
@@ -210,55 +286,70 @@ function processMove(state: GameState, direction: Direction): GameState {
   // Auto-pickup gold, notify for other items
   let currentFloor = floors[floorKey] ?? floor;
   const itemsAtPos = currentFloor.items.filter(
-    i => i.position.x === newPos.x && i.position.y === newPos.y
+    (i) => i.position.x === newPos.x && i.position.y === newPos.y,
   );
-  const goldItems = itemsAtPos.filter(i => i.item.category === 'currency');
-  const nonGoldItems = itemsAtPos.filter(i => i.item.category !== 'currency');
+  const goldItems = itemsAtPos.filter((i) => i.item.category === "currency");
+  const nonGoldItems = itemsAtPos.filter((i) => i.item.category !== "currency");
 
   // Auto-pickup all gold
   if (goldItems.length > 0) {
     let goldTotal = 0;
     for (const g of goldItems) {
-      goldTotal += g.item.properties['amount'] ?? g.item.value;
+      goldTotal += g.item.properties["amount"] ?? g.item.value;
     }
     hero = { ...hero, copper: hero.copper + goldTotal };
-    currentFloor = { ...currentFloor, items: currentFloor.items.filter(i =>
-      !(i.position.x === newPos.x && i.position.y === newPos.y && i.item.category === 'currency')
-    )};
+    currentFloor = {
+      ...currentFloor,
+      items: currentFloor.items.filter(
+        (i) =>
+          !(
+            i.position.x === newPos.x &&
+            i.position.y === newPos.y &&
+            i.item.category === "currency"
+          ),
+      ),
+    };
     floors = { ...floors, [floorKey]: currentFloor };
-    messages.push({ text: `Picked up ${goldTotal} gold.`, severity: 'normal' as const, turn: state.turn + 1 });
+    messages.push({
+      text: `Picked up ${goldTotal} gold.`,
+      severity: "normal" as const,
+      turn: state.turn + 1,
+    });
     Sound.goldPickup();
   }
 
   if (nonGoldItems.length === 1) {
     messages.push({
       text: `You see ${nonGoldItems[0].item.name} on the ground. (G to pick up)`,
-      severity: 'normal' as const,
+      severity: "normal" as const,
       turn: state.turn + 1,
     });
   } else if (nonGoldItems.length > 1) {
     messages.push({
       text: `You see ${nonGoldItems.length} items on the ground. (G to pick up all)`,
-      severity: 'normal' as const,
+      severity: "normal" as const,
       turn: state.turn + 1,
     });
   }
 
   // Notify when stepping onto a building entrance or dungeon entrance
   const movedTile = (floors[floorKey] ?? floor).tiles[newPos.y]?.[newPos.x];
-  if (movedTile?.type === 'building' && movedTile.buildingId) {
+  if (movedTile?.type === "building" && movedTile.buildingId) {
     const info = BUILDING_FLAVORS[movedTile.buildingId];
     const bName = info?.name ?? movedTile.buildingId;
     messages.push({
       text: `You are at ${bName}. (Press Enter or E to go inside)`,
-      severity: 'normal' as const,
+      severity: "normal" as const,
       turn: state.turn + 1,
     });
-  } else if (movedTile?.type === 'stairs-down' && state.currentDungeon === 'town') {
+  } else if (
+    movedTile?.type === "stairs-down" &&
+    state.currentDungeon === "town"
+  ) {
     const targetFloor = state.returnFloor + 1;
     messages.push({
       text: `The entrance to the Abandoned Mine. Floor ${targetFloor} awaits. (Press Enter or E to enter)`,
-      severity: 'normal' as const,
+      severity: "normal" as const,
       turn: state.turn + 1,
     });
   }
@@ -272,7 +363,10 @@ function processMove(state: GameState, direction: Direction): GameState {
   };
 }
 
-function processCastSpell(state: GameState, action: Extract<GameAction, { type: 'castSpell' }>): GameState {
+function processCastSpell(
+  state: GameState,
+  action: Extract<GameAction, { type: "castSpell" }>,
+): GameState {
   return castSpell(state, action.spellId, action.direction, action.target);
 }
 
@@ -281,11 +375,19 @@ function processEnterBuilding(state: GameState): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
   const tile = floor.tiles[state.hero.position.y][state.hero.position.x];
-  if (tile.type !== 'building' || !tile.buildingId) {
-    return addMessage(state, 'There is no building here.', 'system');
+  if (tile.type !== "building" || !tile.buildingId) {
+    return addMessage(state, "There is no building here.", "system");
   }
-  const shopIds = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
-  const screen = shopIds.includes(tile.buildingId) ? 'shop' as const : 'service' as const;
+  const shopIds = [
+    "weapon-shop",
+    "armor-shop",
+    "general-store",
+    "magic-shop",
+    "junk-store",
+  ];
+  const screen = shopIds.includes(tile.buildingId)
+    ? ("shop" as const)
+    : ("service" as const);
 
   const info = BUILDING_FLAVORS[tile.buildingId];
   const msg = info
@@ -297,7 +399,10 @@ function processEnterBuilding(state: GameState): GameState {
     ...state,
     screen,
     activeBuildingId: tile.buildingId,
-    messages: [...state.messages, { text: msg, severity: 'important' as const, turn: state.turn }],
+    messages: [
+      ...state.messages,
+      { text: msg, severity: "important" as const, turn: state.turn },
+    ],
   };
 }
 
@@ -309,32 +414,38 @@ function processUseStairs(state: GameState): GameState {
   const heroTile = floor.tiles[state.hero.position.y][state.hero.position.x];
 
   // Redirect building entry via Enter key
-  if (heroTile.type === 'building') {
+  if (heroTile.type === "building") {
     return processEnterBuilding(state);
   }
 
-  if (heroTile.type === 'stairs-down') {
+  if (heroTile.type === "stairs-down") {
     Sound.stairs();
-    if (state.currentDungeon === 'town') {
+    if (state.currentDungeon === "town") {
       return returnToDungeon(state);
     }
-    return goToFloor(state, state.currentFloor + 1, 'descend');
-  } else if (heroTile.type === 'stairs-up') {
+    return goToFloor(state, state.currentFloor + 1, "descend");
+  } else if (heroTile.type === "stairs-up") {
     Sound.stairs();
     if (state.currentFloor === 0) {
       return teleportToTown(state);
     }
-    return goToFloor(state, state.currentFloor - 1, 'ascend');
+    return goToFloor(state, state.currentFloor - 1, "ascend");
   }
 
-  return addMessage(state, 'There are no stairs here.', 'system');
+  return addMessage(state, "There are no stairs here.", "system");
 }
 
-const SHOP_IDS = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
+const SHOP_IDS = [
+  "weapon-shop",
+  "armor-shop",
+  "general-store",
+  "magic-shop",
+  "junk-store",
+];
 
 export function teleportToTown(state: GameState): GameState {
   let floors = { ...state.floors };
-  const townKey = 'town-0';
+  const townKey = "town-0";
 
   // Always regenerate town map (layout may have changed)
   const { floor: townFloor } = generateTownMap();
@@ -353,13 +464,20 @@ export function teleportToTown(state: GameState): GameState {
 
   return {
     ...state,
-    currentDungeon: 'town' as const,
+    currentDungeon: "town" as const,
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
     hero: { ...state.hero, position: { ...TOWN_START_RETURN } },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
-    messages: [...state.messages, { text: 'You arrive in town.', severity: 'important' as const, turn: state.turn }],
+    messages: [
+      ...state.messages,
+      {
+        text: "You arrive in town.",
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
   };
 }
 
@@ -370,13 +488,25 @@ function returnToDungeon(state: GameState): GameState {
   const floor = state.floors[floorKey];
 
   if (!floor) {
-    return addMessage(state, 'There is nowhere to return to.', 'system');
+    if (targetFloor === 0) {
+      const { floor: newFloor } = generateFloor(
+        targetDungeon,
+        targetFloor,
+        state.rngSeed,
+        true,
+        true,
+        state.difficulty,
+      );
+      state = { ...state, floors: { ...state.floors, [floorKey]: newFloor } };
+      return returnToDungeon(state);
+    }
+    return addMessage(state, "There is nowhere to return to.", "system");
   }
 
   let arrivalPos = { x: 0, y: 0 };
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
-      if (floor.tiles[y][x].type === 'stairs-up') {
+      if (floor.tiles[y][x].type === "stairs-up") {
         arrivalPos = { x, y };
         break;
       }
@@ -389,11 +519,22 @@ function returnToDungeon(state: GameState): GameState {
     currentDungeon: targetDungeon,
     currentFloor: targetFloor,
     hero: { ...state.hero, position: arrivalPos },
-    messages: [...state.messages, { text: `You return to dungeon level ${targetFloor + 1}.`, severity: 'important' as const, turn: state.turn }],
+    messages: [
+      ...state.messages,
+      {
+        text: `You return to dungeon level ${targetFloor + 1}.`,
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
   };
 }
 
-function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 'descend'): GameState {
+function goToFloor(
+  state: GameState,
+  targetFloor: number,
+  direction: "ascend" | "descend",
+): GameState {
   // Determine dungeon tier for this floor
   const targetDungeon = getDungeonForFloor(targetFloor);
   const targetKey = `${targetDungeon}-${targetFloor}`;
@@ -405,8 +546,8 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
       targetDungeon,
       targetFloor,
       state.rngSeed,
-      true,   // has stairs up
-      true,   // has stairs down
+      true, // has stairs up
+      true, // has stairs down
       state.difficulty,
     );
     floors = { ...floors, [targetKey]: newFloor };
@@ -415,7 +556,8 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   const targetFloorData = floors[targetKey];
 
   // Find the matching stairs on the target floor
-  const arrivalStairType = direction === 'descend' ? 'stairs-up' : 'stairs-down';
+  const arrivalStairType =
+    direction === "descend" ? "stairs-up" : "stairs-down";
   let arrivalPos: Vector2 | null = null;
 
   for (let y = 0; y < targetFloorData.height; y++) {
@@ -429,7 +571,10 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   }
 
   if (!arrivalPos) {
-    arrivalPos = { x: Math.floor(targetFloorData.width / 2), y: Math.floor(targetFloorData.height / 2) };
+    arrivalPos = {
+      x: Math.floor(targetFloorData.width / 2),
+      y: Math.floor(targetFloorData.height / 2),
+    };
   }
 
   // Check if the floor being left was cleared
@@ -442,23 +587,27 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
   trackFloorReached(targetFloor);
 
   const depthLabel = targetFloor + 1;
-  const verb = direction === 'descend' ? 'descends to' : 'ascends to';
+  const verb = direction === "descend" ? "descends to" : "ascends to";
   const messages = [
     ...state.messages,
-    { text: `${state.hero.name} ${verb} level ${depthLabel}.`, severity: 'important' as const, turn: state.turn },
+    {
+      text: `${state.hero.name} ${verb} level ${depthLabel}.`,
+      severity: "important" as const,
+      turn: state.turn,
+    },
   ];
 
   // Tier transition messages
   const prevDungeon = getDungeonForFloor(state.currentFloor);
   if (targetDungeon !== prevDungeon) {
     const tierNames: Record<string, string> = {
-      mine: 'the Abandoned Mine',
-      fortress: 'the Underground Fortress',
-      castle: 'the Castle of the Winds',
+      mine: "the Abandoned Mine",
+      fortress: "the Underground Fortress",
+      castle: "the Castle of the Winds",
     };
     messages.push({
       text: `You enter ${tierNames[targetDungeon] ?? targetDungeon}. The air grows heavier.`,
-      severity: 'important' as const,
+      severity: "important" as const,
       turn: state.turn,
     });
   }
@@ -480,23 +629,17 @@ function goToFloor(state: GameState, targetFloor: number, direction: 'ascend' | 
       ...newState,
       messages: [
         ...newState.messages,
-        { text: 'Game auto-saved.', severity: 'system' as const, turn: newState.turn },
+        {
+          text: "Game auto-saved.",
+          severity: "system" as const,
+          turn: newState.turn,
+        },
       ],
     };
   }
 
   return newState;
 }
-
-// Trap data matching generator definitions
-const TRAP_DATA: Record<string, { damage: [number, number]; message: string; sprite: string }> = {
-  pit:    { damage: [3, 8],  message: 'You fall into a pit!', sprite: 'pit-trap' },
-  arrow:  { damage: [2, 6],  message: 'An arrow shoots from the wall!', sprite: 'arrow-trap' },
-  fire:   { damage: [4, 10], message: 'Flames erupt beneath you!', sprite: 'fire-trap' },
-  dart:   { damage: [1, 4],  message: 'A dart flies from a hidden slot!', sprite: 'dart-trap' },
-  portal: { damage: [0, 0],  message: 'A portal pulls you across the room!', sprite: 'portal-trap' },
-  acid:   { damage: [3, 9],  message: 'Acid sprays from the floor!', sprite: 'acid-trap' },
-};
 
 function triggerTrap(
   tile: { trapType?: string; trapRevealed?: boolean },
@@ -507,13 +650,13 @@ function triggerTrap(
   messages: Message[],
   turn: number,
 ): { hero: Hero; floor: Floor } {
-  const trap = TRAP_DATA[tile.trapType ?? ''];
+  const trap = TRAP_DATA[tile.trapType ?? ""];
   if (!trap) return { hero, floor };
 
   Sound.trap();
 
   // Reveal the trap
-  const newTiles = floor.tiles.map(row => [...row]);
+  const newTiles = floor.tiles.map((row) => [...row]);
   newTiles[pos.y][pos.x] = {
     ...newTiles[pos.y][pos.x],
     trapRevealed: true,
@@ -522,15 +665,23 @@ function triggerTrap(
   const newFloor = { ...floor, tiles: newTiles };
 
   // Portal trap: teleport to random floor position
-  if (tile.trapType === 'portal') {
-    messages.push({ text: trap.message, severity: 'important', turn });
+  if (tile.trapType === "portal") {
+    messages.push({ text: trap.message, severity: "important", turn });
     for (let tries = 0; tries < 200; tries++) {
       const x = Math.floor(Math.random() * floor.width);
       const y = Math.floor(Math.random() * floor.height);
       const t = floor.tiles[y]?.[x];
-      if (t?.walkable && t.type !== 'trap' && !floor.monsters.some(m => m.position.x === x && m.position.y === y)) {
+      if (
+        t?.walkable &&
+        t.type !== "trap" &&
+        !floor.monsters.some((m) => m.position.x === x && m.position.y === y)
+      ) {
         hero = { ...hero, position: { x, y } };
-        messages.push({ text: 'You are teleported!', severity: 'important', turn });
+        messages.push({
+          text: "You are teleported!",
+          severity: "important",
+          turn,
+        });
         break;
       }
     }
@@ -538,9 +689,15 @@ function triggerTrap(
   }
 
   // Damage traps
-  const dmg = trap.damage[0] + Math.floor(Math.random() * (trap.damage[1] - trap.damage[0] + 1));
+  const dmg =
+    trap.damage[0] +
+    Math.floor(Math.random() * (trap.damage[1] - trap.damage[0] + 1));
   const newHp = Math.max(0, hero.hp - dmg);
-  messages.push({ text: `${trap.message} You take ${dmg} damage. (${newHp}/${hero.maxHp} HP)`, severity: 'combat', turn });
+  messages.push({
+    text: `${trap.message} You take ${dmg} damage. (${newHp}/${hero.maxHp} HP)`,
+    severity: "combat",
+    turn,
+  });
   hero = { ...hero, hp: newHp };
 
   return { hero, floor: newFloor };
@@ -548,11 +705,15 @@ function triggerTrap(
 
 function processSave(state: GameState): GameState {
   const success = saveGame(state, 1);
-  const msg = success ? 'Game saved.' : 'Failed to save game!';
-  return addMessage(state, msg, 'system');
+  const msg = success ? "Game saved." : "Failed to save game!";
+  return addMessage(state, msg, "system");
 }
 
-function addMessage(state: GameState, text: string, severity: Message['severity']): GameState {
+function addMessage(
+  state: GameState,
+  text: string,
+  severity: Message["severity"],
+): GameState {
   return {
     ...state,
     messages: [...state.messages, { text, severity, turn: state.turn }],
@@ -565,8 +726,11 @@ function processRest(state: GameState): GameState {
 
   // Check for nearby enemies — fail if within 5 tiles
   if (floor) {
-    const nearbyMonster = floor.monsters.find(m => {
-      const dist = Math.max(Math.abs(m.position.x - state.hero.position.x), Math.abs(m.position.y - state.hero.position.y));
+    const nearbyMonster = floor.monsters.find((m) => {
+      const dist = Math.max(
+        Math.abs(m.position.x - state.hero.position.x),
+        Math.abs(m.position.y - state.hero.position.y),
+      );
       return dist <= 5;
     });
     if (nearbyMonster) {
@@ -575,27 +739,36 @@ function processRest(state: GameState): GameState {
         Math.abs(nearbyMonster.position.y - state.hero.position.y),
       );
       // Close enemy: chance to get ambushed (30% if adjacent, 15% if 2-3 tiles)
-      const ambushChance = dist <= 1 ? 0.30 : dist <= 3 ? 0.15 : 0;
+      const ambushChance = dist <= 1 ? 0.3 : dist <= 3 ? 0.15 : 0;
       if (Math.random() < ambushChance) {
         return {
           ...state,
-          messages: [...state.messages, {
-            text: `A ${nearbyMonster.name} catches you off guard while resting!`,
-            severity: 'combat' as const,
-            turn: state.turn,
-          }],
-          turn: state.turn + 2, // monsters get extra turns
+          messages: [
+            ...state.messages,
+            {
+              text: `A ${nearbyMonster.name} catches you off guard while resting!`,
+              severity: "combat" as const,
+              turn: state.turn,
+            },
+          ],
+          turn: state.turn + 1,
         };
       }
       // Even if no ambush, waiting ends early with warning
       return {
         ...state,
-        hero: { ...state.hero, hp: Math.min(state.hero.maxHp, state.hero.hp + 1) },
-        messages: [...state.messages, {
-          text: `You rest briefly but sense danger nearby. (+1 HP)`,
-          severity: 'system' as const,
-          turn: state.turn,
-        }],
+        hero: {
+          ...state.hero,
+          hp: Math.min(state.hero.maxHp, state.hero.hp + 1),
+        },
+        messages: [
+          ...state.messages,
+          {
+            text: `You rest briefly but sense danger nearby. (+1 HP)`,
+            severity: "system" as const,
+            turn: state.turn,
+          },
+        ],
         turn: state.turn + 1,
       };
     }
@@ -621,13 +794,16 @@ function processRest(state: GameState): GameState {
   const gains: string[] = [];
   if (hpGain > 0) gains.push(`+${hpGain} HP`);
   if (mpGain > 0) gains.push(`+${mpGain} MP`);
-  const gainText = gains.length > 0 ? ` (${gains.join(', ')})` : '';
+  const gainText = gains.length > 0 ? ` (${gains.join(", ")})` : "";
 
-  const messages = [...state.messages, {
-    text: `You waited ${waitTurns} turn${waitTurns > 1 ? 's' : ''}.${gainText}`,
-    severity: 'system' as const,
-    turn: state.turn,
-  }];
+  const messages = [
+    ...state.messages,
+    {
+      text: `You waited ${waitTurns} turn${waitTurns > 1 ? "s" : ""}.${gainText}`,
+      severity: "system" as const,
+      turn: state.turn,
+    },
+  ];
 
   return {
     ...state,
@@ -647,7 +823,7 @@ function processSearch(state: GameState): GameState {
   let found = 0;
 
   // Check all 8 adjacent tiles + current tile for secret doors and hidden traps
-  const newTiles = floor.tiles.map(row => [...row]);
+  const newTiles = floor.tiles.map((row) => [...row]);
   for (let dy = -1; dy <= 1; dy++) {
     for (let dx = -1; dx <= 1; dx++) {
       const x = pos.x + dx;
@@ -657,37 +833,53 @@ function processSearch(state: GameState): GameState {
       const tile = newTiles[y][x];
 
       // Reveal secret doors
-      if (tile.type === 'door-secret') {
+      if (tile.type === "door-secret") {
         newTiles[y][x] = {
-          type: 'door-closed',
-          sprite: 'door-closed',
+          type: "door-closed",
+          sprite: "door-closed",
           walkable: false,
           transparent: false,
         };
-        messages.push({ text: 'You found a secret door!', severity: 'important' as const, turn: state.turn });
+        messages.push({
+          text: "You found a secret door!",
+          severity: "important" as const,
+          turn: state.turn,
+        });
         found++;
         trackSecretDoorFound();
       }
 
       // Reveal hidden traps
-      if (tile.type === 'trap' && !tile.trapRevealed) {
+      if (tile.type === "trap" && !tile.trapRevealed) {
         const trapSprites: Record<string, string> = {
-          pit: 'pit-trap', arrow: 'arrow-trap', fire: 'fire-trap',
-          dart: 'dart-trap', portal: 'portal-trap', acid: 'acid-trap',
+          pit: "pit-trap",
+          arrow: "arrow-trap",
+          fire: "fire-trap",
+          dart: "dart-trap",
+          portal: "portal-trap",
+          acid: "acid-trap",
         };
         newTiles[y][x] = {
           ...tile,
           trapRevealed: true,
-          sprite: trapSprites[tile.trapType ?? ''] ?? 'pit-trap',
+          sprite: trapSprites[tile.trapType ?? ""] ?? "pit-trap",
         };
-        messages.push({ text: `You found a ${tile.trapType} trap!`, severity: 'important' as const, turn: state.turn });
+        messages.push({
+          text: `You found a ${tile.trapType} trap!`,
+          severity: "important" as const,
+          turn: state.turn,
+        });
         found++;
       }
     }
   }
 
   if (found === 0) {
-    messages.push({ text: 'You search but find nothing.', severity: 'system' as const, turn: state.turn });
+    messages.push({
+      text: "You search but find nothing.",
+      severity: "system" as const,
+      turn: state.turn,
+    });
   } else {
     Sound.searchFound();
   }

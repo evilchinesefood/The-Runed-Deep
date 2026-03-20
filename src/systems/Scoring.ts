@@ -9,7 +9,7 @@ export interface ScoreEntry {
   timestamp: number;
 }
 
-const LEADERBOARD_KEY = 'cotw-leaderboard';
+const LEADERBOARD_KEY = "cotw-leaderboard";
 const MAX_ENTRIES = 10;
 
 export function calculateScore(
@@ -20,12 +20,15 @@ export function calculateScore(
   copper: number,
   difficulty: string,
 ): number {
-  let score = xp + (floor * 100) + (level * 50) + copper;
+  let score = xp + floor * 100 + level * 50 + copper;
   const diffMult: Record<string, number> = {
-    easy: 1, intermediate: 1.5, hard: 2.5, impossible: 5,
+    easy: 1,
+    intermediate: 1.5,
+    hard: 2.5,
+    impossible: 5,
   };
   score = Math.floor(score * (diffMult[difficulty] ?? 1));
-  const efficiency = Math.max(0.5, 1 - (turns / 10000));
+  const efficiency = Math.max(0.5, 1 - turns / 10000);
   score = Math.floor(score * efficiency);
   return score;
 }
@@ -46,7 +49,12 @@ export function addToLeaderboard(entry: ScoreEntry): number {
   board.sort((a, b) => b.score - a.score);
   const trimmed = board.slice(0, MAX_ENTRIES);
   localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(trimmed));
-  const rank = trimmed.findIndex(e => e === entry);
+  const rank = trimmed.findIndex(
+    (e) =>
+      e.name === entry.name &&
+      e.score === entry.score &&
+      e.timestamp === entry.timestamp,
+  );
   return rank >= 0 ? rank + 1 : 0;
 }
 

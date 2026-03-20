@@ -1,44 +1,51 @@
-import { createInitialGameState, createHero } from './core/game-state';
-import { GameLoop } from './core/game-loop';
-import { InputManager } from './input/input-manager';
-import { MapRenderer } from './rendering/map-renderer';
-import { HudRenderer } from './rendering/hud-renderer';
-import { createSplashScreen } from './ui/splash-screen';
-import { createCharacterCreationScreen } from './ui/character-creation';
-import { createCharacterInfoScreen } from './ui/character-info';
-import { createInventoryScreen } from './ui/inventory-screen';
-import { createDeathScreen } from './ui/death-screen';
-import { createHelpScreen } from './ui/help-screen';
-import { createMapScreen } from './ui/MapScreen';
-import { createSpellScreen } from './ui/SpellScreen';
-import { createShopScreen } from './ui/ShopScreen';
-import { createServiceScreen } from './ui/ServiceScreen';
-import { createIntroScreen } from './ui/IntroScreen';
-import { createVictoryScreen } from './ui/VictoryScreen';
-import { generateTownMap, TOWN_START_INITIAL } from './systems/town/TownMap';
-import { initShopInventory } from './systems/town/Shops';
-import { findPath } from './utils/Pathfinding';
-import { generateFloor } from './systems/dungeon/generator';
-import { SPELL_BY_ID } from './data/spells';
-import { AnimationRenderer } from './rendering/animations';
-import { drainAnimations } from './rendering/animation-queue';
-import { computeFov } from './utils/fov';
-import { loadGame } from './core/save-load';
-import type { GameState, Screen } from './core/types';
-import { generateTestFloor, getAllSpellIds } from './systems/dungeon/TestFloor';
-import { createEmptyEquipment, createDefaultResistances } from './core/game-state';
-import { TouchControls } from './ui/TouchControls';
-import { teleportToTown } from './core/actions';
-import { injectTheme } from './ui/Theme';
-import { Sound } from './systems/Sound';
-import { setOnUnlockCallback, trackNewGamePlus, trackFloorExplored } from './systems/Achievements';
-import { showAchievementToast } from './ui/AchievementToast';
-import { createAchievementsScreen } from './ui/AchievementsScreen';
+import { createInitialGameState, createHero } from "./core/game-state";
+import { GameLoop } from "./core/game-loop";
+import { InputManager } from "./input/input-manager";
+import { MapRenderer } from "./rendering/map-renderer";
+import { HudRenderer } from "./rendering/hud-renderer";
+import { createSplashScreen } from "./ui/splash-screen";
+import { createCharacterCreationScreen } from "./ui/character-creation";
+import { createCharacterInfoScreen } from "./ui/character-info";
+import { createInventoryScreen } from "./ui/inventory-screen";
+import { createDeathScreen } from "./ui/death-screen";
+import { createHelpScreen } from "./ui/help-screen";
+import { createMapScreen } from "./ui/MapScreen";
+import { createSpellScreen } from "./ui/SpellScreen";
+import { createShopScreen } from "./ui/ShopScreen";
+import { createServiceScreen } from "./ui/ServiceScreen";
+import { createIntroScreen } from "./ui/IntroScreen";
+import { createVictoryScreen } from "./ui/VictoryScreen";
+import { generateTownMap, TOWN_START_INITIAL } from "./systems/town/TownMap";
+import { initShopInventory } from "./systems/town/Shops";
+import { findPath } from "./utils/Pathfinding";
+import { generateFloor } from "./systems/dungeon/generator";
+import { SPELL_BY_ID } from "./data/spells";
+import { AnimationRenderer } from "./rendering/animations";
+import { drainAnimations } from "./rendering/animation-queue";
+import { computeFov } from "./utils/fov";
+import { loadGame } from "./core/save-load";
+import type { GameState, Screen } from "./core/types";
+import { generateTestFloor, getAllSpellIds } from "./systems/dungeon/TestFloor";
+import {
+  createEmptyEquipment,
+  createDefaultResistances,
+} from "./core/game-state";
+import { TouchControls } from "./ui/TouchControls";
+import { teleportToTown } from "./core/actions";
+import { injectTheme } from "./ui/Theme";
+import { Sound } from "./systems/Sound";
+import {
+  setOnUnlockCallback,
+  trackNewGamePlus,
+  trackFloorExplored,
+} from "./systems/Achievements";
+import { showAchievementToast } from "./ui/AchievementToast";
+import { createAchievementsScreen } from "./ui/AchievementsScreen";
 
 injectTheme();
 setOnUnlockCallback(showAchievementToast);
 
-const root = document.getElementById('game-root')!;
+const root = document.getElementById("game-root")!;
 
 let mapRenderer: MapRenderer | null = null;
 let hudRenderer: HudRenderer | null = null;
@@ -50,14 +57,14 @@ const gameLoop = new GameLoop(createInitialGameState(), render);
 
 // Spell mode indicator
 input.setSpellModeCallback((spellId) => {
-  const indicator = document.getElementById('spell-mode-indicator');
+  const indicator = document.getElementById("spell-mode-indicator");
   if (indicator) {
     if (spellId) {
       const spell = SPELL_BY_ID[spellId];
       indicator.textContent = `Casting: ${spell?.name ?? spellId} — pick a direction (Esc to cancel)`;
-      indicator.style.display = 'block';
+      indicator.style.display = "block";
     } else {
-      indicator.style.display = 'none';
+      indicator.style.display = "none";
     }
   }
 });
@@ -83,7 +90,11 @@ input.setPathClickCallback((target) => {
 let autoExploring = false;
 
 input.setAutoExploreCallback(() => {
-  if (autoExploring) { autoExploring = false; autoPath = []; return; } // toggle off
+  if (autoExploring) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  } // toggle off
   autoExploring = true;
   exploreNext();
 });
@@ -91,23 +102,38 @@ input.setAutoExploreCallback(() => {
 function exploreNext(): void {
   if (!autoExploring) return;
   const state = gameLoop.getState();
-  if (state.screen !== 'game' || state.hero.hp <= 0 || state.currentDungeon === 'town') {
+  if (
+    state.screen !== "game" ||
+    state.hero.hp <= 0 ||
+    state.currentDungeon === "town"
+  ) {
     autoExploring = false;
     return;
   }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
-  if (!floor) { autoExploring = false; return; }
+  if (!floor) {
+    autoExploring = false;
+    return;
+  }
 
   // Stop if any monster is visible
-  const hasVisibleMonster = floor.monsters.some(m =>
-    floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
+  const hasVisibleMonster = floor.monsters.some(
+    (m) =>
+      floor.visible[m.position.y]?.[m.position.x] ||
+      floor.lit[m.position.y]?.[m.position.x],
   );
-  if (hasVisibleMonster) { autoExploring = false; return; }
+  if (hasVisibleMonster) {
+    autoExploring = false;
+    return;
+  }
 
   // Stop if HP below 50%
-  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; return; }
+  if (state.hero.hp < state.hero.maxHp * 0.5) {
+    autoExploring = false;
+    return;
+  }
 
   // Find nearest EXPLORED walkable tile that has an unexplored walkable neighbor
   // (hero walks to the frontier, FOV reveals the next area)
@@ -125,7 +151,8 @@ function exploreNext(): void {
       for (let dy = -1; dy <= 1 && !hasFrontier; dy++) {
         for (let dx = -1; dx <= 1 && !hasFrontier; dx++) {
           if (dx === 0 && dy === 0) continue;
-          const nx = x + dx, ny = y + dy;
+          const nx = x + dx,
+            ny = y + dy;
           if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
             if (!floor.explored[ny][nx] && floor.tiles[ny][nx].walkable) {
               hasFrontier = true;
@@ -135,7 +162,10 @@ function exploreNext(): void {
       }
       if (!hasFrontier) continue;
       const dist = Math.abs(x - hero.x) + Math.abs(y - hero.y);
-      if (dist < bestDist) { bestDist = dist; bestTarget = { x, y }; }
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestTarget = { x, y };
+      }
     }
   }
 
@@ -145,38 +175,67 @@ function exploreNext(): void {
   }
 
   const path = findPath(floor, hero, bestTarget);
-  if (path.length === 0) { autoExploring = false; return; }
+  if (path.length === 0) {
+    autoExploring = false;
+    return;
+  }
 
   autoPath = path;
   stepAutoPathExplore();
 }
 
 function stepAutoPathExplore(): void {
-  if (!autoExploring || autoPath.length === 0) { autoExploring = false; return; }
+  if (!autoExploring || autoPath.length === 0) {
+    autoExploring = false;
+    return;
+  }
   if (animRenderer?.isPlaying()) {
     autoWalkTimer = window.setTimeout(stepAutoPathExplore, 100);
     return;
   }
 
   const state = gameLoop.getState();
-  if (state.screen !== 'game' || state.hero.hp <= 0) { autoExploring = false; autoPath = []; return; }
+  if (state.screen !== "game" || state.hero.hp <= 0) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
-  if (!floor) { autoExploring = false; return; }
+  if (!floor) {
+    autoExploring = false;
+    return;
+  }
 
   // Stop conditions
-  const hasVisibleMonster = floor.monsters.some(m =>
-    floor.visible[m.position.y]?.[m.position.x] || floor.lit[m.position.y]?.[m.position.x]
+  const hasVisibleMonster = floor.monsters.some(
+    (m) =>
+      floor.visible[m.position.y]?.[m.position.x] ||
+      floor.lit[m.position.y]?.[m.position.x],
   );
-  if (hasVisibleMonster) { autoExploring = false; autoPath = []; return; }
-  if (state.hero.hp < state.hero.maxHp * 0.5) { autoExploring = false; autoPath = []; return; }
+  if (hasVisibleMonster) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
+  if (state.hero.hp < state.hero.maxHp * 0.5) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
 
   // Check for items at current position
-  const itemsHere = floor.items.some(i =>
-    i.position.x === state.hero.position.x && i.position.y === state.hero.position.y
+  const itemsHere = floor.items.some(
+    (i) =>
+      i.position.x === state.hero.position.x &&
+      i.position.y === state.hero.position.y,
   );
-  if (itemsHere) { autoExploring = false; autoPath = []; return; }
+  if (itemsHere) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
 
   const next = autoPath[0];
   const dx = next.x - state.hero.position.x;
@@ -185,7 +244,7 @@ function stepAutoPathExplore(): void {
   const direction = dxdyToDirection(dx, dy);
   if (direction) {
     autoPath.shift();
-    gameLoop.handleAction({ type: 'move', direction });
+    gameLoop.handleAction({ type: "move", direction });
     playPendingAnimations();
 
     if (autoPath.length > 0) {
@@ -208,7 +267,10 @@ function stepAutoPath(): void {
   }
 
   const state = gameLoop.getState();
-  if (state.screen !== 'game' || state.hero.hp <= 0) { autoPath = []; return; }
+  if (state.screen !== "game" || state.hero.hp <= 0) {
+    autoPath = [];
+    return;
+  }
 
   const next = autoPath[0];
   const dx = next.x - state.hero.position.x;
@@ -218,18 +280,21 @@ function stepAutoPath(): void {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (floor) {
-    const hasAdjacentMonster = floor.monsters.some(m => {
+    const hasAdjacentMonster = floor.monsters.some((m) => {
       const mx = Math.abs(m.position.x - state.hero.position.x);
       const my = Math.abs(m.position.y - state.hero.position.y);
       return mx <= 1 && my <= 1;
     });
-    if (hasAdjacentMonster) { autoPath = []; return; }
+    if (hasAdjacentMonster) {
+      autoPath = [];
+      return;
+    }
   }
 
   const direction = dxdyToDirection(dx, dy);
   if (direction) {
     autoPath.shift();
-    gameLoop.handleAction({ type: 'move', direction });
+    gameLoop.handleAction({ type: "move", direction });
     playPendingAnimations();
     if (autoPath.length > 0) {
       autoWalkTimer = window.setTimeout(stepAutoPath, 120);
@@ -239,26 +304,43 @@ function stepAutoPath(): void {
   }
 }
 
-function getNextDifficulty(current: string): import('./core/types').Difficulty {
-  const order: import('./core/types').Difficulty[] = ['easy', 'intermediate', 'hard', 'impossible'];
-  const idx = order.indexOf(current as import('./core/types').Difficulty);
+function getNextDifficulty(current: string): import("./core/types").Difficulty {
+  const order: import("./core/types").Difficulty[] = [
+    "easy",
+    "intermediate",
+    "hard",
+    "impossible",
+  ];
+  const idx = order.indexOf(current as import("./core/types").Difficulty);
   return order[Math.min(order.length - 1, idx + 1)];
 }
 
-function dxdyToDirection(dx: number, dy: number): import('./core/types').Direction | null {
-  const map: Record<string, import('./core/types').Direction> = {
-    '0,-1': 'N', '1,-1': 'NE', '1,0': 'E', '1,1': 'SE',
-    '0,1': 'S', '-1,1': 'SW', '-1,0': 'W', '-1,-1': 'NW',
+function dxdyToDirection(
+  dx: number,
+  dy: number,
+): import("./core/types").Direction | null {
+  const map: Record<string, import("./core/types").Direction> = {
+    "0,-1": "N",
+    "1,-1": "NE",
+    "1,0": "E",
+    "1,1": "SE",
+    "0,1": "S",
+    "-1,1": "SW",
+    "-1,0": "W",
+    "-1,-1": "NW",
   };
   return map[`${dx},${dy}`] ?? null;
 }
 
 // Input handler — cancels auto-walk on manual movement
-input.setHandler(action => {
-  if ((autoPath.length > 0 || autoExploring) && action.type === 'move') {
+input.setHandler((action) => {
+  if ((autoPath.length > 0 || autoExploring) && action.type === "move") {
     autoPath = [];
     autoExploring = false;
-    if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
+    if (autoWalkTimer) {
+      clearTimeout(autoWalkTimer);
+      autoWalkTimer = null;
+    }
   }
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
@@ -267,7 +349,7 @@ input.setHandler(action => {
 
 // Touch controls
 const touchControls = new TouchControls();
-touchControls.setHandler(action => {
+touchControls.setHandler((action) => {
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
   playPendingAnimations();
@@ -296,26 +378,34 @@ function playPendingAnimations(): void {
 }
 
 // F4: Toggle sound / F9: spell test arena / F10: boss test / F11: town teleport
-document.addEventListener('keydown', (e: KeyboardEvent) => {
-  if (e.code === 'F4') {
+document.addEventListener("keydown", (e: KeyboardEvent) => {
+  if (e.code === "F4") {
     e.preventDefault();
     Sound.toggle();
     return;
   }
 
-  if (e.code === 'F9') {
+  if (e.code === "F9") {
     e.preventDefault();
     const { floor: testFloor, playerStart } = generateTestFloor();
     const testState: GameState = {
-      screen: 'game',
+      screen: "game",
       hero: {
-        name: 'Test Hero',
-        gender: 'male',
+        name: "Test Hero",
+        gender: "male",
         position: playerStart,
-        attributes: { strength: 60, intelligence: 70, constitution: 60, dexterity: 60 },
-        hp: 200, maxHp: 200,
-        mp: 500, maxMp: 500,
-        xp: 0, level: 10,
+        attributes: {
+          strength: 60,
+          intelligence: 70,
+          constitution: 60,
+          dexterity: 60,
+        },
+        hp: 200,
+        maxHp: 200,
+        mp: 500,
+        maxMp: 500,
+        xp: 0,
+        level: 10,
         equipment: createEmptyEquipment(),
         inventory: [],
         copper: 1000,
@@ -328,37 +418,67 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         equipAccuracyBonus: 0,
       },
       currentFloor: 0,
-      currentDungeon: 'mine',
-      floors: { 'mine-0': testFloor },
-      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0, deepestFloor: 10 },
+      currentDungeon: "mine",
+      floors: { "mine-0": testFloor },
+      town: {
+        id: "hamlet",
+        shopInventories: {},
+        bankBalance: 0,
+        deepestFloor: 10,
+      },
       messages: [
-        { text: '=== SPELL TEST ARENA ===', severity: 'important', turn: 0 },
-        { text: 'All 30 spells available. 500 MP. Monsters placed for testing.', severity: 'system', turn: 0 },
-        { text: 'Bolt targets: E line at y=15. AoE group: x=10-11, y=20-21.', severity: 'system', turn: 0 },
-        { text: 'Items on ground near start. Cursed armor + unidentified ring for ID/curse testing.', severity: 'system', turn: 0 },
-        { text: 'Enclosed room at top-right for Light spell testing.', severity: 'system', turn: 0 },
+        { text: "=== SPELL TEST ARENA ===", severity: "important", turn: 0 },
+        {
+          text: "All 30 spells available. 500 MP. Monsters placed for testing.",
+          severity: "system",
+          turn: 0,
+        },
+        {
+          text: "Bolt targets: E line at y=15. AoE group: x=10-11, y=20-21.",
+          severity: "system",
+          turn: 0,
+        },
+        {
+          text: "Items on ground near start. Cursed armor + unidentified ring for ID/curse testing.",
+          severity: "system",
+          turn: 0,
+        },
+        {
+          text: "Enclosed room at top-right for Light spell testing.",
+          severity: "system",
+          turn: 0,
+        },
       ],
       turn: 0,
       gameTime: 0,
-      difficulty: 'easy',
+      difficulty: "easy",
       rngSeed: Date.now(),
       returnFloor: 0,
-      activeBuildingId: '',
+      activeBuildingId: "",
       ngPlusCount: 0,
     };
     gameLoop.setState(testState);
   }
 
   // F10: Jump to any floor with a powered-up hero for boss testing
-  if (e.code === 'F10') {
+  if (e.code === "F10") {
     e.preventDefault();
-    const input = prompt('Enter floor number (boss floors: 15, 20, 25, 30, 33, 36, 40):');
+    const input = prompt(
+      "Enter floor number (boss floors: 15, 20, 25, 30, 33, 36, 40):",
+    );
     if (!input) return;
     const targetFloor = parseInt(input) - 1; // convert to 0-indexed
     if (isNaN(targetFloor) || targetFloor < 0) return;
 
     const depth = targetFloor + 1;
-    const { floor: bossFloor, playerStart } = generateFloor('mine', targetFloor, Date.now(), true, true, 'easy');
+    const { floor: bossFloor, playerStart } = generateFloor(
+      "mine",
+      targetFloor,
+      Date.now(),
+      true,
+      true,
+      "easy",
+    );
 
     // Scale hero stats to be viable for the target floor
     const level = Math.max(10, Math.floor(depth * 0.8));
@@ -367,15 +487,23 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     const mp = 50 + depth * 10;
 
     const testState: GameState = {
-      screen: 'game',
+      screen: "game",
       hero: {
-        name: 'Boss Tester',
-        gender: 'male',
+        name: "Boss Tester",
+        gender: "male",
         position: playerStart,
-        attributes: { strength: statBase, intelligence: statBase, constitution: statBase, dexterity: statBase },
-        hp, maxHp: hp,
-        mp, maxMp: mp,
-        xp: 0, level,
+        attributes: {
+          strength: statBase,
+          intelligence: statBase,
+          constitution: statBase,
+          dexterity: statBase,
+        },
+        hp,
+        maxHp: hp,
+        mp,
+        maxMp: mp,
+        xp: 0,
+        level,
         equipment: createEmptyEquipment(),
         inventory: [],
         copper: 5000,
@@ -388,26 +516,39 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         equipAccuracyBonus: Math.floor(depth / 4),
       },
       currentFloor: targetFloor,
-      currentDungeon: 'mine',
+      currentDungeon: "mine",
       floors: { [`mine-${targetFloor}`]: bossFloor },
-      town: { id: 'hamlet', shopInventories: {}, bankBalance: 0, deepestFloor: depth },
+      town: {
+        id: "hamlet",
+        shopInventories: {},
+        bankBalance: 0,
+        deepestFloor: depth,
+      },
       messages: [
-        { text: `=== BOSS TEST: Floor ${depth} ===`, severity: 'important', turn: 0 },
-        { text: `Level ${level} hero with ${hp} HP, ${mp} MP, all spells.`, severity: 'system', turn: 0 },
+        {
+          text: `=== BOSS TEST: Floor ${depth} ===`,
+          severity: "important",
+          turn: 0,
+        },
+        {
+          text: `Level ${level} hero with ${hp} HP, ${mp} MP, all spells.`,
+          severity: "system",
+          turn: 0,
+        },
       ],
       turn: 0,
       gameTime: 0,
-      difficulty: 'easy',
+      difficulty: "easy",
       rngSeed: Date.now(),
       returnFloor: 0,
-      activeBuildingId: '',
+      activeBuildingId: "",
       ngPlusCount: 0,
     };
     gameLoop.setState(testState);
   }
 
   // F11: Teleport to town
-  if (e.code === 'F11') {
+  if (e.code === "F11") {
     e.preventDefault();
     const state = gameLoop.getState();
     gameLoop.setState(teleportToTown(state));
@@ -416,7 +557,9 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 
 // Screen cleanup — called on every screen switch
 const screenCleanups: (() => void)[] = [];
-function addScreenCleanup(fn: () => void): void { screenCleanups.push(fn); }
+function addScreenCleanup(fn: () => void): void {
+  screenCleanups.push(fn);
+}
 
 // Initial render
 render(gameLoop.getState());
@@ -428,7 +571,7 @@ function render(state: GameState): void {
       switchScreen(state);
     }
 
-    if (state.screen === 'game') {
+    if (state.screen === "game") {
       // Sync known spells to input manager for number-key casting
       input.setKnownSpells(state.hero.knownSpells);
       input.setSpellHotkeys(state.hero.spellHotkeys);
@@ -437,15 +580,26 @@ function render(state: GameState): void {
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
       if (floor) {
-        if (state.currentDungeon !== 'town') {
-          const isBlinded = state.hero.activeEffects.some(e => e.id === 'blinded');
+        if (state.currentDungeon !== "town") {
+          const isBlinded = state.hero.activeEffects.some(
+            (e) => e.id === "blinded",
+          );
           const fovRadius = isBlinded ? 1 : 4;
-          computeFov(floor, state.hero.position.x, state.hero.position.y, fovRadius);
-          trackFloorExplored(floor.explored, floor.width, floor.height, floor.tiles);
+          computeFov(
+            floor,
+            state.hero.position.x,
+            state.hero.position.y,
+            fovRadius,
+          );
+          trackFloorExplored(
+            floor.explored,
+            floor.width,
+            floor.height,
+            floor.tiles,
+          );
         } else {
           for (let y = 0; y < floor.height; y++)
-            for (let x = 0; x < floor.width; x++)
-              floor.visible[y][x] = true;
+            for (let x = 0; x < floor.width; x++) floor.visible[y][x] = true;
         }
       }
 
@@ -453,10 +607,11 @@ function render(state: GameState): void {
       hudRenderer?.render(state);
     }
   } catch (err) {
-    console.error('Render error:', err);
-    const errDiv = document.createElement('div');
-    errDiv.style.cssText = 'color:red;padding:20px;font-family:monospace;white-space:pre-wrap;';
-    errDiv.textContent = `Render error:\n${err instanceof Error ? err.stack ?? err.message : String(err)}`;
+    console.error("Render error:", err);
+    const errDiv = document.createElement("div");
+    errDiv.style.cssText =
+      "color:red;padding:20px;font-family:monospace;white-space:pre-wrap;";
+    errDiv.textContent = `Render error:\n${err instanceof Error ? (err.stack ?? err.message) : String(err)}`;
     root.replaceChildren(errDiv);
   }
 }
@@ -475,11 +630,11 @@ function switchScreen(state: GameState): void {
   animRenderer = null;
 
   switch (state.screen) {
-    case 'splash':
+    case "splash":
       input.setEnabled(false);
       createSplashScreen(
         root,
-        action => gameLoop.handleAction(action),
+        (action) => gameLoop.handleAction(action),
         (slot) => {
           const loaded = loadGame(slot);
           if (loaded) {
@@ -489,74 +644,116 @@ function switchScreen(state: GameState): void {
       );
       break;
 
-    case 'intro':
+    case "intro":
       input.setEnabled(false);
-      root.appendChild(createIntroScreen(() => {
-        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
-      }));
+      root.appendChild(
+        createIntroScreen(() => {
+          gameLoop.handleAction({ type: "setScreen", screen: "game" });
+        }),
+      );
       break;
 
-    case 'character-creation':
+    case "character-creation":
       input.setEnabled(false);
-      createCharacterCreationScreen(root, result => {
+      createCharacterCreationScreen(root, (result) => {
         try {
-          const hero = createHero(result.name, result.gender, result.attributes, result.startingSpell, result.difficulty);
+          const hero = createHero(
+            result.name,
+            result.gender,
+            result.attributes,
+            result.startingSpell,
+            result.difficulty,
+          );
 
           // Generate first dungeon floor (for when player enters the mine)
-          const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, result.difficulty);
+          const { floor: dungeonFloor } = generateFloor(
+            "mine",
+            0,
+            Date.now(),
+            true,
+            true,
+            result.difficulty,
+          );
 
           // Generate town and start player near temple
           const { floor: townFloor } = generateTownMap();
           hero.position = { ...TOWN_START_INITIAL };
 
           // Initialize shop inventories
-          const shopIds = ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store'];
-          const shopInventories: Record<string, import('./core/types').Item[]> = {};
-          for (const sid of shopIds) shopInventories[sid] = initShopInventory(sid, 1);
+          const shopIds = [
+            "weapon-shop",
+            "armor-shop",
+            "general-store",
+            "magic-shop",
+            "junk-store",
+          ];
+          const shopInventories: Record<string, import("./core/types").Item[]> =
+            {};
+          for (const sid of shopIds)
+            shopInventories[sid] = initShopInventory(sid, 1);
 
           const newState: GameState = {
             ...gameLoop.getState(),
-            screen: 'intro',
+            screen: "intro",
             hero,
             difficulty: result.difficulty,
-            currentDungeon: 'town',
+            currentDungeon: "town",
             currentFloor: 0,
-            floors: { 'mine-0': dungeonFloor, 'town-0': townFloor },
-            town: { id: 'hamlet', shopInventories, bankBalance: 0, deepestFloor: 1 },
+            floors: { "mine-0": dungeonFloor, "town-0": townFloor },
+            town: {
+              id: "hamlet",
+              shopInventories,
+              bankBalance: 0,
+              deepestFloor: 1,
+            },
             messages: [
-              { text: `Welcome to Bjarnarhaven, ${result.name}.`, severity: 'important', turn: 0 },
-              { text: 'Explore the town. When ready, enter the mine to the north.', severity: 'system', turn: 0 },
-              { text: 'Press F1 for help with controls.', severity: 'system', turn: 0 },
+              {
+                text: `Welcome to Bjarnarhaven, ${result.name}.`,
+                severity: "important",
+                turn: 0,
+              },
+              {
+                text: "Explore the town. When ready, enter the mine to the north.",
+                severity: "system",
+                turn: 0,
+              },
+              {
+                text: "Press F1 for help with controls.",
+                severity: "system",
+                turn: 0,
+              },
             ],
           };
 
           gameLoop.setState(newState);
         } catch (err) {
-          console.error('Failed to start game:', err);
-          const errDiv = document.createElement('div');
-          errDiv.style.cssText = 'color:red;padding:20px;font-family:monospace;white-space:pre-wrap;';
-          errDiv.textContent = `Error starting game:\n${err instanceof Error ? err.stack ?? err.message : String(err)}`;
+          console.error("Failed to start game:", err);
+          const errDiv = document.createElement("div");
+          errDiv.style.cssText =
+            "color:red;padding:20px;font-family:monospace;white-space:pre-wrap;";
+          errDiv.textContent = `Error starting game:\n${err instanceof Error ? (err.stack ?? err.message) : String(err)}`;
           root.replaceChildren(errDiv);
         }
       });
       break;
 
-    case 'game': {
+    case "game": {
       input.setEnabled(true);
       touchControls.show();
 
-      const gameContainer = document.createElement('div');
-      gameContainer.className = 'game-layout';
+      const gameContainer = document.createElement("div");
+      gameContainer.className = "game-layout";
       root.appendChild(gameContainer);
 
       // Spell targeting mode indicator
-      const spellIndicator = document.createElement('div');
-      spellIndicator.id = 'spell-mode-indicator';
-      spellIndicator.style.cssText = 'display:none;color:#ff0;background:#220;padding:4px 12px;font-size:13px;border:1px solid #550;margin-bottom:4px;width:100%;max-width:672px;text-align:center;';
+      const spellIndicator = document.createElement("div");
+      spellIndicator.id = "spell-mode-indicator";
+      spellIndicator.style.cssText =
+        "display:none;color:#ff0;background:#220;padding:4px 12px;font-size:13px;border:1px solid #550;margin-bottom:4px;width:100%;max-width:var(--game-width);text-align:center;";
       gameContainer.appendChild(spellIndicator);
 
       mapRenderer = new MapRenderer(gameContainer);
-      animRenderer = new AnimationRenderer(mapRenderer.getMapContainer());
+      animRenderer = new AnimationRenderer(mapRenderer.getAnimContainer());
       hudRenderer = new HudRenderer(gameContainer);
 
       // Spell bar click → enter spell casting mode
@@ -565,63 +762,79 @@ function switchScreen(state: GameState): void {
       });
 
       // Map click → direction for spell targeting or click-to-move
-      mapRenderer.getMapContainer().addEventListener('click', (e: MouseEvent) => {
-        const state = gameLoop.getState();
-        const worldPos = mapRenderer!.screenToWorld(e.clientX, e.clientY, state.hero.position);
-        if (worldPos) {
-          input.handleMapClick(state.hero.position.x, state.hero.position.y, worldPos.x, worldPos.y);
-          playPendingAnimations();
-        }
-      });
+      mapRenderer
+        .getMapContainer()
+        .addEventListener("click", (e: MouseEvent) => {
+          const state = gameLoop.getState();
+          const worldPos = mapRenderer!.screenToWorld(
+            e.clientX,
+            e.clientY,
+            state.hero.position,
+          );
+          if (worldPos) {
+            input.handleMapClick(
+              state.hero.position.x,
+              state.hero.position.y,
+              worldPos.x,
+              worldPos.y,
+            );
+            playPendingAnimations();
+          }
+        });
 
       break;
     }
 
-    case 'character-info': {
+    case "character-info": {
       input.setEnabled(false);
       const infoScreen = createCharacterInfoScreen(gameLoop.getState(), () => {
-        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+        gameLoop.handleAction({ type: "setScreen", screen: "game" });
       });
       addScreenCleanup(infoScreen.cleanup);
       root.appendChild(infoScreen);
       break;
     }
 
-    case 'inventory': {
+    case "inventory": {
       input.setEnabled(false);
       let invCleanup: (() => void) | null = null;
       const renderInventory = () => {
         if (invCleanup) invCleanup();
         const invScreen = createInventoryScreen(
           gameLoop.getState(),
-          action => {
+          (action) => {
             gameLoop.handleAction(action);
             root.replaceChildren();
             renderInventory();
           },
-          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+          () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
         );
         invCleanup = invScreen.cleanup;
-        addScreenCleanup(() => { if (invCleanup) invCleanup(); });
+        addScreenCleanup(() => {
+          if (invCleanup) invCleanup();
+        });
         root.replaceChildren(invScreen);
       };
       renderInventory();
       break;
     }
 
-    case 'spells': {
+    case "spells": {
       input.setEnabled(false);
       const spellScreen = createSpellScreen(
         gameLoop.getState(),
         (spellId) => {
-          gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+          gameLoop.handleAction({ type: "setScreen", screen: "game" });
           // After returning to game, start spell casting
           setTimeout(() => input.startSpellCast(spellId), 50);
         },
-        () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
         (hotkeys) => {
           const s = gameLoop.getState();
-          gameLoop.setState({ ...s, hero: { ...s.hero, spellHotkeys: hotkeys } });
+          gameLoop.setState({
+            ...s,
+            hero: { ...s.hero, spellHotkeys: hotkeys },
+          });
         },
       );
       addScreenCleanup(spellScreen.cleanup);
@@ -629,28 +842,27 @@ function switchScreen(state: GameState): void {
       break;
     }
 
-    case 'map': {
+    case "map": {
       input.setEnabled(false);
-      const mapScreen = createMapScreen(
-        gameLoop.getState(),
-        () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+      const mapScreen = createMapScreen(gameLoop.getState(), () =>
+        gameLoop.handleAction({ type: "setScreen", screen: "game" }),
       );
       addScreenCleanup(mapScreen.cleanup);
       root.appendChild(mapScreen);
       break;
     }
 
-    case 'help': {
+    case "help": {
       input.setEnabled(false);
       const helpScreen = createHelpScreen(() => {
-        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+        gameLoop.handleAction({ type: "setScreen", screen: "game" });
       });
       addScreenCleanup(helpScreen.cleanup);
       root.appendChild(helpScreen);
       break;
     }
 
-    case 'shop': {
+    case "shop": {
       input.setEnabled(false);
       const shopId = gameLoop.getState().activeBuildingId;
       const renderShop = () => {
@@ -658,8 +870,12 @@ function switchScreen(state: GameState): void {
         const shopScreen = createShopScreen(
           currentState,
           shopId,
-          (newState) => { gameLoop.setState(newState); root.replaceChildren(); renderShop(); },
-          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+          (newState) => {
+            gameLoop.setState(newState);
+            root.replaceChildren();
+            renderShop();
+          },
+          () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
         );
         addScreenCleanup(shopScreen.cleanup);
         root.replaceChildren(shopScreen);
@@ -668,7 +884,7 @@ function switchScreen(state: GameState): void {
       break;
     }
 
-    case 'service': {
+    case "service": {
       input.setEnabled(false);
       const buildingId = gameLoop.getState().activeBuildingId;
       const renderService = () => {
@@ -676,8 +892,12 @@ function switchScreen(state: GameState): void {
         const svcScreen = createServiceScreen(
           currentState,
           buildingId,
-          (newState) => { gameLoop.setState(newState); root.replaceChildren(); renderService(); },
-          () => gameLoop.handleAction({ type: 'setScreen', screen: 'game' }),
+          (newState) => {
+            gameLoop.setState(newState);
+            root.replaceChildren();
+            renderService();
+          },
+          () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
         );
         addScreenCleanup(svcScreen.cleanup);
         root.replaceChildren(svcScreen);
@@ -686,7 +906,7 @@ function switchScreen(state: GameState): void {
       break;
     }
 
-    case 'victory': {
+    case "victory": {
       input.setEnabled(false);
       touchControls.hide();
       const victoryScreen = createVictoryScreen(
@@ -698,21 +918,40 @@ function switchScreen(state: GameState): void {
           const ngCount = s.ngPlusCount + 1;
 
           const { floor: townFloor } = generateTownMap();
-          const { floor: dungeonFloor } = generateFloor('mine', 0, Date.now(), true, true, nextDifficulty);
+          const { floor: dungeonFloor } = generateFloor(
+            "mine",
+            0,
+            Date.now(),
+            true,
+            true,
+            nextDifficulty,
+          );
 
           const ngState: GameState = {
             ...s,
-            screen: 'game',
-            currentDungeon: 'town',
+            screen: "game",
+            currentDungeon: "town",
             currentFloor: 0,
-            floors: { 'mine-0': dungeonFloor, 'town-0': townFloor },
+            floors: { "mine-0": dungeonFloor, "town-0": townFloor },
             difficulty: nextDifficulty,
             ngPlusCount: ngCount,
             returnFloor: 0,
             messages: [
-              { text: `=== NEW GAME PLUS ${ngCount} ===`, severity: 'important', turn: s.turn },
-              { text: `Difficulty increased to ${nextDifficulty}. Loot quality improved.`, severity: 'system', turn: s.turn },
-              { text: 'The dungeon has been reborn. Surtur stirs once more...', severity: 'important', turn: s.turn },
+              {
+                text: `=== NEW GAME PLUS ${ngCount} ===`,
+                severity: "important",
+                turn: s.turn,
+              },
+              {
+                text: `Difficulty increased to ${nextDifficulty}. Loot quality improved.`,
+                severity: "system",
+                turn: s.turn,
+              },
+              {
+                text: "The dungeon has been reborn. Surtur stirs once more...",
+                severity: "important",
+                turn: s.turn,
+              },
             ],
             town: { ...s.town, shopInventories: {}, deepestFloor: 1 },
           };
@@ -728,10 +967,10 @@ function switchScreen(state: GameState): void {
       break;
     }
 
-    case 'death': {
+    case "death": {
       input.setEnabled(false);
-      createDeathScreen(root, gameLoop.getState(), action => {
-        if (action.type === 'setScreen' && action.screen === 'splash') {
+      createDeathScreen(root, gameLoop.getState(), (action) => {
+        if (action.type === "setScreen" && action.screen === "splash") {
           const freshState = createInitialGameState();
           gameLoop.setState(freshState);
         }
@@ -739,10 +978,10 @@ function switchScreen(state: GameState): void {
       break;
     }
 
-    case 'achievements': {
+    case "achievements": {
       input.setEnabled(false);
       const achScreen = createAchievementsScreen(() => {
-        gameLoop.handleAction({ type: 'setScreen', screen: 'game' });
+        gameLoop.handleAction({ type: "setScreen", screen: "game" });
       });
       addScreenCleanup(achScreen.cleanup);
       root.appendChild(achScreen);
