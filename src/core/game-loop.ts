@@ -4,6 +4,7 @@ import { processAllMonsterTurns } from "../systems/monsters/ai";
 import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
 import { hasEnchant, enchantMult } from "../utils/Enchants";
+import { ITEM_BY_ID } from "../data/items";
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -87,6 +88,15 @@ export class GameLoop {
     }
     if (hasRegenMp && state.turn % 3 === 0 && hero.mp < hero.maxMp) {
       hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + regenMpMult) };
+    }
+
+    // Crown of the Ancients: +2 HP and +2 MP per turn
+    for (const eq of Object.values(hero.equipment)) {
+      if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'crown-power') {
+        if (hero.hp < hero.maxHp) hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 2) };
+        if (hero.mp < hero.maxMp) hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + 2) };
+        break;
+      }
     }
 
     const remaining = hero.activeEffects

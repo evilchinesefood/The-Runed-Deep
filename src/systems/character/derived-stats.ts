@@ -1,4 +1,5 @@
 import type { Hero, Attributes, Equipment, EquipSlot } from '../../core/types';
+import { ITEM_BY_ID } from '../../data/items';
 
 /**
  * Computes max HP from Constitution.
@@ -53,15 +54,23 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   // Special enchantment attribute bonuses from equipment (handles critical variants)
   let bonusStr = 0, bonusInt = 0, bonusCon = 0, bonusDex = 0;
   for (const slot of Object.values(hero.equipment)) {
-    if (!slot?.specialEnchantments) continue;
-    for (const e of slot.specialEnchantments) {
-      const isCrit = (e as string).endsWith(':critical');
-      const mult = isCrit ? 2 : 1;
-      const base = isCrit ? (e as string).replace(':critical', '') : e;
-      if (base === 'str-bonus') bonusStr += 10 * mult;
-      if (base === 'int-bonus') bonusInt += 10 * mult;
-      if (base === 'con-bonus') bonusCon += 10 * mult;
-      if (base === 'dex-bonus') bonusDex += 10 * mult;
+    if (!slot) continue;
+    // Special enchantment bonuses
+    if (slot.specialEnchantments) {
+      for (const e of slot.specialEnchantments) {
+        const isCrit = (e as string).endsWith(':critical');
+        const mult = isCrit ? 2 : 1;
+        const base = isCrit ? (e as string).replace(':critical', '') : e;
+        if (base === 'str-bonus') bonusStr += 10 * mult;
+        if (base === 'int-bonus') bonusInt += 10 * mult;
+        if (base === 'con-bonus') bonusCon += 10 * mult;
+        if (base === 'dex-bonus') bonusDex += 10 * mult;
+      }
+    }
+    // Unique item attribute bonuses
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (tpl?.uniqueAbility === 'crown-power') {
+      bonusStr += 10; bonusInt += 10; bonusCon += 10; bonusDex += 10;
     }
   }
   const effCon = hero.attributes.constitution + bonusCon;
@@ -99,15 +108,34 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const hp = Math.min(hero.hp, maxHp);
   const mp = Math.min(hero.mp, maxMp);
 
-  // Apply magic resist bonus to all elemental resistances (cap at 75)
+  // Unique item abilities — elemental resistances and attribute bonuses
+  let uniqueResist = { cold: 0, fire: 0, lightning: 0, acid: 0, drain: 0 };
+  for (const slot of Object.values(hero.equipment)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (!tpl?.uniqueAbility) continue;
+    const ua = tpl.uniqueAbility;
+    if (ua === 'resist-fire-75') uniqueResist.fire += 75;
+    else if (ua === 'resist-cold-75') uniqueResist.cold += 75;
+    else if (ua === 'resist-lightning-75') uniqueResist.lightning += 75;
+    else if (ua === 'resist-drain-75') uniqueResist.drain += 75;
+    else if (ua === 'elemental-immunity') {
+      uniqueResist.cold += 50; uniqueResist.fire += 50;
+      uniqueResist.lightning += 50; uniqueResist.acid += 50; uniqueResist.drain += 50;
+    } else if (ua === 'lightning-boost') {
+      uniqueResist.lightning += 75;
+    }
+  }
+
+  // Apply magic resist + unique resist bonuses to all elemental resistances
   const baseResistances = hero.resistances;
-  const resistances = magicResistBonus > 0 ? {
-    cold:      Math.min(75, baseResistances.cold + magicResistBonus),
-    fire:      Math.min(75, baseResistances.fire + magicResistBonus),
-    lightning: Math.min(75, baseResistances.lightning + magicResistBonus),
-    acid:      Math.min(75, baseResistances.acid + magicResistBonus),
-    drain:     Math.min(75, baseResistances.drain + magicResistBonus),
-  } : baseResistances;
+  const resistances = {
+    cold:      Math.min(100, baseResistances.cold + magicResistBonus + uniqueResist.cold),
+    fire:      Math.min(100, baseResistances.fire + magicResistBonus + uniqueResist.fire),
+    lightning: Math.min(100, baseResistances.lightning + magicResistBonus + uniqueResist.lightning),
+    acid:      Math.min(100, baseResistances.acid + magicResistBonus + uniqueResist.acid),
+    drain:     Math.min(100, baseResistances.drain + magicResistBonus + uniqueResist.drain),
+  };
 
   return {
     ...hero,

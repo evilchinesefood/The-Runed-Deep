@@ -25,6 +25,7 @@ import {
   buildDetectAnimation,
 } from "../../rendering/animations";
 import { hasEnchant, enchantMult } from "../../utils/Enchants";
+import { ITEM_BY_ID } from "../../data/items";
 
 // ============================================================
 // Spell Casting
@@ -438,6 +439,16 @@ function applySpellDamageToMonster(
     const mult =
       enchantMult(state.hero.equipment, "spell-damage") >= 2 ? 1.6 : 1.3;
     damage = Math.round(damage * mult);
+  }
+
+  // Helm of Storms: +50% lightning damage
+  if (element === "lightning") {
+    for (const eq of Object.values(state.hero.equipment)) {
+      if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "lightning-boost") {
+        damage = Math.round(damage * 1.5);
+        break;
+      }
+    }
   }
 
   // Apply elemental resistance

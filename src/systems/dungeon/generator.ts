@@ -709,9 +709,15 @@ function placeTraps(
   const count = Math.min(trapCount, validPositions.length);
   for (let i = 0; i < count; i++) {
     const pos = validPositions[i];
-    // Pick trap type — portal traps only appear on deeper floors
-    const available =
-      depth < 5 ? TRAP_TYPES.filter((t) => t.id !== "portal") : TRAP_TYPES;
+    // Filter traps by depth — stronger traps appear deeper
+    const available = TRAP_TYPES.filter((t) => {
+      if (t.id === "portal" && depth < 5) return false;
+      if (t.id === "lightning" && depth < 10) return false;
+      if (t.id === "wind" && depth < 8) return false;
+      if (t.id === "rune" && depth < 15) return false;
+      if (t.id === "cobweb" && depth < 3) return false;
+      return true;
+    });
     const trap = available[Math.floor(rand() * available.length)];
     floor.tiles[pos.y][pos.x] = createTrapTile(trap.id);
   }

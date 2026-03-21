@@ -105,14 +105,20 @@
       if (saved) Object.assign(notes, JSON.parse(saved));
     } catch {}
 
+    const deletedSprites = new Set();
+
     function saveNotes() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
       updateCount();
     }
 
     function updateCount() {
-      const count = Object.values(notes).filter(n => n.trim()).length;
-      document.getElementById('noteCount').textContent = count + ' note' + (count !== 1 ? 's' : '');
+      const c = Object.values(notes).filter(n => n.trim()).length;
+      const d = typeof deletedSprites !== 'undefined' ? deletedSprites.size : 0;
+      const parts = [];
+      if (c > 0) parts.push(c + ' note' + (c !== 1 ? 's' : ''));
+      if (d > 0) parts.push(d + ' to delete');
+      document.getElementById('noteCount').textContent = parts.join(', ') || '0 notes';
     }
 
     const categories = [
@@ -249,6 +255,16 @@
         lines.push('');
       }
 
+      // Append sprites marked for deletion
+      if (deletedSprites.size > 0) {
+        lines.push('# Unused Sprites to Delete & Blank');
+        lines.push('');
+        for (const cls of deletedSprites) {
+          lines.push('- `.' + cls + '` — delete CSS class and blank sprite on sheet');
+        }
+        lines.push('');
+      }
+
       navigator.clipboard.writeText(lines.join('\n')).then(() => {
         const msg = document.getElementById('copiedMsg');
         msg.style.display = 'inline';
@@ -273,6 +289,103 @@
     footer.style.cssText = 'margin-top:24px;color:#555;font-size:12px;';
     footer.textContent = total + ' base templates';
     content.appendChild(footer);
+
+    // ── Unused Sprites Section ──────────────────────────────
+    // Fetch CSS + key source files to check both template and code references
+    Promise.all([
+      fetch('/css/sprites/items.css').then(function(r) { return r.text(); }),
+      fetch('/src/rendering/map-renderer.ts').then(function(r) { return r.text(); }),
+      fetch('/src/systems/inventory/display-name.ts').then(function(r) { return r.text(); }),
+      fetch('/src/core/game-loop.ts').then(function(r) { return r.text(); }),
+      fetch('/src/systems/combat/combat.ts').then(function(r) { return r.text(); }),
+      fetch('/src/systems/spells/casting.ts').then(function(r) { return r.text(); }),
+      fetch('/src/systems/items/loot.ts').then(function(r) { return r.text(); }),
+      fetch('/src/ui/inventory-screen.ts').then(function(r) { return r.text(); }),
+      fetch('/src/ui/ShopScreen.ts').then(function(r) { return r.text(); }),
+      fetch('/src/ui/item-tooltip.ts').then(function(r) { return r.text(); }),
+      fetch('/src/data/Enchantments.ts').then(function(r) { return r.text(); }),
+    ]).then(function(results) {
+      const cssText = results[0];
+      const codeSources = results.slice(1).join('\n');
+
+      const allClasses = [];
+      const re = /\.([a-z0-9-]+)\s*\{/g;
+      let m;
+      while ((m = re.exec(cssText)) !== null) {
+        if (m[1] !== 'inventory-item') allClasses.push(m[1]);
+      }
+
+      // Check templates
+      const usedSprites = new Set();
+      for (const t of ALL_ITEM_TEMPLATES) {
+        usedSprites.add(t.sprite);
+      }
+
+      // Check code references (string literals containing the class name)
+      for (const cls of allClasses) {
+        if (codeSources.indexOf("'" + cls + "'") !== -1 || codeSources.indexOf('"' + cls + '"') !== -1) {
+          usedSprites.add(cls);
+        }
+      }
+
+      const unused = allClasses.filter(function(c) { return !usedSprites.has(c); });
+      if (unused.length === 0) return;
+
+      const h2 = document.createElement('h2');
+      h2.textContent = 'Unused Sprites (' + unused.length + ')';
+      h2.style.color = '#866';
+      content.appendChild(h2);
+
+      const desc = document.createElement('div');
+      desc.style.cssText = 'color:#666;font-size:12px;margin-bottom:8px;';
+      desc.textContent = 'Click to mark for deletion. Marked sprites will be included in Copy All Notes.';
+      content.appendChild(desc);
+
+      const ugrid = document.createElement('div');
+      ugrid.className = 'grid';
+
+      for (const cls of unused) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.style.cursor = 'pointer';
+        row.style.opacity = '0.6';
+
+        const sp = document.createElement('div');
+        sp.style.cssText = 'width:32px;height:32px;flex-shrink:0;border:1px solid #333;';
+        sp.className = cls;
+        row.appendChild(sp);
+
+        const name = document.createElement('span');
+        name.className = 'name normal';
+        name.textContent = '.' + cls;
+        name.style.cssText = 'font-family:monospace;flex:1;';
+        row.appendChild(name);
+
+        const badge = document.createElement('span');
+        badge.style.cssText = 'font-size:10px;padding:1px 5px;border-radius:2px;display:none;background:#411;color:#f66;';
+        badge.textContent = 'DELETE';
+        row.appendChild(badge);
+
+        row.addEventListener('click', function() {
+          if (deletedSprites.has(cls)) {
+            deletedSprites.delete(cls);
+            row.style.opacity = '0.6';
+            row.style.borderColor = '#333';
+            badge.style.display = 'none';
+          } else {
+            deletedSprites.add(cls);
+            row.style.opacity = '1';
+            row.style.borderColor = '#f44';
+            badge.style.display = 'inline';
+          }
+          updateCount();
+        });
+
+        ugrid.appendChild(row);
+      }
+
+      content.appendChild(ugrid);
+    });
   </script>
 </body>
 </html>

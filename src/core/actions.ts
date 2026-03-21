@@ -34,6 +34,7 @@ import {
   trackFloorCleared,
 } from "../systems/Achievements";
 import { hasEnchant } from "../utils/Enchants";
+import { ITEM_BY_ID } from "../data/items";
 import { TRAP_DATA } from "../data/Traps";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
@@ -266,8 +267,9 @@ function processMove(state: GameState, direction: Direction): GameState {
   if (tileAtNew.type === "trap" && tileAtNew.trapType) {
     const isLevitating = state.hero.activeEffects.some(
       (e) => e.id === "levitation",
-    );
-    const isTrapImmune = hasEnchant(state.hero.equipment, "trap-immune");
+    ) || hasUniqueAbility(state.hero.equipment, 'levitation');
+    const isTrapImmune = hasEnchant(state.hero.equipment, "trap-immune")
+      || hasUniqueAbility(state.hero.equipment, 'elemental-immunity');
     if (!isLevitating && !isTrapImmune) {
       const result = triggerTrap(
         tileAtNew,
@@ -688,10 +690,40 @@ function triggerTrap(
     return { hero, floor: newFloor };
   }
 
-  // Damage traps
-  const dmg =
+  // Cobweb trap: lose a turn (no damage)
+  if (tile.trapType === "cobweb") {
+    messages.push({ text: trap.message, severity: "important", turn });
+    return { hero, floor: newFloor };
+  }
+
+  // Damage traps — apply elemental resistance if applicable
+  let dmg =
     trap.damage[0] +
     Math.floor(Math.random() * (trap.damage[1] - trap.damage[0] + 1));
+
+  if (trap.element) {
+    const resist = hero.resistances[trap.element] ?? 0;
+    if (resist >= 100) {
+      messages.push({
+        text: `${trap.message} Your resistance absorbs the damage!`,
+        severity: "combat",
+        turn,
+      });
+      return { hero, floor: newFloor };
+    }
+    if (resist > 0) {
+      const reduced = Math.round(dmg * (1 - resist / 100));
+      messages.push({
+        text: `${trap.message} Resistance reduces the damage!`,
+        severity: "combat",
+        turn,
+      });
+      dmg = Math.max(1, reduced);
+    } else if (resist < 0) {
+      dmg = Math.round(dmg * (1 + Math.abs(resist) / 100));
+    }
+  }
+
   const newHp = Math.max(0, hero.hp - dmg);
   messages.push({
     text: `${trap.message} You take ${dmg} damage. (${newHp}/${hero.maxHp} HP)`,
@@ -701,6 +733,16 @@ function triggerTrap(
   hero = { ...hero, hp: newHp };
 
   return { hero, floor: newFloor };
+}
+
+/** Check if any equipped item has a specific unique ability */
+function hasUniqueAbility(equipment: Record<string, any>, ability: string): boolean {
+  for (const item of Object.values(equipment)) {
+    if (!item?.templateId) continue;
+    const tpl = ITEM_BY_ID[item.templateId];
+    if (tpl?.uniqueAbility === ability) return true;
+  }
+  return false;
 }
 
 function processSave(state: GameState): GameState {
@@ -858,6 +900,10 @@ function processSearch(state: GameState): GameState {
           dart: "dart-trap",
           portal: "portal-trap",
           acid: "acid-trap",
+          lightning: "lightning-trap",
+          wind: "wind-trap",
+          rune: "rune-trap",
+          cobweb: "cobweb-trap",
         };
         newTiles[y][x] = {
           ...tile,

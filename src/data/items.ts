@@ -32,6 +32,9 @@ export interface ItemTemplate {
   materialTier?: string;
   weightCapacity?: number; // max carry weight in grams
   bulkCapacity?: number;   // max bulk in grams
+  // Unique items
+  unique?: boolean;
+  uniqueAbility?: string;  // special ability ID
 }
 
 // ── Weapons ───────────────────────────────────────────────
@@ -150,9 +153,7 @@ const SHIELDS: ItemTemplate[] = [
   { id: 'small-wood-shield', name: 'Wooden Shield', category: 'shield', sprite: 'wood-shield', equipSlot: 'shield',
     weight: 2000, value: 10, depthMin: 1, depthMax: 16, ac: 1 },
   { id: 'small-iron-shield', name: 'Iron Shield', category: 'shield', sprite: 'metal-shield', equipSlot: 'shield',
-    weight: 3000, value: 30, depthMin: 5, depthMax: 26, ac: 3 },
-  { id: 'large-steel-shield', name: 'Steel Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
-    weight: 5000, value: 80, depthMin: 14, depthMax: 99, ac: 5 },
+    weight: 3000, value: 30, depthMin: 5, depthMax: 99, ac: 3 },
 ];
 
 // ── Helmets ───────────────────────────────────────────────
@@ -161,9 +162,7 @@ const HELMETS: ItemTemplate[] = [
   { id: 'leather-cap', name: 'Leather Cap', category: 'helmet', sprite: 'leather-helmet', equipSlot: 'helmet',
     weight: 500, value: 10, depthMin: 1, depthMax: 14, ac: 1 },
   { id: 'iron-helm', name: 'Iron Helm', category: 'helmet', sprite: 'metal-helmet', equipSlot: 'helmet',
-    weight: 1500, value: 30, depthMin: 5, depthMax: 24, ac: 2 },
-  { id: 'steel-helm', name: 'Steel Helm', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
-    weight: 2000, value: 60, depthMin: 12, depthMax: 99, ac: 3 },
+    weight: 1500, value: 30, depthMin: 5, depthMax: 99, ac: 2 },
 ];
 
 // ── Other Equipment ───────────────────────────────────────
@@ -185,7 +184,7 @@ const EQUIPMENT: ItemTemplate[] = [
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
   { id: 'ring', name: 'Ring', category: 'ring', sprite: 'ring', equipSlot: 'ringLeft',
     weight: 50, value: 20, depthMin: 5, depthMax: 99, ac: 0 },
-  { id: 'amulet', name: 'Amulet', category: 'amulet', sprite: 'amulet', equipSlot: 'amulet',
+  { id: 'amulet', name: 'Amulet', category: 'amulet', sprite: 'amulet-enchanted', equipSlot: 'amulet',
     weight: 100, value: 25, depthMin: 5, depthMax: 99, ac: 0 },
 ];
 
@@ -267,12 +266,12 @@ const CONTAINERS: ItemTemplate[] = [
     weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 60000, bulkCapacity: 12000 },
   { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'backpack-enchanted', equipSlot: 'pack',
     weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 400000, bulkCapacity: 160000 },
-  { id: 'leather-belt', name: 'Leather Belt', category: 'belt', sprite: 'belt-leather-enchanted', equipSlot: 'belt',
+  { id: 'leather-belt', name: 'Fine Belt', category: 'belt', sprite: 'belt-leather-enchanted', equipSlot: 'belt',
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
   { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse-leather', equipSlot: 'purse',
     weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 10000, bulkCapacity: 2000 },
   // Elven tier containers
-  { id: 'elven-pack', name: 'Elven Pack', category: 'container', sprite: 'backpack-enchanted', equipSlot: 'pack',
+  { id: 'elven-pack', name: 'Elven Pack', category: 'container', sprite: 'backpack-elven', equipSlot: 'pack',
     weight: 300, value: 250, depthMin: 14, depthMax: 99, weightCapacity: 100000, bulkCapacity: 30000, materialTier: 'elven' },
   { id: 'elven-purse', name: 'Elven Purse', category: 'container', sprite: 'purse-leather-enchanted', equipSlot: 'purse',
     weight: 50, value: 100, depthMin: 14, depthMax: 99, weightCapacity: 20000, bulkCapacity: 6000, materialTier: 'elven' },
@@ -308,6 +307,33 @@ const WORTHLESS: ItemTemplate[] = [
     weight: 30, value: 1, depthMin: 1, depthMax: 99 },
 ];
 
+// ── Unique / Named Items ─────────────────────────────────
+
+const UNIQUE_ITEMS: ItemTemplate[] = [
+  // Resist amulets — permanent elemental protection
+  { id: 'amulet-fire-ward', name: 'Amulet of Fire Ward', category: 'amulet', sprite: 'amulet-resist-fire', equipSlot: 'amulet',
+    weight: 100, value: 400, depthMin: 10, depthMax: 99, ac: 1, unique: true, uniqueAbility: 'resist-fire-75' },
+  { id: 'amulet-frost-ward', name: 'Amulet of Frost Ward', category: 'amulet', sprite: 'amulet-resist-cold', equipSlot: 'amulet',
+    weight: 100, value: 400, depthMin: 10, depthMax: 99, ac: 1, unique: true, uniqueAbility: 'resist-cold-75' },
+  { id: 'amulet-storm-ward', name: 'Amulet of Storm Ward', category: 'amulet', sprite: 'amulet-resist-lightning', equipSlot: 'amulet',
+    weight: 100, value: 400, depthMin: 12, depthMax: 99, ac: 1, unique: true, uniqueAbility: 'resist-lightning-75' },
+  { id: 'amulet-soul-ward', name: 'Amulet of Soul Ward', category: 'amulet', sprite: 'amulet-resist-drain', equipSlot: 'amulet',
+    weight: 100, value: 500, depthMin: 15, depthMax: 99, ac: 1, unique: true, uniqueAbility: 'resist-drain-75' },
+  // Unique helmets
+  { id: 'helm-of-true-sight', name: 'Helm of True Sight', category: 'helmet', sprite: 'metal-helmet-of-detect-monsters', equipSlot: 'helmet',
+    weight: 1800, value: 600, depthMin: 15, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'detect-monsters' },
+  { id: 'helm-of-storms', name: 'Helm of Storms', category: 'helmet', sprite: 'metal-helmet-of-storms', equipSlot: 'helmet',
+    weight: 2200, value: 800, depthMin: 25, depthMax: 99, ac: 5, unique: true, uniqueAbility: 'lightning-boost' },
+  // Unique boots
+  { id: 'boots-of-levitation', name: 'Boots of Levitation', category: 'boots', sprite: 'boots-of-levitation', equipSlot: 'boots',
+    weight: 800, value: 700, depthMin: 20, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'levitation' },
+  // Unique amulets — late game
+  { id: 'elemental-keystone', name: 'Elemental Keystone', category: 'amulet', sprite: 'elemental-portal', equipSlot: 'amulet',
+    weight: 150, value: 1200, depthMin: 35, depthMax: 99, ac: 2, unique: true, uniqueAbility: 'elemental-immunity' },
+  { id: 'crown-of-ancients', name: 'Crown of the Ancients', category: 'amulet', sprite: 'amulet-of-kings', equipSlot: 'amulet',
+    weight: 200, value: 2000, depthMin: 40, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'crown-power' },
+];
+
 // ============================================================
 // Exports
 // ============================================================
@@ -329,6 +355,7 @@ export const ALL_ITEM_TEMPLATES: ItemTemplate[] = [
   ...CURRENCY,
   ...CONTAINERS,
   ...WORTHLESS,
+  ...UNIQUE_ITEMS,
 ];
 
 export const ITEM_BY_ID: Record<string, ItemTemplate> = Object.fromEntries(

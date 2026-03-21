@@ -6,6 +6,7 @@ import {
 } from "../ui/item-tooltip";
 import { getDungeonForFloor, getTileset } from "../systems/dungeon/Tilesets";
 import { getDisplaySprite, getItemGlow } from "../systems/inventory/display-name";
+import { ITEM_BY_ID } from "../data/items";
 
 const TILE_SIZE = 32;
 
@@ -174,6 +175,14 @@ export class MapRenderer {
     const floor = state.floors[floorKey];
     if (!floor) return;
 
+    // Check for Helm of True Sight
+    let hasTrueSight = false;
+    for (const eq of Object.values(state.hero.equipment)) {
+      if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'detect-monsters') {
+        hasTrueSight = true; break;
+      }
+    }
+
     const cameraX = state.hero.position.x - Math.floor(VIEWPORT_TILES_X / 2);
     const cameraY = state.hero.position.y - Math.floor(VIEWPORT_TILES_Y / 2);
     const tileset =
@@ -331,6 +340,16 @@ export class MapRenderer {
             cell.entity.style.display = "block";
             cell.entity.style.opacity = "1";
             continue;
+          }
+        } else if (hasTrueSight && explored) {
+          // True Sight: show monsters on explored but not visible tiles (dimmed)
+          const monster = floor.monsters.find(
+            (m) => m.position.x === worldX && m.position.y === worldY,
+          );
+          if (monster) {
+            cell.entity.className = monster.sprite;
+            cell.entity.style.display = "block";
+            cell.entity.style.opacity = "0.5";
           }
         }
       }

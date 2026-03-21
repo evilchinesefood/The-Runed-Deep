@@ -54,15 +54,16 @@ export function createItemFromTemplate(
   const tier = ITEM_BY_ID[template.id]?.materialTier;
 
   if (template.equipSlot) {
+    const isUnique = !!template.unique;
     const enchantRoll = Math.random();
-    if (enchantRoll < 0.05 + depth * 0.01) {
-      // Cursed item
+    if (!isUnique && enchantRoll < 0.05 + depth * 0.01) {
+      // Cursed item (never for uniques)
       enchantment = -(Math.floor(Math.random() * 3) + 1);
       cursed = true;
-    } else if (enchantRoll < 0.15 + depth * 0.015) {
-      // Enchanted item — tier, depth, and NG+ boost the range
-      const baseMax = tier === "meteoric" ? 8 : tier === "elven" ? 4 : 3;
-      const depthBonus = Math.floor(depth / 15); // +1 at floor 15, +2 at 30
+    } else if (enchantRoll < (isUnique ? 0.3 + ngPlus * 0.2 : 0.15 + depth * 0.015)) {
+      // Enchanted item — uniques have higher base chance, scale with NG+
+      const baseMax = isUnique ? 3 + ngPlus * 3 : tier === "meteoric" ? 8 : tier === "elven" ? 4 : 3;
+      const depthBonus = Math.floor(depth / 15);
       const ngBonus = tier === "meteoric" ? ngPlus * 5 : 0;
       const maxEnchant = baseMax + depthBonus + ngBonus;
       enchantment = Math.floor(Math.random() * maxEnchant) + 1;
@@ -103,7 +104,7 @@ export function createItemFromTemplate(
     weight: template.weight,
     bulk: Math.floor(template.weight / 5),
     value: Math.max(1, template.value + enchantment * 20),
-    identified: !cursed && enchantment === 0,
+    identified: !!template.unique || (!cursed && enchantment === 0),
     cursed,
     enchantment,
     properties,

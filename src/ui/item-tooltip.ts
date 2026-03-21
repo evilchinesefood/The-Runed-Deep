@@ -165,6 +165,24 @@ function buildTooltipContent(item: Item): HTMLElement {
     container.appendChild(enchBox);
   }
 
+  // Unique ability
+  const tplU = ITEM_BY_ID[item.templateId];
+  if (tplU?.uniqueAbility && item.identified) {
+    const abilityDesc: Record<string, string> = {
+      'resist-fire-75': '+75 Fire Resistance',
+      'resist-cold-75': '+75 Cold Resistance',
+      'resist-lightning-75': '+75 Lightning Resistance',
+      'resist-drain-75': '+75 Drain Resistance, immune to level drain',
+      'detect-monsters': 'Reveals all monsters on the floor',
+      'lightning-boost': '+50% Lightning spell damage, +75 Lightning Resistance',
+      'levitation': 'Immune to pit and portal traps, walk over water',
+      'elemental-immunity': '+50% all elemental resistances, immune to traps',
+      'crown-power': '+10 all attributes, +2 HP/MP regen per turn',
+    };
+    const desc = abilityDesc[tplU.uniqueAbility] ?? tplU.uniqueAbility;
+    container.appendChild(d('div', { color: '#fc4', fontSize: '11px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
+  }
+
   // Cursed
   if (item.cursed && item.identified) {
     container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed'));
