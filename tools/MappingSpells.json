@@ -1,0 +1,18 @@
+{
+  "arrows-spell": "effect/arrow0.png",
+  "dart-spell": "effect/bolt0.png",
+  "snow-spell": "effect/cloud_cold0.png",
+  "water-spell": "effect/cloud_blue_smoke.png",
+  "fire-bolt-spell": "effect/bolt3.png",
+  "ice-bolt-spell": "effect/bolt5.png",
+  "lightnig-bolt-spell": "effect/bolt4.png",
+  "lightning-bolt-spell": "effect/bolt4.png",
+  "acid-bolt-spell": "effect/bolt6.png",
+  "wind1-spell": "effect/cloud_grey_smoke.png",
+  "wind2-spell": "effect/cloud_blue_smoke.png",
+  "fire1-spell": "effect/cloud_fire0.png",
+  "fire2-spell": "effect/cloud_fire1.png",
+  "lightning1-spell": "effect/bolt4.png",
+  "lightning2-spell": "effect/bolt5.png",
+  "lightning3-spell": "effect/bolt6.png"
+}
