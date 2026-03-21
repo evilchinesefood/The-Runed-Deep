@@ -1,5 +1,5 @@
 // ============================================================
-// Monster database — Castle of the Winds
+// Monster database — The Runed Deep
 //
 // Monsters unlock progressively: 1-2 new types every few floors.
 // Once unlocked, monsters continue to appear on deeper floors

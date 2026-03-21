@@ -1,5 +1,5 @@
 // ============================================================
-// Spell database — all 30 learnable spells from Castle of the Winds
+// Spell database — all 30 learnable spells from The Runed Deep
 // ============================================================
 
 export type SpellCategory =

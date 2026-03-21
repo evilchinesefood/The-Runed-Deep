@@ -1,5 +1,5 @@
 // ============================================================
-// Item Database — Castle of the Winds
+// Item Database — The Runed Deep
 //
 // All item templates organized by category. Each has a depth
 // range for when it can appear as loot. Deeper = better items.

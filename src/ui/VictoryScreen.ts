@@ -105,7 +105,7 @@ export function createVictoryScreen(
     },
     `With a final blow, Surtur falls. The ancient evil is vanquished.
 
-The Castle of the Winds grows silent. You have avenged Bjarnarhaven. Your name will be sung in the halls of Odin for eternity.`,
+The The Runed Deep grows silent. You have avenged Bjarnarhaven. Your name will be sung in the halls of Odin for eternity.`,
   );
   parchment.appendChild(epilogue);
 

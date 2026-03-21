@@ -1,5 +1,5 @@
 // ============================================================
-// Boss floor generator — Castle of the Winds
+// Boss floor generator — The Runed Deep
 // Pre-designed layouts for all 7 boss encounters.
 // ============================================================
 

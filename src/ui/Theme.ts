@@ -9,7 +9,7 @@ export function injectTheme(): void {
   injected = true;
 
   const style = document.createElement("style");
-  style.id = "cotw-theme";
+  style.id = "rd-theme";
   style.textContent = `
     :root {
       /* Colors */

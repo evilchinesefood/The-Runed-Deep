@@ -1,6 +1,6 @@
 import type { GameState } from "./types";
 
-const SAVE_KEY_PREFIX = "cotw-save-";
+const SAVE_KEY_PREFIX = "rd-save-";
 const MAX_SLOTS = 3;
 
 export interface SaveSlotInfo {

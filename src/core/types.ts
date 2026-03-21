@@ -1,5 +1,5 @@
 // ============================================================
-// Core type definitions for Castle of the Winds
+// Core type definitions for The Runed Deep
 // ============================================================
 
 export interface Vector2 {

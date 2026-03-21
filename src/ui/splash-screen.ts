@@ -15,7 +15,7 @@ export function createSplashScreen(
   // Logo image
   const logo = document.createElement("img");
   logo.src = "assets/logo.png";
-  logo.alt = "Castle of the Winds";
+  logo.alt = "The Runed Deep";
   logo.style.cssText = "max-width:100%;height:auto;margin-bottom:40px;";
   splash.appendChild(logo);
 

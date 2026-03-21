@@ -9,7 +9,7 @@ export interface ScoreEntry {
   timestamp: number;
 }
 
-const LEADERBOARD_KEY = "cotw-leaderboard";
+const LEADERBOARD_KEY = "rd-leaderboard";
 const MAX_ENTRIES = 10;
 
 export function calculateScore(

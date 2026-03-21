@@ -603,7 +603,7 @@ function goToFloor(
     const tierNames: Record<string, string> = {
       mine: "the Abandoned Mine",
       fortress: "the Underground Fortress",
-      castle: "the Castle of the Winds",
+      castle: "the The Runed Deep",
     };
     messages.push({
       text: `You enter ${tierNames[targetDungeon] ?? targetDungeon}. The air grows heavier.`,

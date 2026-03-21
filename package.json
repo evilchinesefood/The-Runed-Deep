@@ -1,7 +1,7 @@
 {
-  "name": "castle-of-the-winds",
+  "name": "the-runed-deep",
   "version": "1.0.0",
-  "description": "Castle of the Winds is a tile-based RPG made by Rick Saada in the late 80s. Many old school RPGers remember the game with fond memories and as such, this is my first attempt to port the game into the modern era to be playable on mobile and web browsers.",
+  "description": "The Runed Deep is a turn-based dungeon crawler inspired by the classic Castle of the Winds. Descend 40 floors, defeat Surtur, and avenge your village. Playable on desktop and mobile browsers.",
   "type": "module",
   "scripts": {
     "dev": "vite",
