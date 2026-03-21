@@ -60,10 +60,11 @@ export function createItemFromTemplate(
       enchantment = -(Math.floor(Math.random() * 3) + 1);
       cursed = true;
     } else if (enchantRoll < 0.15 + depth * 0.015) {
-      // Enchanted item — tier and depth boost the range
-      const baseMax = tier === "meteoric" ? 5 : tier === "elven" ? 4 : 3;
+      // Enchanted item — tier, depth, and NG+ boost the range
+      const baseMax = tier === "meteoric" ? 8 : tier === "elven" ? 4 : 3;
       const depthBonus = Math.floor(depth / 15); // +1 at floor 15, +2 at 30
-      const maxEnchant = Math.min(6, baseMax + depthBonus);
+      const ngBonus = tier === "meteoric" ? ngPlus * 5 : 0;
+      const maxEnchant = baseMax + depthBonus + ngBonus;
       enchantment = Math.floor(Math.random() * maxEnchant) + 1;
     }
   }
