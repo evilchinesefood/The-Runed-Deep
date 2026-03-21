@@ -18,7 +18,7 @@ import { createVictoryScreen } from "./ui/VictoryScreen";
 import { generateTownMap, TOWN_START_INITIAL } from "./systems/town/TownMap";
 import { initShopInventory } from "./systems/town/Shops";
 import { findPath } from "./utils/Pathfinding";
-import { generateFloor } from "./systems/dungeon/generator";
+import { generateFloor, getDungeonForFloor } from "./systems/dungeon/generator";
 import { SPELL_BY_ID } from "./data/spells";
 import { AnimationRenderer } from "./rendering/animations";
 import { drainAnimations } from "./rendering/animation-queue";
@@ -241,6 +241,27 @@ function stepAutoPathExplore(): void {
   const dx = next.x - state.hero.position.x;
   const dy = next.y - state.hero.position.y;
 
+  // Stop at closed/locked doors
+  const nextTile = floor.tiles[next.y]?.[next.x];
+  if (
+    nextTile &&
+    (nextTile.type === "door-closed" || nextTile.type === "door-locked")
+  ) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
+
+  // Stop if next tile has items on the ground
+  const nextHasItems = floor.items.some(
+    (i) => i.position.x === next.x && i.position.y === next.y,
+  );
+  if (nextHasItems) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
+
   const direction = dxdyToDirection(dx, dy);
   if (direction) {
     autoPath.shift();
@@ -276,16 +297,35 @@ function stepAutoPath(): void {
   const dx = next.x - state.hero.position.x;
   const dy = next.y - state.hero.position.y;
 
-  // Stop auto-walk if a monster is adjacent
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (floor) {
+    // Stop auto-walk if a monster is adjacent
     const hasAdjacentMonster = floor.monsters.some((m) => {
       const mx = Math.abs(m.position.x - state.hero.position.x);
       const my = Math.abs(m.position.y - state.hero.position.y);
       return mx <= 1 && my <= 1;
     });
     if (hasAdjacentMonster) {
+      autoPath = [];
+      return;
+    }
+
+    // Stop at closed/locked doors
+    const nextTile = floor.tiles[next.y]?.[next.x];
+    if (
+      nextTile &&
+      (nextTile.type === "door-closed" || nextTile.type === "door-locked")
+    ) {
+      autoPath = [];
+      return;
+    }
+
+    // Stop at items on the ground
+    const nextHasItems = floor.items.some(
+      (i) => i.position.x === next.x && i.position.y === next.y,
+    );
+    if (nextHasItems) {
       autoPath = [];
       return;
     }
@@ -460,91 +500,69 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     gameLoop.setState(testState);
   }
 
-  // F10: Jump to any floor with a powered-up hero for boss testing
+  // F10: Jump to any floor (or town) — keeps current hero as-is
   if (e.code === "F10") {
     e.preventDefault();
-    const input = prompt(
-      "Enter floor number (boss floors: 15, 20, 25, 30, 33, 36, 40):",
-    );
+    const input = prompt("Enter floor number (1-40), or 0 for town:");
     if (!input) return;
-    const targetFloor = parseInt(input) - 1; // convert to 0-indexed
-    if (isNaN(targetFloor) || targetFloor < 0) return;
+    const num = parseInt(input);
+    if (isNaN(num) || num < 0 || num > 40) return;
 
-    const depth = targetFloor + 1;
-    const { floor: bossFloor, playerStart } = generateFloor(
-      "mine",
-      targetFloor,
-      Date.now(),
-      true,
-      true,
-      "easy",
-    );
+    const state = gameLoop.getState();
+    if (state.screen !== "game") return;
 
-    // Scale hero stats to be viable for the target floor
-    const level = Math.max(10, Math.floor(depth * 0.8));
-    const statBase = Math.min(90, 50 + depth);
-    const hp = 100 + depth * 15;
-    const mp = 50 + depth * 10;
+    if (num === 0) {
+      // Jump to town
+      gameLoop.setState(teleportToTown(state));
+      return;
+    }
 
-    const testState: GameState = {
-      screen: "game",
-      hero: {
-        name: "Boss Tester",
-        gender: "male",
-        position: playerStart,
-        attributes: {
-          strength: statBase,
-          intelligence: statBase,
-          constitution: statBase,
-          dexterity: statBase,
-        },
-        hp,
-        maxHp: hp,
-        mp,
-        maxMp: mp,
-        xp: 0,
-        level,
-        equipment: createEmptyEquipment(),
-        inventory: [],
-        copper: 5000,
-        knownSpells: getAllSpellIds(),
-        spellHotkeys: getAllSpellIds().slice(0, 7),
-        activeEffects: [],
-        resistances: createDefaultResistances(),
-        armorValue: Math.floor(statBase / 10) + depth,
-        equipDamageBonus: Math.floor(depth / 3),
-        equipAccuracyBonus: Math.floor(depth / 4),
-      },
+    const targetFloor = num - 1; // 0-indexed
+    const targetDungeon = getDungeonForFloor(targetFloor);
+    const floorKey = `${targetDungeon}-${targetFloor}`;
+    let floors = { ...state.floors };
+
+    // Generate the floor if it doesn't exist
+    if (!floors[floorKey]) {
+      const { floor: newFloor } = generateFloor(
+        targetDungeon,
+        targetFloor,
+        state.rngSeed,
+        true,
+        true,
+        state.difficulty,
+      );
+      floors = { ...floors, [floorKey]: newFloor };
+    }
+
+    // Find stairs-up as arrival position
+    const fl = floors[floorKey];
+    let pos = { x: 1, y: 1 };
+    for (let y = 0; y < fl.height; y++) {
+      for (let x = 0; x < fl.width; x++) {
+        if (fl.tiles[y][x].type === "stairs-up") {
+          pos = { x, y };
+          break;
+        }
+      }
+      if (pos.x !== 1 || pos.y !== 1) break;
+    }
+
+    gameLoop.setState({
+      ...state,
       currentFloor: targetFloor,
-      currentDungeon: "mine",
-      floors: { [`mine-${targetFloor}`]: bossFloor },
-      town: {
-        id: "hamlet",
-        shopInventories: {},
-        bankBalance: 0,
-        deepestFloor: depth,
-      },
+      currentDungeon: targetDungeon,
+      floors,
+      hero: { ...state.hero, position: pos },
       messages: [
+        ...state.messages,
         {
-          text: `=== BOSS TEST: Floor ${depth} ===`,
-          severity: "important",
-          turn: 0,
-        },
-        {
-          text: `Level ${level} hero with ${hp} HP, ${mp} MP, all spells.`,
-          severity: "system",
-          turn: 0,
+          text: `Jumped to floor ${num}.`,
+          severity: "system" as const,
+          turn: state.turn,
         },
       ],
-      turn: 0,
-      gameTime: 0,
-      difficulty: "easy",
-      rngSeed: Date.now(),
-      returnFloor: 0,
-      activeBuildingId: "",
-      ngPlusCount: 0,
-    };
-    gameLoop.setState(testState);
+    });
   }
 
   // F11: Teleport to town

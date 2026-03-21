@@ -2,9 +2,13 @@
 // Loot generation — drops items when monsters die
 // ============================================================
 
-import type { Item, Vector2 } from '../../core/types';
-import { getItemsForDepth, ITEM_BY_ID, type ItemTemplate } from '../../data/items';
-import { rollSpecialEnchantments } from '../../data/Enchantments';
+import type { Item, Vector2 } from "../../core/types";
+import {
+  getItemsForDepth,
+  ITEM_BY_ID,
+  type ItemTemplate,
+} from "../../data/items";
+import { rollSpecialEnchantments } from "../../data/Enchantments";
 
 let nextItemId = 1;
 
@@ -12,13 +16,17 @@ let nextItemId = 1;
  * Generate a random loot drop for a killed monster.
  * Returns null if no drop (based on drop chance).
  */
-export function generateLoot(depth: number, _position: Vector2, ngPlus: number = 0): Item | null {
+export function generateLoot(
+  depth: number,
+  _position: Vector2,
+  ngPlus: number = 0,
+): Item | null {
   // Drop chance: 30% base, increases slightly with depth
-  const dropChance = 0.30 + depth * 0.005;
+  const dropChance = 0.3 + depth * 0.005;
   if (Math.random() > dropChance) return null;
 
   // 20% chance of copper instead of an item
-  if (Math.random() < 0.20) {
+  if (Math.random() < 0.2) {
     return createCopperDrop(depth);
   }
 
@@ -33,12 +41,17 @@ export function generateLoot(depth: number, _position: Vector2, ngPlus: number =
  * Create an Item instance from a template.
  * May add random enchantments on deeper floors.
  */
-export function createItemFromTemplate(template: ItemTemplate, depth: number, ngPlus: number = 0): Item {
+export function createItemFromTemplate(
+  template: ItemTemplate,
+  depth: number,
+  ngPlus: number = 0,
+): Item {
   const id = `item-${nextItemId++}`;
 
-  // Enchantment chance increases with depth
+  // Enchantment chance increases with depth; tier boosts enchantment range
   let enchantment = 0;
   let cursed = false;
+  const tier = ITEM_BY_ID[template.id]?.materialTier;
 
   if (template.equipSlot) {
     const enchantRoll = Math.random();
@@ -47,22 +60,30 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number, ng
       enchantment = -(Math.floor(Math.random() * 3) + 1);
       cursed = true;
     } else if (enchantRoll < 0.15 + depth * 0.015) {
-      // Enchanted item
-      enchantment = Math.floor(Math.random() * 3) + 1;
+      // Enchanted item — tier and depth boost the range
+      const baseMax = tier === "meteoric" ? 5 : tier === "elven" ? 4 : 3;
+      const depthBonus = Math.floor(depth / 15); // +1 at floor 15, +2 at 30
+      const maxEnchant = Math.min(6, baseMax + depthBonus);
+      enchantment = Math.floor(Math.random() * maxEnchant) + 1;
     }
   }
 
   // Build properties from template
   const properties: Record<string, number> = {};
-  if (template.damageMin !== undefined) properties['damageMin'] = template.damageMin;
-  if (template.damageMax !== undefined) properties['damageMax'] = template.damageMax;
-  if (template.accuracy !== undefined) properties['accuracy'] = template.accuracy;
-  if (template.ac !== undefined) properties['ac'] = template.ac;
-  if (template.healAmount !== undefined) properties['healAmount'] = template.healAmount;
-  if (template.healPct !== undefined) properties['healPct'] = template.healPct;
-  if (template.charges !== undefined) properties['charges'] = template.charges;
-  if (template.twoHanded) properties['twoHanded'] = 1;
-  if (template.weightCapacity !== undefined) properties['weightCapacity'] = template.weightCapacity;
+  if (template.damageMin !== undefined)
+    properties["damageMin"] = template.damageMin;
+  if (template.damageMax !== undefined)
+    properties["damageMax"] = template.damageMax;
+  if (template.accuracy !== undefined)
+    properties["accuracy"] = template.accuracy;
+  if (template.ac !== undefined) properties["ac"] = template.ac;
+  if (template.healAmount !== undefined)
+    properties["healAmount"] = template.healAmount;
+  if (template.healPct !== undefined) properties["healPct"] = template.healPct;
+  if (template.charges !== undefined) properties["charges"] = template.charges;
+  if (template.twoHanded) properties["twoHanded"] = 1;
+  if (template.weightCapacity !== undefined)
+    properties["weightCapacity"] = template.weightCapacity;
 
   // Build display name
   let name = template.name;
@@ -72,12 +93,13 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number, ng
   // Pick sprite variant for cursed/enchanted
   // Skip variant suffix if base sprite already ends with -cursed or -enchanted
   let sprite = template.sprite;
-  const alreadyVariant = sprite.endsWith('-enchanted') || sprite.endsWith('-cursed');
+  const alreadyVariant =
+    sprite.endsWith("-enchanted") || sprite.endsWith("-cursed");
   if (!alreadyVariant) {
     if (cursed) {
-      sprite = template.sprite + '-cursed';
+      sprite = template.sprite + "-cursed";
     } else if (enchantment > 0) {
-      sprite = template.sprite + '-enchanted';
+      sprite = template.sprite + "-enchanted";
     }
   }
 
@@ -96,12 +118,22 @@ export function createItemFromTemplate(template: ItemTemplate, depth: number, ng
     properties,
   };
 
-  const isTier = !!(ITEM_BY_ID[template.id]?.materialTier);
+  const isTier = !!ITEM_BY_ID[template.id]?.materialTier;
   const specials = rollSpecialEnchantments(depth, isTier, ngPlus);
   if (specials.length > 0) {
-    const suffixes = ['of Power', 'of the Ancients', 'of Legends', 'of the Gods', 'of Valor'];
+    const suffixes = [
+      "of Power",
+      "of the Ancients",
+      "of Legends",
+      "of the Gods",
+      "of Valor",
+    ];
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    return { ...base, name: `${base.name} ${suffix}`, specialEnchantments: specials };
+    return {
+      ...base,
+      name: `${base.name} ${suffix}`,
+      specialEnchantments: specials,
+    };
   }
 
   return base;
@@ -111,10 +143,10 @@ export function createCopperDrop(depth: number): Item {
   const amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
   return {
     id: `item-${nextItemId++}`,
-    templateId: 'copper-coins',
+    templateId: "copper-coins",
     name: `${amount} Gold`,
-    category: 'currency',
-    sprite: 'coins-gold',
+    category: "currency",
+    sprite: "coins-gold",
     weight: amount * 5,
     bulk: amount,
     value: amount,

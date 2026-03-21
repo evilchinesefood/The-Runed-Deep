@@ -12,6 +12,7 @@ import { processMonsterAbility } from "../monsters/ai";
 import { Sound } from "../Sound";
 import { trackMonsterKill, trackFloorDamage } from "../Achievements";
 import { hasEnchant, enchantMult } from "../../utils/Enchants";
+import { getDisplayName } from "../inventory/display-name";
 
 // ============================================================
 // Blood splatters
@@ -229,7 +230,7 @@ export function playerAttacksMonster(
     if (loot) {
       newItems.push({ item: loot, position: { ...monster.position } });
       messages.push({
-        text: `The ${monster.name} dropped ${loot.name}.`,
+        text: `The ${monster.name} dropped ${getDisplayName(loot)}.`,
         severity: "normal",
         turn: state.turn,
       });
@@ -403,7 +404,7 @@ export function monsterAttacksPlayer(
           if (loot) {
             newItems.push({ item: loot, position: { ...m.position } });
             thornsMsgs.push({
-              text: `The ${monster.name} dropped ${loot.name}.`,
+              text: `The ${monster.name} dropped ${getDisplayName(loot)}.`,
               severity: "normal" as const,
               turn: result.turn,
             });
