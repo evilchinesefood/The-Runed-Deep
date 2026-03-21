@@ -212,7 +212,7 @@ function processMove(state: GameState, direction: Direction): GameState {
       const newTiles = floor.tiles.map((row) => [...row]);
       newTiles[newPos.y][newPos.x] = {
         type: "door-open",
-        sprite: "door-broken",
+        sprite: "door-open",
         walkable: true,
         transparent: true,
       };

@@ -166,7 +166,6 @@ export function createInventoryScreen(
     flexShrink: "0",
     overflow: "hidden",
     background: "#fff",
-    padding: `${Math.round(8 * dollScale)}px`,
     boxSizing: "border-box",
   });
   const dollBg = el("div", {

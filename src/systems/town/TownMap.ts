@@ -118,9 +118,9 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   );
 
   // Border walls with proper orientation
-  const HWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false, rotate: 90 };
+  const HWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
   const VWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
-  const CORNER: Tile = { type: 'wall', sprite: 'town-wall-corner', walkable: false, transparent: false };
+  const CORNER: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
 
   // North and south borders (horizontal — rotated 90°)
   for (let x = 1; x < W - 1; x++) { tiles[0][x] = { ...HWALL }; tiles[H - 1][x] = { ...HWALL }; }
@@ -128,9 +128,9 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   for (let y = 1; y < H - 1; y++) { tiles[y][0] = { ...VWALL }; tiles[y][W - 1] = { ...VWALL }; }
   // Corners — top-left correct, top-right 90°, bottom-left 90°, bottom-right 180°
   tiles[0][0] = { ...CORNER };
-  tiles[0][W - 1] = { ...CORNER, rotate: 90 };
-  tiles[H - 1][0] = { ...CORNER, rotate: 360 };
-  tiles[H - 1][W - 1] = { ...CORNER, rotate: 180 };
+  tiles[0][W - 1] = { ...CORNER };
+  tiles[H - 1][0] = { ...CORNER };
+  tiles[H - 1][W - 1] = { ...CORNER };
 
   // Place building footprints as walls
   for (const b of TOWN_BUILDINGS) {

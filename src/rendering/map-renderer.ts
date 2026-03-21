@@ -260,21 +260,13 @@ export class MapRenderer {
             tile.type === "building" ? "grass" : isLit ? "lit-dgn" : "dark-dgn";
           cell.floor.className = underlaySprite;
           cell.floor.style.opacity = opacity;
-          if (tile.type !== "building") {
-            cell.floor.style.filter = (visible || isLit)
-              ? "brightness(3.0)"
-              : "brightness(1.8)";
-          }
           // Buildings render via overlay system, not tile grid
           if (tile.type !== "building" || tile.walkable) {
             cell.ground.className = tile.sprite;
             cell.ground.style.display = "block";
             cell.ground.style.opacity = opacity;
           }
-        } else if (
-          tile.sprite === "town-wall-corner" ||
-          tile.sprite === "town-wall"
-        ) {
+        } else if (tile.sprite === "town-wall") {
           // Town fence: grass underneath, fence sprite on ground layer
           cell.floor.className = "grass";
           cell.floor.style.opacity = opacity;
@@ -294,13 +286,6 @@ export class MapRenderer {
           if (isWall && tileset?.wallTint) {
             cell.floor.style.backgroundColor = tileset.wallTint;
             cell.floor.style.backgroundBlendMode = "multiply";
-          }
-          // Lighten floor tiles — DCSS dark-dgn sprites are very dark,
-          // boost aggressively so visible floors read as light gray
-          if (isFloorLike) {
-            cell.floor.style.filter = (visible || isLit)
-              ? "brightness(3.0)"
-              : "brightness(1.8)";
           }
         }
 

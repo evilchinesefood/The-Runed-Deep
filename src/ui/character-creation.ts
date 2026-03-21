@@ -113,6 +113,28 @@ export function createCharacterCreationScreen(
   attrHeader.appendChild(pointsDisplay);
   attrPanel.appendChild(attrHeader);
 
+  // Hold-to-repeat: fires action on click, then repeats while held
+  function holdRepeat(btn: HTMLElement, action: () => void): void {
+    let interval: number | null = null;
+    let timeout: number | null = null;
+    const stop = () => {
+      if (timeout) { clearTimeout(timeout); timeout = null; }
+      if (interval) { clearInterval(interval); interval = null; }
+    };
+    const start = () => {
+      action();
+      timeout = window.setTimeout(() => {
+        interval = window.setInterval(action, 50);
+      }, 300);
+    };
+    btn.addEventListener("mousedown", start);
+    btn.addEventListener("touchstart", (e) => { e.preventDefault(); start(); });
+    btn.addEventListener("mouseup", stop);
+    btn.addEventListener("mouseleave", stop);
+    btn.addEventListener("touchend", stop);
+    btn.addEventListener("touchcancel", stop);
+  }
+
   const attrNames: (keyof Attributes)[] = [
     "strength",
     "intelligence",
@@ -167,7 +189,7 @@ export function createCharacterCreationScreen(
     minus.style.height = "32px";
     minus.style.padding = "0";
     minus.style.fontSize = "16px";
-    minus.addEventListener("click", () => {
+    holdRepeat(minus, () => {
       if (state.attributes[attr] > MIN_ATTR) {
         state.attributes[attr]--;
         updateAll();
@@ -211,7 +233,7 @@ export function createCharacterCreationScreen(
     plus.style.height = "32px";
     plus.style.padding = "0";
     plus.style.fontSize = "16px";
-    plus.addEventListener("click", () => {
+    holdRepeat(plus, () => {
       if (state.attributes[attr] < MAX_ATTR && pointsUsed() < TOTAL_POINTS) {
         state.attributes[attr]++;
         updateAll();
