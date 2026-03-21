@@ -124,7 +124,7 @@ export function createHelpScreen(
     el(
       "div",
       { marginBottom: "3px", fontSize: "12px", color: "#888" },
-      "Cursed items cannot be removed without Remove Curse.",
+      "Cursed items have negative enchantments but can be freely swapped.",
     ),
   );
   tips.appendChild(

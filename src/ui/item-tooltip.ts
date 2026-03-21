@@ -167,7 +167,7 @@ function buildTooltipContent(item: Item): HTMLElement {
 
   // Cursed
   if (item.cursed && item.identified) {
-    container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed — cannot be unequipped'));
+    container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed'));
   }
 
   // Unidentified

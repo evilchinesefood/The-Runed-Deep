@@ -133,6 +133,7 @@ export function createItemFromTemplate(
     return {
       ...base,
       name: `${base.name} ${suffix}`,
+      identified: false,
       specialEnchantments: specials,
     };
   }

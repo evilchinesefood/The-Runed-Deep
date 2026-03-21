@@ -147,8 +147,6 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     const result = teleportHero(state, hero, messages);
     hero = result.hero;
     state = result.state;
-  } else if (item.templateId === "scroll-remove-curse") {
-    hero = removeCurseFromFirst(hero, messages, state.turn);
   } else if (item.templateId === "scroll-rune-of-return") {
     if (state.currentDungeon === "town") {
       messages.push({

@@ -72,6 +72,7 @@ export function loadGame(slot: number = 1): GameState | null {
       if (!state.floors[key].decals) state.floors[key].decals = [];
       for (const m of state.floors[key].monsters) {
         if (m.armor === undefined) m.armor = 0;
+        (m as any).hasFled ??= false;
       }
     }
 

@@ -88,6 +88,7 @@ export function createMonster(
     sleeping: false,
     slowed: false,
     fleeing: 0,
+    hasFled: false,
     bled: false,
   };
 }

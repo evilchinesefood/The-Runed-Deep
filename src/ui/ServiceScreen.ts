@@ -5,7 +5,7 @@
 import type { GameState } from '../core/types';
 import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
 import {
-  templeHealHP, templeHealMP, templeRemoveCurse, templeCurePoison,
+  templeHealHP, templeHealMP, templeCurePoison,
   sageIdentifyOne, sageIdentifyAll,
   bankDeposit, bankWithdraw,
   innRest,
@@ -30,13 +30,11 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
 
   const missingHP = state.hero.maxHp - state.hero.hp;
   const missingMP = state.hero.maxMp - state.hero.mp;
-  const hasCursed = Object.values(state.hero.equipment).some(i => i && i.cursed);
   const isPoisoned = state.hero.activeEffects.some(e => e.id === 'poisoned');
 
   const items: [string, number, boolean, () => GameState][] = [
     ['Heal HP (free)', 0, missingHP <= 0, () => templeHealHP(state)],
     ['Restore MP (free)', 0, missingMP <= 0, () => templeHealMP(state)],
-    ['Remove Curse — 25 gold', 25, !hasCursed || state.hero.copper < 25, () => templeRemoveCurse(state)],
     ['Cure Poison (free)', 0, !isPoisoned, () => templeCurePoison(state)],
   ];
 

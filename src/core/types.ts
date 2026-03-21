@@ -176,6 +176,7 @@ export interface Monster {
   sleeping: boolean;
   slowed: boolean;
   fleeing: number; // turns remaining in flee mode, 0 = not fleeing
+  hasFled: boolean; // true after first flee — won't flee again
   bled: boolean; // has already left a blood splatter
 }
 

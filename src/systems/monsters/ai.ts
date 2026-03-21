@@ -726,12 +726,13 @@ function processMelee(
   if (dist <= 1) {
     // Attack
     let s = monsterAttacksPlayer(state, monster);
-    // Check flee trigger at low HP
+    // Check flee trigger at low HP (only once per monster)
     const updatedFloor = s.floors[floorKey];
     if (updatedFloor) {
       const updatedMonster = updatedFloor.monsters[idx];
       if (
         updatedMonster &&
+        !updatedMonster.hasFled &&
         updatedMonster.hp / updatedMonster.maxHp <= 0.25 &&
         Math.random() < 0.4
       ) {
@@ -739,6 +740,7 @@ function processMelee(
         s = updateMonster(s, floorKey, idx, {
           ...updatedMonster,
           fleeing: fleeTurns,
+          hasFled: true,
         });
       }
     }
@@ -746,12 +748,13 @@ function processMelee(
   }
 
   if (manhattan(monster.position, hero.position) <= 20) {
-    // Low HP flee check before moving
-    if (monster.hp / monster.maxHp <= 0.25 && Math.random() < 0.4) {
+    // Low HP flee check before moving (only once per monster)
+    if (!monster.hasFled && monster.hp / monster.maxHp <= 0.25 && Math.random() < 0.4) {
       const fleeTurns = rollRange(5, 10);
       let s = updateMonster(state, floorKey, idx, {
         ...monster,
         fleeing: fleeTurns,
+        hasFled: true,
       });
       return moveAwayFrom(s, floorKey, idx, hero.position);
     }
@@ -889,11 +892,12 @@ function processThief(
     if (curFloor && s.hero.copper < state.hero.copper) {
       // Gold was stolen — trigger flee
       const mi = curFloor.monsters.findIndex((m) => m.id === monster.id);
-      if (mi >= 0) {
+      if (mi >= 0 && !curFloor.monsters[mi].hasFled) {
         const fleeTurns = rollRange(8, 12);
         s = updateMonster(s, floorKey, mi, {
           ...curFloor.monsters[mi],
           fleeing: fleeTurns,
+          hasFled: true,
         });
       }
     }

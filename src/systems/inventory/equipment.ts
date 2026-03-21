@@ -39,44 +39,15 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   if (slot === 'weapon' && item.properties['twoHanded']) {
     const shield = equipment.shield;
     if (shield) {
-      if (shield.cursed) {
-        if (!shield.identified) {
-          equipment = { ...equipment, shield: { ...shield, identified: true } };
-        }
-        showGameToast('Your shield is cursed and cannot be removed!', 'error');
-        return {
-          ...state,
-          hero: { ...hero, equipment },
-          messages: [
-            ...state.messages,
-            msg(`Cannot equip two-handed weapon — your shield is cursed!`, state.turn, 'important'),
-          ],
-        };
-      }
       inventory = [...inventory, shield];
       equipment = { ...equipment, shield: null };
       messages.push(msg(`Unequipped ${shield.name}.`, state.turn));
     }
   }
 
-  // If slot is occupied, check curse before swapping
+  // If slot is occupied, swap to inventory
   const existing = equipment[slot];
   if (existing) {
-    if (existing.cursed) {
-      const revealed = !existing.identified;
-      if (revealed) {
-        equipment = { ...equipment, [slot]: { ...existing, identified: true } };
-      }
-      showGameToast(`${existing.name} is cursed and cannot be removed!`, 'error');
-      return {
-        ...state,
-        hero: { ...hero, equipment },
-        messages: [
-          ...state.messages,
-          msg(`${existing.name} is cursed and cannot be removed!`, state.turn, 'important'),
-        ],
-      };
-    }
     inventory = [...inventory, existing];
     messages.push(msg(`Unequipped ${existing.name}.`, state.turn));
   }
@@ -106,23 +77,6 @@ export function processUnequipItem(state: GameState, slot: EquipSlot): GameState
   const hero = { ...state.hero };
   const item = hero.equipment[slot];
   if (!item) return state;
-
-  if (item.cursed) {
-    let equipment = hero.equipment;
-    const messages: Message[] = [];
-    if (!item.identified) {
-      equipment = { ...equipment, [slot]: { ...item, identified: true } };
-      messages.push(msg(`${item.name} is cursed and cannot be removed!`, state.turn, 'important'));
-    } else {
-      messages.push(msg(`${item.name} is cursed and cannot be removed!`, state.turn, 'important'));
-    }
-    showGameToast(`${item.name} is cursed and cannot be removed!`, 'error');
-    return {
-      ...state,
-      hero: { ...hero, equipment },
-      messages: [...state.messages, ...messages],
-    };
-  }
 
   const equipment = { ...hero.equipment, [slot]: null };
   const inventory = [...hero.inventory, item];

@@ -227,8 +227,6 @@ const SCROLLS: ItemTemplate[] = [
     weight: 50, value: 30, depthMin: 1, depthMax: 99, spellId: 'identify' },
   { id: 'scroll-teleport', name: 'Scroll of Teleport', category: 'scroll', sprite: 'scroll',
     weight: 50, value: 40, depthMin: 3, depthMax: 99, spellId: 'teleport' },
-  { id: 'scroll-remove-curse', name: 'Scroll of Remove Curse', category: 'scroll', sprite: 'scroll',
-    weight: 50, value: 50, depthMin: 5, depthMax: 99, spellId: 'remove-curse' },
   { id: 'scroll-rune-of-return', name: 'Scroll of Rune of Return', category: 'scroll', sprite: 'scroll',
     weight: 50, value: 60, depthMin: 1, depthMax: 99, spellId: 'rune-of-return' },
 ];
@@ -276,27 +274,27 @@ const CURRENCY: ItemTemplate[] = [
 
 const CONTAINERS: ItemTemplate[] = [
   { id: 'small-pack', name: 'Small Pack', category: 'container', sprite: 'bag', equipSlot: 'pack',
-    weight: 500, value: 20, depthMin: 1, depthMax: 99, weightCapacity: 15000, bulkCapacity: 3000 },
+    weight: 500, value: 20, depthMin: 1, depthMax: 99, weightCapacity: 30000, bulkCapacity: 6000 },
   { id: 'large-pack', name: 'Large Pack', category: 'container', sprite: 'pack', equipSlot: 'pack',
-    weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 30000, bulkCapacity: 6000 },
+    weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 60000, bulkCapacity: 12000 },
   { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
-    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 200000, bulkCapacity: 80000 },
+    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 400000, bulkCapacity: 160000 },
   { id: 'leather-belt', name: 'Leather Belt', category: 'belt', sprite: 'belt', equipSlot: 'belt',
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
   { id: 'belt-of-wands', name: 'Belt of Wand Quiver', category: 'belt', sprite: 'belt-wand-quiver', equipSlot: 'belt',
-    weight: 400, value: 40, depthMin: 8, depthMax: 99, ac: 0, weightCapacity: 2000, bulkCapacity: 500 },
+    weight: 400, value: 40, depthMin: 8, depthMax: 99, ac: 0, weightCapacity: 4000, bulkCapacity: 1000 },
   { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
-    weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 5000, bulkCapacity: 1000 },
+    weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 10000, bulkCapacity: 2000 },
   // Elven tier containers
   { id: 'elven-pack', name: 'Elven Pack', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
-    weight: 300, value: 250, depthMin: 14, depthMax: 99, weightCapacity: 50000, bulkCapacity: 15000, materialTier: 'elven' },
+    weight: 300, value: 250, depthMin: 14, depthMax: 99, weightCapacity: 100000, bulkCapacity: 30000, materialTier: 'elven' },
   { id: 'elven-purse', name: 'Elven Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
-    weight: 50, value: 100, depthMin: 14, depthMax: 99, weightCapacity: 10000, bulkCapacity: 3000, materialTier: 'elven' },
+    weight: 50, value: 100, depthMin: 14, depthMax: 99, weightCapacity: 20000, bulkCapacity: 6000, materialTier: 'elven' },
   // Meteoric tier containers
   { id: 'meteoric-pack', name: 'Meteoric Pack', category: 'container', sprite: 'pack-enchanted', equipSlot: 'pack',
-    weight: 200, value: 600, depthMin: 26, depthMax: 99, weightCapacity: 80000, bulkCapacity: 30000, materialTier: 'meteoric' },
+    weight: 200, value: 600, depthMin: 26, depthMax: 99, weightCapacity: 160000, bulkCapacity: 60000, materialTier: 'meteoric' },
   { id: 'meteoric-purse', name: 'Meteoric Purse', category: 'container', sprite: 'purse', equipSlot: 'purse',
-    weight: 30, value: 300, depthMin: 26, depthMax: 99, weightCapacity: 20000, bulkCapacity: 8000, materialTier: 'meteoric' },
+    weight: 30, value: 300, depthMin: 26, depthMax: 99, weightCapacity: 40000, bulkCapacity: 16000, materialTier: 'meteoric' },
 ];
 
 // ── Worthless / Flavor Items ───────────────────────────────
@@ -316,8 +314,6 @@ const WORTHLESS: ItemTemplate[] = [
     weight: 400, value: 2, depthMin: 1, depthMax: 99 },
   { id: 'old-boots', name: 'Old Boots', category: 'misc', sprite: 'broken-boot',
     weight: 600, value: 2, depthMin: 1, depthMax: 99 },
-  { id: 'apple', name: 'Apple', category: 'misc', sprite: 'apple',
-    weight: 150, value: 1, depthMin: 1, depthMax: 99 },
   { id: 'parchment', name: 'Worn Parchment', category: 'misc', sprite: 'parchment',
     weight: 30, value: 1, depthMin: 1, depthMax: 99 },
 ];

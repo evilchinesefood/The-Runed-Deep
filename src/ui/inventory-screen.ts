@@ -298,8 +298,8 @@ export function createInventoryScreen(
   invPanel.style.overflowY = "auto";
 
   // Sort controls
-  type SortMode = "newest" | "oldest" | "identified" | "type";
-  let sortMode: SortMode = "newest";
+  type SortMode = "newest" | "oldest" | "identified" | "unidentified" | "type";
+  let sortMode: SortMode = (localStorage.getItem("rd-inv-sort") as SortMode) || "newest";
 
   const sortBar = el("div", {
     display: "flex",
@@ -311,6 +311,7 @@ export function createInventoryScreen(
     ["newest", "Newest"],
     ["oldest", "Oldest"],
     ["identified", "Identified"],
+    ["unidentified", "Unidentified"],
     ["type", "By Type"],
   ];
   const sortButtons: HTMLElement[] = [];
@@ -326,6 +327,7 @@ export function createInventoryScreen(
     sb.textContent = label;
     sb.addEventListener("click", () => {
       sortMode = mode;
+      localStorage.setItem("rd-inv-sort", mode);
       updateSortButtons();
       renderInvRows();
     });
@@ -343,6 +345,25 @@ export function createInventoryScreen(
   updateSortButtons();
   invPanel.appendChild(sortBar);
 
+  interface ItemStack { item: Item; count: number; }
+
+  function stackItems(items: Item[]): ItemStack[] {
+    const stacks: ItemStack[] = [];
+    const map = new Map<string, ItemStack>();
+    for (const item of items) {
+      const key = `${item.templateId}|${item.enchantment}|${item.identified}|${item.cursed}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.count++;
+      } else {
+        const stack = { item, count: 1 };
+        map.set(key, stack);
+        stacks.push(stack);
+      }
+    }
+    return stacks;
+  }
+
   function getSortedInventory(): typeof h.inventory {
     const inv = [...h.inventory];
     switch (sortMode) {
@@ -353,6 +374,10 @@ export function createInventoryScreen(
       case "identified":
         return inv.sort((a, b) =>
           a.identified === b.identified ? 0 : a.identified ? -1 : 1,
+        );
+      case "unidentified":
+        return inv.sort((a, b) =>
+          a.identified === b.identified ? a.name.localeCompare(b.name) : a.identified ? 1 : -1,
         );
       case "type":
         return inv.sort((a, b) => a.category.localeCompare(b.category));
@@ -386,8 +411,9 @@ export function createInventoryScreen(
     }
 
     const sorted = getSortedInventory();
-    for (let i = 0; i < sorted.length; i++) {
-      const item = sorted[i];
+    const stacks = stackItems(sorted);
+    for (let i = 0; i < stacks.length; i++) {
+      const { item, count } = stacks[i];
       const tpl = ITEM_BY_ID[item.templateId];
       const isSelected = i === selectedIdx;
 
@@ -402,15 +428,37 @@ export function createInventoryScreen(
       });
 
       // Sprite
-      const sprite = el("div", {
+      const spriteWrap = el("div", {
         width: "32px",
         height: "32px",
         flexShrink: "0",
+        position: "relative",
       });
-      sprite.className = getDisplaySprite(item) + " inventory-item";
-      row.appendChild(sprite);
+      const spriteDiv = el("div", {
+        width: "32px",
+        height: "32px",
+      });
+      spriteDiv.className = getDisplaySprite(item) + " inventory-item";
+      spriteWrap.appendChild(spriteDiv);
+      if (count > 1) {
+        const badge = el("span", {
+          position: "absolute",
+          bottom: "-2px",
+          right: "-2px",
+          background: "#c90",
+          color: "#000",
+          fontSize: "10px",
+          fontWeight: "bold",
+          padding: "0 3px",
+          borderRadius: "3px",
+          lineHeight: "14px",
+        }, `${count}`);
+        spriteWrap.appendChild(badge);
+      }
+      row.appendChild(spriteWrap);
 
       // Name
+      const label = count > 1 ? `${itemDisplayLabel(item)} (x${count})` : itemDisplayLabel(item);
       row.appendChild(
         el(
           "span",
@@ -419,7 +467,7 @@ export function createInventoryScreen(
             fontSize: "13px",
             color: itemNameColor(item),
           },
-          itemDisplayLabel(item),
+          label,
         ),
       );
 
@@ -433,11 +481,11 @@ export function createInventoryScreen(
             width: "55px",
             textAlign: "right",
           },
-          `${(item.weight / 1000).toFixed(1)} kg`,
+          `${((item.weight * count) / 1000).toFixed(1)} kg`,
         ),
       );
 
-      // Action buttons
+      // Action buttons (act on first item in stack)
       const actions = el("div", {
         display: "flex",
         gap: "4px",
@@ -501,10 +549,7 @@ export function createInventoryScreen(
   const BASE_CARRY = 10000;
   const pack = h.equipment.pack;
   const packTpl = pack ? ITEM_BY_ID[pack.templateId] : null;
-  let packWeight = packTpl?.weightCapacity ?? 0;
-  if (pack && pack.cursed && pack.enchantment < 0) {
-    packWeight = Math.max(0, packWeight + pack.enchantment * 3000);
-  }
+  const packWeight = packTpl?.weightCapacity ?? 0;
   const totalCap = BASE_CARRY + packWeight;
   const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
   const pct = Math.round((invWeight / totalCap) * 100);
@@ -529,7 +574,8 @@ export function createInventoryScreen(
     }
 
     const sorted = getSortedInventory();
-    if (sorted.length === 0) return;
+    const stacked = stackItems(sorted);
+    if (stacked.length === 0) return;
 
     if (e.code === "ArrowUp") {
       e.preventDefault();
@@ -539,12 +585,12 @@ export function createInventoryScreen(
     }
     if (e.code === "ArrowDown") {
       e.preventDefault();
-      selectedIdx = Math.min(sorted.length - 1, selectedIdx + 1);
+      selectedIdx = Math.min(stacked.length - 1, selectedIdx + 1);
       refreshSelection();
       return;
     }
 
-    const item = sorted[selectedIdx];
+    const item = stacked[selectedIdx]?.item;
     if (!item) return;
 
     if (e.code === "KeyE") {

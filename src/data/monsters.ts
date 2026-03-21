@@ -182,7 +182,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'green-slime', name: 'Green Slime', sprite: 'green-slime',
     hp: [22, 35], damage: [4, 9], speed: 0.5, xpValue: 20, armor: 0,
-    ai: 'melee', abilities: ['physical-immune'], resistances: r({ acid: 100 }),
+    ai: 'melee', abilities: [], resistances: r({ acid: 100 }),
     unlockFloor: 10, boss: false,
   },
 
@@ -270,7 +270,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'gelatinous-glob', name: 'Gelatinous Glob', sprite: 'gelatinous-glob',
     hp: [30, 48], damage: [6, 12], speed: 0.4, xpValue: 36, armor: 0,
-    ai: 'melee', abilities: ['physical-immune', 'acid-touch'], resistances: r({ acid: 100, lightning: 50 }),
+    ai: 'melee', abilities: ['acid-touch'], resistances: r({ acid: 100, lightning: 50 }),
     unlockFloor: 18, boss: false,
   },
 

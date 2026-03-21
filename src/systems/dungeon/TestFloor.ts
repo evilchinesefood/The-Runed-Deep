@@ -47,6 +47,7 @@ function makeMonster(
     sleeping: false,
     slowed: false,
     fleeing: 0,
+    hasFled: false,
     bled: false,
   };
 }
@@ -147,8 +148,8 @@ export function generateTestFloor(): {
   const swordTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "long-sword")!;
   const armorTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "chain-mail")!;
   const ringTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "ring")!;
-  const removeCurseTpl = ALL_ITEM_TEMPLATES.find(
-    (t) => t.id === "scroll-remove-curse",
+  const returnTpl = ALL_ITEM_TEMPLATES.find(
+    (t) => t.id === "scroll-rune-of-return",
   )!;
 
   // Normal items
@@ -165,7 +166,7 @@ export function generateTestFloor(): {
     position: { x: 3, y: 14 },
   });
   items.push({
-    item: createItemFromTemplate(removeCurseTpl, 5),
+    item: createItemFromTemplate(returnTpl, 5),
     position: { x: 3, y: 15 },
   });
 

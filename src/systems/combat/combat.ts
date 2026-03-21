@@ -168,18 +168,8 @@ export function playerAttacksMonster(
     return applyMessages(state, messages);
   }
 
-  // Physical-immune check (slimes — heavily reduced damage)
-  const isPhysicalImmune = monster.abilities.includes("physical-immune");
   const rawDamage = calcPlayerDamage(state.hero);
   let damage = applyArmor(Math.max(1, rawDamage), monster.armor);
-  if (isPhysicalImmune) {
-    damage = Math.max(1, Math.floor(damage * 0.1)); // 90% reduction
-    messages.push({
-      text: `Your weapon barely affects the ${monster.name}!`,
-      severity: "combat",
-      turn: state.turn,
-    });
-  }
 
   // Hit flash on the monster
   queueAnimation([

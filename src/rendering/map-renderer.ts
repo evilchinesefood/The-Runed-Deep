@@ -14,7 +14,7 @@ function calcMapScale(): number {
   if (w <= 380) return 0.625; // 20px effective
   if (w <= 480) return 0.75; // 24px effective
   if (w <= 720) return 0.875; // 28px effective
-  return 1;
+  return 0.9;
 }
 
 function calcViewportTiles(): { x: number; y: number } {
@@ -288,6 +288,10 @@ export class MapRenderer {
           if (isWall && tileset?.wallTint) {
             cell.floor.style.backgroundColor = tileset.wallTint;
             cell.floor.style.backgroundBlendMode = "multiply";
+          }
+          // Lighten floor tiles when visible or lit
+          if (isFloorLike && (visible || isLit)) {
+            cell.floor.style.filter = "brightness(1.25)";
           }
         }
 
