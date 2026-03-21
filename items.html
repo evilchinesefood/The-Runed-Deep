@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Item Browser — The Runed Deep</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/sprites/items.css" />
+  <link rel="stylesheet" href="/css/sprites/inventory.css" />
+  <link rel="stylesheet" href="/css/sprites/spells.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; color: #ccc; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+    h1 { color: #c90; margin-bottom: 4px; font-size: 24px; }
+    .subtitle { color: #666; font-size: 13px; margin-bottom: 20px; }
+    h2 { color: #c90; font-size: 16px; margin: 24px 0 8px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+    .grid { display: flex; flex-direction: column; gap: 2px; }
+    .row {
+      display: flex; align-items: center; gap: 6px;
+      background: #1a1a1a; border: 1px solid #333; border-radius: 4px;
+      padding: 4px 10px; cursor: pointer;
+      transition: background 0.1s;
+    }
+    .row:hover { background: #222; border-color: #555; }
+    .row.has-note { border-left: 3px solid #c90; }
+    .row-name { font-size: 13px; color: #ccc; width: 200px; flex-shrink: 0; }
+    .variants { display: flex; gap: 12px; align-items: center; }
+    .variant { display: flex; align-items: center; gap: 4px; }
+    .sprite { width: 32px; height: 32px; flex-shrink: 0; }
+    .sprite.glow-enchanted {
+      filter: drop-shadow(0 0 2px rgba(70, 130, 255, 0.9));
+      -webkit-filter: drop-shadow(0 0 2px rgba(70, 130, 255, 0.9));
+    }
+    .sprite.glow-cursed {
+      filter: drop-shadow(0 0 2px rgba(255, 50, 50, 0.9));
+      -webkit-filter: drop-shadow(0 0 2px rgba(255, 50, 50, 0.9));
+    }
+    .vlabel { font-size: 11px; }
+    .normal { color: #888; }
+    .cursed { color: #f44; }
+    .enchanted { color: #4af; }
+    .meta { font-size: 11px; color: #555; margin-left: auto; white-space: nowrap; }
+    .note-icon { color: #c90; font-size: 11px; margin-left: 8px; flex-shrink: 0; }
+
+    /* Note editor */
+    .note-editor {
+      display: none; padding: 6px 10px 8px;
+      background: #151515; border: 1px solid #333; border-top: none;
+      border-radius: 0 0 4px 4px; margin-top: -3px; margin-bottom: 2px;
+    }
+    .note-editor.open { display: block; }
+    .note-editor textarea {
+      width: 100%; height: 50px; background: #1a1a1a; color: #ccc;
+      border: 1px solid #444; padding: 6px; font-size: 12px;
+      font-family: inherit; resize: vertical;
+    }
+    .note-editor textarea:focus { outline: none; border-color: #c90; }
+    .note-editor .note-meta { font-size: 10px; color: #555; margin-top: 4px; }
+
+    /* Copy bar */
+    .copy-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1a1a1a; border-top: 1px solid #333;
+      padding: 8px 20px; display: flex; align-items: center; gap: 12px;
+      z-index: 100;
+    }
+    .copy-bar .count { font-size: 13px; color: #c90; }
+    .copy-btn {
+      padding: 6px 16px; background: #446; color: #aaf; border: 1px solid #558;
+      cursor: pointer; font-size: 13px; border-radius: 4px;
+    }
+    .copy-btn:hover { background: #558; }
+    .clear-btn {
+      padding: 6px 16px; background: #333; color: #888; border: 1px solid #444;
+      cursor: pointer; font-size: 13px; border-radius: 4px;
+    }
+    .clear-btn:hover { background: #444; color: #ccc; }
+    .copied-msg { color: #4c4; font-size: 12px; display: none; }
+
+    body { padding-bottom: 60px; }
+  </style>
+</head>
+<body>
+  <h1>Item Browser</h1>
+  <div class="subtitle">Click any item to add notes. Copy all notes for Claude.</div>
+  <div id="content"></div>
+
+  <div class="copy-bar">
+    <span class="count" id="noteCount">0 notes</span>
+    <button class="copy-btn" id="copyBtn">Copy All Notes</button>
+    <button class="clear-btn" id="clearBtn">Clear All</button>
+    <span class="copied-msg" id="copiedMsg">Copied!</span>
+  </div>
+
+  <script type="module">
+    import { ALL_ITEM_TEMPLATES } from '/src/data/items.ts';
+
+    const content = document.getElementById('content');
+    const notes = {};
+    const STORAGE_KEY = 'rd-item-notes';
+
+    // Load saved notes
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) Object.assign(notes, JSON.parse(saved));
+    } catch {}
+
+    function saveNotes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      updateCount();
+    }
+
+    function updateCount() {
+      const count = Object.values(notes).filter(n => n.trim()).length;
+      document.getElementById('noteCount').textContent = count + ' note' + (count !== 1 ? 's' : '');
+    }
+
+    const categories = [
+      ['Weapons', t => t.category === 'weapon'],
+      ['Armor', t => t.category === 'armor'],
+      ['Shields', t => t.category === 'shield'],
+      ['Helmets', t => t.category === 'helmet'],
+      ['Cloaks', t => t.category === 'cloak'],
+      ['Bracers', t => t.category === 'bracers'],
+      ['Gauntlets', t => t.category === 'gauntlets'],
+      ['Belts', t => t.category === 'belt'],
+      ['Boots', t => t.category === 'boots'],
+      ['Rings', t => t.category === 'ring'],
+      ['Amulets', t => t.category === 'amulet'],
+      ['Potions', t => t.category === 'potion'],
+      ['Scrolls', t => t.category === 'scroll'],
+      ['Spellbooks', t => t.category === 'spellbook'],
+      ['Wands', t => t.category === 'wand'],
+      ['Containers', t => t.category === 'container'],
+      ['Miscellaneous', t => t.category === 'misc' || t.category === 'currency'],
+    ];
+
+    function makeVariant(spriteClass, label, colorClass, glowClass) {
+      const v = document.createElement('div');
+      v.className = 'variant';
+      const sp = document.createElement('div');
+      sp.className = 'sprite ' + spriteClass + (glowClass ? ' ' + glowClass : '');
+      v.appendChild(sp);
+      const lbl = document.createElement('span');
+      lbl.className = 'vlabel ' + colorClass;
+      lbl.textContent = label;
+      v.appendChild(lbl);
+      return v;
+    }
+
+    for (const [title, filter] of categories) {
+      const items = ALL_ITEM_TEMPLATES.filter(filter);
+      if (items.length === 0) continue;
+
+      const h2 = document.createElement('h2');
+      h2.textContent = title + ' (' + items.length + ')';
+      content.appendChild(h2);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      for (const t of items) {
+        const row = document.createElement('div');
+        row.className = 'row' + (notes[t.id]?.trim() ? ' has-note' : '');
+
+        const name = document.createElement('span');
+        name.className = 'row-name';
+        name.textContent = t.name;
+        row.appendChild(name);
+
+        const variants = document.createElement('div');
+        variants.className = 'variants';
+        variants.appendChild(makeVariant(t.sprite, 'Base', 'normal', ''));
+        if (t.equipSlot) {
+          variants.appendChild(makeVariant(t.sprite, '+1', 'enchanted', 'glow-enchanted'));
+          variants.appendChild(makeVariant(t.sprite, '-1', 'cursed', 'glow-cursed'));
+        }
+        row.appendChild(variants);
+
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = 'F' + t.depthMin + '-' + t.depthMax;
+        row.appendChild(meta);
+
+        // Note indicator
+        const noteIcon = document.createElement('span');
+        noteIcon.className = 'note-icon';
+        noteIcon.textContent = notes[t.id]?.trim() ? '\u270E' : '';
+        row.appendChild(noteIcon);
+
+        // Note editor (below the row)
+        const editor = document.createElement('div');
+        editor.className = 'note-editor';
+
+        const textarea = document.createElement('textarea');
+        textarea.value = notes[t.id] || '';
+        textarea.placeholder = 'Add notes for ' + t.name + '...';
+        textarea.addEventListener('input', () => {
+          notes[t.id] = textarea.value;
+          saveNotes();
+          row.classList.toggle('has-note', textarea.value.trim().length > 0);
+          noteIcon.textContent = textarea.value.trim() ? '\u270E' : '';
+        });
+        textarea.addEventListener('click', (e) => e.stopPropagation());
+        editor.appendChild(textarea);
+
+        const noteMeta = document.createElement('div');
+        noteMeta.className = 'note-meta';
+        noteMeta.textContent = 'id: ' + t.id + '  \u2022  sprite: ' + t.sprite + '  \u2022  category: ' + t.category;
+        editor.appendChild(noteMeta);
+
+        row.addEventListener('click', () => {
+          const isOpen = editor.classList.contains('open');
+          // Close all others
+          document.querySelectorAll('.note-editor.open').forEach(e => e.classList.remove('open'));
+          if (!isOpen) {
+            editor.classList.add('open');
+            textarea.focus();
+          }
+        });
+
+        grid.appendChild(row);
+        grid.appendChild(editor);
+      }
+
+      content.appendChild(grid);
+    }
+
+    // Copy all notes
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const lines = [];
+      lines.push('# Item Notes for The Runed Deep');
+      lines.push('');
+
+      for (const t of ALL_ITEM_TEMPLATES) {
+        const note = notes[t.id]?.trim();
+        if (!note) continue;
+        lines.push('## ' + t.name);
+        lines.push('- **id:** `' + t.id + '`');
+        lines.push('- **sprite:** `' + t.sprite + '`');
+        lines.push('- **category:** ' + t.category);
+        if (t.equipSlot) lines.push('- **slot:** ' + t.equipSlot);
+        if (t.materialTier) lines.push('- **tier:** ' + t.materialTier);
+        lines.push('- **depth:** F' + t.depthMin + '-' + t.depthMax);
+        lines.push('');
+        lines.push('**Note:** ' + note);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+      }
+
+      navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        const msg = document.getElementById('copiedMsg');
+        msg.style.display = 'inline';
+        setTimeout(() => { msg.style.display = 'none'; }, 2000);
+      });
+    });
+
+    // Clear all
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (!confirm('Clear all notes?')) return;
+      for (const key of Object.keys(notes)) delete notes[key];
+      saveNotes();
+      document.querySelectorAll('.has-note').forEach(r => r.classList.remove('has-note'));
+      document.querySelectorAll('.note-icon').forEach(i => { i.textContent = ''; });
+      document.querySelectorAll('.note-editor textarea').forEach(ta => { ta.value = ''; });
+    });
+
+    updateCount();
+
+    const total = ALL_ITEM_TEMPLATES.length;
+    const footer = document.createElement('div');
+    footer.style.cssText = 'margin-top:24px;color:#555;font-size:12px;';
+    footer.textContent = total + ' base templates';
+    content.appendChild(footer);
+  </script>
+</body>
+</html>

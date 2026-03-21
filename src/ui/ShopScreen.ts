@@ -246,7 +246,7 @@ function buildPanel(
         btnLabel(item),
         disabled,
         () => onAction(item.id),
-        isSold ? "#666" : undefined,
+        isSold ? "#7a8a5a" : undefined,
       );
       list.appendChild(row);
     }

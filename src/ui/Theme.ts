@@ -82,7 +82,8 @@ export function injectTheme(): void {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
+      overflow-y: auto;
     }
 
     /* Scrollbar styling */
@@ -105,6 +106,7 @@ export function injectTheme(): void {
     .screen-scrollable {
       overflow-y: auto;
       max-height: 100vh;
+      padding-bottom: 40px;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }

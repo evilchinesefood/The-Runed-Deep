@@ -223,7 +223,6 @@ export function trackEquipmentCheck(equipment: Record<string, unknown>): void {
     "helmet",
     "body",
     "cloak",
-    "bracers",
     "gauntlets",
     "belt",
     "boots",

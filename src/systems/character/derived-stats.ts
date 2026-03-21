@@ -34,7 +34,7 @@ export function computeBaseArmorValue(dexterity: number): number {
 export function computeTotalArmorValue(dexterity: number, equipment: Equipment): number {
   let ac = computeBaseArmorValue(dexterity);
 
-  const armorSlots: EquipSlot[] = ['helmet', 'body', 'shield', 'cloak', 'bracers', 'gauntlets', 'boots', 'belt'];
+  const armorSlots: EquipSlot[] = ['helmet', 'body', 'shield', 'cloak', 'gauntlets', 'boots', 'belt'];
   for (const slot of armorSlots) {
     const item = equipment[slot];
     if (item && item.properties['ac']) {

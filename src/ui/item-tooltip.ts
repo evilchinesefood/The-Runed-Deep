@@ -41,7 +41,7 @@ function nameColor(item: Item): string {
 function categoryLabel(item: Item): string {
   const labels: Record<string, string> = {
     weapon: 'Weapon', armor: 'Body Armor', shield: 'Shield', helmet: 'Helmet',
-    cloak: 'Cloak', bracers: 'Bracers', gauntlets: 'Gauntlets', belt: 'Belt',
+    cloak: 'Cloak', gauntlets: 'Gloves', belt: 'Belt',
     boots: 'Boots', ring: 'Ring', amulet: 'Amulet', potion: 'Potion',
     scroll: 'Scroll', spellbook: 'Spellbook', wand: 'Wand', staff: 'Staff',
     container: 'Container', currency: 'Currency', misc: 'Misc',

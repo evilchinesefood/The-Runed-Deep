@@ -26,7 +26,6 @@ export function createEmptyEquipment(): Equipment {
     helmet: null,
     body: null,
     cloak: null,
-    bracers: null,
     gauntlets: null,
     belt: null,
     boots: null,

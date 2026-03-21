@@ -56,7 +56,6 @@ export type EquipSlot =
   | "helmet"
   | "body"
   | "cloak"
-  | "bracers"
   | "gauntlets"
   | "belt"
   | "boots"
@@ -72,7 +71,6 @@ export interface Equipment {
   helmet: Item | null;
   body: Item | null;
   cloak: Item | null;
-  bracers: Item | null;
   gauntlets: Item | null;
   belt: Item | null;
   boots: Item | null;
@@ -122,7 +120,6 @@ export type ItemCategory =
   | "shield"
   | "helmet"
   | "cloak"
-  | "bracers"
   | "gauntlets"
   | "belt"
   | "boots"

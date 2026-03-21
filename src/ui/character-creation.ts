@@ -347,6 +347,7 @@ export function createCharacterCreationScreen(
     color: "#f44",
     height: "20px",
     marginTop: "8px",
+    flexShrink: "0",
   });
   screen.appendChild(validationMsg);
 
@@ -354,8 +355,10 @@ export function createCharacterCreationScreen(
   startBtn.style.width = "100%";
   startBtn.style.maxWidth = "320px";
   startBtn.style.marginTop = "8px";
+  startBtn.style.marginBottom = "16px";
   startBtn.style.padding = "14px 32px";
   startBtn.style.fontSize = "16px";
+  startBtn.style.flexShrink = "0";
   startBtn.addEventListener("click", () => {
     if (pointsRemaining() !== 0) return;
     if (!state.name.trim()) state.name = "Hero";

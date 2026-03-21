@@ -5,7 +5,7 @@ import {
   hideItemTooltip,
 } from "../ui/item-tooltip";
 import { getDungeonForFloor, getTileset } from "../systems/dungeon/Tilesets";
-import { getDisplaySprite } from "../systems/inventory/display-name";
+import { getDisplaySprite, getItemGlow } from "../systems/inventory/display-name";
 
 const TILE_SIZE = 32;
 
@@ -14,7 +14,7 @@ function calcMapScale(): number {
   if (w <= 380) return 0.625; // 20px effective
   if (w <= 480) return 0.75; // 24px effective
   if (w <= 720) return 0.875; // 28px effective
-  return 0.9;
+  return 1;
 }
 
 function calcViewportTiles(): { x: number; y: number } {
@@ -199,6 +199,7 @@ export class MapRenderer {
         cell.ground.style.display = "none";
         cell.ground.style.opacity = "";
         cell.ground.style.transform = "";
+        cell.ground.style.filter = "";
         cell.entity.className = "";
         cell.entity.style.display = "none";
 
@@ -259,6 +260,11 @@ export class MapRenderer {
             tile.type === "building" ? "grass" : isLit ? "lit-dgn" : "dark-dgn";
           cell.floor.className = underlaySprite;
           cell.floor.style.opacity = opacity;
+          if (tile.type !== "building") {
+            cell.floor.style.filter = (visible || isLit)
+              ? "brightness(3.0)"
+              : "brightness(1.8)";
+          }
           // Buildings render via overlay system, not tile grid
           if (tile.type !== "building" || tile.walkable) {
             cell.ground.className = tile.sprite;
@@ -289,9 +295,12 @@ export class MapRenderer {
             cell.floor.style.backgroundColor = tileset.wallTint;
             cell.floor.style.backgroundBlendMode = "multiply";
           }
-          // Lighten floor tiles when visible or lit
-          if (isFloorLike && (visible || isLit)) {
-            cell.floor.style.filter = "brightness(1.25)";
+          // Lighten floor tiles — DCSS dark-dgn sprites are very dark,
+          // boost aggressively so visible floors read as light gray
+          if (isFloorLike) {
+            cell.floor.style.filter = (visible || isLit)
+              ? "brightness(3.0)"
+              : "brightness(1.8)";
           }
         }
 
@@ -309,6 +318,8 @@ export class MapRenderer {
             cell.ground.className = getDisplaySprite(itemsHere[0].item);
             cell.ground.style.display = "block";
             cell.ground.style.opacity = "1";
+            const glow = getItemGlow(itemsHere[0].item);
+            if (glow) cell.ground.style.filter = glow;
           } else if (hasBlood) {
             cell.ground.className = "blood-trap";
             cell.ground.style.display = "block";

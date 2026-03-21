@@ -18,7 +18,7 @@ export interface ShopDef {
 
 export const SHOP_DEFS: Record<string, ShopDef> = {
   'weapon-shop':   { id: 'weapon-shop',   name: 'Weapon Shop',     categories: ['weapon'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
-  'armor-shop':    { id: 'armor-shop',    name: 'Armor Shop',      categories: ['armor','shield','helmet','cloak','bracers','gauntlets','boots','belt'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
+  'armor-shop':    { id: 'armor-shop',    name: 'Armor Shop',      categories: ['armor','shield','helmet','cloak','gauntlets','boots','belt'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
   'general-store': { id: 'general-store', name: 'General Store',   categories: ['potion','scroll','ring','amulet','misc','container'], buyMult: 1.0, sellOnCat: 0.5, sellOffCat: 0.35 },
   'magic-shop':    { id: 'magic-shop',    name: 'Magic Shop',      categories: ['spellbook','wand','staff'], buyMult: 1.2, sellOnCat: 0.55, sellOffCat: 0.25 },
   'junk-store':    { id: 'junk-store',    name: "Olaf's Junk Store", categories: [], buyMult: 0.8, sellOnCat: 0.4, sellOffCat: 0.4 },

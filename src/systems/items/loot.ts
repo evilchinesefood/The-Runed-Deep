@@ -91,18 +91,8 @@ export function createItemFromTemplate(
   if (enchantment > 0) name = `${template.name} +${enchantment}`;
   else if (enchantment < 0) name = `${template.name} ${enchantment}`;
 
-  // Pick sprite variant for cursed/enchanted
-  // Skip variant suffix if base sprite already ends with -cursed or -enchanted
-  let sprite = template.sprite;
-  const alreadyVariant =
-    sprite.endsWith("-enchanted") || sprite.endsWith("-cursed");
-  if (!alreadyVariant) {
-    if (cursed) {
-      sprite = template.sprite + "-cursed";
-    } else if (enchantment > 0) {
-      sprite = template.sprite + "-enchanted";
-    }
-  }
+  // All items use their template sprite — glow differentiates enchanted/cursed
+  const sprite = template.sprite;
 
   const base: Item = {
     id,
