@@ -176,6 +176,7 @@ function buildPanel(
   sortMode: ShopSort,
   onSortChange: (mode: ShopSort) => void,
   soldKeys?: Set<string>,
+  noStack?: boolean,
 ): HTMLElement {
   const panel = createPanel(header);
   panel.style.flex = "1";
@@ -233,7 +234,7 @@ function buildPanel(
       ),
     );
   } else {
-    const stacks = stackItems(sorted);
+    const stacks = noStack ? sorted.map(i => ({ item: i, count: 1 })) : stackItems(sorted);
     for (const { item, count } of stacks) {
       const price = getPrice(item);
       const disabled = !canAfford(item);
@@ -341,6 +342,8 @@ export function createShopScreen(
         invSort = mode;
         render();
       },
+      undefined,
+      true,
     );
     row.appendChild(yourItems);
 

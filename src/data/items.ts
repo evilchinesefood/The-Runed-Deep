@@ -178,7 +178,7 @@ const EQUIPMENT: ItemTemplate[] = [
     weight: 800, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
   { id: 'leather-boots', name: 'Leather Boots', category: 'boots', sprite: 'boots', equipSlot: 'boots',
     weight: 800, value: 15, depthMin: 1, depthMax: 18, ac: 1 },
-  { id: 'iron-boots', name: 'Iron Boots', category: 'boots', sprite: 'boots-of-speed', equipSlot: 'boots',
+  { id: 'iron-boots', name: 'Iron Boots', category: 'boots', sprite: 'boots-enchanted', equipSlot: 'boots',
     weight: 1500, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
   { id: 'belt', name: 'Belt', category: 'belt', sprite: 'belt-leather', equipSlot: 'belt',
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },

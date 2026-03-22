@@ -487,7 +487,9 @@ export function monsterRangedAttack(
     /^summon-(monster|undead|devil|fire-giant)$/,
   );
   if (summonMatch) {
-    const floorIdx = floor.monsters.indexOf(monster);
+    const freshFloor = state.floors[floorKey];
+    const floorIdx = freshFloor ? freshFloor.monsters.findIndex(m => m.id === monster.id) : -1;
+    if (floorIdx < 0) return state;
     return spawnNearSummoner(state, floorKey, floorIdx, ability);
   }
 

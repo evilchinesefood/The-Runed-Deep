@@ -33,7 +33,7 @@
 .altar {
     background: url('../../assets/tiles.png') -352px -32px;
 }
-.status {
+.statue {
     background: url('../../assets/tiles.png') -384px -32px;
 }
 .path {
@@ -63,7 +63,7 @@
 .gold {
     background: url('../../assets/tiles.png') -128px -96px;
 }
-.alter {
+.altar-2 {
     background: url('../../assets/tiles.png') -192px -96px;
 }
 .stone-coffin {

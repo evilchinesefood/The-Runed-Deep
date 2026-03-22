@@ -102,9 +102,9 @@ export class MapRenderer {
         groundEl.style.cssText = posStyle + "background-color:transparent;";
         this.mapContainer.appendChild(groundEl);
 
-        // Entity layer (top — hero/monsters, transparent bg)
+        // Entity layer (top — hero/monsters, transparent bg, above building overlays)
         const entityEl = document.createElement("div");
-        entityEl.style.cssText = posStyle + "background-color:transparent;";
+        entityEl.style.cssText = posStyle + "background-color:transparent;z-index:3;";
         this.mapContainer.appendChild(entityEl);
 
         this.cells[y][x] = {
@@ -363,26 +363,22 @@ export class MapRenderer {
 
   // Sprite dimensions for building CSS classes
   private static BUILDING_SPRITES: Record<string, [number, number]> = {
-    "straw-house-east": [96, 96],
-    "straw-house-west": [96, 96],
-    hut: [64, 64],
-    "hut-fire": [64, 64],
-    "house-up": [96, 64],
-    "house-down1": [96, 64],
-    "house-down2": [96, 64],
-    "house-right": [64, 96],
-    "junk-yard": [96, 96],
-    villa1: [96, 128],
-    villa2: [96, 128],
-    pantheon: [96, 128],
-    temple: [160, 160],
-    "hut-temple": [160, 160],
-    "hut-temple-fire": [160, 160],
-    town: [256, 160],
-    yurt: [64, 64],
-    gate: [96, 32],
-    "straw-house-east-fire": [96, 96],
-    "straw-house-west-fire": [96, 96],
+    "wall-piece": [90, 31],
+    "round-hut": [66, 59],
+    "building-1": [98, 63],
+    "building-2": [106, 66],
+    "building-3": [85, 59],
+    "silo": [65, 65],
+    "big-hut": [105, 93],
+    "building-4": [64, 94],
+    "junk-yard": [111, 98],
+    "keep": [125, 120],
+    "l-building-1": [143, 138],
+    "l-building-2": [161, 138],
+    "hut-1": [56, 54],
+    "hut-2": [57, 55],
+    "sage": [110, 109],
+    "temple": [132, 127],
   };
 
   private renderBuildingOverlays(
@@ -428,7 +424,7 @@ export class MapRenderer {
           width:${sw}px;
           height:${sh}px;
           pointer-events:none;
-          z-index:5;
+          z-index:2;
           ${rot ? `transform:rotate(${rot}deg);transform-origin:center center;` : ""}
         `;
         this.mapContainer.appendChild(div);

@@ -49,10 +49,10 @@ export type SpellAnimation = ProjectileAnim | ExplosionAnim | FlashAnim | PulseA
 export const SPELL_SPRITES: Record<string, string> = {
   'magic-arrow': 'arrows-spell',
   'cold-bolt': 'ice-bolt-spell',
-  'lightning-bolt': 'lightnig-bolt-spell',  // typo in original CSS
+  'lightning-bolt': 'lightning-bolt-spell',
   'fire-bolt': 'fire-bolt-spell',
   'cold-ball': 'snow-spell',
-  'ball-lightning': 'lightnig-bolt-spell',
+  'ball-lightning': 'lightning-bolt-spell',
   'fire-ball': 'fire1-spell',
   'acid-bolt': 'acid-bolt-spell',
 };

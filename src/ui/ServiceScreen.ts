@@ -16,7 +16,7 @@ const BUILDING_NAMES: Record<string, string> = {
   temple: 'Temple of Odin',
   sage: 'The Sage',
   bank: 'Bank',
-  inn: 'The Inn',
+  inn: 'The Resting Stag Inn',
 };
 
 function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {

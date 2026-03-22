@@ -5,3 +5,10 @@ dist/
 .claude/
 dcss-tiles/
 tools/__pycache__/
+
+# Dev browser pages
+items.html
+tiles.html
+buildings.html
+monsters.html
+mapbuilder.html

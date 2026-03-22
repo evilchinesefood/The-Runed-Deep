@@ -1,179 +1,126 @@
 // ============================================================
-// Town map generation — compact layout with multi-tile buildings
+// Town map — exact from map builder, zero auto-generation
 // ============================================================
 
 import type { Floor, Tile, Vector2 } from '../../core/types';
 
-const W = 25;
-const H = 26;
-
-const GRASS: Tile = { type: 'grass', sprite: 'grass', walkable: true, transparent: true };
-const PATH: Tile = { type: 'path', sprite: 'path', walkable: true, transparent: true };
-// WALL used as base for border construction below
+const W = 30;
+const H = 32;
 
 export interface TownBuilding {
-  id: string;
-  name: string;
-  flavor: string;
-  x: number;       // top-left tile of sprite/footprint
-  y: number;
-  w: number;       // footprint width in tiles
-  h: number;       // footprint height in tiles
-  entranceX: number;
-  entranceY: number;
-  sprite: string;
-  spriteW: number;
-  spriteH: number;
-  rotate?: number; // CSS rotation in degrees (0, 90, 180, 270)
+  id: string; name: string; flavor: string;
+  x: number; y: number; w: number; h: number;
+  entranceX: number; entranceY: number;
+  sprite: string; spriteW: number; spriteH: number;
+  rotation?: number;
 }
 
-// Sprite reference:
-// straw-house-east  96x96 (3x3 tiles) — door on RIGHT
-// straw-house-west  96x96 (3x3 tiles) — door on LEFT
-// hut               64x64 (2x2 tiles) — door on RIGHT
-// hut-fire          64x64 (2x2 tiles) — door on RIGHT
-// house-up          96x64 (3x2 tiles) — door on TOP
-// house-down1       96x64 (3x2 tiles) — door on BOTTOM
-// house-right       64x96 (2x3 tiles) — door on RIGHT bottom
-// junk-yard         96x96 (3x3 tiles) — door on RIGHT
-// villa2            96x128 (3x4 tiles) — door on TOP
-// temple            160x160 (5x5 tiles) — door on TOP
-// pantheon          96x128 (3x4 tiles) — door on BOTTOM
-
 export const TOWN_BUILDINGS: TownBuilding[] = [
-  // === Left side (entrances face RIGHT toward center spine) ===
-  {
-    id: 'weapon-shop', name: 'Weapon Shop',
-    flavor: 'Fine blades and sturdy hammers for the discerning adventurer.',
-    x: 2, y: 2, w: 3, h: 3, entranceX: 5, entranceY: 3,
-    sprite: 'straw-house-east', spriteW: 96, spriteH: 96,
-  },
-  {
-    id: 'general-store', name: 'General Store',
-    flavor: 'Potions, scrolls, and sundries for every occasion.',
-    x: 3, y: 8, w: 2, h: 2, entranceX: 5, entranceY: 8,
-    sprite: 'hut', spriteW: 64, spriteH: 64,
-  },
-  {
-    id: 'junk-store', name: "Olaf's Junk Store",
-    flavor: "One man's trash is another man's slightly different trash.",
-    x: 2, y: 12, w: 3, h: 3, entranceX: 5, entranceY: 12,
-    sprite: 'junk-yard', spriteW: 96, spriteH: 96,
-  },
-  {
-    id: 'bank', name: 'Bank',
-    flavor: 'Keep your wealth safe from the dangers below.',
-    x: 2, y: 17, w: 3, h: 4, entranceX: 5, entranceY: 17,
-    sprite: 'villa2', spriteW: 96, spriteH: 128,
-  },
+  { id: 'inn', name: 'The Resting Stag Inn', flavor: 'A warm bed and a hearty meal await.',
+    x: 2, y: 2, w: 4, h: 3, entranceX: 24, entranceY: 27, sprite: 'building-2', spriteW: 106, spriteH: 66 },
+  { id: 'armor-shop', name: 'Armor Shop', flavor: 'Protection for every part of the body.',
+    x: 2, y: 7, w: 4, h: 3, entranceX: 3, entranceY: 10, sprite: 'big-hut', spriteW: 105, spriteH: 93 },
+  { id: 'general-store', name: 'General Store', flavor: 'Potions, scrolls, and sundries for every occasion.',
+    x: 2, y: 13, w: 2, h: 2, entranceX: 3, entranceY: 15, sprite: 'round-hut', spriteW: 66, spriteH: 59 },
+  { id: 'weapon-shop', name: 'Weapon Shop', flavor: 'Fine blades for the discerning adventurer.',
+    x: 23, y: 3, w: 3, h: 2, entranceX: 23, entranceY: 5, sprite: 'building-1', spriteW: 98, spriteH: 63 },
+  { id: 'sage', name: 'The Sage', flavor: 'Ancient knowledge to reveal the secrets of your treasures.',
+    x: 17, y: 9, w: 2, h: 2, entranceX: 21, entranceY: 7, sprite: 'round-hut', spriteW: 66, spriteH: 59 },
+  { id: 'magic-shop', name: 'Magic Shop', flavor: 'Arcane tomes and enchanted wands of great power.',
+    x: 20, y: 8, w: 4, h: 4, entranceX: 20, entranceY: 12, sprite: 'sage', spriteW: 110, spriteH: 109 },
+  { id: 'junk-store', name: "Olaf's Junk Store", flavor: "One man's trash is another man's slightly different trash.",
+    x: 24, y: 15, w: 4, h: 4, entranceX: 24, entranceY: 18, sprite: 'junk-yard', spriteW: 111, spriteH: 98, rotation: 180 },
+  { id: 'temple', name: 'Temple of Odin', flavor: 'A place of healing and divine protection.',
+    x: 12, y: 25, w: 5, h: 4, entranceX: 14, entranceY: 24, sprite: 'temple', spriteW: 132, spriteH: 127 },
+  { id: 'bank', name: 'Bank', flavor: 'Keep your wealth safe from the dangers below.',
+    x: 22, y: 26, w: 5, h: 5, entranceX: 6, entranceY: 22, sprite: 'l-building-1', spriteW: 143, spriteH: 138 },
+];
 
-  // === Right side (entrances face LEFT toward center spine) ===
-  {
-    id: 'armor-shop', name: 'Armor Shop',
-    flavor: 'Protection for every part of the body.',
-    x: 19, y: 2, w: 3, h: 3, entranceX: 18, entranceY: 3,
-    sprite: 'straw-house-west', spriteW: 96, spriteH: 96,
-  },
-  {
-    id: 'inn', name: 'The Resting Stag Inn',
-    flavor: 'A warm bed and a hearty meal await.',
-    x: 19, y: 7, w: 3, h: 2, entranceX: 20, entranceY: 9,
-    sprite: 'house-down1', spriteW: 96, spriteH: 64,
-  },
-  {
-    id: 'sage', name: 'The Sage',
-    flavor: 'Ancient knowledge to reveal the secrets of your treasures.',
-    x: 20, y: 11, w: 2, h: 2, entranceX: 19, entranceY: 12,
-    sprite: 'hut', spriteW: 64, spriteH: 64, rotate: 180,
-  },
-  {
-    id: 'magic-shop', name: 'Magic Shop',
-    flavor: 'Arcane tomes and enchanted wands of great power.',
-    x: 20, y: 16, w: 2, h: 3, entranceX: 19, entranceY: 17,
-    sprite: 'house-right', spriteW: 64, spriteH: 96, rotate: 180,
-  },
-
-  // === Temple at south center (entrance on top/north side) ===
-  {
-    id: 'temple', name: 'Temple of Odin',
-    flavor: 'A place of healing and divine protection.',
-    x: 10, y: 19, w: 5, h: 5, entranceX: 12, entranceY: 18,
-    sprite: 'temple', spriteW: 160, spriteH: 160,
-  },
+const DECORATIONS: { sprite: string; x: number; y: number; w: number; h: number; spriteW: number; spriteH: number }[] = [
+  { sprite: 'keep', x: 2, y: 20, w: 4, h: 4, spriteW: 125, spriteH: 120 },
+  { sprite: 'silo', x: 20, y: 14, w: 2, h: 2, spriteW: 65, spriteH: 65 },
+  { sprite: 'wall-piece', x: 11, y: 1, w: 3, h: 1, spriteW: 90, spriteH: 31 },
+  { sprite: 'wall-piece', x: 15, y: 1, w: 3, h: 1, spriteW: 90, spriteH: 31 },
+  { sprite: 'hut-1', x: 16, y: 7, w: 2, h: 2, spriteW: 56, spriteH: 54 },
+  { sprite: 'hut-2', x: 10, y: 20, w: 2, h: 2, spriteW: 57, spriteH: 55 },
 ];
 
 export const BUILDING_FLAVORS: Record<string, { name: string; flavor: string }> = {};
-for (const b of TOWN_BUILDINGS) {
-  BUILDING_FLAVORS[b.id] = { name: b.name, flavor: b.flavor };
+for (const b of TOWN_BUILDINGS) BUILDING_FLAVORS[b.id] = { name: b.name, flavor: b.flavor };
+
+export const TOWN_START_INITIAL: Vector2 = { x: 14, y: 23 };
+export const TOWN_START_RETURN: Vector2 = { x: 14, y: 2 };
+
+// Tile resolver
+function tf(sprite: string): Tile {
+  switch (sprite) {
+    case 'town-wall': return { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
+    case 'invisible-wall': return { type: 'wall', sprite: 'grass', walkable: false, transparent: true };
+    case 'path': return { type: 'path', sprite: 'path', walkable: true, transparent: true };
+    case 'water': return { type: 'water', sprite: 'water', walkable: false, transparent: true };
+    case 'sign': return { type: 'grass', sprite: 'sign', walkable: true, transparent: true };
+    case 'mine-entrance': return { type: 'stairs-down', sprite: 'mine-entrance', walkable: true, transparent: true };
+    default: return { type: 'grass', sprite, walkable: true, transparent: true };
+  }
 }
 
-const DUNGEON_ENTRANCE = { x: 12, y: 1 };
-export const TOWN_START_INITIAL: Vector2 = { x: 12, y: 17 };  // first visit: near temple
-export const TOWN_START_RETURN: Vector2 = { x: 12, y: 2 };    // returning from dungeon: near entrance
-const PLAYER_START: Vector2 = TOWN_START_INITIAL;
+// Place a tile
+function t(tiles: Tile[][], y: number, x: number, sprite: string): void {
+  tiles[y][x] = tf(sprite);
+}
 
 export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   const tiles: Tile[][] = Array.from({ length: H }, () =>
-    Array.from({ length: W }, () => ({ ...GRASS }))
+    Array.from({ length: W }, () => tf('grass'))
   );
 
-  // Border walls with proper orientation
-  const HWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
-  const VWALL: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
-  const CORNER: Tile = { type: 'wall', sprite: 'town-wall', walkable: false, transparent: false };
+  // Every non-grass tile — exact from builder export, no auto-generation
+  t(tiles,0,0,'town-wall'); t(tiles,0,1,'town-wall'); t(tiles,0,2,'town-wall'); t(tiles,0,3,'town-wall'); t(tiles,0,4,'town-wall'); t(tiles,0,5,'town-wall'); t(tiles,0,6,'town-wall'); t(tiles,0,7,'town-wall'); t(tiles,0,8,'town-wall'); t(tiles,0,9,'town-wall'); t(tiles,0,10,'town-wall'); t(tiles,0,11,'town-wall'); t(tiles,0,12,'town-wall'); t(tiles,0,13,'town-wall'); t(tiles,0,14,'town-wall'); t(tiles,0,15,'town-wall'); t(tiles,0,16,'town-wall'); t(tiles,0,17,'town-wall'); t(tiles,0,18,'town-wall'); t(tiles,0,19,'town-wall'); t(tiles,0,20,'town-wall'); t(tiles,0,21,'town-wall'); t(tiles,0,22,'town-wall'); t(tiles,0,23,'town-wall'); t(tiles,0,24,'town-wall'); t(tiles,0,25,'town-wall'); t(tiles,0,26,'town-wall'); t(tiles,0,27,'town-wall'); t(tiles,0,28,'town-wall'); t(tiles,0,29,'town-wall');
+  t(tiles,1,0,'town-wall'); t(tiles,1,10,'invisible-wall'); t(tiles,1,14,'mine-entrance'); t(tiles,1,18,'invisible-wall'); t(tiles,1,29,'town-wall');
+  t(tiles,2,0,'town-wall'); t(tiles,2,2,'invisible-wall'); t(tiles,2,3,'invisible-wall'); t(tiles,2,4,'invisible-wall'); t(tiles,2,11,'invisible-wall'); t(tiles,2,14,'path'); t(tiles,2,17,'invisible-wall'); t(tiles,2,29,'town-wall');
+  t(tiles,3,0,'town-wall'); t(tiles,3,2,'invisible-wall'); t(tiles,3,3,'invisible-wall'); t(tiles,3,4,'invisible-wall'); t(tiles,3,14,'path'); t(tiles,3,23,'invisible-wall'); t(tiles,3,24,'invisible-wall'); t(tiles,3,25,'invisible-wall'); t(tiles,3,29,'town-wall');
+  t(tiles,4,0,'town-wall'); t(tiles,4,2,'sign'); t(tiles,4,3,'path'); t(tiles,4,4,'path'); t(tiles,4,5,'path'); t(tiles,4,6,'path'); t(tiles,4,7,'path'); t(tiles,4,8,'path'); t(tiles,4,9,'path'); t(tiles,4,10,'path'); t(tiles,4,11,'path'); t(tiles,4,12,'path'); t(tiles,4,13,'path'); t(tiles,4,14,'path'); t(tiles,4,23,'invisible-wall'); t(tiles,4,24,'invisible-wall'); t(tiles,4,25,'invisible-wall'); t(tiles,4,29,'town-wall');
+  t(tiles,5,0,'town-wall'); t(tiles,5,14,'path'); t(tiles,5,15,'path'); t(tiles,5,16,'path'); t(tiles,5,17,'path'); t(tiles,5,18,'path'); t(tiles,5,19,'path'); t(tiles,5,20,'path'); t(tiles,5,21,'path'); t(tiles,5,22,'path'); t(tiles,5,23,'path'); t(tiles,5,25,'sign'); t(tiles,5,29,'town-wall');
+  t(tiles,6,0,'town-wall'); t(tiles,6,14,'path'); t(tiles,6,21,'path'); t(tiles,6,29,'town-wall');
+  t(tiles,7,0,'town-wall'); t(tiles,7,2,'invisible-wall'); t(tiles,7,3,'invisible-wall'); t(tiles,7,4,'invisible-wall'); t(tiles,7,14,'path'); t(tiles,7,16,'invisible-wall'); t(tiles,7,17,'invisible-wall'); t(tiles,7,20,'sign'); t(tiles,7,21,'path'); t(tiles,7,29,'town-wall');
+  t(tiles,8,0,'town-wall'); t(tiles,8,2,'invisible-wall'); t(tiles,8,3,'invisible-wall'); t(tiles,8,4,'invisible-wall'); t(tiles,8,14,'path'); t(tiles,8,16,'invisible-wall'); t(tiles,8,17,'invisible-wall'); t(tiles,8,29,'town-wall');
+  t(tiles,9,0,'town-wall'); t(tiles,9,2,'invisible-wall'); t(tiles,9,3,'invisible-wall'); t(tiles,9,4,'invisible-wall'); t(tiles,9,14,'path'); t(tiles,9,17,'invisible-wall'); t(tiles,9,18,'invisible-wall'); t(tiles,9,20,'invisible-wall'); t(tiles,9,21,'invisible-wall'); t(tiles,9,22,'invisible-wall'); t(tiles,9,29,'town-wall');
+  t(tiles,10,0,'town-wall'); t(tiles,10,2,'sign'); t(tiles,10,3,'path'); t(tiles,10,4,'path'); t(tiles,10,5,'path'); t(tiles,10,6,'path'); t(tiles,10,7,'path'); t(tiles,10,8,'path'); t(tiles,10,9,'path'); t(tiles,10,10,'path'); t(tiles,10,11,'path'); t(tiles,10,12,'path'); t(tiles,10,13,'path'); t(tiles,10,14,'path'); t(tiles,10,17,'invisible-wall'); t(tiles,10,18,'invisible-wall'); t(tiles,10,20,'invisible-wall'); t(tiles,10,21,'invisible-wall'); t(tiles,10,22,'invisible-wall'); t(tiles,10,29,'town-wall');
+  t(tiles,11,0,'town-wall'); t(tiles,11,14,'path'); t(tiles,11,15,'path'); t(tiles,11,16,'path'); t(tiles,11,17,'path'); t(tiles,11,29,'town-wall');
+  t(tiles,12,0,'town-wall'); t(tiles,12,14,'path'); t(tiles,12,29,'town-wall');
+  t(tiles,13,0,'town-wall'); t(tiles,13,2,'invisible-wall'); t(tiles,13,3,'invisible-wall'); t(tiles,13,14,'path'); t(tiles,13,18,'water'); t(tiles,13,29,'town-wall');
+  t(tiles,14,0,'town-wall'); t(tiles,14,2,'invisible-wall'); t(tiles,14,3,'invisible-wall'); t(tiles,14,14,'path'); t(tiles,14,17,'water'); t(tiles,14,18,'water'); t(tiles,14,19,'water'); t(tiles,14,20,'invisible-wall'); t(tiles,14,21,'invisible-wall'); t(tiles,14,29,'town-wall');
+  t(tiles,15,0,'town-wall'); t(tiles,15,2,'sign'); t(tiles,15,3,'path'); t(tiles,15,4,'path'); t(tiles,15,5,'path'); t(tiles,15,6,'path'); t(tiles,15,7,'path'); t(tiles,15,8,'path'); t(tiles,15,9,'path'); t(tiles,15,10,'path'); t(tiles,15,11,'path'); t(tiles,15,12,'path'); t(tiles,15,13,'path'); t(tiles,15,14,'path'); t(tiles,15,17,'water'); t(tiles,15,18,'water'); t(tiles,15,19,'water'); t(tiles,15,20,'invisible-wall'); t(tiles,15,21,'invisible-wall'); t(tiles,15,24,'invisible-wall'); t(tiles,15,25,'invisible-wall'); t(tiles,15,26,'invisible-wall'); t(tiles,15,27,'invisible-wall'); t(tiles,15,29,'town-wall');
+  t(tiles,16,0,'town-wall'); t(tiles,16,14,'path'); t(tiles,16,16,'water'); t(tiles,16,17,'water'); t(tiles,16,18,'water'); t(tiles,16,19,'water'); t(tiles,16,20,'water'); t(tiles,16,24,'invisible-wall'); t(tiles,16,27,'invisible-wall'); t(tiles,16,29,'town-wall');
+  t(tiles,17,0,'town-wall'); t(tiles,17,14,'path'); t(tiles,17,18,'water'); t(tiles,17,19,'water'); t(tiles,17,24,'invisible-wall'); t(tiles,17,25,'invisible-wall'); t(tiles,17,26,'invisible-wall'); t(tiles,17,27,'invisible-wall'); t(tiles,17,29,'town-wall');
+  t(tiles,18,0,'town-wall'); t(tiles,18,14,'path'); t(tiles,18,15,'path'); t(tiles,18,16,'path'); t(tiles,18,17,'path'); t(tiles,18,18,'path'); t(tiles,18,19,'path'); t(tiles,18,20,'path'); t(tiles,18,21,'path'); t(tiles,18,22,'path'); t(tiles,18,23,'path'); t(tiles,18,24,'path'); t(tiles,18,25,'sign'); t(tiles,18,29,'town-wall');
+  t(tiles,19,0,'town-wall'); t(tiles,19,14,'path'); t(tiles,19,29,'town-wall');
+  t(tiles,20,0,'town-wall'); t(tiles,20,2,'invisible-wall'); t(tiles,20,4,'invisible-wall'); t(tiles,20,5,'invisible-wall'); t(tiles,20,10,'invisible-wall'); t(tiles,20,11,'invisible-wall'); t(tiles,20,14,'path'); t(tiles,20,29,'town-wall');
+  t(tiles,21,0,'town-wall'); t(tiles,21,2,'invisible-wall'); t(tiles,21,5,'invisible-wall'); t(tiles,21,10,'invisible-wall'); t(tiles,21,11,'invisible-wall'); t(tiles,21,14,'path'); t(tiles,21,29,'town-wall');
+  t(tiles,22,0,'town-wall'); t(tiles,22,2,'invisible-wall'); t(tiles,22,5,'invisible-wall'); t(tiles,22,6,'path'); t(tiles,22,7,'path'); t(tiles,22,8,'path'); t(tiles,22,9,'path'); t(tiles,22,10,'path'); t(tiles,22,11,'path'); t(tiles,22,12,'path'); t(tiles,22,13,'path'); t(tiles,22,14,'path'); t(tiles,22,15,'path'); t(tiles,22,16,'path'); t(tiles,22,17,'path'); t(tiles,22,18,'path'); t(tiles,22,19,'path'); t(tiles,22,20,'path'); t(tiles,22,21,'path'); t(tiles,22,22,'path'); t(tiles,22,23,'path'); t(tiles,22,24,'path'); t(tiles,22,29,'town-wall');
+  t(tiles,23,0,'town-wall'); t(tiles,23,2,'invisible-wall'); t(tiles,23,3,'invisible-wall'); t(tiles,23,4,'invisible-wall'); t(tiles,23,5,'invisible-wall'); t(tiles,23,6,'sign'); t(tiles,23,14,'path'); t(tiles,23,24,'path'); t(tiles,23,29,'town-wall');
+  t(tiles,24,0,'town-wall'); t(tiles,24,14,'path'); t(tiles,24,15,'sign'); t(tiles,24,24,'path'); t(tiles,24,29,'town-wall');
+  t(tiles,25,0,'town-wall'); t(tiles,25,12,'invisible-wall'); t(tiles,25,13,'invisible-wall'); t(tiles,25,14,'invisible-wall'); t(tiles,25,15,'invisible-wall'); t(tiles,25,24,'path'); t(tiles,25,25,'sign'); t(tiles,25,29,'town-wall');
+  t(tiles,26,0,'town-wall'); t(tiles,26,12,'invisible-wall'); t(tiles,26,13,'invisible-wall'); t(tiles,26,14,'invisible-wall'); t(tiles,26,15,'invisible-wall'); t(tiles,26,22,'invisible-wall'); t(tiles,26,24,'path'); t(tiles,26,29,'town-wall');
+  t(tiles,27,0,'town-wall'); t(tiles,27,12,'invisible-wall'); t(tiles,27,13,'invisible-wall'); t(tiles,27,14,'invisible-wall'); t(tiles,27,15,'invisible-wall'); t(tiles,27,22,'invisible-wall'); t(tiles,27,23,'invisible-wall'); t(tiles,27,24,'path'); t(tiles,27,25,'sign'); t(tiles,27,29,'town-wall');
+  t(tiles,28,0,'town-wall'); t(tiles,28,12,'invisible-wall'); t(tiles,28,13,'invisible-wall'); t(tiles,28,14,'invisible-wall'); t(tiles,28,15,'invisible-wall'); t(tiles,28,22,'invisible-wall'); t(tiles,28,24,'invisible-wall'); t(tiles,28,25,'invisible-wall'); t(tiles,28,26,'invisible-wall'); t(tiles,28,29,'town-wall');
+  t(tiles,29,0,'town-wall'); t(tiles,29,22,'invisible-wall'); t(tiles,29,23,'invisible-wall'); t(tiles,29,24,'invisible-wall'); t(tiles,29,25,'invisible-wall'); t(tiles,29,26,'invisible-wall'); t(tiles,29,29,'town-wall');
+  t(tiles,30,0,'town-wall'); t(tiles,30,29,'town-wall');
+  t(tiles,31,0,'town-wall'); t(tiles,31,1,'town-wall'); t(tiles,31,2,'town-wall'); t(tiles,31,3,'town-wall'); t(tiles,31,4,'town-wall'); t(tiles,31,5,'town-wall'); t(tiles,31,6,'town-wall'); t(tiles,31,7,'town-wall'); t(tiles,31,8,'town-wall'); t(tiles,31,9,'town-wall'); t(tiles,31,10,'town-wall'); t(tiles,31,11,'town-wall'); t(tiles,31,12,'town-wall'); t(tiles,31,13,'town-wall'); t(tiles,31,14,'town-wall'); t(tiles,31,15,'town-wall'); t(tiles,31,16,'town-wall'); t(tiles,31,17,'town-wall'); t(tiles,31,18,'town-wall'); t(tiles,31,19,'town-wall'); t(tiles,31,20,'town-wall'); t(tiles,31,21,'town-wall'); t(tiles,31,22,'town-wall'); t(tiles,31,23,'town-wall'); t(tiles,31,24,'town-wall'); t(tiles,31,25,'town-wall'); t(tiles,31,26,'town-wall'); t(tiles,31,27,'town-wall'); t(tiles,31,28,'town-wall'); t(tiles,31,29,'town-wall');
 
-  // North and south borders (horizontal — rotated 90°)
-  for (let x = 1; x < W - 1; x++) { tiles[0][x] = { ...HWALL }; tiles[H - 1][x] = { ...HWALL }; }
-  // East and west borders (vertical — default orientation)
-  for (let y = 1; y < H - 1; y++) { tiles[y][0] = { ...VWALL }; tiles[y][W - 1] = { ...VWALL }; }
-  // Corners — top-left correct, top-right 90°, bottom-left 90°, bottom-right 180°
-  tiles[0][0] = { ...CORNER };
-  tiles[0][W - 1] = { ...CORNER };
-  tiles[H - 1][0] = { ...CORNER };
-  tiles[H - 1][W - 1] = { ...CORNER };
-
-  // Place building footprints as walls
+  // Building sprite anchors — placed AFTER tiles so they override
   for (const b of TOWN_BUILDINGS) {
-    for (let by = b.y; by < b.y + b.h && by < H; by++) {
-      for (let bx = b.x; bx < b.x + b.w && bx < W; bx++) {
-        tiles[by][bx] = { type: 'wall', sprite: 'rock', walkable: false, transparent: true };
-      }
-    }
-    // Top-left for sprite overlay
-    if (b.y >= 0 && b.y < H && b.x >= 0 && b.x < W) {
-      tiles[b.y][b.x] = { type: 'building', sprite: b.sprite, walkable: false, transparent: true, buildingId: b.id, rotate: b.rotate ?? 0 };
-    }
-    // Entrance tile
-    if (b.entranceY >= 0 && b.entranceY < H && b.entranceX >= 0 && b.entranceX < W) {
-      tiles[b.entranceY][b.entranceX] = {
-        type: 'building', sprite: 'path', walkable: true, transparent: true, buildingId: b.id,
-      };
-    }
+    if (b.y >= 0 && b.y < H && b.x >= 0 && b.x < W)
+      tiles[b.y][b.x] = { type: 'building', sprite: b.sprite, walkable: false, transparent: true, buildingId: b.id, rotate: b.rotation ?? 0 };
+    if (b.entranceY >= 0 && b.entranceY < H && b.entranceX >= 0 && b.entranceX < W)
+      tiles[b.entranceY][b.entranceX] = { type: 'building', sprite: 'path', walkable: true, transparent: true, buildingId: b.id };
   }
 
-  // Dungeon entrance at top
-  tiles[DUNGEON_ENTRANCE.y][DUNGEON_ENTRANCE.x] = {
-    type: 'stairs-down', sprite: 'mine-entrance', walkable: true, transparent: true,
-  };
-
-  // === Paths ===
-  // Main vertical spine (stop at temple entrance, don't extend past)
-  for (let y = 1; y <= 18; y++) sp(tiles, 12, y);
-
-  // Left branches to entrances
-  for (let x = 5; x <= 12; x++) sp(tiles, x, 3);   // weapon shop
-  for (let x = 5; x <= 12; x++) sp(tiles, x, 8);   // general store
-  for (let x = 5; x <= 12; x++) sp(tiles, x, 12);  // junk store
-  for (let x = 5; x <= 12; x++) sp(tiles, x, 17);  // bank
-
-  // Right branches to entrances
-  for (let x = 12; x <= 18; x++) sp(tiles, x, 3);  // armor shop
-  for (let x = 12; x <= 20; x++) sp(tiles, x, 9);  // inn
-  for (let x = 12; x <= 19; x++) sp(tiles, x, 12); // sage
-  for (let x = 12; x <= 19; x++) sp(tiles, x, 17); // magic shop
-
-  // Temple entrance
-  sp(tiles, 12, 18);
+  // Decoration anchors
+  for (const d of DECORATIONS) {
+    if (d.y >= 0 && d.y < H && d.x >= 0 && d.x < W)
+      tiles[d.y][d.x] = { type: 'building', sprite: d.sprite, walkable: false, transparent: true };
+  }
 
   const explored = Array.from({ length: H }, () => Array(W).fill(true));
   const visible = Array.from({ length: H }, () => Array(W).fill(true));
@@ -181,13 +128,6 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
 
   return {
     floor: { id: 'town-0', tiles, monsters: [], items: [], decals: [], explored, visible, lit, width: W, height: H },
-    playerStart: PLAYER_START,
+    playerStart: TOWN_START_INITIAL,
   };
-}
-
-function sp(tiles: Tile[][], x: number, y: number): void {
-  if (x <= 0 || x >= W - 1 || y <= 0 || y >= H - 1) return;
-  const t = tiles[y][x];
-  if (t.type === 'wall' || t.type === 'stairs-down' || t.type === 'building') return;
-  tiles[y][x] = { ...PATH };
 }

@@ -149,6 +149,7 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     state = result.state;
   } else if (item.templateId === "scroll-rune-of-return") {
     if (state.currentDungeon === "town") {
+      hero = removeFromInventory(hero, idx);
       messages.push({
         text: "You are already in town.",
         severity: "system",

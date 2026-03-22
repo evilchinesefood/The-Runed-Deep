@@ -2,110 +2,90 @@
     position: absolute;
 }
 
-/* Row 1 */
-.gate {
-    background: url('../../assets/buildings.png') -0px -0px;
-    height: 32px;
-    width: 96px;
+/* Row 1 — Small buildings */
+.wall-piece {
+    background: url('../../assets/buildings.png') -18px -21px;
+    height: 31px;
+    width: 90px;
 }
-.hut {
-    background: url('../../assets/buildings.png') -96px -0px;
-    height: 64px;
-    width: 64px;
+.round-hut {
+    background: url('../../assets/buildings.png') -130px -11px;
+    height: 59px;
+    width: 66px;
 }
-.hut-fire {
-    background: url('../../assets/buildings.png') -160px -0px;
-    height: 64px;
-    width: 64px;
+.building-1 {
+    background: url('../../assets/buildings.png') -289px -7px;
+    height: 63px;
+    width: 98px;
 }
-.house-up {
-    background: url('../../assets/buildings.png') -224px -0px;
-    height: 64px;
-    width: 96px;
+.building-2 {
+    background: url('../../assets/buildings.png') -397px -10px;
+    height: 66px;
+    width: 106px;
 }
-.house-down1 {
-    background: url('../../assets/buildings.png') -320px -0px;
-    height: 64px;
-    width: 96px;
+.building-3 {
+    background: url('../../assets/buildings.png') -510px -15px;
+    height: 59px;
+    width: 85px;
 }
-.house-down2 {
-    background: url('../../assets/buildings.png') -416px -0px;
-    height: 64px;
-    width: 96px;
-}
-.yurt {
-    background: url('../../assets/buildings.png') -512px -0px;
-    height: 64px;
-    width: 64px;
+.silo {
+    background: url('../../assets/buildings.png') -601px -8px;
+    height: 65px;
+    width: 65px;
 }
 
-/* Row 2 */
-.straw-house-east {
-    background: url('../../assets/buildings.png') -0px -64px;
-    height: 96px;
-    width: 96px;
+/* Row 2 — Medium buildings */
+.big-hut {
+    background: url('../../assets/buildings.png') -14px -89px;
+    height: 93px;
+    width: 105px;
 }
-.straw-house-east-fire {
-    background: url('../../assets/buildings.png') -96px -64px;
-    height: 96px;
-    width: 96px;
-}
-.straw-house-west {
-    background: url('../../assets/buildings.png') -192px -64px;
-    height: 96px;
-    width: 96px;
-}
-.straw-house-west-fire {
-    background: url('../../assets/buildings.png') -288px -64px;
-    height: 96px;
-    width: 96px;
-}
-.house-right {
-    background: url('../../assets/buildings.png') -384px -64px;
-    height: 96px;
+.building-4 {
+    background: url('../../assets/buildings.png') -486px -87px;
+    height: 94px;
     width: 64px;
 }
 .junk-yard {
-    background: url('../../assets/buildings.png') -448px -64px;
-    height: 96px;
-    width: 96px;
+    background: url('../../assets/buildings.png') -554px -85px;
+    height: 98px;
+    width: 111px;
 }
 
-/* Row 3 */
-.pantheon {
-    background: url('../../assets/buildings.png') -0px -160px;
-    height: 128px;
-    width: 96px;
+/* Row 3 — Large buildings */
+.keep {
+    background: url('../../assets/buildings.png') -11px -195px;
+    height: 120px;
+    width: 125px;
 }
-.villa1 {
-    background: url('../../assets/buildings.png') -96px -160px;
-    height: 128px;
-    width: 96px;
+.l-building-1 {
+    background: url('../../assets/buildings.png') -147px -189px;
+    height: 138px;
+    width: 143px;
 }
-.villa2 {
-    background: url('../../assets/buildings.png') -192px -160px;
-    height: 128px;
-    width: 96px;
+.l-building-2 {
+    background: url('../../assets/buildings.png') -295px -187px;
+    height: 138px;
+    width: 161px;
+}
+.hut-1 {
+    background: url('../../assets/buildings.png') -605px -197px;
+    height: 54px;
+    width: 56px;
+}
+.hut-2 {
+    background: url('../../assets/buildings.png') -605px -262px;
+    height: 55px;
+    width: 57px;
 }
 
-/* Row 4 */
-.hut-temple {
-    background: url('../../assets/buildings.png') -0px -288px;
-    height: 160px;
-    width: 160px;
-}
-.hut-temple-fire {
-    background: url('../../assets/buildings.png') -160px -288px;
-    height: 160px;
-    width: 160px;
-}
-.town {
-    background: url('../../assets/buildings.png') -320px -288px;
-    height: 160px;
-    width: 256px;
+/* Row 4 — Special buildings */
+.sage {
+    background: url('../../assets/buildings.png') -30px -329px;
+    height: 109px;
+    width: 110px;
 }
 .temple {
-    background: url('../../assets/buildings.png') -576px -288px;
-    height: 160px;
-    width: 160px;
+    background: url('../../assets/buildings.png') -541px -321px;
+    height: 127px;
+    width: 132px;
 }
