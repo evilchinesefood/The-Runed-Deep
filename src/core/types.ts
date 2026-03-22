@@ -197,7 +197,8 @@ export type TileType =
   | "path"
   | "rock"
   | "building"
-  | "trap";
+  | "trap"
+  | "decor";
 
 export interface Tile {
   type: TileType;

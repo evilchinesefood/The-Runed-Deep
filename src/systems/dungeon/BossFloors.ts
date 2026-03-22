@@ -36,6 +36,14 @@ function trap(trapType: string): Tile {
   return { type: 'trap', sprite: ts.floor, walkable: true, transparent: true, trapType, trapRevealed: false };
 }
 
+function decor(sprite: string, walkable = false): Tile {
+  return { type: 'decor', sprite, walkable, transparent: true };
+}
+
+function water(): Tile {
+  return { type: 'water', sprite: 'water', walkable: false, transparent: true };
+}
+
 // ── Grid helpers ──────────────────────────────────────────
 
 function initGrid(w: number, h: number): Tile[][] {
@@ -116,6 +124,78 @@ function placeLoot(
 
 function rand01(): number {
   return Math.random();
+}
+
+// ── Boss floor decoration ────────────────────────────────
+
+const BOSS_DECOR: { sprite: string; walkable: boolean; minDepth: number; weight: number }[] = [
+  { sprite: 'pillar-stone', walkable: false, minDepth: 1, weight: 4 },
+  { sprite: 'pillar-broken', walkable: true, minDepth: 5, weight: 3 },
+  { sprite: 'altar', walkable: false, minDepth: 10, weight: 1 },
+  { sprite: 'altar-2', walkable: false, minDepth: 20, weight: 1 },
+  { sprite: 'statue', walkable: false, minDepth: 10, weight: 2 },
+  { sprite: 'stone-coffin', walkable: false, minDepth: 15, weight: 2 },
+  { sprite: 'fountain', walkable: false, minDepth: 10, weight: 1 },
+];
+
+function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2, count: number): void {
+  const W = tiles[0].length, H = tiles.length;
+  const available = BOSS_DECOR.filter(d => depth >= d.minDepth);
+  if (available.length === 0) return;
+
+  const totalW = available.reduce((s, d) => s + d.weight, 0);
+  function pick() {
+    let roll = Math.random() * totalW;
+    for (const d of available) { roll -= d.weight; if (roll <= 0) return d; }
+    return available[available.length - 1];
+  }
+
+  let placed = 0;
+  for (let tries = 0; tries < count * 10 && placed < count; tries++) {
+    const x = 1 + Math.floor(Math.random() * (W - 2));
+    const y = 1 + Math.floor(Math.random() * (H - 2));
+    const t = tiles[y][x];
+    if (t.type !== 'floor') continue;
+    if (x === playerStart.x && y === playerStart.y) continue;
+    // Not adjacent to stairs
+    const near = [[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy]) => {
+      const adj = tiles[y+dy]?.[x+dx];
+      return adj?.type === 'stairs-up' || adj?.type === 'stairs-down';
+    });
+    if (near) continue;
+
+    const d = pick();
+
+    // For non-walkable decor, don't block corridors/doorways
+    if (!d.walkable) {
+      let walkable = 0;
+      for (const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+        const nx = x+dx, ny = y+dy;
+        if (ny >= 0 && ny < H && nx >= 0 && nx < W && tiles[ny][nx].walkable) walkable++;
+      }
+      if (walkable < 3) continue;
+    }
+
+    tiles[y][x] = decor(d.sprite, d.walkable);
+    placed++;
+  }
+
+  // Also add 1-2 water patches in deeper boss floors
+  if (depth >= 20) {
+    for (let w = 0; w < 2; w++) {
+      const wx = 2 + Math.floor(Math.random() * (W - 4));
+      const wy = 2 + Math.floor(Math.random() * (H - 4));
+      if (tiles[wy][wx].type === 'floor') {
+        tiles[wy][wx] = water();
+        // Spread 1-2 adjacent
+        for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+          if (Math.random() < 0.4 && tiles[wy+dy]?.[wx+dx]?.type === 'floor') {
+            tiles[wy+dy][wx+dx] = water();
+          }
+        }
+      }
+    }
+  }
 }
 
 // ── Floor 15: Hrungnir, Hill Giant Lord ───────────────────
@@ -674,14 +754,22 @@ export function generateBossFloor(
   if (!BOSS_FLOORS.has(floorNum)) return null;
   ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS['mine'];
 
+  let result: { floor: Floor; playerStart: Vector2 } | null = null;
   switch (floorNum) {
-    case 15: return buildFloor15(dungeonId, depth, difficulty);
-    case 20: return buildFloor20(dungeonId, depth, difficulty);
-    case 25: return buildFloor25(dungeonId, depth, difficulty);
-    case 30: return buildFloor30(dungeonId, depth, difficulty);
-    case 33: return buildFloor33(dungeonId, depth, difficulty);
-    case 36: return buildFloor36(dungeonId, depth, difficulty);
-    case 40: return buildFloor40(dungeonId, depth, difficulty);
-    default: return null;
+    case 15: result = buildFloor15(dungeonId, depth, difficulty); break;
+    case 20: result = buildFloor20(dungeonId, depth, difficulty); break;
+    case 25: result = buildFloor25(dungeonId, depth, difficulty); break;
+    case 30: result = buildFloor30(dungeonId, depth, difficulty); break;
+    case 33: result = buildFloor33(dungeonId, depth, difficulty); break;
+    case 36: result = buildFloor36(dungeonId, depth, difficulty); break;
+    case 40: result = buildFloor40(dungeonId, depth, difficulty); break;
   }
+
+  // Add decorative elements to boss floors
+  if (result) {
+    const decorCount = floorNum >= 30 ? 8 : floorNum >= 20 ? 6 : 4;
+    decorateBossFloor(result.floor.tiles, depth, result.playerStart, decorCount);
+  }
+
+  return result;
 }

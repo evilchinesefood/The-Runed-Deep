@@ -36,12 +36,14 @@ export function processPickupItem(state: GameState): GameState {
   let copper = hero.copper;
 
   // Base carry capacity 10kg (10000g), pack adds to it
+  // Enchantment modifies capacity: +5kg per level, -5kg per cursed level
   const BASE_CARRY = 10000;
   const packItem = hero.equipment.pack;
   const packTpl = packItem ? ITEM_BY_ID[packItem.templateId] : null;
-  const packWeight =
+  const basePackWeight =
     packItem?.properties["weightCapacity"] ?? packTpl?.weightCapacity ?? 0;
-  const packCap = BASE_CARRY + packWeight;
+  const enchBonus = packItem ? packItem.enchantment * 5000 : 0;
+  const packCap = BASE_CARRY + Math.max(0, basePackWeight + enchBonus);
 
   // Track picked up item IDs
   const pickedIds = new Set<string>();

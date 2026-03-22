@@ -134,9 +134,14 @@ function buildTooltipContent(item: Item): HTMLElement {
     hasStats = true;
   }
 
-  // Container capacity
+  // Container capacity (enchantment modifies: +5kg per level)
   if (tpl?.weightCapacity) {
-    statsBox.appendChild(statLine(`Capacity: ${(tpl.weightCapacity / 1000).toFixed(0)} kg`));
+    const enchBonus = item.enchantment * 5000;
+    const effectiveCap = Math.max(0, tpl.weightCapacity + enchBonus);
+    const capText = item.enchantment !== 0
+      ? `Capacity: ${(effectiveCap / 1000).toFixed(0)} kg (base ${(tpl.weightCapacity / 1000).toFixed(0)})`
+      : `Capacity: ${(tpl.weightCapacity / 1000).toFixed(0)} kg`;
+    statsBox.appendChild(statLine(capText));
     hasStats = true;
   }
 

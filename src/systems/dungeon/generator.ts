@@ -317,6 +317,9 @@ function generateFloorAttempt(
   // Place traps in corridors and rooms (not on stairs or player start)
   placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
 
+  // Place decorative objects in rooms
+  placeDecor(floor, rooms, effectiveDepth, playerStart, rand);
+
   // Validate floor quality
   if (!skipValidation) {
     // Must have minimum room count
@@ -720,5 +723,113 @@ function placeTraps(
     });
     const trap = available[Math.floor(rand() * available.length)];
     floor.tiles[pos.y][pos.x] = createTrapTile(trap.id);
+  }
+}
+
+// ── Decorative objects ────────────────────────────────────
+
+interface DecorDef {
+  sprite: string;
+  walkable: boolean;
+  transparent: boolean;
+  minDepth: number;
+  weight: number;
+}
+
+const DECOR_TYPES: DecorDef[] = [
+  { sprite: 'pillar-stone', walkable: false, transparent: false, minDepth: 1, weight: 5 },
+  { sprite: 'pillar-broken', walkable: true, transparent: true, minDepth: 5, weight: 3 },
+  { sprite: 'altar', walkable: false, transparent: true, minDepth: 10, weight: 1 },
+  { sprite: 'altar-2', walkable: false, transparent: true, minDepth: 15, weight: 1 },
+  { sprite: 'statue', walkable: false, transparent: true, minDepth: 8, weight: 2 },
+  { sprite: 'water', walkable: false, transparent: true, minDepth: 1, weight: 3 },
+  { sprite: 'stone-coffin', walkable: false, transparent: true, minDepth: 12, weight: 2 },
+  { sprite: 'fountain', walkable: false, transparent: true, minDepth: 10, weight: 1 },
+];
+
+function placeDecor(
+  floor: Floor,
+  rooms: Room[],
+  depth: number,
+  playerStart: Vector2,
+  rand: () => number,
+): void {
+  const available = DECOR_TYPES.filter(d => depth >= d.minDepth);
+  if (available.length === 0) return;
+
+  // Weight-based selection
+  const totalWeight = available.reduce((s, d) => s + d.weight, 0);
+  function pickDecor(): DecorDef {
+    let roll = rand() * totalWeight;
+    for (const d of available) {
+      roll -= d.weight;
+      if (roll <= 0) return d;
+    }
+    return available[available.length - 1];
+  }
+
+  // Place 1-3 decor per room (larger rooms get more)
+  for (const room of rooms) {
+    if (room.w < 5 || room.h < 5) continue; // skip small rooms
+    const count = 1 + Math.floor(rand() * Math.min(3, Math.floor(room.w * room.h / 20)));
+
+    for (let i = 0; i < count; i++) {
+      // Pick a random floor tile inside the room (not edges)
+      for (let tries = 0; tries < 20; tries++) {
+        const x = room.x + 1 + Math.floor(rand() * (room.w - 2));
+        const y = room.y + 1 + Math.floor(rand() * (room.h - 2));
+
+        if (x <= 0 || x >= floor.width - 1 || y <= 0 || y >= floor.height - 1) continue;
+        const tile = floor.tiles[y][x];
+        if (tile.type !== 'floor') continue;
+        if (x === playerStart.x && y === playerStart.y) continue;
+        // Don't place adjacent to stairs
+        const adj = [[-1,0],[1,0],[0,-1],[0,1]];
+        const nearStairs = adj.some(([dx,dy]) => {
+          const t = floor.tiles[y+dy]?.[x+dx];
+          return t?.type === 'stairs-up' || t?.type === 'stairs-down';
+        });
+        if (nearStairs) continue;
+        // Don't block if monster is here
+        if (floor.monsters.some(m => m.position.x === x && m.position.y === y)) continue;
+
+        const decor = pickDecor();
+
+        // For non-walkable decor, check it won't block a path
+        // Count walkable cardinal neighbors — if < 3, it might be a corridor/doorway
+        if (!decor.walkable) {
+          let walkableNeighbors = 0;
+          for (const [dx, dy] of adj) {
+            const nx = x + dx, ny = y + dy;
+            if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
+              if (floor.tiles[ny][nx].walkable) walkableNeighbors++;
+            }
+          }
+          if (walkableNeighbors < 3) continue; // skip — might block a path
+        }
+
+        // Water can spread 1-3 tiles
+        if (decor.sprite === 'water') {
+          const spread = 1 + Math.floor(rand() * 3);
+          for (let s = 0; s < spread; s++) {
+            const wx = x + Math.floor(rand() * 3) - 1;
+            const wy = y + Math.floor(rand() * 3) - 1;
+            if (wx > 0 && wx < floor.width - 1 && wy > 0 && wy < floor.height - 1) {
+              const wt = floor.tiles[wy][wx];
+              if (wt.type === 'floor') {
+                floor.tiles[wy][wx] = { type: 'water', sprite: 'water', walkable: false, transparent: true };
+              }
+            }
+          }
+          floor.tiles[y][x] = { type: 'water', sprite: 'water', walkable: false, transparent: true };
+        } else {
+          floor.tiles[y][x] = {
+            type: 'decor', sprite: decor.sprite,
+            walkable: decor.walkable, transparent: decor.transparent,
+          };
+        }
+        break;
+      }
+    }
   }
 }

@@ -89,12 +89,20 @@ input.setPathClickCallback((target) => {
 // Auto-explore: find nearest unexplored tile and walk toward it
 let autoExploring = false;
 
+function aeMsg(text: string): void {
+  const state = gameLoop.getState();
+  gameLoop.setState({
+    ...state,
+    messages: [...state.messages, { text, severity: 'system' as const, turn: state.turn }],
+  });
+}
+
 input.setAutoExploreCallback(() => {
   if (autoExploring) {
     autoExploring = false;
     autoPath = [];
     return;
-  } // toggle off
+  }
   autoExploring = true;
   exploreNext();
 });
@@ -102,11 +110,12 @@ input.setAutoExploreCallback(() => {
 function exploreNext(): void {
   if (!autoExploring) return;
   const state = gameLoop.getState();
-  if (
-    state.screen !== "game" ||
-    state.hero.hp <= 0 ||
-    state.currentDungeon === "town"
-  ) {
+  if (state.screen !== "game" || state.hero.hp <= 0) {
+    autoExploring = false;
+    return;
+  }
+  if (state.currentDungeon === "town") {
+    aeMsg("Auto-explore is not available in town.");
     autoExploring = false;
     return;
   }
@@ -125,28 +134,28 @@ function exploreNext(): void {
       floor.lit[m.position.y]?.[m.position.x],
   );
   if (hasVisibleMonster) {
+    aeMsg("Auto-explore stopped — monster spotted!");
     autoExploring = false;
     return;
   }
 
   // Stop if HP below 50%
   if (state.hero.hp < state.hero.maxHp * 0.5) {
+    aeMsg(`Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`);
     autoExploring = false;
     return;
   }
 
   // Find nearest EXPLORED walkable tile that has an unexplored walkable neighbor
-  // (hero walks to the frontier, FOV reveals the next area)
   const hero = state.hero.position;
   let bestTarget: { x: number; y: number } | null = null;
   let bestDist = Infinity;
 
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
-      if (!floor.explored[y][x]) continue; // must be explored
-      if (!floor.tiles[y][x].walkable) continue; // must be walkable
-      if (x === hero.x && y === hero.y) continue; // skip hero's current tile
-      // Must have at least one unexplored walkable neighbor
+      if (!floor.explored[y][x]) continue;
+      if (!floor.tiles[y][x].walkable) continue;
+      if (x === hero.x && y === hero.y) continue;
       let hasFrontier = false;
       for (let dy = -1; dy <= 1 && !hasFrontier; dy++) {
         for (let dx = -1; dx <= 1 && !hasFrontier; dx++) {
@@ -170,12 +179,14 @@ function exploreNext(): void {
   }
 
   if (!bestTarget) {
+    aeMsg("Auto-explore stopped — floor fully explored.");
     autoExploring = false;
     return;
   }
 
   const path = findPath(floor, hero, bestTarget);
   if (path.length === 0) {
+    aeMsg("Auto-explore stopped — can't find a path.");
     autoExploring = false;
     return;
   }
@@ -215,11 +226,13 @@ function stepAutoPathExplore(): void {
       floor.lit[m.position.y]?.[m.position.x],
   );
   if (hasVisibleMonster) {
+    aeMsg("Auto-explore stopped — monster spotted!");
     autoExploring = false;
     autoPath = [];
     return;
   }
   if (state.hero.hp < state.hero.maxHp * 0.5) {
+    aeMsg(`Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`);
     autoExploring = false;
     autoPath = [];
     return;
@@ -232,6 +245,7 @@ function stepAutoPathExplore(): void {
       i.position.y === state.hero.position.y,
   );
   if (itemsHere) {
+    aeMsg("Auto-explore stopped — item found on the ground.");
     autoExploring = false;
     autoPath = [];
     return;
@@ -241,12 +255,16 @@ function stepAutoPathExplore(): void {
   const dx = next.x - state.hero.position.x;
   const dy = next.y - state.hero.position.y;
 
-  // Stop at closed/locked doors
+  // Stop at closed/locked doors or traps
   const nextTile = floor.tiles[next.y]?.[next.x];
-  if (
-    nextTile &&
-    (nextTile.type === "door-closed" || nextTile.type === "door-locked")
-  ) {
+  if (nextTile && (nextTile.type === "door-closed" || nextTile.type === "door-locked")) {
+    aeMsg("Auto-explore stopped — door ahead.");
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
+  if (nextTile?.type === "trap" && !nextTile.trapRevealed) {
+    aeMsg("Auto-explore stopped — trap detected!");
     autoExploring = false;
     autoPath = [];
     return;
@@ -267,6 +285,20 @@ function stepAutoPathExplore(): void {
     autoPath.shift();
     gameLoop.handleAction({ type: "move", direction });
     playPendingAnimations();
+
+    // Stop if hero stepped on a trap
+    const postState = gameLoop.getState();
+    const postFloorKey = `${postState.currentDungeon}-${postState.currentFloor}`;
+    const postFloor = postState.floors[postFloorKey];
+    if (postFloor) {
+      const heroTile = postFloor.tiles[postState.hero.position.y]?.[postState.hero.position.x];
+      if (heroTile?.type === 'trap' && heroTile.trapRevealed) {
+        aeMsg("Auto-explore stopped — trap triggered!");
+        autoExploring = false;
+        autoPath = [];
+        return;
+      }
+    }
 
     if (autoPath.length > 0) {
       autoWalkTimer = window.setTimeout(stepAutoPathExplore, 80);

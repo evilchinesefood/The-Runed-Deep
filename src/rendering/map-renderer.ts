@@ -262,6 +262,7 @@ export class MapRenderer {
           tile.type === "door-open" ||
           tile.type === "door-locked" ||
           tile.type === "building" ||
+          tile.type === "decor" ||
           (tile.type === "trap" && tile.trapRevealed);
 
         if (isOverlayTile) {

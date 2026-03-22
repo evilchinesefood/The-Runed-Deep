@@ -250,16 +250,32 @@ export class HudRenderer {
   private renderMessages(messages: Message[]): void {
     const recent = messages.slice(-50);
     this.messagesEl.replaceChildren();
+    const colors: Record<string, string> = {
+      combat: '#fa0',
+      important: '#4f4',
+      system: '#888',
+      normal: '#ccc',
+    };
     for (const m of recent) {
-      const color =
-        m.severity === "combat"
-          ? "#fa0"
-          : m.severity === "important"
-            ? "#ff0"
-            : m.severity === "system"
-              ? "#888"
-              : "#ccc";
-      const line = el("div", { color, margin: "1px 0" }, m.text);
+      const baseColor = colors[m.severity] ?? '#ccc';
+      const line = document.createElement('div');
+      line.style.margin = '1px 0';
+      // Highlight numbers in the text with a brighter color
+      const parts = m.text.split(/(\d+)/g);
+      for (const part of parts) {
+        if (/^\d+$/.test(part)) {
+          const num = document.createElement('span');
+          num.textContent = part;
+          num.style.color = '#fff';
+          num.style.fontWeight = 'bold';
+          line.appendChild(num);
+        } else {
+          const txt = document.createElement('span');
+          txt.textContent = part;
+          txt.style.color = baseColor;
+          line.appendChild(txt);
+        }
+      }
       this.messagesEl.appendChild(line);
     }
     this.messagesEl.scrollTop = this.messagesEl.scrollHeight;

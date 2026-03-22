@@ -198,13 +198,13 @@ const POTIONS: ItemTemplate[] = [
   { id: 'potion-heal-major', name: 'Potion of Major Healing', category: 'potion', sprite: 'potion-heal-major',
     weight: 200, value: 80, depthMin: 12, depthMax: 99, healPct: 0.75, healAmount: 40 },
   { id: 'potion-gain-str', name: 'Draught of Gain Strength', category: 'potion', sprite: 'potion-gain-attribute',
-    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+    weight: 200, value: 200, depthMin: 5, depthMax: 99 },
   { id: 'potion-gain-int', name: 'Draught of Gain Intelligence', category: 'potion', sprite: 'potion-gain-attribute',
-    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+    weight: 200, value: 200, depthMin: 5, depthMax: 99 },
   { id: 'potion-gain-con', name: 'Draught of Gain Constitution', category: 'potion', sprite: 'potion-gain-attribute',
-    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+    weight: 200, value: 200, depthMin: 5, depthMax: 99 },
   { id: 'potion-gain-dex', name: 'Draught of Gain Dexterity', category: 'potion', sprite: 'potion-gain-attribute',
-    weight: 200, value: 200, depthMin: 10, depthMax: 99 },
+    weight: 200, value: 200, depthMin: 5, depthMax: 99 },
 ];
 
 // ── Scrolls ───────────────────────────────────────────────
@@ -380,6 +380,10 @@ export function getItemsForDepth(depth: number): ItemTemplate[] {
       available.push(...tierItems);
     }
   }
+
+  // Stat potions appear 3x in the pool for higher drop rate
+  const statPotions = available.filter(t => t.id.startsWith('potion-gain-'));
+  available.push(...statPotions, ...statPotions);
 
   return available;
 }
