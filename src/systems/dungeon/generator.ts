@@ -305,7 +305,10 @@ function generateFloorAttempt(
     difficulty,
   );
 
-  // Place items/treasure in rooms
+  // Place decorative objects FIRST so items/traps don't spawn on them
+  placeDecor(floor, rooms, effectiveDepth, playerStart, rand);
+
+  // Place items/treasure in rooms (only on floor tiles, not decor/water)
   floor.items = placeGroundItems(
     floor,
     rooms,
@@ -316,9 +319,6 @@ function generateFloorAttempt(
 
   // Place traps in corridors and rooms (not on stairs or player start)
   placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
-
-  // Place decorative objects in rooms
-  placeDecor(floor, rooms, effectiveDepth, playerStart, rand);
 
   // Validate floor quality
   if (!skipValidation) {

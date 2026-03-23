@@ -20,6 +20,7 @@ import {
 import {
   getDisplayName,
   getDisplaySprite,
+  getItemGlow,
 } from "../systems/inventory/display-name";
 import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
 
@@ -88,6 +89,8 @@ function itemRow(
   sp.style.position = "absolute";
   sp.style.top = "0";
   sp.style.left = "0";
+  const glow = getItemGlow(item);
+  if (glow) sp.style.filter = glow;
   spriteWrap.appendChild(sp);
   if (count > 1) {
     const badge = el(

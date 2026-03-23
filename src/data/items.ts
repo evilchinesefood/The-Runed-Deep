@@ -91,11 +91,11 @@ const ELVEN_ARMOR: ItemTemplate[] = [
   { id: 'elven-cloak', name: 'Elven Cloak', category: 'cloak', sprite: 'elven-cloak', equipSlot: 'cloak',
     weight: 600, value: 500, depthMin: 15, depthMax: 99, ac: 3, materialTier: 'elven' },
   { id: 'elven-belt', name: 'Elven Belt', category: 'belt', sprite: 'elven-belt', equipSlot: 'belt',
-    weight: 200, value: 150, depthMin: 14, depthMax: 99, ac: 1, materialTier: 'elven' },
+    weight: 200, value: 150, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
   { id: 'elven-ring', name: 'Elven Ring', category: 'ring', sprite: 'elven-ring', equipSlot: 'ringLeft',
-    weight: 30, value: 200, depthMin: 14, depthMax: 99, ac: 1, materialTier: 'elven' },
+    weight: 30, value: 200, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
   { id: 'elven-amulet', name: 'Elven Amulet', category: 'amulet', sprite: 'elven-amulet', equipSlot: 'amulet',
-    weight: 60, value: 250, depthMin: 14, depthMax: 99, ac: 1, materialTier: 'elven' },
+    weight: 60, value: 250, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
 ];
 
 // ── Meteoric Steel Weapons & Armor ────────────────────────
@@ -127,11 +127,11 @@ const METEORIC_ARMOR: ItemTemplate[] = [
   { id: 'meteoric-cloak', name: 'Meteoric Cloak', category: 'cloak', sprite: 'meteoric-cloak', equipSlot: 'cloak',
     weight: 800, value: 600, depthMin: 26, depthMax: 99, ac: 4, materialTier: 'meteoric' },
   { id: 'meteoric-belt', name: 'Meteoric Belt', category: 'belt', sprite: 'meteoric-belt', equipSlot: 'belt',
-    weight: 300, value: 400, depthMin: 26, depthMax: 99, ac: 2, materialTier: 'meteoric' },
+    weight: 300, value: 400, depthMin: 26, depthMax: 99, ac: 4, materialTier: 'meteoric' },
   { id: 'meteoric-ring', name: 'Meteoric Ring', category: 'ring', sprite: 'meteoric-ring', equipSlot: 'ringLeft',
-    weight: 40, value: 500, depthMin: 26, depthMax: 99, ac: 2, materialTier: 'meteoric' },
+    weight: 40, value: 500, depthMin: 26, depthMax: 99, ac: 4, materialTier: 'meteoric' },
   { id: 'meteoric-amulet', name: 'Meteoric Amulet', category: 'amulet', sprite: 'meteoric-amulet', equipSlot: 'amulet',
-    weight: 80, value: 600, depthMin: 26, depthMax: 99, ac: 2, materialTier: 'meteoric' },
+    weight: 80, value: 600, depthMin: 26, depthMax: 99, ac: 4, materialTier: 'meteoric' },
 ];
 
 // ── Armor ─────────────────────────────────────────────────
@@ -181,11 +181,11 @@ const EQUIPMENT: ItemTemplate[] = [
   { id: 'iron-boots', name: 'Iron Boots', category: 'boots', sprite: 'boots-enchanted', equipSlot: 'boots',
     weight: 1500, value: 35, depthMin: 10, depthMax: 99, ac: 2 },
   { id: 'belt', name: 'Belt', category: 'belt', sprite: 'belt-leather', equipSlot: 'belt',
-    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
+    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 1 },
   { id: 'ring', name: 'Ring', category: 'ring', sprite: 'ring', equipSlot: 'ringLeft',
-    weight: 50, value: 20, depthMin: 5, depthMax: 99, ac: 0 },
+    weight: 50, value: 20, depthMin: 5, depthMax: 99, ac: 1 },
   { id: 'amulet', name: 'Amulet', category: 'amulet', sprite: 'amulet-enchanted', equipSlot: 'amulet',
-    weight: 100, value: 25, depthMin: 5, depthMax: 99, ac: 0 },
+    weight: 100, value: 25, depthMin: 5, depthMax: 99, ac: 1 },
 ];
 
 // ── Potions ───────────────────────────────────────────────
@@ -220,17 +220,39 @@ const SCROLLS: ItemTemplate[] = [
 
 // ── Spellbooks ────────────────────────────────────────────
 
+// Spellbook-only spells — these are NOT auto-learned on level-up.
+// Must find the spellbook as loot and use it (must be identified first).
 const SPELLBOOKS: ItemTemplate[] = [
-  { id: 'book-heal-medium', name: 'Spellbook of Heal Medium Wounds', category: 'spellbook', sprite: 'spell-book',
-    weight: 500, value: 200, depthMin: 8, depthMax: 99, spellId: 'heal-medium-wounds' },
+  { id: 'book-levitation', name: 'Spellbook of Levitation', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 200, depthMin: 8, depthMax: 99, spellId: 'levitation' },
+  { id: 'book-clairvoyance', name: 'Spellbook of Clairvoyance', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 250, depthMin: 10, depthMax: 99, spellId: 'clairvoyance' },
+  { id: 'book-lightning-bolt', name: 'Spellbook of Lightning Bolt', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 300, depthMin: 10, depthMax: 99, spellId: 'lightning-bolt' },
   { id: 'book-fire-bolt', name: 'Spellbook of Fire Bolt', category: 'spellbook', sprite: 'spell-book',
     weight: 500, value: 250, depthMin: 10, depthMax: 99, spellId: 'fire-bolt' },
-  { id: 'book-shield', name: 'Spellbook of Shield', category: 'spellbook', sprite: 'spell-book',
-    weight: 500, value: 200, depthMin: 6, depthMax: 99, spellId: 'shield' },
+  { id: 'book-resist-fire', name: 'Spellbook of Resist Fire', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 300, depthMin: 12, depthMax: 99, spellId: 'resist-fire' },
+  { id: 'book-resist-cold', name: 'Spellbook of Resist Cold', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 300, depthMin: 12, depthMax: 99, spellId: 'resist-cold' },
+  { id: 'book-resist-lightning', name: 'Spellbook of Resist Lightning', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 300, depthMin: 14, depthMax: 99, spellId: 'resist-lightning' },
+  { id: 'book-sleep-monster', name: 'Spellbook of Sleep Monster', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 250, depthMin: 12, depthMax: 99, spellId: 'sleep-monster' },
+  { id: 'book-slow-monster', name: 'Spellbook of Slow Monster', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 250, depthMin: 14, depthMax: 99, spellId: 'slow-monster' },
+  { id: 'book-cold-ball', name: 'Spellbook of Cold Ball', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 400, depthMin: 16, depthMax: 99, spellId: 'cold-ball' },
   { id: 'book-teleport', name: 'Spellbook of Teleport', category: 'spellbook', sprite: 'spell-book',
-    weight: 500, value: 300, depthMin: 12, depthMax: 99, spellId: 'teleport' },
-  { id: 'book-heal-major', name: 'Spellbook of Heal Major Wounds', category: 'spellbook', sprite: 'spell-book',
-    weight: 500, value: 400, depthMin: 15, depthMax: 99, spellId: 'heal-major-wounds' },
+    weight: 500, value: 400, depthMin: 18, depthMax: 99, spellId: 'teleport' },
+  { id: 'book-remove-curse', name: 'Spellbook of Remove Curse', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 350, depthMin: 16, depthMax: 99, spellId: 'remove-curse' },
+  { id: 'book-ball-lightning', name: 'Spellbook of Ball Lightning', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 500, depthMin: 20, depthMax: 99, spellId: 'ball-lightning' },
+  { id: 'book-fire-ball', name: 'Spellbook of Fire Ball', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 500, depthMin: 20, depthMax: 99, spellId: 'fire-ball' },
+  { id: 'book-transmogrify', name: 'Spellbook of Transmogrify', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 600, depthMin: 25, depthMax: 99, spellId: 'transmogrify-monster' },
 ];
 
 // ── Wands ─────────────────────────────────────────────────
@@ -267,7 +289,7 @@ const CONTAINERS: ItemTemplate[] = [
   { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'backpack-enchanted', equipSlot: 'pack',
     weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 400000, bulkCapacity: 160000 },
   { id: 'leather-belt', name: 'Fine Belt', category: 'belt', sprite: 'belt-leather-enchanted', equipSlot: 'belt',
-    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 0 },
+    weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 2 },
   { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse-leather', equipSlot: 'purse',
     weight: 100, value: 5, depthMin: 1, depthMax: 99, weightCapacity: 10000, bulkCapacity: 2000 },
   // Elven tier containers

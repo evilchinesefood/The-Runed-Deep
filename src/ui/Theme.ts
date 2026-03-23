@@ -132,44 +132,54 @@ export function injectTheme(): void {
       border-bottom: 1px solid var(--border);
     }
 
-    /* Buttons */
+    /* Buttons — Stone Slab style */
     .btn {
-      padding: 6px 16px;
+      padding: 8px 18px;
       font-size: var(--fs-md);
       font-family: var(--font);
-      background: var(--bg-button);
-      color: var(--text);
-      border: 1px solid var(--border-focus);
+      font-weight: bold;
+      background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
+      color: #c9a84c;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      border: 2px solid #555;
+      border-bottom: 3px solid #333;
       border-radius: var(--radius);
       cursor: pointer;
       user-select: none;
-      transition: background 0.1s, transform 0.1s;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
       min-height: 32px;
     }
-    .btn:hover { background: var(--bg-button-hover); }
-    .btn:active { background: var(--bg-button-active); transform: scale(0.96); }
+    .btn:hover {
+      background: linear-gradient(180deg, #555 0%, #333 40%, #222 100%);
+      border-color: #777; color: #e0c060;
+    }
+    .btn:active { transform: translateY(1px); border-bottom-width: 2px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-primary {
-      background: #530;
-      color: #fc0;
-      border: 2px solid var(--accent);
+      border-color: #7a6530;
+      color: #ffd700;
+      background: linear-gradient(180deg, #3a3020 0%, #2a2010 40%, #1a1508 100%);
       font-size: var(--fs-lg);
       padding: 10px 32px;
       letter-spacing: 1px;
     }
-    .btn-primary:hover { background: #640; }
+    .btn-primary:hover { border-color: #a08040; color: #ffe44c; background: linear-gradient(180deg, #4a3828 0%, #3a2818 40%, #2a1d10 100%); }
 
     .btn-danger {
-      background: #411;
-      color: #f66;
-      border: 1px solid #633;
+      color: #e04040;
+      border-color: #5a2020;
+      background: linear-gradient(180deg, #3a1a1a 0%, #2a1010 40%, #1a0808 100%);
     }
-    .btn-danger:hover { background: #522; }
+    .btn-danger:hover { color: #ff5050; border-color: #7a3030; }
 
     .btn-sm {
-      padding: 4px 10px;
+      padding: 5px 12px;
       font-size: 12px;
       min-height: 28px;
+      border-width: 1px;
+      border-bottom-width: 2px;
     }
 
     /* Title bar — used at top of most screens */

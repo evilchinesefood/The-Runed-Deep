@@ -246,6 +246,21 @@ export function removeCurseFromFirst(
 }
 
 function useSpellbook(state: GameState, item: Item, idx: number): GameState {
+  // Must be identified to read
+  if (!item.identified) {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          text: `You can't read this spellbook — it must be identified first.`,
+          severity: "system" as const,
+          turn: state.turn,
+        },
+      ],
+    };
+  }
+
   const tpl = ITEM_BY_ID[item.templateId];
   const spellId = tpl?.spellId;
   if (!spellId) {

@@ -104,7 +104,7 @@ export function createItemFromTemplate(
     weight: template.weight,
     bulk: Math.floor(template.weight / 5),
     value: Math.max(1, template.value + enchantment * 20),
-    identified: !!template.unique || (!cursed && enchantment === 0),
+    identified: !!template.unique || (template.category !== 'spellbook' && !cursed && enchantment === 0),
     cursed,
     enchantment,
     properties,

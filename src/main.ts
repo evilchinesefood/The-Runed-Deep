@@ -179,9 +179,20 @@ function exploreNext(): void {
   }
 
   if (!bestTarget) {
-    aeMsg("Auto-explore stopped — floor fully explored.");
-    autoExploring = false;
-    return;
+    // Floor fully explored — navigate to stairs down
+    for (let y = 0; y < floor.height && !bestTarget; y++) {
+      for (let x = 0; x < floor.width && !bestTarget; x++) {
+        if (floor.tiles[y][x].type === 'stairs-down' && !(x === hero.x && y === hero.y)) {
+          bestTarget = { x, y };
+        }
+      }
+    }
+    if (!bestTarget) {
+      aeMsg("Auto-explore stopped — floor fully explored.");
+      autoExploring = false;
+      return;
+    }
+    aeMsg("Floor explored — heading to stairs.");
   }
 
   const path = findPath(floor, hero, bestTarget);

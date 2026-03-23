@@ -86,7 +86,7 @@ export function createCharacterCreationScreen(
     const btn = document.createElement("button");
     btn.textContent = g === "male" ? "Male" : "Female";
     btn.dataset.gender = g;
-    btn.style.cssText = `padding:6px 14px;font-size:13px;border:1px solid #555;cursor:pointer;${g === state.gender ? "background:#446;color:#aaf;" : "background:#222;color:#888;"}`;
+    btn.style.cssText = `padding:6px 14px;font-size:13px;font-weight:bold;border:2px solid #555;border-bottom:3px solid #333;border-radius:4px;cursor:pointer;letter-spacing:0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.8);${g === state.gender ? "background:linear-gradient(180deg,#3a3020,#2a2010,#1a1508);color:#ffd700;border-color:#7a6530;" : "background:linear-gradient(180deg,#4a4a4a,#2a2a2a,#1a1a1a);color:#c9a84c;"}`;
     btn.addEventListener("click", () => {
       state.gender = g;
       genderBtns.querySelectorAll("button").forEach((b) => {
@@ -350,7 +350,7 @@ export function createCharacterCreationScreen(
     const btn = document.createElement("button");
     btn.textContent = d.charAt(0).toUpperCase() + d.slice(1);
     btn.dataset.diff = d;
-    btn.style.cssText = `padding:5px 12px;font-size:12px;border:1px solid #444;cursor:pointer;${d === state.difficulty ? `background:#222;color:${diffColors[d]};border-color:${diffColors[d]};` : "background:#111;color:#666;"}`;
+    btn.style.cssText = `padding:5px 12px;font-size:12px;font-weight:bold;border:2px solid #555;border-bottom:3px solid #333;border-radius:4px;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,0.8);${d === state.difficulty ? `background:linear-gradient(180deg,#3a3020,#2a2010,#1a1508);color:${diffColors[d]};border-color:${diffColors[d]};` : "background:linear-gradient(180deg,#4a4a4a,#2a2a2a,#1a1a1a);color:#666;"}`;
     btn.addEventListener("click", () => {
       state.difficulty = d;
       diffPanel.querySelectorAll("button").forEach((b) => {

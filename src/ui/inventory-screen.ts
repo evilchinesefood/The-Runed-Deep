@@ -3,6 +3,7 @@ import { ITEM_BY_ID } from "../data/items";
 import {
   getDisplayName,
   getDisplaySprite,
+  getItemGlow,
 } from "../systems/inventory/display-name";
 import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
 import { createScreen, createPanel, createTitleBar, el } from "./Theme";
@@ -39,7 +40,7 @@ function btn(label: string, onClick: () => void): HTMLElement {
   const b = document.createElement("button");
   b.textContent = label;
   b.style.cssText =
-    "padding:2px 6px;background:#333;border:1px solid #555;color:#ccc;cursor:pointer;font-size:12px;";
+    "padding:2px 6px;background:linear-gradient(180deg,#4a4a4a,#2a2a2a,#1a1a1a);border:1px solid #555;border-bottom:2px solid #333;color:#c9a84c;text-shadow:0 1px 2px rgba(0,0,0,0.8);cursor:pointer;font-size:12px;font-weight:bold;";
   b.addEventListener("click", (e) => {
     e.stopPropagation();
     onClick();
@@ -110,6 +111,8 @@ function createEquipSlot(
       left: "0",
     });
     sprite.className = getDisplaySprite(item);
+    const eqGlow = getItemGlow(item);
+    if (eqGlow) sprite.style.filter = eqGlow;
     container.appendChild(sprite);
     container.addEventListener("click", onUnequip);
     container.addEventListener("mouseenter", () => {
@@ -435,6 +438,8 @@ export function createInventoryScreen(
         height: "32px",
       });
       spriteDiv.className = getDisplaySprite(item) + " inventory-item";
+      const invGlow = getItemGlow(item);
+      if (invGlow) spriteDiv.style.filter = invGlow;
       spriteWrap.appendChild(spriteDiv);
       if (count > 1) {
         const badge = el("span", {

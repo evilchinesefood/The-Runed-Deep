@@ -79,42 +79,67 @@ function buildTooltipContent(item: Item): HTMLElement {
   // Stats
   const statsBox = d('div', { marginBottom: '4px' });
   let hasStats = false;
+  const ench = item.identified ? item.enchantment : 0;
 
-  // Damage
+  // Damage — show effective range including enchantment
   if (item.properties['damageMin'] !== undefined && item.properties['damageMax'] !== undefined) {
-    let dmg = `${item.properties['damageMin']}–${item.properties['damageMax']} damage`;
-    if (item.identified && item.enchantment !== 0) {
-      const sign = item.enchantment > 0 ? '+' : '';
-      dmg += ` (${sign}${item.enchantment} enchant)`;
-    }
-    statsBox.appendChild(statLine(dmg));
-    hasStats = true;
-  }
-
-  // Accuracy
-  const acc = item.properties['accuracy'];
-  if (acc !== undefined && acc !== 0) {
-    statsBox.appendChild(statLine(`${acc > 0 ? '+' : ''}${acc} accuracy`));
-    hasStats = true;
-  }
-
-  // AC
-  if (item.properties['ac'] !== undefined && item.properties['ac'] !== 0) {
-    let acText: string;
-    if (item.identified && item.enchantment !== 0) {
-      const total = item.properties['ac'] + item.enchantment;
-      const sign = item.enchantment > 0 ? '+' : '';
-      acText = `+${total} AC (${sign}${item.enchantment} enchant)`;
+    const baseMin = item.properties['damageMin'];
+    const baseMax = item.properties['damageMax'];
+    const effMin = baseMin + ench;
+    const effMax = baseMax + ench;
+    if (ench !== 0) {
+      statsBox.appendChild(statLine(`${effMin}–${effMax} damage (base ${baseMin}–${baseMax})`));
     } else {
-      acText = `+${item.properties['ac']} AC`;
+      statsBox.appendChild(statLine(`${baseMin}–${baseMax} damage`));
     }
-    statsBox.appendChild(statLine(acText));
     hasStats = true;
+  }
+
+  // Accuracy — show effective value including enchantment
+  const baseAcc = item.properties['accuracy'] ?? 0;
+  if (item.category === 'weapon') {
+    const effAcc = baseAcc + ench;
+    if (ench !== 0) {
+      statsBox.appendChild(statLine(`${effAcc > 0 ? '+' : ''}${effAcc} accuracy (base ${baseAcc > 0 ? '+' : ''}${baseAcc})`));
+    } else if (baseAcc !== 0) {
+      statsBox.appendChild(statLine(`${baseAcc > 0 ? '+' : ''}${baseAcc} accuracy`));
+    }
+    hasStats = true;
+  }
+
+  // AC — show effective value including enchantment
+  if (item.properties['ac'] !== undefined) {
+    const baseAC = item.properties['ac'];
+    const effAC = baseAC + ench;
+    if (ench !== 0) {
+      statsBox.appendChild(statLine(`+${effAC} AC (base +${baseAC})`));
+    } else if (baseAC > 0) {
+      statsBox.appendChild(statLine(`+${baseAC} AC`));
+    }
+    hasStats = true;
+  }
+
+  // Equip slot
+  if (tpl?.equipSlot) {
+    const slotNames: Record<string, string> = {
+      weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body',
+      cloak: 'Cloak', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet',
+      ringLeft: 'Ring', ringRight: 'Ring', amulet: 'Neck', pack: 'Pack', purse: 'Purse',
+    };
+    statsBox.appendChild(d('div', { color: '#666', paddingLeft: '8px', fontSize: '11px' }, `Slot: ${slotNames[tpl.equipSlot] ?? tpl.equipSlot}`));
+    hasStats = true;
+  }
+
+  // Depth range
+  if (tpl && item.identified) {
+    statsBox.appendChild(d('div', { color: '#555', paddingLeft: '8px', fontSize: '10px' }, `Floors ${tpl.depthMin}–${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
   }
 
   // Healing
   if (item.properties['healPct']) {
-    statsBox.appendChild(statLine(`Heals ${Math.round(item.properties['healPct'] * 100)}% HP`));
+    const pct = Math.round(item.properties['healPct'] * 100);
+    const flat = item.properties['healAmount'] ?? 0;
+    statsBox.appendChild(statLine(`Heals ${pct}% HP (min ${flat})`));
     hasStats = true;
   } else if (item.properties['healAmount']) {
     statsBox.appendChild(statLine(`Heals ${item.properties['healAmount']} HP`));
@@ -125,6 +150,9 @@ function buildTooltipContent(item: Item): HTMLElement {
   if ((item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') && tpl?.spellId) {
     const spellName = tpl.spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     statsBox.appendChild(statLine(`Spell: ${spellName}`));
+    if (item.category === 'spellbook' && !item.identified) {
+      statsBox.appendChild(d('div', { color: '#886', paddingLeft: '8px', fontSize: '11px', fontStyle: 'italic' }, 'Must identify to read'));
+    }
     hasStats = true;
   }
 

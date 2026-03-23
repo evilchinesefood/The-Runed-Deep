@@ -138,7 +138,7 @@ const BOSS_DECOR: { sprite: string; walkable: boolean; minDepth: number; weight:
   { sprite: 'fountain', walkable: false, minDepth: 10, weight: 1 },
 ];
 
-function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2, count: number): void {
+function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2, count: number, items: PlacedItem[] = []): void {
   const W = tiles[0].length, H = tiles.length;
   const available = BOSS_DECOR.filter(d => depth >= d.minDepth);
   if (available.length === 0) return;
@@ -157,6 +157,8 @@ function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2,
     const t = tiles[y][x];
     if (t.type !== 'floor') continue;
     if (x === playerStart.x && y === playerStart.y) continue;
+    // Don't place on items
+    if (items.some(i => i.position.x === x && i.position.y === y)) continue;
     // Not adjacent to stairs
     const near = [[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy]) => {
       const adj = tiles[y+dy]?.[x+dx];
@@ -768,7 +770,7 @@ export function generateBossFloor(
   // Add decorative elements to boss floors
   if (result) {
     const decorCount = floorNum >= 30 ? 8 : floorNum >= 20 ? 6 : 4;
-    decorateBossFloor(result.floor.tiles, depth, result.playerStart, decorCount);
+    decorateBossFloor(result.floor.tiles, depth, result.playerStart, decorCount, result.floor.items);
   }
 
   return result;

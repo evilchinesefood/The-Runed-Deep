@@ -78,10 +78,10 @@ export function xpToNextLevel(hero: Hero, difficulty: Difficulty): number {
 // The order progresses through spell levels, mixing categories
 // so the player gets a balanced set of abilities.
 
+// ~15 essential spells auto-learned on level-up.
+// The other ~15 spells are spellbook-only (found as dungeon loot).
 const SPELL_LEARN_ORDER: string[] = [
-  // Level 1 spells are chosen at character creation, so learning starts from level-ups.
-  // The player already has 1 spell. They learn one new spell per level-up.
-  // Level 2 (first level-up):
+  // Level 2:
   'heal-minor-wounds',
   // Level 3:
   'light',
@@ -93,7 +93,6 @@ const SPELL_LEARN_ORDER: string[] = [
   'phase-door',
   // Level 7:
   'magic-arrow',
-  // Now level 2 spells:
   // Level 8:
   'cold-bolt',
   // Level 9:
@@ -103,46 +102,19 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 11:
   'neutralize-poison',
   // Level 12:
-  'levitation',
+  'heal-medium-wounds',
   // Level 13:
   'detect-traps',
   // Level 14:
-  'clairvoyance',
-  // Now level 3 spells:
-  // Level 15:
-  'lightning-bolt',
-  // Level 16:
-  'heal-medium-wounds',
-  // Level 17:
-  'resist-fire',
-  // Level 18:
-  'fire-bolt',
-  // Level 19:
-  'sleep-monster',
-  // Level 20:
   'rune-of-return',
-  // Level 21:
-  'cold-ball',
-  // Level 22:
-  'resist-cold',
-  // Level 23:
-  'slow-monster',
-  // Level 24:
-  'resist-lightning',
-  // Level 25:
-  'teleport',
-  // Level 26:
-  'remove-curse',
-  // Now level 4-5 spells:
-  // Level 27:
-  'ball-lightning',
-  // Level 28:
+  // Level 15:
   'heal-major-wounds',
-  // Level 29:
-  'fire-ball',
-  // Level 30:
+  // Level 16:
   'healing',
-  // Transmogrify is learned from spellbooks only (not auto-learned)
+  // Spellbook-only (NOT auto-learned):
+  // levitation, clairvoyance, lightning-bolt, resist-fire, resist-cold,
+  // resist-lightning, fire-bolt, sleep-monster, cold-ball, slow-monster,
+  // teleport, remove-curse, ball-lightning, fire-ball, transmogrify-monster
 ];
 
 /**

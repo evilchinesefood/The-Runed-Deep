@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Style Guide — The Runed Deep</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: #ccc; font-family: 'Segoe UI', sans-serif; padding: 30px; }
+    h1 { color: #c90; font-size: 28px; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 30px; }
+    h2 { color: #c90; font-size: 18px; margin: 30px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+    h3 { color: #888; font-size: 14px; margin: 16px 0 8px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .label { font-size: 11px; color: #555; text-align: center; margin-top: 4px; }
+    .card { background: #111; border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .palette { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch { width: 60px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #000; font-weight: bold; }
+
+    /* ── Style A: Stone Slab ── */
+    .btn-stone {
+      padding: 10px 24px; font-size: 14px; font-weight: bold; cursor: pointer;
+      background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
+      border: 2px solid #555; border-bottom: 3px solid #333;
+      color: #c9a84c; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      border-radius: 4px; letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+    .btn-stone:hover { background: linear-gradient(180deg, #555 0%, #333 40%, #222 100%); border-color: #777; color: #e0c060; }
+    .btn-stone:active { transform: translateY(1px); border-bottom-width: 2px; }
+    .btn-stone.primary { border-color: #7a6530; color: #ffd700; background: linear-gradient(180deg, #3a3020 0%, #2a2010 40%, #1a1508 100%); }
+    .btn-stone.primary:hover { border-color: #a08040; color: #ffe44c; }
+    .btn-stone.sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Style B: Rune Border ── */
+    .btn-rune {
+      padding: 10px 24px; font-size: 14px; font-weight: bold; cursor: pointer;
+      background: #1a1a1a; color: #c9a84c;
+      border: 1px solid #4a3a20; border-radius: 3px;
+      text-shadow: 0 0 6px rgba(200, 160, 60, 0.3);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 4px rgba(200,160,60,0.1);
+      letter-spacing: 1px; text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .btn-rune:hover { border-color: #8a6a30; box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 8px rgba(200,160,60,0.2); color: #e0c060; }
+    .btn-rune:active { transform: translateY(1px); }
+    .btn-rune.primary { border-color: #6a5020; box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 6px rgba(200,160,60,0.15); }
+    .btn-rune.primary:hover { border-color: #a08040; box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 12px rgba(200,160,60,0.3); }
+    .btn-rune.sm { padding: 5px 12px; font-size: 11px; letter-spacing: 0.5px; }
+
+    /* ── Style C: Ember Glow ── */
+    .btn-ember {
+      padding: 10px 24px; font-size: 14px; font-weight: bold; cursor: pointer;
+      background: linear-gradient(180deg, #2a1a0a 0%, #1a0e04 100%);
+      border: 1px solid #4a2a10; border-radius: 4px;
+      color: #e8a030; text-shadow: 0 0 8px rgba(255,120,20,0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,200,100,0.05);
+      transition: all 0.2s;
+    }
+    .btn-ember:hover { background: linear-gradient(180deg, #3a2210 0%, #2a1608 100%); border-color: #7a4020; text-shadow: 0 0 12px rgba(255,120,20,0.6); color: #ffc040; }
+    .btn-ember:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+    .btn-ember.primary { background: linear-gradient(180deg, #3a2010 0%, #2a1208 100%); border-color: #6a3818; }
+    .btn-ember.primary:hover { border-color: #9a5828; text-shadow: 0 0 16px rgba(255,120,20,0.8); }
+    .btn-ember.sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Style D: Crystal Blue ── */
+    .btn-crystal {
+      padding: 10px 24px; font-size: 14px; font-weight: bold; cursor: pointer;
+      background: linear-gradient(180deg, #1a2a3a 0%, #0e1a28 100%);
+      border: 1px solid #2a4a6a; border-radius: 4px;
+      color: #6ac0ff; text-shadow: 0 0 6px rgba(100,180,255,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(100,200,255,0.05);
+      transition: all 0.2s;
+    }
+    .btn-crystal:hover { border-color: #4a7aaa; text-shadow: 0 0 10px rgba(100,180,255,0.5); color: #8ad0ff; }
+    .btn-crystal:active { transform: translateY(1px); }
+    .btn-crystal.primary { border-color: #3a6090; }
+    .btn-crystal.sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Style E: Mixed (Stone + Gold + Rune accents) ── */
+    .btn-mixed {
+      padding: 10px 24px; font-size: 14px; font-weight: bold; cursor: pointer;
+      background: linear-gradient(180deg, #3a3830 0%, #252320 50%, #1a1810 100%);
+      border: 2px solid #4a4030; border-radius: 3px;
+      color: #d4a840; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      box-shadow: inset 0 1px 0 rgba(255,200,100,0.08), 0 2px 4px rgba(0,0,0,0.4);
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+    .btn-mixed:hover {
+      background: linear-gradient(180deg, #4a4838 0%, #302e24 50%, #222018 100%);
+      border-color: #6a5838; color: #e8c050;
+      box-shadow: inset 0 1px 0 rgba(255,200,100,0.12), 0 2px 8px rgba(200,160,60,0.15);
+    }
+    .btn-mixed:active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+    .btn-mixed.primary {
+      background: linear-gradient(180deg, #3a3018 0%, #2a2210 50%, #1a1608 100%);
+      border-color: #6a5028; color: #ffd050;
+      box-shadow: inset 0 1px 0 rgba(255,200,100,0.1), 0 0 8px rgba(200,160,60,0.1);
+    }
+    .btn-mixed.primary:hover { border-color: #8a6838; box-shadow: inset 0 1px 0 rgba(255,200,100,0.15), 0 0 12px rgba(200,160,60,0.2); }
+    .btn-mixed.sm { padding: 5px 12px; font-size: 12px; }
+    .btn-mixed.danger { color: #e04040; border-color: #5a2020; }
+    .btn-mixed.danger:hover { color: #ff5050; border-color: #7a3030; }
+
+    /* Disabled state for all */
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>The Runed Deep — Button Style Guide</h1>
+  <div class="subtitle">Inspired by the logo: dark stone, gold text, blue rune crystals, red ember glow</div>
+
+  <!-- Color Palette -->
+  <h2>Color Palette (from logo)</h2>
+  <div class="palette">
+    <div><div class="swatch" style="background:#c9a84c;">Gold</div><div class="label">#c9a84c</div></div>
+    <div><div class="swatch" style="background:#ffd700;color:#000;">Bright Gold</div><div class="label">#ffd700</div></div>
+    <div><div class="swatch" style="background:#e8a030;">Amber</div><div class="label">#e8a030</div></div>
+    <div><div class="swatch" style="background:#6ac0ff;">Crystal Blue</div><div class="label">#6ac0ff</div></div>
+    <div><div class="swatch" style="background:#ff4422;color:#fff;">Ember Red</div><div class="label">#ff4422</div></div>
+    <div><div class="swatch" style="background:#2a2a2a;color:#888;">Dark Stone</div><div class="label">#2a2a2a</div></div>
+    <div><div class="swatch" style="background:#4a4a4a;color:#ccc;">Mid Stone</div><div class="label">#4a4a4a</div></div>
+    <div><div class="swatch" style="background:#3a3018;color:#c90;">Warm Stone</div><div class="label">#3a3018</div></div>
+  </div>
+
+  <!-- Style A -->
+  <h2>A — Stone Slab</h2>
+  <div class="card">
+    <h3>Dark stone gradient, gold text, heavy border</h3>
+    <div class="row">
+      <button class="btn-stone primary">Begin Adventure</button>
+      <button class="btn-stone">Weapon Shop</button>
+      <button class="btn-stone sm">Buy</button>
+      <button class="btn-stone sm">Sell</button>
+      <button class="btn-stone" disabled>Disabled</button>
+    </div>
+  </div>
+
+  <!-- Style B -->
+  <h2>B — Rune Border</h2>
+  <div class="card">
+    <h3>Minimal dark bg, subtle gold border glow, uppercase rune feel</h3>
+    <div class="row">
+      <button class="btn-rune primary">Begin Adventure</button>
+      <button class="btn-rune">Weapon Shop</button>
+      <button class="btn-rune sm">Buy</button>
+      <button class="btn-rune sm">Sell</button>
+      <button class="btn-rune" disabled>Disabled</button>
+    </div>
+  </div>
+
+  <!-- Style C -->
+  <h2>C — Ember Glow</h2>
+  <div class="card">
+    <h3>Warm dark gradient, orange text with ember glow (skull/fire feel)</h3>
+    <div class="row">
+      <button class="btn-ember primary">Begin Adventure</button>
+      <button class="btn-ember">Weapon Shop</button>
+      <button class="btn-ember sm">Buy</button>
+      <button class="btn-ember sm">Sell</button>
+      <button class="btn-ember" disabled>Disabled</button>
+    </div>
+  </div>
+
+  <!-- Style D -->
+  <h2>D — Crystal Blue</h2>
+  <div class="card">
+    <h3>Cool blue tones (rune crystal accent color)</h3>
+    <div class="row">
+      <button class="btn-crystal primary">Begin Adventure</button>
+      <button class="btn-crystal">Weapon Shop</button>
+      <button class="btn-crystal sm">Buy</button>
+      <button class="btn-crystal sm">Sell</button>
+      <button class="btn-crystal" disabled>Disabled</button>
+    </div>
+  </div>
+
+  <!-- Style E -->
+  <h2>E — Mixed (Recommended)</h2>
+  <div class="card">
+    <h3>Warm stone + gold text — closest to logo feel. Primary has golden border glow.</h3>
+    <div class="row">
+      <button class="btn-mixed primary">Begin Adventure</button>
+      <button class="btn-mixed">Weapon Shop</button>
+      <button class="btn-mixed sm">Buy</button>
+      <button class="btn-mixed sm">Sell</button>
+      <button class="btn-mixed sm danger">Drop</button>
+      <button class="btn-mixed" disabled>Disabled</button>
+    </div>
+    <h3>In context: Service buttons</h3>
+    <div class="row" style="flex-direction:column;align-items:stretch;max-width:300px;">
+      <button class="btn-mixed" style="text-align:left;width:100%;">Heal HP (free)</button>
+      <button class="btn-mixed" style="text-align:left;width:100%;">Restore MP (free)</button>
+      <button class="btn-mixed" style="text-align:left;width:100%;">Cure Poison (free)</button>
+    </div>
+    <h3>Sort bar</h3>
+    <div class="row">
+      <button class="btn-mixed sm primary">Newest</button>
+      <button class="btn-mixed sm">Oldest</button>
+      <button class="btn-mixed sm">Identified</button>
+      <button class="btn-mixed sm">By Type</button>
+    </div>
+  </div>
+
+  <!-- Side by side comparison -->
+  <h2>All Styles — Primary Button</h2>
+  <div class="row">
+    <div style="text-align:center;"><button class="btn-stone primary">Stone Slab</button><div class="label">A</div></div>
+    <div style="text-align:center;"><button class="btn-rune primary">Rune Border</button><div class="label">B</div></div>
+    <div style="text-align:center;"><button class="btn-ember primary">Ember Glow</button><div class="label">C</div></div>
+    <div style="text-align:center;"><button class="btn-crystal primary">Crystal Blue</button><div class="label">D</div></div>
+    <div style="text-align:center;"><button class="btn-mixed primary">Mixed</button><div class="label">E</div></div>
+  </div>
+</body>
+</html>
