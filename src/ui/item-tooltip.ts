@@ -1,9 +1,23 @@
 import type { Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
-import { ENCHANTMENT_BY_ID } from '../data/Enchantments';
+import { ENCHANTMENT_BY_ID, formatAffixDesc } from '../data/Enchantments';
 import { getDisplayName } from '../systems/inventory/display-name';
 
 let tooltipEl: HTMLElement | null = null;
+let compareEl: HTMLElement | null = null;
+let tabHeld = false;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') { e.preventDefault(); tabHeld = true; refreshCompare(); }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'Tab') { tabHeld = false; hideCompareTooltip(); }
+});
+
+// Stored context for active hover
+let activeCompareItem: Item | null = null;
+let activeMouseX = 0;
+let activeMouseY = 0;
 
 function d(tag: string, styles?: Partial<CSSStyleDeclaration>, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -33,8 +47,11 @@ function getTooltip(): HTMLElement {
 }
 
 function nameColor(item: Item): string {
-  if (item.cursed && item.identified) return '#f44';
-  if (item.identified && item.enchantment > 0) return '#4af';
+  if (!item.identified) return '#ddd';
+  const tpl = ITEM_BY_ID[item.templateId];
+  if (tpl?.unique || item.specialEnchantments?.length) return '#f90';
+  if (item.cursed) return '#f44';
+  if (item.enchantment > 0) return '#4af';
   return '#ddd';
 }
 
@@ -191,8 +208,8 @@ function buildTooltipContent(item: Item): HTMLElement {
       const ench = ENCHANTMENT_BY_ID[eid];
       if (ench) {
         const prefix = isCrit ? '★★' : '★';
-        const suffix = isCrit ? ' (Critical - 2x)' : '';
-        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${ench.description}${suffix}`));
+        const desc = formatAffixDesc(eid, item.enchantment, isCrit);
+        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${desc}`));
       }
     }
     container.appendChild(enchBox);
@@ -202,15 +219,24 @@ function buildTooltipContent(item: Item): HTMLElement {
   const tplU = ITEM_BY_ID[item.templateId];
   if (tplU?.uniqueAbility && item.identified) {
     const abilityDesc: Record<string, string> = {
-      'resist-fire-75': '+75 Fire Resistance',
-      'resist-cold-75': '+75 Cold Resistance',
-      'resist-lightning-75': '+75 Lightning Resistance',
-      'resist-drain-75': '+75 Drain Resistance, immune to level drain',
+      'resist-fire-75': item.properties?.['wardUpgraded'] ? '+99 Fire Resistance' : '+75 Fire Resistance',
+      'resist-cold-75': item.properties?.['wardUpgraded'] ? '+99 Cold Resistance' : '+75 Cold Resistance',
+      'resist-lightning-75': item.properties?.['wardUpgraded'] ? '+99 Lightning Resistance' : '+75 Lightning Resistance',
+      'resist-drain-75': item.properties?.['wardUpgraded'] ? '+99 Drain Resistance' : '+75 Drain Resistance, immune to level drain',
       'detect-monsters': 'Reveals all monsters on the floor',
       'lightning-boost': '+50% Lightning spell damage, +75 Lightning Resistance',
       'levitation': 'Immune to pit and portal traps, walk over water',
-      'elemental-immunity': '+50% all elemental resistances, immune to traps',
+      'elemental-immunity': '+50% all elemental resistances, immune to traps and poison',
       'crown-power': '+10 all attributes, +2 HP/MP regen per turn',
+      'fortune-power': 'Double gold from drops, +25% item drop rate',
+      'shadow-cloak': 'Monsters detect you 3 tiles later',
+      'titan-power': '+30 Constitution, carry capacity doubled',
+      'blooddrinker': 'Heals 30% of all damage dealt',
+      'archmage-power': '+30 Intelligence, spells cost 25% less MP',
+      'aegis-power': '+10 AC, reflect 30% melee damage',
+      'forge-power': '+20 Strength, fire attacks deal +50% damage',
+      'demonhide-power': '+15 AC, +50 fire/cold resist, 25% thorns',
+      'worldsplitter': 'Attacks hit all adjacent enemies',
     };
     const desc = abilityDesc[tplU.uniqueAbility] ?? tplU.uniqueAbility;
     container.appendChild(d('div', { color: '#fc4', fontSize: '11px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
@@ -281,16 +307,83 @@ export function showPileTooltip(items: Item[], x: number, y: number): void {
   positionTooltip(tip, x, y);
 }
 
-export function hideItemTooltip(): void {
-  if (tooltipEl) tooltipEl.style.display = 'none';
+function getCompareTooltip(): HTMLElement {
+  if (compareEl) return compareEl;
+  compareEl = d('div', {
+    position: 'fixed',
+    zIndex: '9998',
+    background: '#1a1a0a',
+    border: '1px solid #665',
+    padding: '8px 10px',
+    fontFamily: "'Segoe UI', Tahoma, sans-serif",
+    fontSize: '12px',
+    color: '#ccc',
+    pointerEvents: 'none',
+    display: 'none',
+    maxWidth: '260px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.8)',
+  });
+  document.body.appendChild(compareEl);
+  return compareEl;
 }
 
-export function attachItemTooltip(el: HTMLElement, item: Item): void {
+function showCompareTooltip(equippedItem: Item, x: number, y: number): void {
+  const tip = getCompareTooltip();
+  tip.replaceChildren();
+  tip.appendChild(d('div', { color: '#886', fontSize: '10px', marginBottom: '4px', fontWeight: 'bold' }, 'EQUIPPED'));
+  tip.appendChild(buildTooltipContent(equippedItem));
+  // Position to the left of the main tooltip
+  tip.style.display = 'block';
+  const mainRect = tooltipEl?.getBoundingClientRect();
+  if (mainRect) {
+    let left = mainRect.left - tip.offsetWidth - 8;
+    if (left < 4) left = mainRect.right + 8;
+    tip.style.left = `${Math.max(4, left)}px`;
+    tip.style.top = `${mainRect.top}px`;
+  } else {
+    positionTooltip(tip, x - 280, y);
+  }
+}
+
+function hideCompareTooltip(): void {
+  if (compareEl) compareEl.style.display = 'none';
+}
+
+function refreshCompare(): void {
+  if (tabHeld && activeCompareItem && tooltipEl?.style.display === 'block') {
+    showCompareTooltip(activeCompareItem, activeMouseX, activeMouseY);
+  }
+}
+
+export function hideItemTooltip(): void {
+  if (tooltipEl) tooltipEl.style.display = 'none';
+  hideCompareTooltip();
+  activeCompareItem = null;
+}
+
+export function attachItemTooltip(el: HTMLElement, item: Item, equippedItem?: Item | null): void {
   el.addEventListener('mouseenter', (e: MouseEvent) => {
     showItemTooltip(item, e.clientX, e.clientY);
+    activeCompareItem = equippedItem ?? null;
+    activeMouseX = e.clientX;
+    activeMouseY = e.clientY;
+    if (tabHeld && activeCompareItem) {
+      showCompareTooltip(activeCompareItem, e.clientX, e.clientY);
+    }
   });
   el.addEventListener('mousemove', (e: MouseEvent) => {
+    activeMouseX = e.clientX;
+    activeMouseY = e.clientY;
     if (tooltipEl?.style.display === 'block') positionTooltip(tooltipEl, e.clientX, e.clientY);
+    if (tabHeld && activeCompareItem && compareEl?.style.display === 'block') {
+      const mainRect = tooltipEl?.getBoundingClientRect();
+      if (mainRect && compareEl) {
+        let left = mainRect.left - compareEl.offsetWidth - 8;
+        if (left < 4) left = mainRect.right + 8;
+        compareEl.style.left = `${Math.max(4, left)}px`;
+        compareEl.style.top = `${mainRect.top}px`;
+      }
+    }
   });
   el.addEventListener('mouseleave', hideItemTooltip);
 }

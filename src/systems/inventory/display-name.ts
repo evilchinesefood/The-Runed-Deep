@@ -42,6 +42,7 @@ export function itemNameColor(item: Item): string {
   if (!item.identified) return '#888';
   const tpl = ITEM_BY_ID[item.templateId];
   if (tpl?.unique) return '#f90';
+  if (item.specialEnchantments?.length) return '#f90';
   if (item.cursed) return '#f44';
   if (item.enchantment > 0) return '#4af';
   return '#fff';
@@ -50,7 +51,7 @@ export function itemNameColor(item: Item): string {
 export function getItemGlow(item: Item): string {
   if (!item.identified) return '';
   const tpl = ITEM_BY_ID[item.templateId];
-  if (tpl?.unique) return 'drop-shadow(0 0 2px rgba(255, 153, 0, 0.9))';
+  if (tpl?.unique || item.specialEnchantments?.length) return 'drop-shadow(0 0 2px rgba(255, 153, 0, 0.9))';
   if (item.enchantment > 0) return 'drop-shadow(0 0 2px rgba(70, 130, 255, 0.9))';
   if (item.cursed) return 'drop-shadow(0 0 2px rgba(255, 50, 50, 0.9))';
   return '';

@@ -24,16 +24,23 @@ import {
   itemNameColor,
 } from "../systems/inventory/display-name";
 import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
+import { ITEM_BY_ID } from "../data/items";
 
 interface ItemStack {
   item: Item;
   count: number;
 }
 
+const NO_STACK_SLOTS = new Set(['weapon', 'shield', 'helmet', 'body', 'cloak', 'gauntlets', 'belt', 'boots']);
 function stackItems(items: Item[]): ItemStack[] {
   const stacks: ItemStack[] = [];
   const map = new Map<string, ItemStack>();
   for (const item of items) {
+    const tpl = ITEM_BY_ID[item.templateId];
+    if (tpl?.equipSlot && NO_STACK_SLOTS.has(tpl.equipSlot)) {
+      stacks.push({ item, count: 1 });
+      continue;
+    }
     const key = `${item.templateId}|${item.enchantment}|${item.identified}|${item.cursed}`;
     const existing = map.get(key);
     if (existing) {

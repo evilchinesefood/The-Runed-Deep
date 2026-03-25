@@ -83,6 +83,31 @@ export function loadGame(slot: number = 1): GameState | null {
       }
     }
 
+    // Migrate old enchantment IDs to new affix IDs
+    const ENCHANT_MIGRATION: Record<string, string> = {
+      'life-steal': 'vampiric', 'reflect-damage': 'thorns', 'speed-boost': 'swiftness',
+      'spell-damage': 'spell-power', 'regen-hp': 'regeneration', 'regen-mp': 'arcane-mastery',
+      'str-bonus': 'might', 'int-bonus': 'brilliance', 'con-bonus': 'fortitude',
+      'dex-bonus': 'grace', 'poison-immune': 'magic-resist', 'trap-immune': 'magic-resist',
+    };
+    function migrateEnchants(item: any) {
+      if (!item?.specialEnchantments) return;
+      item.specialEnchantments = item.specialEnchantments.map((e: string) => {
+        const isCrit = e.endsWith(':critical');
+        const base = isCrit ? e.replace(':critical', '') : e;
+        const mapped = ENCHANT_MIGRATION[base];
+        return mapped ? (isCrit ? `${mapped}:critical` : mapped) : e;
+      });
+    }
+    for (const item of state.hero.inventory) migrateEnchants(item);
+    for (const eq of Object.values(state.hero.equipment)) if (eq) migrateEnchants(eq);
+    for (const key of Object.keys(state.floors)) {
+      for (const placed of state.floors[key].items ?? []) migrateEnchants(placed?.item);
+    }
+    for (const items of Object.values(state.town.shopInventories)) {
+      for (const item of items as any[]) migrateEnchants(item);
+    }
+
     // Ensure new item IDs don't collide with loaded items
     syncItemIdCounter(state);
 

@@ -2,6 +2,7 @@
 // ============================================================
 // The Runed Deep — Cloud Save API
 // Flat-file save storage with rate limiting and validation
+// Saves are gzip-compressed base64 from the client
 // ============================================================
 
 header('Content-Type: application/json');
@@ -13,11 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
 $SAVES_DIR = __DIR__ . '/saves';
 $RATE_DIR  = __DIR__ . '/ratelimit';
-$MAX_SAVES      = 500;     // total saves on server
-$MAX_FILE_SIZE  = 512000;  // 512KB per save
-$RATE_WINDOW    = 3600;    // 1 hour
-$RATE_MAX_WRITE = 20;      // max writes per IP per hour
-$RATE_MAX_READ  = 60;      // max reads per IP per hour
+$MAX_SAVES      = 500;
+$MAX_DATA_SIZE  = 2000000;  // 2MB compressed (base64)
+$RATE_WINDOW    = 3600;
+$RATE_MAX_WRITE = 20;
+$RATE_MAX_READ  = 60;
 $CODE_PATTERN   = '/^[A-Z0-9]{5}$/';
 
 if (!is_dir($SAVES_DIR)) mkdir($SAVES_DIR, 0755, true);
@@ -31,7 +32,6 @@ function fail(int $code, string $msg): void {
 
 function getClientIp(): string {
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    // Take first IP if comma-separated
     return preg_replace('/[^a-fA-F0-9.:_-]/', '', explode(',', $ip)[0]);
 }
 
@@ -45,7 +45,6 @@ function checkRate(string $ip, string $action, int $max, int $window): void {
     }
 
     $now = time();
-    // Prune old entries
     $entries = array_filter($entries, fn($t) => ($now - $t) < $window);
 
     if (count($entries) >= $max) {
@@ -58,25 +57,11 @@ function checkRate(string $ip, string $action, int $max, int $window): void {
 
 function cleanRateFiles(): void {
     global $RATE_DIR, $RATE_WINDOW;
-    // 5% chance to clean up stale rate limit files
     if (mt_rand(1, 20) !== 1) return;
     $cutoff = time() - ($RATE_WINDOW * 2);
     foreach (glob($RATE_DIR . '/*.json') as $f) {
         if (filemtime($f) < $cutoff) @unlink($f);
     }
-}
-
-function validateSaveData(string $json): bool {
-    $data = json_decode($json, true);
-    if (!$data) return false;
-    // Must have basic game state fields
-    $required = ['hero', 'currentFloor', 'currentDungeon', 'turn'];
-    foreach ($required as $key) {
-        if (!array_key_exists($key, $data)) return false;
-    }
-    // Hero must have name and position
-    if (!isset($data['hero']['name']) || !isset($data['hero']['position'])) return false;
-    return true;
 }
 
 $ip = getClientIp();
@@ -89,9 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     checkRate($ip, 'read', $RATE_MAX_READ, $RATE_WINDOW);
 
-    $file = $SAVES_DIR . '/' . $code . '.json';
+    $file = $SAVES_DIR . '/' . $code . '.dat';
     if (!file_exists($file)) fail(404, 'Save not found.');
 
+    // Return raw compressed data (client handles decompression)
+    header('Content-Type: text/plain');
     echo file_get_contents($file);
     exit;
 }
@@ -106,22 +93,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!preg_match($CODE_PATTERN, $code)) fail(400, 'Invalid code format.');
     if (!is_string($data) || strlen($data) < 10) fail(400, 'Missing save data.');
-    if (strlen($data) > $MAX_FILE_SIZE) fail(400, 'Save data too large (max 512KB).');
+    if (strlen($data) > $MAX_DATA_SIZE) fail(400, 'Save data too large (max 2MB compressed).');
 
-    // Validate it looks like a real game save
-    if (!validateSaveData($data)) fail(400, 'Invalid save data format.');
+    // Validate: compressed data must be valid base64
+    if (!empty($body['compressed'])) {
+        if (base64_decode($data, true) === false) {
+            fail(400, 'Invalid compressed data.');
+        }
+    } else {
+        // Uncompressed: validate it looks like a game save
+        $parsed = json_decode($data, true);
+        if (!$parsed || !isset($parsed['hero']['name']) || !isset($parsed['currentFloor'])) {
+            fail(400, 'Invalid save data format.');
+        }
+    }
 
     checkRate($ip, 'write', $RATE_MAX_WRITE, $RATE_WINDOW);
 
-    // Check total save count (only for NEW saves, not overwrites)
-    $file = $SAVES_DIR . '/' . $code . '.json';
+    $file = $SAVES_DIR . '/' . $code . '.dat';
     if (!file_exists($file)) {
-        $count = count(glob($SAVES_DIR . '/*.json'));
+        $count = count(glob($SAVES_DIR . '/*.dat'));
         if ($count >= $MAX_SAVES) fail(507, 'Server save limit reached.');
     }
 
     file_put_contents($file, $data, LOCK_EX);
-    echo json_encode(['ok' => true, 'code' => $code]);
+    echo json_encode(['ok' => true, 'code' => $code, 'size' => strlen($data)]);
     exit;
 }
 

@@ -271,12 +271,12 @@ export function createSplashScreen(
         alignItems: "center",
       });
 
+      const slotBtnStyle = "height:34px;padding:0 10px;font-size:13px;display:flex;align-items:center;justify-content:center;";
+
       // Cloud toggle button
       const cloudBtn = createButton(code ? "\u2713" : "\u2601", "sm");
       cloudBtn.title = code ? "Cloud sync enabled" : "Enable cloud sync";
-      cloudBtn.style.fontSize = "16px";
-      cloudBtn.style.padding = "4px 8px";
-      cloudBtn.style.minWidth = "34px";
+      cloudBtn.style.cssText += slotBtnStyle + "min-width:34px;font-size:16px;";
       if (code) {
         cloudBtn.style.color = "#4f4";
         cloudBtn.style.borderColor = "#4a4";
@@ -319,6 +319,7 @@ export function createSplashScreen(
       btnGroup.appendChild(cloudBtn);
 
       const loadBtn = createButton("Load");
+      loadBtn.style.cssText += slotBtnStyle;
       loadBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         // If cloud-enabled, pull latest from server first
@@ -343,8 +344,7 @@ export function createSplashScreen(
       btnGroup.appendChild(loadBtn);
 
       const delBtn = createButton("X", "danger");
-      delBtn.style.fontSize = "12px";
-      delBtn.style.padding = "4px 8px";
+      delBtn.style.cssText += slotBtnStyle + "min-width:34px;";
       const slotNum = info.slot;
       delBtn.addEventListener("click", (e) => {
         e.stopPropagation();

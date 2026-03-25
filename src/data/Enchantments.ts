@@ -1,61 +1,108 @@
-export interface SpecialEnchantment {
+// ============================================================
+// Affix system — scaled enchantments for tiered items
+// effective = base + (itemEnchantment * perLevel), capped
+// ============================================================
+
+export interface Affix {
   id: string;
   name: string;
   description: string;
   color: string;
+  base: number;        // base value at +0
+  perLevel: number;    // bonus per +1 enchantment
+  cap: number;         // maximum effective value
+  base2?: number;      // second stat base (for dual-stat affixes)
+  perLevel2?: number;
+  cap2?: number;
+  weaponOnly?: boolean;
+  armorOnly?: boolean;
+  weight: number;      // drop weight (higher = more common)
 }
 
-export const ENCHANTMENTS: SpecialEnchantment[] = [
-  { id: 'magic-resist', name: 'Magic Resistance', description: '+25% all elemental resistance', color: '#a8f' },
-  { id: 'life-steal', name: 'Life Steal', description: 'Heal 15% of melee damage dealt', color: '#f44' },
-  { id: 'spell-damage', name: 'Spell Power', description: '+30% spell damage', color: '#48f' },
-  { id: 'speed-boost', name: 'Swiftness', description: 'Extra action every 3 turns', color: '#fc4' },
-  { id: 'poison-immune', name: 'Poison Immunity', description: 'Immune to poison', color: '#4f4' },
-  { id: 'trap-immune', name: 'Trap Immunity', description: 'Immune to traps', color: '#886' },
-  { id: 'str-bonus', name: 'Might', description: '+10 Strength', color: '#e44' },
-  { id: 'int-bonus', name: 'Brilliance', description: '+10 Intelligence', color: '#48f' },
-  { id: 'con-bonus', name: 'Fortitude', description: '+10 Constitution', color: '#4c4' },
-  { id: 'dex-bonus', name: 'Grace', description: '+10 Dexterity', color: '#fc4' },
-  { id: 'reflect-damage', name: 'Thorns', description: 'Reflect 20% of melee damage taken', color: '#f84' },
-  { id: 'regen-hp', name: 'Regeneration', description: '+1 HP every 2 turns', color: '#4f4' },
-  { id: 'regen-mp', name: 'Meditation', description: '+1 MP every 3 turns', color: '#48f' },
+// Keep old interface name for compatibility with tooltip rendering
+export type SpecialEnchantment = Affix;
+
+export const AFFIXES: Affix[] = [
+  // ── Offensive ─────────────────────────────────────────────
+  { id: 'sharpness', name: 'Sharpness', description: '+{v} damage', color: '#e44',
+    base: 2, perLevel: 2, cap: 20, weaponOnly: true, weight: 3 },
+  { id: 'might', name: 'Might', description: '+{v} Strength', color: '#e44',
+    base: 5, perLevel: 3, cap: 35, weight: 1 },
+  { id: 'vampiric', name: 'Vampiric', description: '{v}% damage healed', color: '#f44',
+    base: 10, perLevel: 3, cap: 40, weight: 1 },
+  { id: 'spell-power', name: 'Spell Power', description: '+{v}% spell damage', color: '#48f',
+    base: 15, perLevel: 5, cap: 65, weight: 1 },
+  { id: 'thorns', name: 'Thorns', description: '{v}% damage reflected', color: '#f84',
+    base: 10, perLevel: 4, cap: 50, weight: 1 },
+  { id: 'fire-touched', name: 'Fire Touched', description: '+{v}% fire damage, +{v2} fire resist', color: '#f64',
+    base: 10, perLevel: 3, cap: 40, base2: 15, perLevel2: 5, cap2: 65, weight: 1 },
+  { id: 'frost-touched', name: 'Frost Touched', description: '+{v}% cold damage, +{v2} cold resist', color: '#6cf',
+    base: 10, perLevel: 3, cap: 40, base2: 15, perLevel2: 5, cap2: 65, weight: 1 },
+  { id: 'storm-touched', name: 'Storm Touched', description: '+{v}% lightning damage, +{v2} lightning resist', color: '#ff8',
+    base: 10, perLevel: 3, cap: 40, base2: 15, perLevel2: 5, cap2: 65, weight: 1 },
+
+  // ── Defensive ─────────────────────────────────────────────
+  { id: 'hardened', name: 'Hardened', description: '+{v} AC', color: '#8af',
+    base: 2, perLevel: 1, cap: 12, armorOnly: true, weight: 3 },
+  { id: 'fortitude', name: 'Fortitude', description: '+{v} Constitution', color: '#4c4',
+    base: 5, perLevel: 3, cap: 35, weight: 1 },
+  { id: 'magic-resist', name: 'Magic Resistance', description: '+{v}% all elemental resist', color: '#a8f',
+    base: 10, perLevel: 3, cap: 40, weight: 1 },
+  { id: 'evasion', name: 'Evasion', description: '{v}% chance to dodge', color: '#adf',
+    base: 5, perLevel: 2, cap: 25, weight: 1 },
+  { id: 'vitality', name: 'Vitality', description: '+{v} max HP', color: '#f44',
+    base: 25, perLevel: 10, cap: 125, weight: 1 },
+  { id: 'regeneration', name: 'Regeneration', description: '+{v} HP every 2 turns', color: '#4f4',
+    base: 1, perLevel: 0.5, cap: 6, weight: 1 },
+
+  // ── Utility ───────────────────────────────────────────────
+  { id: 'grace', name: 'Grace', description: '+{v} Dexterity', color: '#fc4',
+    base: 5, perLevel: 3, cap: 35, weight: 1 },
+  { id: 'brilliance', name: 'Brilliance', description: '+{v} Intelligence', color: '#48f',
+    base: 5, perLevel: 3, cap: 35, weight: 1 },
+  { id: 'swiftness', name: 'Swiftness', description: '{v}% chance for extra action', color: '#fc4',
+    base: 5, perLevel: 3, cap: 35, weight: 1 },
+  { id: 'arcane-well', name: 'Arcane Well', description: '+{v} max MP', color: '#88f',
+    base: 25, perLevel: 10, cap: 125, weight: 1 },
+  { id: 'arcane-mastery', name: 'Arcane Mastery', description: '-{v}% MP cost, +{v2} MP/3 turns', color: '#a6f',
+    base: 10, perLevel: 3, cap: 40, base2: 1, perLevel2: 0.5, cap2: 6, weight: 1 },
+  { id: 'fortune', name: 'Fortune', description: '+{v}% gold, +{v2}% XP', color: '#fd4',
+    base: 10, perLevel: 3, cap: 40, base2: 8, perLevel2: 2, cap2: 28, weight: 1 },
 ];
 
-export const ENCHANTMENT_BY_ID: Record<string, SpecialEnchantment> = Object.fromEntries(
-  ENCHANTMENTS.map(e => [e.id, e])
+// Keep ENCHANTMENTS alias for backward compat with tooltip code
+export const ENCHANTMENTS = AFFIXES;
+
+export const AFFIX_BY_ID: Record<string, Affix> = Object.fromEntries(
+  AFFIXES.map(a => [a.id, a])
 );
 
-/** Roll special enchantments for an item. Chance and count scale with depth. */
-export function rollSpecialEnchantments(depth: number, isTierItem: boolean, ngPlus: number = 0): string[] {
-  const ngBonus = ngPlus * 0.15;
-  let chance: number;
-  if (isTierItem) {
-    chance = Math.min(0.60, 0.15 + Math.max(0, depth - 15) * 0.01 + ngBonus);
-  } else {
-    chance = depth >= 15 ? Math.min(0.35, 0.02 + (depth - 15) * 0.005 + ngBonus) : ngBonus > 0 ? Math.min(0.20, ngBonus) : 0;
-  }
-  if (Math.random() > chance) return [];
+// Backward compat alias
+export const ENCHANTMENT_BY_ID = AFFIX_BY_ID;
 
-  // Count scales with depth: base 2, +1 per 10 floors, max 5
-  const baseCount = 2;
-  const bonusCount = Math.floor(depth / 10);
-  const count = Math.min(5, baseCount + bonusCount);
+/** Compute the effective value of an affix given the item's enchantment level */
+export function getAffixValue(affixId: string, enchantLevel: number, critical: boolean): number {
+  const affix = AFFIX_BY_ID[affixId];
+  if (!affix) return 0;
+  const mult = critical ? 2 : 1;
+  return Math.min(affix.cap, (affix.base + enchantLevel * affix.perLevel) * mult);
+}
 
-  const pool = [...ENCHANTMENTS];
-  const result: string[] = [];
+/** Compute the secondary value (for dual-stat affixes like Touched) */
+export function getAffixValue2(affixId: string, enchantLevel: number, critical: boolean): number {
+  const affix = AFFIX_BY_ID[affixId];
+  if (!affix || affix.base2 === undefined) return 0;
+  const mult = critical ? 2 : 1;
+  return Math.min(affix.cap2!, (affix.base2 + enchantLevel * (affix.perLevel2 ?? 0)) * mult);
+}
 
-  for (let i = 0; i < count && pool.length > 0; i++) {
-    const idx = Math.floor(Math.random() * pool.length);
-    result.push(pool[idx].id);
-    pool.splice(idx, 1);
-  }
-
-  // In NG+, enchantments have 20% chance to be critical (doubled effect)
-  if (ngPlus > 0) {
-    return result.map(id => Math.random() < 0.20 ? `${id}:critical` : id);
-  }
-
-  return result;
+/** Format affix description with computed values */
+export function formatAffixDesc(affixId: string, enchantLevel: number, critical: boolean): string {
+  const affix = AFFIX_BY_ID[affixId];
+  if (!affix) return affixId;
+  const v = Math.round(getAffixValue(affixId, enchantLevel, critical));
+  const v2 = Math.round(getAffixValue2(affixId, enchantLevel, critical));
+  return affix.description.replace('{v}', `${v}`).replace('{v2}', `${v2}`);
 }
 
 /** Check if an item's enchantment list contains an enchantment. Returns multiplier: 0=none, 1=normal, 2=critical */
@@ -75,4 +122,94 @@ export function getEquipEnchantTotal(equipment: Record<string, any>, enchId: str
     }
   }
   return total;
+}
+
+/**
+ * Get total scaled affix value across all equipped items.
+ * Each item contributes: getAffixValue(id, item.enchantment, isCritical)
+ */
+export function getEquipAffixTotal(equipment: Record<string, any>, affixId: string): number {
+  let total = 0;
+  for (const item of Object.values(equipment)) {
+    if (!item?.specialEnchantments) continue;
+    const enchants = item.specialEnchantments as string[];
+    const isCrit = enchants.includes(`${affixId}:critical`);
+    const has = isCrit || enchants.includes(affixId);
+    if (has) {
+      total += getAffixValue(affixId, item.enchantment ?? 0, isCrit);
+    }
+  }
+  return total;
+}
+
+/** Same as getEquipAffixTotal but for the secondary value */
+export function getEquipAffixTotal2(equipment: Record<string, any>, affixId: string): number {
+  let total = 0;
+  for (const item of Object.values(equipment)) {
+    if (!item?.specialEnchantments) continue;
+    const enchants = item.specialEnchantments as string[];
+    const isCrit = enchants.includes(`${affixId}:critical`);
+    const has = isCrit || enchants.includes(affixId);
+    if (has) {
+      total += getAffixValue2(affixId, item.enchantment ?? 0, isCrit);
+    }
+  }
+  return total;
+}
+
+/**
+ * Roll special affixes for an item.
+ * isWeapon/isArmor filters weapon-only and armor-only affixes.
+ */
+export function rollSpecialEnchantments(
+  depth: number, isTierItem: boolean, ngPlus: number = 0,
+  isWeapon: boolean = false, isArmor: boolean = false,
+): string[] {
+  const ngBonus = ngPlus * 0.15;
+  let chance: number;
+  if (isTierItem) {
+    chance = Math.min(0.60, 0.15 + Math.max(0, depth - 15) * 0.01 + ngBonus);
+  } else {
+    chance = depth >= 15 ? Math.min(0.35, 0.02 + (depth - 15) * 0.005 + ngBonus) : ngBonus > 0 ? Math.min(0.20, ngBonus) : 0;
+  }
+  if (Math.random() > chance) return [];
+
+  // Count: base 2, +1 per 10 floors, +1 per NG+
+  // Cap: 5 + ngPlus * 2 (no max in NG+)
+  const baseCount = 2;
+  const bonusCount = Math.floor(depth / 10);
+  const maxCount = 5 + ngPlus * 2;
+  const count = Math.min(maxCount, baseCount + bonusCount + ngPlus);
+
+  // Build weighted pool filtered by weapon/armor
+  const pool = AFFIXES.filter(a => {
+    if (a.weaponOnly && !isWeapon) return false;
+    if (a.armorOnly && !isArmor) return false;
+    return true;
+  });
+
+  const result: string[] = [];
+  const used = new Set<string>();
+
+  for (let i = 0; i < count && pool.length > used.size; i++) {
+    // Weighted random selection
+    const available = pool.filter(a => !used.has(a.id));
+    const totalWeight = available.reduce((s, a) => s + a.weight, 0);
+    let roll = Math.random() * totalWeight;
+    let picked = available[0];
+    for (const a of available) {
+      roll -= a.weight;
+      if (roll <= 0) { picked = a; break; }
+    }
+    used.add(picked.id);
+    result.push(picked.id);
+  }
+
+  // Critical chance by NG level: 0% / 20% / 30% / 40%
+  const critChance = ngPlus <= 0 ? 0 : ngPlus === 1 ? 0.20 : ngPlus === 2 ? 0.30 : 0.40;
+  if (critChance > 0) {
+    return result.map(id => Math.random() < critChance ? `${id}:critical` : id);
+  }
+
+  return result;
 }

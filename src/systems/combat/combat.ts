@@ -11,7 +11,8 @@ import { generateLoot } from "../items/loot";
 import { processMonsterAbility } from "../monsters/ai";
 import { Sound } from "../Sound";
 import { trackMonsterKill, trackFloorDamage } from "../Achievements";
-import { hasEnchant, enchantMult } from "../../utils/Enchants";
+import { hasEnchant, equipAffixTotal } from "../../utils/Enchants";
+import { ITEM_BY_ID } from "../../data/items";
 import { getDisplayName } from "../inventory/display-name";
 
 // ============================================================
@@ -193,17 +194,28 @@ export function playerAttacksMonster(
 
   const newHp = monster.hp - damage;
 
-  // Life steal
-  if (hasEnchant(state.hero.equipment, "life-steal") && damage > 0) {
-    const mult = enchantMult(state.hero.equipment, "life-steal");
-    const heal = Math.max(1, Math.floor(damage * 0.15 * mult));
+  // Vampiric — scaled heal % from affix
+  if (hasEnchant(state.hero.equipment, "vampiric") && damage > 0) {
+    const pct = equipAffixTotal(state.hero.equipment, "vampiric") / 100;
+    const heal = Math.max(1, Math.floor(damage * pct));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
     state = { ...state, hero: { ...state.hero, hp: healedHp } };
     messages.push({
-      text: `Life steal heals you for ${heal} HP.`,
+      text: `Vampiric heals you for ${heal} HP.`,
       severity: "combat",
       turn: state.turn,
     });
+  }
+
+  // Blooddrinker unique: 30% of all damage healed
+  if (damage > 0) {
+    const weapon = state.hero.equipment.weapon;
+    if (weapon && ITEM_BY_ID[weapon.templateId]?.uniqueAbility === 'blooddrinker') {
+      const heal = Math.max(1, Math.floor(damage * 0.3));
+      const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
+      state = { ...state, hero: { ...state.hero, hp: healedHp } };
+      messages.push({ text: `Blooddrinker heals you for ${heal} HP.`, severity: "combat", turn: state.turn });
+    }
   }
 
   if (newHp <= 0) {
@@ -224,6 +236,7 @@ export function playerAttacksMonster(
       state.currentFloor,
       monster.position,
       state.ngPlusCount,
+      state.hero.equipment,
     );
     let newItems = [...floor.items];
     if (loot) {
@@ -312,6 +325,17 @@ export function monsterAttacksPlayer(
     return applyMessages(state, messages);
   }
 
+  // Evasion — chance to dodge
+  const evasionPct = equipAffixTotal(state.hero.equipment, "evasion");
+  if (evasionPct > 0 && Math.random() * 100 < evasionPct) {
+    messages.push({
+      text: `${state.hero.name} dodges the ${monster.name}'s attack!`,
+      severity: "combat",
+      turn: state.turn,
+    });
+    return applyMessages(state, messages);
+  }
+
   const rawDamage = calcMonsterDamage(monster);
   const damage = applyArmor(rawDamage, state.hero.armorValue);
 
@@ -368,11 +392,16 @@ export function monsterAttacksPlayer(
     floors,
   };
 
-  // Reflect damage (Thorns enchantment)
+  // Reflect damage (Thorns affix + unique abilities)
   let monsterKilledByThorns = false;
-  if (hasEnchant(state.hero.equipment, "reflect-damage") && damage > 0) {
-    const reflectMult = enchantMult(state.hero.equipment, "reflect-damage");
-    const reflectDmg = Math.max(1, Math.floor(damage * 0.2 * reflectMult));
+  let totalThornsPct = equipAffixTotal(state.hero.equipment, "thorns");
+  // Aegis of the Fallen: 30% reflect
+  for (const eq of Object.values(state.hero.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'aegis-power') totalThornsPct += 30;
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'demonhide-power') totalThornsPct += 25;
+  }
+  if (totalThornsPct > 0 && damage > 0) {
+    const reflectDmg = Math.max(1, Math.floor(damage * totalThornsPct / 100));
     const floorKey2 = `${result.currentDungeon}-${result.currentFloor}`;
     const floor2 = result.floors[floorKey2];
     if (floor2) {
@@ -391,6 +420,7 @@ export function monsterAttacksPlayer(
             result.currentFloor,
             m.position,
             result.ngPlusCount,
+            result.hero.equipment,
           );
           let newItems = [...floor2.items];
           const thornsMsgs: Message[] = [

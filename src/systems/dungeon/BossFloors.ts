@@ -6,7 +6,7 @@
 import type { Floor, Tile, Vector2, Difficulty, PlacedItem } from '../../core/types';
 import { getBossForFloor, MONSTER_BY_ID } from '../../data/monsters';
 import { createMonster } from '../monsters/spawning';
-import { getItemsForDepth } from '../../data/items';
+import { getItemsForDepth, ALL_ITEM_TEMPLATES } from '../../data/items';
 import { createItemFromTemplate } from '../items/loot';
 import { getDungeonForFloor, TILESETS, type Tileset } from './Tilesets';
 
@@ -104,16 +104,29 @@ function placeLoot(
   depth: number,
   positions: Vector2[],
   count: number,
+  ngPlus: number = 0,
 ): void {
   const candidates = getItemsForDepth(depth);
   if (candidates.length === 0) return;
+
+  // Boss guaranteed unique drop (always in NG+, else for bosses F30+)
+  const uniqueCandidates = ALL_ITEM_TEMPLATES.filter(t => t.unique && depth >= t.depthMin && depth <= t.depthMax);
+  const guaranteeUnique = ngPlus >= 1 || depth >= 30;
+
   let placed = 0;
   for (const pos of positions) {
     if (placed >= count) break;
     const t = tiles[pos.y]?.[pos.x];
     if (!t?.walkable || t.type === 'stairs-up' || t.type === 'stairs-down') continue;
-    const tpl = candidates[Math.floor(Math.random() * candidates.length)];
-    const item = createItemFromTemplate(tpl, depth);
+
+    let tpl;
+    if (placed === 0 && guaranteeUnique && uniqueCandidates.length > 0) {
+      // First item is guaranteed unique
+      tpl = uniqueCandidates[Math.floor(Math.random() * uniqueCandidates.length)];
+    } else {
+      tpl = candidates[Math.floor(Math.random() * candidates.length)];
+    }
+    const item = createItemFromTemplate(tpl, depth, ngPlus);
     item.identified = true;
     items.push({ item, position: { ...pos } });
     placed++;

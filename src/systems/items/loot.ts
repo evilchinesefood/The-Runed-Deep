@@ -8,7 +8,7 @@ import {
   ITEM_BY_ID,
   type ItemTemplate,
 } from "../../data/items";
-import { rollSpecialEnchantments } from "../../data/Enchantments";
+import { rollSpecialEnchantments, getEquipAffixTotal } from "../../data/Enchantments";
 
 let nextItemId = Date.now();
 
@@ -49,14 +49,27 @@ export function generateLoot(
   depth: number,
   _position: Vector2,
   ngPlus: number = 0,
+  equipment?: Record<string, any>,
 ): Item | null {
-  // Drop chance: 30% base, increases slightly with depth
-  const dropChance = 0.3 + depth * 0.005;
+  // Fortune affix: boost drop chance
+  let fortuneDropBonus = 0;
+  if (equipment) {
+    fortuneDropBonus = getEquipAffixTotal(equipment, "fortune") / 100;
+    // fortune-power unique: +25% drop rate
+    for (const eq of Object.values(equipment)) {
+      if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') {
+        fortuneDropBonus += 0.25;
+        break;
+      }
+    }
+  }
+
+  const dropChance = 0.3 + depth * 0.005 + fortuneDropBonus;
   if (Math.random() > dropChance) return null;
 
   // 20% chance of copper instead of an item
   if (Math.random() < 0.2) {
-    return createCopperDrop(depth);
+    return createCopperDrop(depth, equipment);
   }
 
   const candidates = getItemsForDepth(depth);
@@ -84,18 +97,24 @@ export function createItemFromTemplate(
 
   if (template.equipSlot) {
     const isUnique = !!template.unique;
-    const enchantRoll = Math.random();
-    if (!isUnique && enchantRoll < 0.05 + depth * 0.01) {
-      // Cursed item (never for uniques)
-      enchantment = -(Math.floor(Math.random() * 3) + 1);
-      cursed = true;
-    } else if (enchantRoll < (isUnique ? 0.3 + ngPlus * 0.2 : 0.15 + depth * 0.015)) {
-      // Enchanted item — uniques have higher base chance, scale with NG+
-      const baseMax = isUnique ? 3 + ngPlus * 3 : tier === "meteoric" ? 8 : tier === "elven" ? 4 : 3;
-      const depthBonus = Math.floor(depth / 15);
-      const ngBonus = tier === "meteoric" ? ngPlus * 5 : 0;
-      const maxEnchant = baseMax + depthBonus + ngBonus;
-      enchantment = Math.floor(Math.random() * maxEnchant) + 1;
+    if (isUnique) {
+      // Uniques: guaranteed minimum enchantment, scales with NG+
+      const minEnch = ngPlus >= 3 ? 10 : ngPlus === 2 ? 9 : ngPlus === 1 ? 7 : 5;
+      const maxEnch = minEnch + 3 + ngPlus * 2;
+      enchantment = minEnch + Math.floor(Math.random() * (maxEnch - minEnch + 1));
+    } else {
+      const enchantRoll = Math.random();
+      if (enchantRoll < 0.05 + depth * 0.01) {
+        // Cursed item
+        enchantment = -(Math.floor(Math.random() * 3) + 1);
+        cursed = true;
+      } else if (enchantRoll < 0.15 + depth * 0.015) {
+        const meteoricMax = [8, 15, 20, 25][Math.min(ngPlus, 3)] ?? 25;
+        const baseMax = tier === "meteoric" ? meteoricMax : tier === "elven" ? (4 + ngPlus * 2) : 3;
+        const depthBonus = Math.floor(depth / 15);
+        const maxEnchant = baseMax + depthBonus;
+        enchantment = Math.floor(Math.random() * maxEnchant) + 1;
+      }
     }
   }
 
@@ -140,7 +159,40 @@ export function createItemFromTemplate(
   };
 
   const isTier = !!ITEM_BY_ID[template.id]?.materialTier;
-  const specials = rollSpecialEnchantments(depth, isTier, ngPlus);
+  const isUnique = !!template.unique;
+  const isWeapon = template.category === 'weapon';
+  const isArmor = ['armor', 'shield', 'helmet', 'cloak', 'gauntlets', 'boots', 'belt'].includes(template.category);
+
+  // Ward amulets: 10% chance to roll 99% resist instead of 75%
+  if (isUnique && template.uniqueAbility?.startsWith('resist-') && template.uniqueAbility.endsWith('-75')) {
+    if (Math.random() < 0.10) {
+      base.properties['wardUpgraded'] = 1;
+    }
+  }
+
+  // Roll affixes — uniques get guaranteed minimum
+  let specials: string[];
+  if (isUnique) {
+    // Always roll affixes for uniques, min count scales with NG+
+    const minAffixes = ngPlus >= 3 ? 5 : ngPlus === 2 ? 4 : ngPlus === 1 ? 3 : 2;
+    specials = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor);
+    // Ensure minimum count — capped at 20 attempts to prevent infinite loop
+    let attempts = 0;
+    while (specials.length < minAffixes && attempts++ < 20) {
+      const extra = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor);
+      if (extra.length === 0) continue; // roll returned empty due to random chance, retry
+      for (const e of extra) {
+        const eid = e.replace(':critical', '');
+        if (!specials.some(s => s.replace(':critical', '') === eid)) {
+          specials.push(e);
+          if (specials.length >= minAffixes) break;
+        }
+      }
+    }
+  } else {
+    specials = rollSpecialEnchantments(depth, isTier, ngPlus, isWeapon, isArmor);
+  }
+
   if (specials.length > 0) {
     const suffixes = [
       "of Power",
@@ -153,7 +205,7 @@ export function createItemFromTemplate(
     return {
       ...base,
       name: `${base.name} ${suffix}`,
-      identified: false,
+      identified: isUnique, // uniques always identified
       specialEnchantments: specials,
     };
   }
@@ -161,8 +213,20 @@ export function createItemFromTemplate(
   return base;
 }
 
-export function createCopperDrop(depth: number): Item {
-  const amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
+export function createCopperDrop(depth: number, equipment?: Record<string, any>): Item {
+  let amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
+  // Fortune affix: bonus gold %
+  if (equipment) {
+    const goldBonus = getEquipAffixTotal(equipment, "fortune") / 100;
+    // fortune-power unique: double gold
+    let fortuneUniqueMult = 1;
+    for (const eq of Object.values(equipment)) {
+      if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') {
+        fortuneUniqueMult = 2; break;
+      }
+    }
+    amount = Math.round(amount * (1 + goldBonus) * fortuneUniqueMult);
+  }
   return {
     id: `item-${nextItemId++}`,
     templateId: "copper-coins",

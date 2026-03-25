@@ -15,7 +15,7 @@ import { recomputeDerivedStats } from "../character/derived-stats";
 import { getMonstersForDepth } from "../../data/monsters";
 import { createMonster } from "./spawning";
 import { xpRequiredForLevel } from "../character/leveling";
-import { hasEnchant } from "../../utils/Enchants";
+import { ITEM_BY_ID } from "../../data/items";
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -511,7 +511,9 @@ export function processMonsterAbility(
   for (const ability of monster.abilities) {
     switch (ability) {
       case "poison": {
-        const isPoisonImmune = hasEnchant(s.hero.equipment, "poison-immune");
+        const isPoisonImmune = Object.values(s.hero.equipment).some(
+          eq => eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'elemental-immunity'
+        );
         if (!isPoisonImmune && Math.random() < 0.3) {
           const alreadyPoisoned = s.hero.activeEffects.some(
             (e) => e.id === "poisoned",

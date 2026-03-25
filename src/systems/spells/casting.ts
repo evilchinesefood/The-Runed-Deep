@@ -24,7 +24,7 @@ import {
   buildTeleportAnimation,
   buildDetectAnimation,
 } from "../../rendering/animations";
-import { hasEnchant, enchantMult } from "../../utils/Enchants";
+import { equipAffixTotal } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
 
 // ============================================================
@@ -48,7 +48,12 @@ export function castSpell(
     return addMsg(state, `You don't know that spell.`, "system");
   }
 
-  const cost = Math.max(1, spell.manaCost);
+  // Arcane Mastery: reduce MP cost + Ring of the Archmage unique
+  let costReduction = equipAffixTotal(state.hero.equipment, "arcane-mastery");
+  for (const eq of Object.values(state.hero.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'archmage-power') costReduction += 25;
+  }
+  const cost = Math.max(1, Math.round(spell.manaCost * (1 - Math.min(costReduction, 75) / 100)));
   if (state.hero.mp < cost) {
     return addMsg(
       state,
@@ -434,17 +439,36 @@ function applySpellDamageToMonster(
   const monster = floor.monsters[monsterIdx];
   let damage = rollRange(minDmg, maxDmg);
 
-  // Spell damage enchantment bonus
-  if (hasEnchant(state.hero.equipment, "spell-damage")) {
-    const mult =
-      enchantMult(state.hero.equipment, "spell-damage") >= 2 ? 1.6 : 1.3;
-    damage = Math.round(damage * mult);
+  // Spell Power affix (scaled)
+  const spellPower = equipAffixTotal(state.hero.equipment, "spell-power");
+  if (spellPower > 0) damage = Math.round(damage * (1 + spellPower / 100));
+
+  // Elemental Touched affix bonuses (primary = damage %)
+  if (element === "fire") {
+    const bonus = equipAffixTotal(state.hero.equipment, "fire-touched");
+    if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
+  } else if (element === "cold") {
+    const bonus = equipAffixTotal(state.hero.equipment, "frost-touched");
+    if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
+  } else if (element === "lightning") {
+    const bonus = equipAffixTotal(state.hero.equipment, "storm-touched");
+    if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
   }
 
   // Helm of Storms: +50% lightning damage
   if (element === "lightning") {
     for (const eq of Object.values(state.hero.equipment)) {
       if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "lightning-boost") {
+        damage = Math.round(damage * 1.5);
+        break;
+      }
+    }
+  }
+
+  // Gauntlets of the Forge: +50% fire damage
+  if (element === "fire") {
+    for (const eq of Object.values(state.hero.equipment)) {
+      if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "forge-power") {
         damage = Math.round(damage * 1.5);
         break;
       }

@@ -1,40 +1,25 @@
 import type { Hero, Attributes, Equipment, EquipSlot } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
+import { getEquipAffixTotal, getEquipAffixTotal2 } from '../../data/Enchantments';
 
-/**
- * Computes max HP from Constitution.
- * Base 10 + CON/5 at level 1. Each level-up adds CON/10 (minimum 1).
- */
 export function computeMaxHp(constitution: number, level: number): number {
   const base = 10 + Math.floor(constitution / 5);
   const perLevel = Math.max(1, Math.floor(constitution / 10));
   return base + perLevel * (level - 1);
 }
 
-/**
- * Computes max MP from Intelligence.
- * Base 5 + INT/5 at level 1. Each level-up adds INT/10 (minimum 1).
- */
 export function computeMaxMp(intelligence: number, level: number): number {
   const base = 5 + Math.floor(intelligence / 5);
   const perLevel = Math.max(1, Math.floor(intelligence / 10));
   return base + perLevel * (level - 1);
 }
 
-/**
- * Computes base armor value from Dexterity.
- * DEX/10 as baseline AC before equipment.
- */
 export function computeBaseArmorValue(dexterity: number): number {
   return Math.floor(dexterity / 10);
 }
 
-/**
- * Computes total armor value from base DEX + all equipped armor pieces.
- */
 export function computeTotalArmorValue(dexterity: number, equipment: Equipment): number {
   let ac = computeBaseArmorValue(dexterity);
-
   const armorSlots: EquipSlot[] = ['helmet', 'body', 'shield', 'cloak', 'gauntlets', 'boots', 'belt', 'ringLeft', 'ringRight', 'amulet'];
   for (const slot of armorSlots) {
     const item = equipment[slot];
@@ -42,130 +27,125 @@ export function computeTotalArmorValue(dexterity: number, equipment: Equipment):
       ac += item.properties['ac'] + item.enchantment;
     }
   }
-
   return ac;
 }
 
-/**
- * Recomputes all derived stats on a hero and returns an updated copy.
- * Call this after any attribute change, level-up, or equipment change.
- */
 export function recomputeDerivedStats(hero: Hero): Hero {
-  // Special enchantment attribute bonuses from equipment (handles critical variants)
-  let bonusStr = 0, bonusInt = 0, bonusCon = 0, bonusDex = 0;
-  for (const slot of Object.values(hero.equipment)) {
-    if (!slot) continue;
-    // Special enchantment bonuses
-    if (slot.specialEnchantments) {
-      for (const e of slot.specialEnchantments) {
-        const isCrit = (e as string).endsWith(':critical');
-        const mult = isCrit ? 2 : 1;
-        const base = isCrit ? (e as string).replace(':critical', '') : e;
-        if (base === 'str-bonus') bonusStr += 10 * mult;
-        if (base === 'int-bonus') bonusInt += 10 * mult;
-        if (base === 'con-bonus') bonusCon += 10 * mult;
-        if (base === 'dex-bonus') bonusDex += 10 * mult;
-      }
-    }
-    // Unique item attribute bonuses
-    const tpl = ITEM_BY_ID[slot.templateId];
-    if (tpl?.uniqueAbility === 'crown-power') {
-      bonusStr += 10; bonusInt += 10; bonusCon += 10; bonusDex += 10;
-    }
-  }
-  const effCon = hero.attributes.constitution + bonusCon;
-  const effInt = hero.attributes.intelligence + bonusInt;
-  const effDex = hero.attributes.dexterity + bonusDex;
+  const eq = hero.equipment;
 
-  const maxHp = computeMaxHp(effCon, hero.level);
-  const maxMp = computeMaxMp(effInt, hero.level);
-  let armorValue = computeTotalArmorValue(effDex, hero.equipment);
+  // ── Scaled affix attribute bonuses ────────────────────────
+  const bonusStr = Math.round(getEquipAffixTotal(eq, 'might'));
+  const bonusInt = Math.round(getEquipAffixTotal(eq, 'brilliance'));
+  const bonusCon = Math.round(getEquipAffixTotal(eq, 'fortitude'));
+  const bonusDex = Math.round(getEquipAffixTotal(eq, 'grace'));
 
-  // Preserve Shield spell bonus
-  const hasShield = hero.activeEffects?.some(e => e.id === 'shield');
-  if (hasShield) armorValue += 4;
-
-  // Weapon bonuses
-  let equipDamageBonus = 0;
-  let equipAccuracyBonus = 0;
-  const weapon = hero.equipment.weapon;
-  if (weapon) {
-    equipDamageBonus = weapon.enchantment;
-    equipAccuracyBonus = (weapon.properties['accuracy'] ?? 0) + weapon.enchantment;
-  }
-
-  // Magic resistance from equipment enchantments
-  let magicResistBonus = 0;
-  for (const slot of Object.values(hero.equipment)) {
-    if (!slot?.specialEnchantments) continue;
-    for (const e of slot.specialEnchantments) {
-      if (e === 'magic-resist') magicResistBonus += 25;
-      if (e === 'magic-resist:critical') magicResistBonus += 50;
-    }
-  }
-
-  // Clamp current HP/MP to new max (don't exceed, but don't reduce if already below)
-  const hp = Math.min(hero.hp, maxHp);
-  const mp = Math.min(hero.mp, maxMp);
-
-  // Unique item abilities — elemental resistances and attribute bonuses
-  let uniqueResist = { cold: 0, fire: 0, lightning: 0, acid: 0, drain: 0 };
-  for (const slot of Object.values(hero.equipment)) {
+  // ── Unique item attribute bonuses ─────────────────────────
+  let uStr = 0, uInt = 0, uCon = 0, uDex = 0;
+  for (const slot of Object.values(eq)) {
     if (!slot) continue;
     const tpl = ITEM_BY_ID[slot.templateId];
     if (!tpl?.uniqueAbility) continue;
     const ua = tpl.uniqueAbility;
-    if (ua === 'resist-fire-75') uniqueResist.fire += 75;
-    else if (ua === 'resist-cold-75') uniqueResist.cold += 75;
-    else if (ua === 'resist-lightning-75') uniqueResist.lightning += 75;
-    else if (ua === 'resist-drain-75') uniqueResist.drain += 75;
+    if (ua === 'crown-power') { uStr += 10; uInt += 10; uCon += 10; uDex += 10; }
+    else if (ua === 'titan-power') uCon += 30;
+    else if (ua === 'archmage-power') uInt += 30;
+    else if (ua === 'forge-power') uStr += 20;
+  }
+
+  const effCon = hero.attributes.constitution + bonusCon + uCon;
+  const effInt = hero.attributes.intelligence + bonusInt + uInt;
+  const effDex = hero.attributes.dexterity + bonusDex + uDex;
+
+  // ── Max HP/MP with Vitality and Arcane Well bonuses ───────
+  let maxHp = computeMaxHp(effCon, hero.level);
+  let maxMp = computeMaxMp(effInt, hero.level);
+  maxHp += Math.round(getEquipAffixTotal(eq, 'vitality'));
+  maxMp += Math.round(getEquipAffixTotal(eq, 'arcane-well'));
+
+  // ── Armor value + Hardened affix ──────────────────────────
+  let armorValue = computeTotalArmorValue(effDex, eq);
+  armorValue += Math.round(getEquipAffixTotal(eq, 'hardened'));
+
+  // Unique armor bonuses
+  for (const slot of Object.values(eq)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (tpl?.uniqueAbility === 'aegis-power') armorValue += 10;
+    if (tpl?.uniqueAbility === 'demonhide-power') armorValue += 15;
+  }
+
+  // Shield spell bonus
+  const hasShield = hero.activeEffects?.some(e => e.id === 'shield');
+  if (hasShield) armorValue += 4;
+
+  // ── Weapon bonuses + Sharpness affix ──────────────────────
+  let equipDamageBonus = 0;
+  let equipAccuracyBonus = 0;
+  const weapon = eq.weapon;
+  if (weapon) {
+    equipDamageBonus = weapon.enchantment;
+    equipAccuracyBonus = (weapon.properties['accuracy'] ?? 0) + weapon.enchantment;
+  }
+  equipDamageBonus += Math.round(getEquipAffixTotal(eq, 'sharpness'));
+  // Might/Strength bonus adds to melee damage (1 per 5 bonus Str)
+  equipDamageBonus += Math.floor((bonusStr + uStr) / 5);
+
+  // ── Magic Resistance (scaled, capped at 40% per affix) ───
+  const magicResistBonus = Math.round(getEquipAffixTotal(eq, 'magic-resist'));
+
+  // ── Elemental Touched resist bonuses ──────────────────────
+  const fireResistBonus = Math.round(getEquipAffixTotal2(eq, 'fire-touched'));
+  const coldResistBonus = Math.round(getEquipAffixTotal2(eq, 'frost-touched'));
+  const lightningResistBonus = Math.round(getEquipAffixTotal2(eq, 'storm-touched'));
+
+  // ── Unique item elemental resistances ─────────────────────
+  let uniqueResist = { cold: 0, fire: 0, lightning: 0, acid: 0, drain: 0 };
+  for (const slot of Object.values(eq)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (!tpl?.uniqueAbility) continue;
+    const ua = tpl.uniqueAbility;
+    const wardVal = slot.properties?.['wardUpgraded'] ? 99 : 75;
+    if (ua === 'resist-fire-75') uniqueResist.fire += wardVal;
+    else if (ua === 'resist-cold-75') uniqueResist.cold += wardVal;
+    else if (ua === 'resist-lightning-75') uniqueResist.lightning += wardVal;
+    else if (ua === 'resist-drain-75') uniqueResist.drain += wardVal;
     else if (ua === 'elemental-immunity') {
       uniqueResist.cold += 50; uniqueResist.fire += 50;
       uniqueResist.lightning += 50; uniqueResist.acid += 50; uniqueResist.drain += 50;
     } else if (ua === 'lightning-boost') {
       uniqueResist.lightning += 75;
+    } else if (ua === 'demonhide-power') {
+      uniqueResist.fire += 50; uniqueResist.cold += 50;
     }
   }
 
-  // Apply magic resist + unique resist bonuses to all elemental resistances
+  const hp = Math.min(hero.hp, maxHp);
+  const mp = Math.min(hero.mp, maxMp);
+
   const baseResistances = hero.resistances;
   const resistances = {
-    cold:      Math.min(100, baseResistances.cold + magicResistBonus + uniqueResist.cold),
-    fire:      Math.min(100, baseResistances.fire + magicResistBonus + uniqueResist.fire),
-    lightning: Math.min(100, baseResistances.lightning + magicResistBonus + uniqueResist.lightning),
+    cold:      Math.min(100, baseResistances.cold + magicResistBonus + coldResistBonus + uniqueResist.cold),
+    fire:      Math.min(100, baseResistances.fire + magicResistBonus + fireResistBonus + uniqueResist.fire),
+    lightning: Math.min(100, baseResistances.lightning + magicResistBonus + lightningResistBonus + uniqueResist.lightning),
     acid:      Math.min(100, baseResistances.acid + magicResistBonus + uniqueResist.acid),
     drain:     Math.min(100, baseResistances.drain + magicResistBonus + uniqueResist.drain),
   };
 
   return {
     ...hero,
-    maxHp,
-    maxMp,
-    hp,
-    mp,
-    armorValue,
-    equipDamageBonus,
-    equipAccuracyBonus,
-    resistances,
+    maxHp, maxMp, hp, mp, armorValue, equipDamageBonus, equipAccuracyBonus, resistances,
   };
 }
 
-/**
- * Returns the effective attribute value including equipment bonuses.
- */
 export function getEffectiveAttribute(
   base: number,
   attr: keyof Attributes,
   equipment: Equipment
 ): number {
   let total = base;
-
-  const slots = Object.values(equipment);
-  for (const item of slots) {
-    if (item && item.properties[attr]) {
-      total += item.properties[attr];
-    }
+  for (const item of Object.values(equipment)) {
+    if (item && item.properties[attr]) total += item.properties[attr];
   }
-
   return total;
 }

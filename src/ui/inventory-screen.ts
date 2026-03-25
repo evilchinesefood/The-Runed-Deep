@@ -343,10 +343,17 @@ export function createInventoryScreen(
 
   interface ItemStack { item: Item; count: number; }
 
+  const NO_STACK_SLOTS = new Set(['weapon', 'shield', 'helmet', 'body', 'cloak', 'gauntlets', 'belt', 'boots']);
   function stackItems(items: Item[]): ItemStack[] {
     const stacks: ItemStack[] = [];
     const map = new Map<string, ItemStack>();
     for (const item of items) {
+      // Weapons and armor never stack (unique affixes make each different)
+      const tplS = ITEM_BY_ID[item.templateId];
+      if (tplS?.equipSlot && NO_STACK_SLOTS.has(tplS.equipSlot)) {
+        stacks.push({ item, count: 1 });
+        continue;
+      }
       const key = `${item.templateId}|${item.enchantment}|${item.identified}|${item.cursed}`;
       const existing = map.get(key);
       if (existing) {
@@ -522,7 +529,12 @@ export function createInventoryScreen(
         selectedIdx = i;
         refreshSelection();
       });
-      attachItemTooltip(row, item);
+      // Pass equipped item in same slot for Tab-compare
+      const equipSlot = tpl?.equipSlot;
+      let equippedInSlot = equipSlot ? h.equipment[equipSlot] : null;
+      // For rings, prefer the occupied slot for comparison
+      if (equipSlot === 'ringLeft' && !equippedInSlot) equippedInSlot = h.equipment.ringRight;
+      attachItemTooltip(row, item, equippedInSlot);
       invPanel.appendChild(row);
       invRows.push(row);
     }
@@ -558,7 +570,10 @@ export function createInventoryScreen(
   const packTpl = pack ? ITEM_BY_ID[pack.templateId] : null;
   const basePackWeight = packTpl?.weightCapacity ?? 0;
   const packEnchBonus = pack ? pack.enchantment * 5000 : 0;
-  const totalCap = BASE_CARRY + Math.max(0, basePackWeight + packEnchBonus);
+  let totalCap = BASE_CARRY + Math.max(0, basePackWeight + packEnchBonus);
+  for (const eq of Object.values(h.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'titan-power') { totalCap *= 2; break; }
+  }
   const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
   const pct = Math.round((invWeight / totalCap) * 100);
   const capColor = pct > 90 ? "#f44" : pct > 70 ? "#fa0" : "#aaa";

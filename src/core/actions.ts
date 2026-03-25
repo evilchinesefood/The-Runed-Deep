@@ -33,7 +33,7 @@ import {
   trackFloorReached,
   trackFloorCleared,
 } from "../systems/Achievements";
-import { hasEnchant } from "../utils/Enchants";
+// Enchant utils removed — affix checks now use unique abilities only
 import { ITEM_BY_ID } from "../data/items";
 import { TRAP_DATA } from "../data/Traps";
 import { getDisplayName } from "../systems/inventory/display-name";
@@ -269,8 +269,8 @@ function processMove(state: GameState, direction: Direction): GameState {
     const isLevitating = state.hero.activeEffects.some(
       (e) => e.id === "levitation",
     ) || hasUniqueAbility(state.hero.equipment, 'levitation');
-    const isTrapImmune = hasEnchant(state.hero.equipment, "trap-immune")
-      || hasUniqueAbility(state.hero.equipment, 'elemental-immunity');
+    const isTrapImmune = hasUniqueAbility(state.hero.equipment, 'elemental-immunity')
+      || hasUniqueAbility(state.hero.equipment, 'levitation');
     if (!isLevitating && !isTrapImmune) {
       const result = triggerTrap(
         tileAtNew,

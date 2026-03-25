@@ -354,6 +354,25 @@ const UNIQUE_ITEMS: ItemTemplate[] = [
     weight: 150, value: 1200, depthMin: 35, depthMax: 99, ac: 2, unique: true, uniqueAbility: 'elemental-immunity' },
   { id: 'crown-of-ancients', name: 'Crown of the Ancients', category: 'amulet', sprite: 'amulet-of-kings', equipSlot: 'amulet',
     weight: 200, value: 2000, depthMin: 40, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'crown-power' },
+  // ── New Uniques ───────────────────────────────────────────
+  { id: 'ring-of-fortune', name: 'Ring of Fortune', category: 'ring', sprite: 'elven-ring', equipSlot: 'ringLeft',
+    weight: 50, value: 500, depthMin: 15, depthMax: 99, ac: 2, unique: true, uniqueAbility: 'fortune-power' },
+  { id: 'cloak-of-shadows', name: 'Cloak of Shadows', category: 'cloak', sprite: 'elven-cloak', equipSlot: 'cloak',
+    weight: 600, value: 500, depthMin: 15, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'shadow-cloak' },
+  { id: 'belt-of-the-titan', name: 'Belt of the Titan', category: 'belt', sprite: 'belt-enchanted', equipSlot: 'belt',
+    weight: 400, value: 600, depthMin: 20, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'titan-power' },
+  { id: 'blooddrinker', name: 'Blooddrinker', category: 'weapon', sprite: 'meteoric-sword', equipSlot: 'weapon',
+    weight: 2500, value: 800, depthMin: 20, depthMax: 99, damageMin: 8, damageMax: 18, accuracy: 3, unique: true, uniqueAbility: 'blooddrinker' },
+  { id: 'ring-of-the-archmage', name: 'Ring of the Archmage', category: 'ring', sprite: 'meteoric-ring', equipSlot: 'ringLeft',
+    weight: 50, value: 800, depthMin: 25, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'archmage-power' },
+  { id: 'aegis-of-the-fallen', name: 'Aegis of the Fallen', category: 'shield', sprite: 'meteoric-shield', equipSlot: 'shield',
+    weight: 3000, value: 900, depthMin: 25, depthMax: 99, ac: 8, unique: true, uniqueAbility: 'aegis-power' },
+  { id: 'gauntlets-of-the-forge', name: 'Gauntlets of the Forge', category: 'gauntlets', sprite: 'gloves-meteoric', equipSlot: 'gauntlets',
+    weight: 1200, value: 800, depthMin: 25, depthMax: 99, ac: 4, unique: true, uniqueAbility: 'forge-power' },
+  { id: 'demonhide-armor', name: 'Demonhide Armor', category: 'armor', sprite: 'meteoric-chain-mail', equipSlot: 'body',
+    weight: 5000, value: 1500, depthMin: 30, depthMax: 99, ac: 12, unique: true, uniqueAbility: 'demonhide-power' },
+  { id: 'worldsplitter', name: 'Worldsplitter', category: 'weapon', sprite: 'meteoric-two-handed-sword', equipSlot: 'weapon',
+    weight: 4500, value: 2000, depthMin: 35, depthMax: 99, damageMin: 15, damageMax: 35, accuracy: 2, twoHanded: true, unique: true, uniqueAbility: 'worldsplitter' },
 ];
 
 // ============================================================

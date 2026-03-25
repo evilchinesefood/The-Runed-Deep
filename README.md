@@ -17,12 +17,13 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Procedural generation** — 5 room shapes, locked/secret doors, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental with resistance checks (fire, acid, lightning, wind, rune), special (portal, cobweb)
 - **Dungeon decor** — pillars, altars, statues, coffins, fountains, water pools scattered in rooms and boss lairs
-- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored
+- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored, seeks out secret doors when no path to next floor
 
 ### Combat & Monsters
 - **68 monster types** across 5 AI behaviors (melee, ranged, caster, thief, summoner)
 - **Flee-once mechanic** — monsters flee at low HP once, then fight to the death
 - **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, and traps
+- **Evasion system** — dodge chance from gear affixes
 
 ### Magic
 - **30 spells** split into two learning paths:
@@ -34,19 +35,58 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ### Items & Equipment
 - **100+ item templates** — weapons, armor, potions, scrolls, spellbooks, wands, containers
 - **3 material tiers** — regular, elven (green sprites), meteoric steel (dark sprites) with scaling enchantment ranges
-- **9 unique named items** with special abilities:
-  - Amulets of Fire/Frost/Storm/Soul Ward (+75 element resist)
-  - Helm of True Sight (reveals all monsters), Helm of Storms (+50% lightning damage)
-  - Boots of Levitation (trap immune), Elemental Keystone (+50% all resists)
-  - Crown of the Ancients (+10 all stats, +2 HP/MP regen — Surtur drop)
-- **13 special enchantments** with NG+ critical variants (life steal, thorns, regen, speed boost, etc.)
-- **Enchantment glow system** — blue drop-shadow for enchanted, red for cursed (same base sprite)
+
+#### Affix System
+- **20 scaled affixes** — each has a base value that scales with the item's +N enchantment level
+- **Offensive:** Sharpness (+dmg, weapons only), Might (+STR), Vampiric (% heal), Spell Power, Thorns, Fire/Frost/Storm Touched
+- **Defensive:** Hardened (+AC, armor only), Fortitude (+CON), Magic Resistance, Evasion, Vitality (+HP), Regeneration
+- **Utility:** Grace (+DEX), Brilliance (+INT), Swiftness (% extra actions), Arcane Well (+MP), Arcane Mastery (-MP cost + MP regen), Fortune (+gold/XP/drops)
+- **Weighted drops** — Sharpness and Hardened have 3x drop weight on their respective item types
+- **Weapon/armor context** — weapon-only and armor-only affixes filtered during generation
+- **Named items** — items with affixes get suffixes: "of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"
+- **Color-coded rarity** — white (normal), blue (enchanted), orange (legendary/unique), red (cursed), gray (unidentified)
+
+#### 18 Unique Items
+| Item | Slot | Ability |
+|------|------|---------|
+| Amulet of Fire/Frost/Storm/Soul Ward | Amulet | +75% element resist (10% chance: 99%) |
+| Helm of True Sight | Helmet | Reveals monsters on explored tiles |
+| Helm of Storms | Helmet | +75 lightning resist, +50% lightning damage |
+| Boots of Levitation | Boots | Immune to pit/portal traps |
+| Elemental Keystone | Amulet | +50% all resists, trap + poison immune |
+| Crown of the Ancients | Amulet | +10 all stats, +2 HP/MP regen/turn |
+| Ring of Fortune | Ring | Double gold, +25% item drops |
+| Cloak of Shadows | Cloak | Monsters detect 3 tiles later |
+| Belt of the Titan | Belt | +30 CON, carry capacity doubled |
+| Blooddrinker | Weapon | Heals 30% of all damage dealt |
+| Ring of the Archmage | Ring | +30 INT, spells cost 25% less MP |
+| Aegis of the Fallen | Shield | +10 AC, reflect 30% melee damage |
+| Gauntlets of the Forge | Gauntlets | +20 STR, fire attacks +50% |
+| Demonhide Armor | Body | +15 AC, +50 fire/cold resist, 25% thorns |
+| Worldsplitter | Weapon (2H) | Highest base damage in game |
+
+- All uniques always roll +5 minimum enchantment and 2+ random affixes
+- Boss kills guarantee a unique drop (always in NG+, F30+ otherwise)
+- **Enchantment glow system** — blue glow for enchanted, red for cursed, orange for legendary/unique
 - **Cursed items** generate with negative enchantments but can be freely unequipped
 - **Auto-identify** potions and scrolls on pickup
-- **Item stacking** in inventory display
+- **Tab-compare tooltips** — hold Tab while hovering an equippable item to see it side-by-side with your equipped item
 - **Pack enchantment** affects carry capacity (+5kg per level)
-- **All equipment gives AC** — belts, rings, and amulets scale 1/2/3/4 by tier
 - **Stat potions** — permanent +1 to STR/INT/CON/DEX, boosted drop rate from floor 5+
+
+### New Game Plus
+- Affix cap scales: 5 / 7 / 9 / unlimited (+2 per NG cycle)
+- Critical affix chance: 0% / 20% / 30% / 40% (doubled effect)
+- Meteoric enchantment range: +8 / +15 / +20 / +25
+- Unique items scale: min enchant +5/+7/+9/+10, min affixes 2/3/4/5
+- Boss guaranteed unique drops in all NG+ cycles
+- Unique drop rate bonus: +50% / +100% / +150% per NG level
+
+### Cloud Saves
+- **Cross-device sync** — enable cloud saves per slot with a 5-character code
+- **Auto-sync** — every save pushes to server, loading pulls latest
+- **Load by code** — enter a code on any device to download a save
+- PHP backend with rate limiting, save validation, flat-file storage
 
 ### Town
 - **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage, Magic Shop, Junk Store, Temple, Bank
@@ -55,22 +95,20 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Town layout** built with visual map builder tool, exported as exact tile data
 
 ### UI & Polish
-- **Stone Slab button style** — dark stone gradient, gold text, 3D pressed border (inspired by game logo)
+- **Stone Slab button style** — dark stone gradient, gold text, 3D pressed border
 - **Color-coded messages** — combat (orange), important (green), system (grey), normal (light grey)
 - **Bold white numbers** in all chat messages for readability
-- **Rich item tooltips** — effective damage/accuracy/AC with enchantment breakdown, equip slot, floor range, unique abilities
-- **Enchantment glow** on item sprites in inventory, paperdoll, and shop screens
+- **Rich item tooltips** — effective damage/accuracy/AC with enchantment breakdown, scaled affix values, unique abilities
 - **Auto-explore feedback** — messages explain every stop reason (monster spotted, low HP, item found, door, trap, fully explored)
 - **Character creation** — name, gender, 4 attributes with hold-to-repeat buttons, difficulty, starting spell
 - **4 difficulty levels** — Easy, Intermediate, Hard, Impossible
-- **New Game Plus** with scaling difficulty and enhanced loot (meteoric items scale +5 per cycle)
 - **Scoring and leaderboard** persisted to localStorage
 - **18 achievements**
 - **18 synthesized sound effects** via Web Audio API
 - **Responsive layout** — scales to phone, tablet, and desktop
 - **Touch controls** — D-pad and action buttons for mobile play
 - **Click-to-move** with A* pathfinding
-- **Save/load** — 3 slots + auto-save on stairs
+- **Save/load** — 3 slots + auto-save on stairs + cloud sync
 
 ## Controls
 
@@ -86,6 +124,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 | M | Minimap |
 | 1-7 | Quick-cast spell |
 | Tab | Auto-explore (navigates to stairs when done) |
+| Tab (hold) | Compare hovered item with equipped |
 | F1 | Help |
 | F2 | Achievements |
 | F3 | Save game |
@@ -103,6 +142,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - Turn-based game loop: player acts → level-ups → tick effects → monsters act → render
 - Web Audio API for sound synthesis
 - localStorage for saves, leaderboard, and achievements
+- PHP cloud save backend with rate limiting
 - No frameworks, no runtime dependencies
 
 ## Development
@@ -128,7 +168,7 @@ The project includes several browser-based dev tools (gitignored, not deployed):
 
 ## Deployment
 
-Build and copy `dist/` to any static web server. No server runtime required.
+Build and copy `dist/` to any static web server. The cloud save PHP endpoint needs a PHP-capable server.
 
 ```bash
 npx vite build --base /rd/    # For subdirectory deploy
@@ -140,22 +180,23 @@ Currently deployed via SFTP to `dev.jdayers.com/rd/`.
 
 ```
 src/
-  core/           Game state, actions, game loop, save/load with migrations
-  data/           Item templates, monster data, spells, enchantments, traps
+  core/           Game state, actions, game loop, save/load, cloud sync
+  data/           Item templates, monster data, spells, affixes, traps
   systems/
-    combat/       Melee combat, armor, damage, thorns reflect
-    character/    Derived stats (AC, resistances, unique items), leveling, spell learning
+    combat/       Melee combat, armor, damage, vampiric heal, thorns, evasion
+    character/    Derived stats (AC, resistances, affix bonuses, uniques), leveling
     dungeon/      Procedural generation, tilesets, boss floors, decorative objects
     inventory/    Equip, pickup, drop, use items, display names, item glow
-    items/        Loot generation — enchantments, specials, unique items, tier weighting
+    items/        Loot generation — affixes, scaling, unique items, tier weighting
     monsters/     AI (5 types), spawning, flee-once mechanic
     spells/       All 30 spell implementations including resist buffs
     town/         Town map (exact tile data), shops, services (temple, sage, bank, inn)
   ui/             All screens — splash, creation, inventory, shop, spells, services, etc.
   rendering/      Map renderer (3-layer + building overlays + decor), HUD, spell animations
   input/          Keyboard + touch input, auto-explore, spell targeting
-  utils/          FOV, pathfinding, enchantment helpers
+  utils/          FOV, pathfinding, affix helpers
 public/
+  api/            Cloud save PHP endpoint
   assets/         Sprite sheets (PNG) — tiles, items, monsters, buildings, spells
   css/sprites/    CSS classes for all sprites
 ```

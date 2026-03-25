@@ -3,7 +3,7 @@ import { processAction } from "./actions";
 import { processAllMonsterTurns } from "../systems/monsters/ai";
 import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
-import { hasEnchant, enchantMult } from "../utils/Enchants";
+import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../utils/Enchants";
 import { ITEM_BY_ID } from "../data/items";
 
 export type RenderCallback = (state: GameState) => void;
@@ -47,12 +47,10 @@ export class GameLoop {
       newState = this.tickActiveEffects(newState);
     }
 
-    // 4. Process monster turns (when in game screen, a turn-consuming action happened, and not in town)
-    // Speed boost: skip monster turn every 3rd turn if hero has speed-boost equipped
-    const hasSpeedBoost = hasEnchant(newState.hero.equipment, "speed-boost");
-    const speedMult = enchantMult(newState.hero.equipment, "speed-boost");
-    const skipModulo = speedMult >= 2 ? 2 : 3; // critical: skip every 2nd turn instead of 3rd
-    const skipMonsters = hasSpeedBoost && newState.turn % skipModulo === 0;
+    // 4. Process monster turns
+    // Swiftness: chance-based extra action (skip monster turn)
+    const swiftPct = equipAffixTotal(newState.hero.equipment, "swiftness");
+    const skipMonsters = swiftPct > 0 && Math.random() * 100 < swiftPct;
     if (
       newState.screen === "game" &&
       newState.turn > this.state.turn &&
@@ -78,19 +76,20 @@ export class GameLoop {
     let hero = { ...state.hero };
     let messages = [...state.messages];
 
-    // Equipment regen enchantments
-    const hasRegenHp = hasEnchant(hero.equipment, "regen-hp");
-    const hasRegenMp = hasEnchant(hero.equipment, "regen-mp");
-    const regenHpMult = enchantMult(hero.equipment, "regen-hp");
-    const regenMpMult = enchantMult(hero.equipment, "regen-mp");
-    if (hasRegenHp && state.turn % 2 === 0 && hero.hp < hero.maxHp) {
-      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + regenHpMult) };
-    }
-    if (hasRegenMp && state.turn % 3 === 0 && hero.mp < hero.maxMp) {
-      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + regenMpMult) };
+    // ── Regeneration affix (scaled) ─────────────────────────
+    const regenHp = equipAffixTotal(hero.equipment, "regeneration");
+    if (regenHp > 0 && state.turn % 2 === 0 && hero.hp < hero.maxHp) {
+      const heal = Math.max(1, Math.round(regenHp));
+      hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
     }
 
-    // Crown of the Ancients: +2 HP and +2 MP per turn
+    // ── Arcane Mastery MP regen (secondary value) ───────────
+    if (hasEnchant(hero.equipment, "arcane-mastery") && state.turn % 3 === 0 && hero.mp < hero.maxMp) {
+      const mpRegen = Math.max(1, Math.round(equipAffixTotal2(hero.equipment, "arcane-mastery")));
+      hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + mpRegen) };
+    }
+
+    // ── Crown of the Ancients: +2 HP and +2 MP per turn ────
     for (const eq of Object.values(hero.equipment)) {
       if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'crown-power') {
         if (hero.hp < hero.maxHp) hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + 2) };
@@ -107,7 +106,7 @@ export class GameLoop {
       (e) => !remaining.find((r) => r.id === e.id),
     );
 
-    // Poison damage tick (before expiry check — poison hurts while active)
+    // Poison damage tick
     const poisoned = hero.activeEffects.find(
       (e) => e.id === "poisoned" && e.turnsRemaining > 1,
     );
@@ -134,33 +133,14 @@ export class GameLoop {
         },
       ];
 
-      // Reverse effect-specific bonuses
       if (e.id === "shield") {
         hero = { ...hero, armorValue: Math.max(0, hero.armorValue - 4) };
       } else if (e.id === "resist-cold") {
-        hero = {
-          ...hero,
-          resistances: {
-            ...hero.resistances,
-            cold: Math.max(0, hero.resistances.cold - 50),
-          },
-        };
+        hero = { ...hero, resistances: { ...hero.resistances, cold: Math.max(0, hero.resistances.cold - 50) } };
       } else if (e.id === "resist-fire") {
-        hero = {
-          ...hero,
-          resistances: {
-            ...hero.resistances,
-            fire: Math.max(0, hero.resistances.fire - 50),
-          },
-        };
+        hero = { ...hero, resistances: { ...hero.resistances, fire: Math.max(0, hero.resistances.fire - 50) } };
       } else if (e.id === "resist-lightning") {
-        hero = {
-          ...hero,
-          resistances: {
-            ...hero.resistances,
-            lightning: Math.max(0, hero.resistances.lightning - 50),
-          },
-        };
+        hero = { ...hero, resistances: { ...hero.resistances, lightning: Math.max(0, hero.resistances.lightning - 50) } };
       }
     }
 

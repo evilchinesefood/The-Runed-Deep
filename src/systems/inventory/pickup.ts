@@ -43,7 +43,11 @@ export function processPickupItem(state: GameState): GameState {
   const basePackWeight =
     packItem?.properties["weightCapacity"] ?? packTpl?.weightCapacity ?? 0;
   const enchBonus = packItem ? packItem.enchantment * 5000 : 0;
-  const packCap = BASE_CARRY + Math.max(0, basePackWeight + enchBonus);
+  let packCap = BASE_CARRY + Math.max(0, basePackWeight + enchBonus);
+  // Belt of the Titan: double carry capacity
+  for (const eq of Object.values(hero.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'titan-power') { packCap *= 2; break; }
+  }
 
   // Track picked up item IDs
   const pickedIds = new Set<string>();
