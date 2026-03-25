@@ -26,8 +26,12 @@ function calcViewportTiles(): { x: number; y: number } {
   let tilesX = Math.floor(Math.min(w - 16, 672) / effectiveTile);
   if (tilesX % 2 === 0) tilesX--;
   tilesX = Math.max(9, Math.min(21, tilesX));
+
+  // Portrait mobile: reserve more space for touch controls + HUD
+  const isPortrait = w <= 480 && h > w;
   const hudHeight = w <= 480 ? 160 : 220;
-  let tilesY = Math.floor((h - hudHeight) / effectiveTile);
+  const touchPadding = isPortrait ? Math.floor(h * 0.25) : 0;
+  let tilesY = Math.floor((h - hudHeight - touchPadding) / effectiveTile);
   if (tilesY % 2 === 0) tilesY--;
   tilesY = Math.max(7, Math.min(15, tilesY));
   return { x: tilesX, y: tilesY };

@@ -155,7 +155,21 @@ function processContextAction(state: GameState): GameState {
     }
   }
 
-  // Nothing to do — E doesn't wait, only Q does
+  // Adjacent monster → attack it (move toward it to trigger combat)
+  for (const m of floor.monsters) {
+    const dx = m.position.x - pos.x;
+    const dy = m.position.y - pos.y;
+    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && !(dx === 0 && dy === 0)) {
+      const dirMap: Record<string, Direction> = {
+        "0,-1": "N", "1,-1": "NE", "1,0": "E", "1,1": "SE",
+        "0,1": "S", "-1,1": "SW", "-1,0": "W", "-1,-1": "NW",
+      };
+      const dir = dirMap[`${dx},${dy}`];
+      if (dir) return processMove(state, dir);
+    }
+  }
+
+  // Nothing to do
   return addMessage(state, "Nothing to interact with here.", "system");
 }
 
