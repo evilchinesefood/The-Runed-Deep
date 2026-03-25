@@ -15,7 +15,7 @@
 // Floor  7: Carrion Creeper, Goblin
 // Floor  8: Giant Scorpion
 // Floor  9: Walking Corpse, Huge Lizard
-// Floor 10: Green Slime
+// Floor 10: Red Slime
 // Floor 11: Hobgoblin, Shadow
 // Floor 12: Huge Ogre
 // Floor 13: Gray Wolf, Bandit
@@ -180,7 +180,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
 
   // ── Floor 10 ────────────────────────────────────────────
   {
-    id: 'green-slime', name: 'Green Slime', sprite: 'green-slime',
+    id: 'green-slime', name: 'Red Slime', sprite: 'green-slime',
     hp: [22, 35], damage: [4, 9], speed: 0.5, xpValue: 20, armor: 0,
     ai: 'melee', abilities: [], resistances: r({ acid: 100 }),
     unlockFloor: 10, boss: false,

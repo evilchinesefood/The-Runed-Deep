@@ -21,6 +21,7 @@ import {
   getDisplayName,
   getDisplaySprite,
   getItemGlow,
+  itemNameColor,
 } from "../systems/inventory/display-name";
 import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
 
@@ -250,7 +251,7 @@ function buildPanel(
         btnLabel(item),
         disabled,
         () => onAction(item.id),
-        isSold ? "#7a8a5a" : undefined,
+        isSold ? "#7a8a5a" : itemNameColor(item),
       );
       list.appendChild(row);
     }

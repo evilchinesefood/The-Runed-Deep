@@ -95,6 +95,7 @@ input.setPathClickCallback((target) => {
 
 // Auto-explore: find nearest unexplored tile and walk toward it
 let autoExploring = false;
+let autoSearchOnArrival = false;
 
 function aeMsg(text: string): void {
   const state = gameLoop.getState();
@@ -107,6 +108,7 @@ function aeMsg(text: string): void {
 input.setAutoExploreCallback(() => {
   if (autoExploring) {
     autoExploring = false;
+    autoSearchOnArrival = false;
     autoPath = [];
     return;
   }
@@ -194,12 +196,41 @@ function exploreNext(): void {
         }
       }
     }
-    if (!bestTarget) {
-      aeMsg("Auto-explore stopped — floor fully explored.");
-      autoExploring = false;
-      return;
+    if (bestTarget) {
+      aeMsg("Floor explored — heading to stairs.");
+    } else {
+      // No stairs found — look for secret doors adjacent to explored walkable tiles
+      let secretTarget: { x: number; y: number } | null = null;
+      let secretDist = Infinity;
+      for (let y = 0; y < floor.height; y++) {
+        for (let x = 0; x < floor.width; x++) {
+          if (floor.tiles[y][x].type !== 'door-secret') continue;
+          // Find nearest explored walkable tile adjacent to this secret door
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
+              if (!floor.tiles[ny][nx].walkable || !floor.explored[ny][nx]) continue;
+              const dist = Math.abs(nx - hero.x) + Math.abs(ny - hero.y);
+              if (dist < secretDist) {
+                secretDist = dist;
+                secretTarget = { x: nx, y: ny };
+              }
+            }
+          }
+        }
+      }
+      if (secretTarget) {
+        bestTarget = secretTarget;
+        autoSearchOnArrival = true;
+        aeMsg("Searching for hidden passages...");
+      } else {
+        aeMsg("Auto-explore stopped — floor fully explored.");
+        autoExploring = false;
+        return;
+      }
     }
-    aeMsg("Floor explored — heading to stairs.");
   }
 
   const path = findPath(floor, hero, bestTarget);
@@ -321,7 +352,13 @@ function stepAutoPathExplore(): void {
     if (autoPath.length > 0) {
       autoWalkTimer = window.setTimeout(stepAutoPathExplore, 80);
     } else {
-      // Path exhausted, find next unexplored target
+      // Path exhausted — if we were heading to a secret door, search it
+      if (autoSearchOnArrival) {
+        autoSearchOnArrival = false;
+        gameLoop.handleAction({ type: "search" });
+        playPendingAnimations();
+      }
+      // Find next unexplored target
       setTimeout(exploreNext, 100);
     }
   } else {
@@ -427,6 +464,7 @@ input.setHandler((action) => {
   if ((autoPath.length > 0 || autoExploring) && action.type === "move") {
     autoPath = [];
     autoExploring = false;
+    autoSearchOnArrival = false;
     if (autoWalkTimer) {
       clearTimeout(autoWalkTimer);
       autoWalkTimer = null;
@@ -447,6 +485,7 @@ touchControls.setHandler((action) => {
 touchControls.setAutoExploreHandler(() => {
   if (autoExploring) {
     autoExploring = false;
+    autoSearchOnArrival = false;
     autoPath = [];
     return;
   }
@@ -878,16 +917,20 @@ function switchScreen(state: GameState): void {
       let invSelectedIdx = 0;
       let invScrollTop = 0;
       let currentInvScreen: ReturnType<typeof createInventoryScreen> | null = null;
-      const renderInventory = () => {
-        // Save position from previous screen before destroying it
+
+      const saveInvPosition = () => {
         if (currentInvScreen) {
           invSelectedIdx = currentInvScreen.getSelectedIdx();
           invScrollTop = currentInvScreen.getScrollTop();
         }
+      };
+
+      const renderInventory = () => {
         if (invCleanup) invCleanup();
         const invScreen = createInventoryScreen(
           gameLoop.getState(),
           (action) => {
+            saveInvPosition(); // save BEFORE destroying DOM
             gameLoop.handleAction(action);
             root.replaceChildren();
             renderInventory();
@@ -901,7 +944,6 @@ function switchScreen(state: GameState): void {
           if (invCleanup) invCleanup();
         });
         root.replaceChildren(invScreen);
-        // Restore scroll position after DOM update
         requestAnimationFrame(() => {
           const panel = invScreen.querySelector('[data-inv-panel]') as HTMLElement;
           if (panel && invScrollTop > 0) panel.scrollTop = invScrollTop;
@@ -957,44 +999,33 @@ function switchScreen(state: GameState): void {
     case "shop": {
       input.setEnabled(false);
       const shopId = gameLoop.getState().activeBuildingId;
-      const renderShop = () => {
-        const currentState = gameLoop.getState();
-        const shopScreen = createShopScreen(
-          currentState,
-          shopId,
-          (newState) => {
-            gameLoop.setState(newState);
-            root.replaceChildren();
-            renderShop();
-          },
-          () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
-        );
-        addScreenCleanup(shopScreen.cleanup);
-        root.replaceChildren(shopScreen);
-      };
-      renderShop();
+      const shopScreen = createShopScreen(
+        state,
+        shopId,
+        (newState) => {
+          gameLoop.setState(newState);
+          // Shop's internal render() handles the visual update + scroll restore
+        },
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+      );
+      addScreenCleanup(shopScreen.cleanup);
+      root.replaceChildren(shopScreen);
       break;
     }
 
     case "service": {
       input.setEnabled(false);
       const buildingId = gameLoop.getState().activeBuildingId;
-      const renderService = () => {
-        const currentState = gameLoop.getState();
-        const svcScreen = createServiceScreen(
-          currentState,
-          buildingId,
-          (newState) => {
-            gameLoop.setState(newState);
-            root.replaceChildren();
-            renderService();
-          },
-          () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
-        );
-        addScreenCleanup(svcScreen.cleanup);
-        root.replaceChildren(svcScreen);
-      };
-      renderService();
+      const svcScreen = createServiceScreen(
+        state,
+        buildingId,
+        (newState) => {
+          gameLoop.setState(newState);
+        },
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+      );
+      addScreenCleanup(svcScreen.cleanup);
+      root.replaceChildren(svcScreen);
       break;
     }
 

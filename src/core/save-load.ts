@@ -1,5 +1,6 @@
 import type { GameState } from "./types";
 import { syncItemIdCounter } from "../systems/items/loot";
+import { getCloudCode, pushSave } from "./CloudSave";
 
 const SAVE_KEY_PREFIX = "rd-save-";
 const MAX_SLOTS = 3;
@@ -35,6 +36,11 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
 
     const json = JSON.stringify(saveData);
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
+
+    // Cloud sync — fire and forget
+    const code = getCloudCode(slot);
+    if (code) pushSave(code, JSON.stringify(saveState));
+
     return true;
   } catch (e) {
     console.error("Failed to save game:", e);

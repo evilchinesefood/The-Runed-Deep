@@ -4,6 +4,7 @@ import {
   getDisplayName,
   getDisplaySprite,
   getItemGlow,
+  itemNameColor,
 } from "../systems/inventory/display-name";
 import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
 import { createScreen, createPanel, createTitleBar, el } from "./Theme";
@@ -23,12 +24,6 @@ function sectionHeader(text: string): HTMLElement {
   );
 }
 
-function itemNameColor(item: Item): string {
-  if (!item.identified) return "#888"; // lighter gray for unidentified
-  if (item.cursed) return "#f44"; // red for cursed
-  if (item.enchantment > 0) return "#4af"; // blue for enchanted
-  return "#fff"; // white for normal identified
-}
 
 function itemDisplayLabel(item: Item): string {
   const name = getDisplayName(item);
@@ -138,7 +133,7 @@ export function createInventoryScreen(
   initialSelectedIdx: number = 0,
 ): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
   const h = state.hero;
-  let selectedIdx = initialSelectedIdx;
+  let selectedIdx = Math.min(initialSelectedIdx, Math.max(0, h.inventory.length - 1));
 
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
