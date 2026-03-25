@@ -45,6 +45,13 @@ import { createAchievementsScreen } from "./ui/AchievementsScreen";
 injectTheme();
 setOnUnlockCallback(showAchievementToast);
 
+// Prevent iOS Safari rubber-band bounce and double-tap zoom
+document.addEventListener('touchmove', (e) => {
+  if (!(e.target as HTMLElement)?.closest?.('.screen-scrollable, .panel, [data-shop-list]')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 const root = document.getElementById("game-root")!;
 
 let mapRenderer: MapRenderer | null = null;
@@ -436,6 +443,15 @@ touchControls.setHandler((action) => {
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
   playPendingAnimations();
+});
+touchControls.setAutoExploreHandler(() => {
+  if (autoExploring) {
+    autoExploring = false;
+    autoPath = [];
+    return;
+  }
+  autoExploring = true;
+  exploreNext();
 });
 
 function playPendingAnimations(): void {
@@ -859,7 +875,15 @@ function switchScreen(state: GameState): void {
     case "inventory": {
       input.setEnabled(false);
       let invCleanup: (() => void) | null = null;
+      let invSelectedIdx = 0;
+      let invScrollTop = 0;
+      let currentInvScreen: ReturnType<typeof createInventoryScreen> | null = null;
       const renderInventory = () => {
+        // Save position from previous screen before destroying it
+        if (currentInvScreen) {
+          invSelectedIdx = currentInvScreen.getSelectedIdx();
+          invScrollTop = currentInvScreen.getScrollTop();
+        }
         if (invCleanup) invCleanup();
         const invScreen = createInventoryScreen(
           gameLoop.getState(),
@@ -869,12 +893,19 @@ function switchScreen(state: GameState): void {
             renderInventory();
           },
           () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+          invSelectedIdx,
         );
+        currentInvScreen = invScreen;
         invCleanup = invScreen.cleanup;
         addScreenCleanup(() => {
           if (invCleanup) invCleanup();
         });
         root.replaceChildren(invScreen);
+        // Restore scroll position after DOM update
+        requestAnimationFrame(() => {
+          const panel = invScreen.querySelector('[data-inv-panel]') as HTMLElement;
+          if (panel && invScrollTop > 0) panel.scrollTop = invScrollTop;
+        });
       };
       renderInventory();
       break;

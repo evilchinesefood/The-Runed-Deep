@@ -135,9 +135,10 @@ export function createInventoryScreen(
   state: GameState,
   onAction: (action: GameAction) => void,
   onClose: () => void,
-): HTMLElement & { cleanup: () => void } {
+  initialSelectedIdx: number = 0,
+): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
   const h = state.hero;
-  let selectedIdx = 0;
+  let selectedIdx = initialSelectedIdx;
 
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
@@ -293,6 +294,7 @@ export function createInventoryScreen(
 
   // ── Inventory panel ────────────────────────────────────────
   const invPanel = createPanel("Inventory");
+  invPanel.setAttribute('data-inv-panel', '1');
   invPanel.style.maxHeight = "clamp(200px, 40vh, 300px)";
   invPanel.style.overflowY = "auto";
 
@@ -494,7 +496,10 @@ export function createInventoryScreen(
       });
       if (tpl?.equipSlot) {
         actions.appendChild(
-          btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })),
+          btn("[E]", () => {
+            console.log('[INV-E] equip clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId, 'tpl.equipSlot:', tpl?.equipSlot);
+            onAction({ type: "equipItem", itemId: item.id });
+          }),
         );
       }
       if (
@@ -504,11 +509,17 @@ export function createInventoryScreen(
         item.category === "wand"
       ) {
         actions.appendChild(
-          btn("[U]", () => onAction({ type: "useItem", itemId: item.id })),
+          btn("[U]", () => {
+            console.log('[INV-U] use clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId);
+            onAction({ type: "useItem", itemId: item.id });
+          }),
         );
       }
       actions.appendChild(
-        btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })),
+        btn("[D]", () => {
+          console.log('[INV-D] drop clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId);
+          onAction({ type: "dropItem", itemId: item.id });
+        }),
       );
       row.appendChild(actions);
 
@@ -597,6 +608,7 @@ export function createInventoryScreen(
 
     if (e.code === "KeyE") {
       const tpl = ITEM_BY_ID[item.templateId];
+      console.log('[INV-KEY-E] selectedIdx:', selectedIdx, 'item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId, 'equipSlot:', tpl?.equipSlot ?? 'NONE');
       if (tpl?.equipSlot) {
         e.preventDefault();
         onAction({ type: "equipItem", itemId: item.id });
@@ -627,6 +639,9 @@ export function createInventoryScreen(
     document.removeEventListener("keydown", keyHandler);
     hideItemTooltip();
   };
-  (screen as HTMLElement & { cleanup: () => void }).cleanup = cleanup;
-  return screen as HTMLElement & { cleanup: () => void };
+  const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number };
+  result.cleanup = cleanup;
+  result.getSelectedIdx = () => selectedIdx;
+  result.getScrollTop = () => invPanel.scrollTop;
+  return result;
 }

@@ -9,6 +9,7 @@ import { recomputeDerivedStats } from "../character/derived-stats";
 import { ITEM_BY_ID } from "../../data/items";
 import { castSpell } from "../spells/casting";
 import { teleportToTown } from "../../core/actions";
+import { showGameToast } from "../../ui/GameToast";
 
 export function processUseItem(state: GameState, itemId: string): GameState {
   const idx = state.hero.inventory.findIndex((i) => i.id === itemId);
@@ -72,6 +73,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
+    showGameToast('+1 Strength!', 'success');
     messages.push({
       text: "You feel stronger! (+1 Strength)",
       severity: "important",
@@ -86,6 +88,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
+    showGameToast('+1 Intelligence!', 'success');
     messages.push({
       text: "You feel smarter! (+1 Intelligence)",
       severity: "important",
@@ -100,6 +103,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
+    showGameToast('+1 Constitution!', 'success');
     messages.push({
       text: "You feel healthier! (+1 Constitution)",
       severity: "important",
@@ -114,6 +118,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
+    showGameToast('+1 Dexterity!', 'success');
     messages.push({
       text: "You feel more agile! (+1 Dexterity)",
       severity: "important",
@@ -143,6 +148,7 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
 
   if (item.templateId === "scroll-identify") {
     hero = identifyFirstUnknown(hero, messages, state.turn);
+    showGameToast('Scroll of Identify used', 'info');
   } else if (item.templateId === "scroll-teleport") {
     const result = teleportHero(state, hero, messages);
     hero = result.hero;
@@ -304,6 +310,7 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     },
     idx,
   );
+  showGameToast(`Learned ${spellName}!`, 'success');
   return {
     ...state,
     hero,

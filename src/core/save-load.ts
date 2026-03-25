@@ -1,4 +1,5 @@
 import type { GameState } from "./types";
+import { syncItemIdCounter } from "../systems/items/loot";
 
 const SAVE_KEY_PREFIX = "rd-save-";
 const MAX_SLOTS = 3;
@@ -75,6 +76,9 @@ export function loadGame(slot: number = 1): GameState | null {
         (m as any).hasFled ??= false;
       }
     }
+
+    // Ensure new item IDs don't collide with loaded items
+    syncItemIdCounter(state);
 
     return state;
   } catch (e) {

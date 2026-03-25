@@ -263,11 +263,13 @@ export class MapRenderer {
           tile.type === "door-locked" ||
           tile.type === "building" ||
           tile.type === "decor" ||
+          tile.sprite === "sign" ||
           (tile.type === "trap" && tile.trapRevealed);
 
         if (isOverlayTile) {
+          const inTown = state.currentDungeon === "town";
           const underlaySprite =
-            tile.type === "building" ? "grass" : isLit ? "lit-dgn" : "dark-dgn";
+            tile.type === "building" || inTown ? "grass" : isLit ? "lit-dgn" : "dark-dgn";
           cell.floor.className = underlaySprite;
           cell.floor.style.opacity = opacity;
           // Buildings render via overlay system, not tile grid

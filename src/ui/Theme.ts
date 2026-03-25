@@ -76,6 +76,9 @@ export function injectTheme(): void {
       color: var(--text);
       overflow-x: hidden;
       min-height: 100vh;
+      min-height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
     }
 
     #game-root {
@@ -83,7 +86,12 @@ export function injectTheme(): void {
       flex-direction: column;
       align-items: center;
       height: 100vh;
+      height: 100dvh;
       overflow-y: auto;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
     }
 
     /* Scrollbar styling */
@@ -264,10 +272,11 @@ export function injectTheme(): void {
         --fs-md: 13px;
         --fs-sm: 11px;
       }
-      .btn { padding: 8px 14px; min-height: 36px; }
-      .btn-sm { padding: 6px 10px; min-height: 32px; font-size: 12px; }
-      .btn-primary { padding: 12px 24px; }
+      .btn { padding: 10px 16px; min-height: 40px; }
+      .btn-sm { padding: 8px 12px; min-height: 34px; font-size: 12px; }
+      .btn-primary { padding: 14px 28px; }
       .panel { padding: var(--sp-sm); }
+      .screen-scrollable { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
     }
 
     /* Responsive — small phone */
@@ -279,7 +288,12 @@ export function injectTheme(): void {
         --fs-lg: 13px;
       }
       .screen { padding: var(--sp-sm); }
-      .btn { padding: 8px 10px; font-size: 12px; }
+      .btn { padding: 8px 12px; font-size: 12px; }
+    }
+
+    /* iOS standalone (Add to Home Screen) */
+    @media (display-mode: standalone) {
+      body { padding-top: env(safe-area-inset-top, 0px); }
     }
   `;
   document.head.appendChild(style);

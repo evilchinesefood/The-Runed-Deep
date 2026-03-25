@@ -6,6 +6,7 @@ import type { GameState, Item } from '../../core/types';
 import { ALL_ITEM_TEMPLATES, getItemsForDepth } from '../../data/items';
 import { createItemFromTemplate } from '../items/loot';
 import { trackGoldSpent } from '../Achievements';
+import { getDisplayName } from '../inventory/display-name';
 
 export interface ShopDef {
   id: string;
@@ -19,8 +20,8 @@ export interface ShopDef {
 export const SHOP_DEFS: Record<string, ShopDef> = {
   'weapon-shop':   { id: 'weapon-shop',   name: 'Weapon Shop',     categories: ['weapon'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
   'armor-shop':    { id: 'armor-shop',    name: 'Armor Shop',      categories: ['armor','shield','helmet','cloak','gauntlets','boots','belt'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
-  'general-store': { id: 'general-store', name: 'General Store',   categories: ['potion','scroll','ring','amulet','misc','container'], buyMult: 1.0, sellOnCat: 0.5, sellOffCat: 0.35 },
-  'magic-shop':    { id: 'magic-shop',    name: 'Magic Shop',      categories: ['spellbook','wand','staff'], buyMult: 1.2, sellOnCat: 0.55, sellOffCat: 0.25 },
+  'general-store': { id: 'general-store', name: 'General Store',   categories: ['potion','ring','amulet','misc','container'], buyMult: 1.0, sellOnCat: 0.5, sellOffCat: 0.35 },
+  'magic-shop':    { id: 'magic-shop',    name: 'Magic Shop',      categories: ['spellbook','wand','staff','scroll'], buyMult: 1.2, sellOnCat: 0.55, sellOffCat: 0.25 },
   'junk-store':    { id: 'junk-store',    name: "Olaf's Junk Store", categories: [], buyMult: 0.8, sellOnCat: 0.4, sellOffCat: 0.4 },
 };
 
@@ -48,7 +49,10 @@ export function initShopInventory(shopId: string, depth: number): Item[] {
   if (!shop) return [];
 
   const count = 8 + Math.floor(Math.random() * 5); // 8-12
-  const candidates = getItemsForDepth(depth).filter(t => shop.categories.length === 0 || shop.categories.includes(t.category));
+  // Filter to shop categories, exclude worthless/broken items (value <= 5)
+  const candidates = getItemsForDepth(depth).filter(t =>
+    (shop.categories.length === 0 || shop.categories.includes(t.category)) && t.value > 5
+  );
 
   // Fallback for junk store — use depth-1 everything
   const pool = candidates.length > 0 ? candidates : ALL_ITEM_TEMPLATES.filter(t => t.depthMin === 1);
@@ -78,6 +82,7 @@ function addMsg(state: GameState, text: string, severity: 'normal' | 'important'
 export function buyItem(state: GameState, shopId: string, itemId: string): GameState {
   const shopInv = state.town.shopInventories[shopId] ?? [];
   const idx = shopInv.findIndex(i => i.id === itemId);
+  console.log('[BUY] shopId:', shopId, 'itemId:', itemId, 'found:', idx >= 0 ? `${shopInv[idx].name} (${shopInv[idx].templateId})` : 'NOT FOUND');
   if (idx === -1) return addMsg(state, 'Item not found.', 'system');
 
   const item = shopInv[idx];
@@ -105,6 +110,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
 
 export function sellItem(state: GameState, shopId: string, itemId: string): GameState {
   const idx = state.hero.inventory.findIndex(i => i.id === itemId);
+  console.log('[SELL] shopId:', shopId, 'itemId:', itemId, 'found:', idx >= 0 ? `${state.hero.inventory[idx].name} (${state.hero.inventory[idx].templateId})` : 'NOT FOUND');
   if (idx === -1) return addMsg(state, 'Item not found.', 'system');
 
   const item = state.hero.inventory[idx];
@@ -122,5 +128,5 @@ export function sellItem(state: GameState, shopId: string, itemId: string): Game
       ...state.town,
       shopInventories: { ...state.town.shopInventories, [shopId]: [...shopInv, item] },
     },
-  }, `You sell ${item.name} for ${price} gold.`);
+  }, `You sell ${getDisplayName(item)} for ${price} gold.`);
 }

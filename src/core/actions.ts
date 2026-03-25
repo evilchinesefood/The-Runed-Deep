@@ -36,6 +36,7 @@ import {
 import { hasEnchant } from "../utils/Enchants";
 import { ITEM_BY_ID } from "../data/items";
 import { TRAP_DATA } from "../data/Traps";
+import { getDisplayName } from "../systems/inventory/display-name";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N: { x: 0, y: -1 },
@@ -322,7 +323,7 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   if (nonGoldItems.length === 1) {
     messages.push({
-      text: `You see ${nonGoldItems[0].item.name} on the ground. (G to pick up)`,
+      text: `You see ${getDisplayName(nonGoldItems[0].item)} on the ground. (G to pick up)`,
       severity: "normal" as const,
       turn: state.turn + 1,
     });

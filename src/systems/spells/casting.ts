@@ -953,7 +953,7 @@ function resolveLight(state: GameState): GameState {
   const py = state.hero.position.y;
 
   // Light player tile (floor and trap tiles — not walls)
-  const canLight = (t: string) => t === "floor" || t === "trap";
+  const canLight = (t: string) => t === "floor" || t === "trap" || t === "decor" || t === "stairs-up" || t === "stairs-down";
   if (newFloor.tiles[py]?.[px] && canLight(newFloor.tiles[py][px].type)) {
     newFloor.lit[py][px] = true;
   }

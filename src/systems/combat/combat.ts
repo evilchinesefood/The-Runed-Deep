@@ -18,6 +18,14 @@ import { getDisplayName } from "../inventory/display-name";
 // Blood splatters
 // ============================================================
 
+/** Check if a tile can receive blood or dropped items */
+function canPlaceOnTile(floor: Floor, x: number, y: number): boolean {
+  const tile = floor.tiles[y]?.[x];
+  if (!tile) return false;
+  const t = tile.type;
+  return t === "floor" || t === "trap" || t === "path" || t === "grass";
+}
+
 /** Add a blood decal for a monster — only once per monster */
 function maybeAddMonsterBlood(
   floor: Floor,
@@ -27,7 +35,7 @@ function maybeAddMonsterBlood(
   if (monster.bled) return floor;
   if (monster.hp > monster.maxHp * 0.25 && monster.hp > 0) return floor;
   if (Math.random() > 0.75) return floor;
-  // Mark monster as having bled
+  if (!canPlaceOnTile(floor, monster.position.x, monster.position.y)) return floor;
   const monsters = [...floor.monsters];
   monsters[monsterIndex] = { ...monsters[monsterIndex], bled: true };
   return {
@@ -46,6 +54,7 @@ function maybeAddPlayerBlood(
 ): Floor {
   if (hp > maxHp * 0.25) return floor;
   if (Math.random() > 0.75) return floor;
+  if (!canPlaceOnTile(floor, pos.x, pos.y)) return floor;
   if (floor.decals.some((d) => d.x === pos.x && d.y === pos.y)) return floor;
   return { ...floor, decals: [...floor.decals, { x: pos.x, y: pos.y }] };
 }
@@ -228,8 +237,8 @@ export function playerAttacksMonster(
 
     let newFloor: Floor = { ...floor, monsters: newMonsters, items: newItems };
     // Blood on death (always)
-    // Blood on death (always, monster is already removed from array so just add decal)
-    if (Math.random() < 0.75) {
+    // Blood on death — skip decor/doors/stairs
+    if (Math.random() < 0.75 && canPlaceOnTile(newFloor, monster.position.x, monster.position.y)) {
       newFloor = {
         ...newFloor,
         decals: [
@@ -400,7 +409,7 @@ export function monsterAttacksPlayer(
             });
           }
           let newFloor2 = { ...floor2, monsters: newMonsters, items: newItems };
-          if (Math.random() < 0.75) {
+          if (Math.random() < 0.75 && canPlaceOnTile(newFloor2, m.position.x, m.position.y)) {
             newFloor2 = {
               ...newFloor2,
               decals: [

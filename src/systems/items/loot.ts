@@ -10,7 +10,36 @@ import {
 } from "../../data/items";
 import { rollSpecialEnchantments } from "../../data/Enchantments";
 
-let nextItemId = 1;
+let nextItemId = Date.now();
+
+/** Ensure nextItemId is above all existing item IDs in a loaded save */
+export function syncItemIdCounter(state: import('../../core/types').GameState): void {
+  let maxId = 0;
+  const extract = (id: string) => {
+    const m = id.match(/^item-(\d+)$/);
+    if (m) maxId = Math.max(maxId, parseInt(m[1]));
+  };
+  // Scan hero inventory + equipment
+  for (const item of state.hero.inventory) extract(item.id);
+  for (const eq of Object.values(state.hero.equipment)) {
+    if (eq) extract((eq as any).id);
+  }
+  // Scan floor items
+  for (const floor of Object.values(state.floors)) {
+    for (const placed of (floor as any).items ?? []) {
+      if (placed?.item?.id) extract(placed.item.id);
+    }
+  }
+  // Scan shop inventories
+  for (const items of Object.values(state.town.shopInventories)) {
+    for (const item of items as any[]) {
+      if (item?.id) extract(item.id);
+    }
+  }
+  if (maxId >= nextItemId) {
+    nextItemId = maxId + 1;
+  }
+}
 
 /**
  * Generate a random loot drop for a killed monster.

@@ -260,10 +260,24 @@ export class HudRenderer {
       const baseColor = colors[m.severity] ?? '#ccc';
       const line = document.createElement('div');
       line.style.margin = '1px 0';
-      // Highlight numbers in the text with a brighter color
-      const parts = m.text.split(/(\d+)/g);
+      // Split on: enchanted items (+N), cursed items (-N), plain numbers, and item suffixes
+      const parts = m.text.split(/(\S+ \+\d+|\S+ -\d+|\d+)/g);
       for (const part of parts) {
-        if (/^\d+$/.test(part)) {
+        if (/\S+ \+\d+$/.test(part)) {
+          // Enchanted item name — blue
+          const span = document.createElement('span');
+          span.textContent = part;
+          span.style.color = '#4af';
+          span.style.fontWeight = 'bold';
+          line.appendChild(span);
+        } else if (/\S+ -\d+$/.test(part)) {
+          // Cursed item name — red
+          const span = document.createElement('span');
+          span.textContent = part;
+          span.style.color = '#f44';
+          span.style.fontWeight = 'bold';
+          line.appendChild(span);
+        } else if (/^\d+$/.test(part)) {
           const num = document.createElement('span');
           num.textContent = part;
           num.style.color = '#fff';
