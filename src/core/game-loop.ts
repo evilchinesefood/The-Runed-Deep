@@ -5,7 +5,7 @@ import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
 import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../utils/Enchants";
 import { ITEM_BY_ID } from "../data/items";
-// Resist spell bonuses now computed by recomputeDerivedStats from active effects
+import { recomputeDerivedStats } from "../systems/character/derived-stats";
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -140,11 +140,14 @@ export class GameLoop {
       }
     }
 
-    return {
-      ...state,
-      hero: { ...hero, activeEffects: remaining },
-      messages,
-    };
+    // Recompute stats if any resist spell expired (so resistance drops correctly)
+    hero = { ...hero, activeEffects: remaining };
+    const hasResistExpiry = expired.some(e => e.id.startsWith('resist-'));
+    if (hasResistExpiry) {
+      hero = recomputeDerivedStats(hero);
+    }
+
+    return { ...state, hero, messages };
   }
 
   private processMonsterTurns(state: GameState): GameState {

@@ -542,7 +542,9 @@ export function processMonsterAbility(
       case "drain-intelligence":
       case "drain-constitution":
       case "drain-dexterity": {
-        if (Math.random() < 0.25) {
+        const drainResist = (s.hero.resistances.drain ?? 0) / 100;
+        if (drainResist >= 1) break; // fully immune
+        if (Math.random() < 0.25 * (1 - drainResist)) {
           const attr = ability.replace(
             "drain-",
             "",
@@ -559,7 +561,9 @@ export function processMonsterAbility(
       }
 
       case "drain-level": {
-        if (Math.random() < 0.15) {
+        const drainResist = (s.hero.resistances.drain ?? 0) / 100;
+        if (drainResist >= 1) break;
+        if (Math.random() < 0.15 * (1 - drainResist)) {
           const newLevel = Math.max(1, s.hero.level - 1);
           const newXp = xpRequiredForLevel(newLevel, s.difficulty) || 0;
           let hero = recomputeDerivedStats({
@@ -578,7 +582,9 @@ export function processMonsterAbility(
       }
 
       case "drain-hp": {
-        if (Math.random() < 0.4) {
+        const drainResist = (s.hero.resistances.drain ?? 0) / 100;
+        if (drainResist >= 1) break;
+        if (Math.random() < 0.4 * (1 - drainResist)) {
           // Monster drains hero HP and heals itself
           const heal = rollRange(
             1,

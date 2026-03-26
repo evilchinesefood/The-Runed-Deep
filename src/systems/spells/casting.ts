@@ -26,6 +26,7 @@ import {
 } from "../../rendering/animations";
 import { equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
+import { recomputeDerivedStats } from "../character/derived-stats";
 
 function fortuneXp(baseXp: number, equipment: any): number {
   let xp = baseXp;
@@ -643,7 +644,7 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
 
   return {
     ...addMsg(state, msg, "important"),
-    hero: { ...hero, activeEffects: newEffects },
+    hero: recomputeDerivedStats({ ...hero, activeEffects: newEffects }),
   };
 }
 

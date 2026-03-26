@@ -124,7 +124,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'skeleton', name: 'Skeleton', sprite: 'skeleton',
     hp: [14, 22], damage: [4, 8], speed: 0.9, xpValue: 12, armor: 3,
-    ai: 'melee', abilities: [], resistances: r({ cold: 50, drain: 100 }),
+    ai: 'melee', abilities: ['cold-touch'], resistances: r({ cold: 50, drain: 100 }),
     unlockFloor: 5, boss: false,
   },
   {
@@ -168,7 +168,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'walking-corpse', name: 'Walking Corpse', sprite: 'walking-corpse',
     hp: [20, 32], damage: [5, 11], speed: 0.7, xpValue: 18, armor: 1,
-    ai: 'melee', abilities: [], resistances: r({ cold: 50, drain: 100 }),
+    ai: 'melee', abilities: ['drain-strength'], resistances: r({ cold: 50, drain: 100 }),
     unlockFloor: 9, boss: false,
   },
   {
@@ -182,7 +182,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'green-slime', name: 'Red Slime', sprite: 'green-slime',
     hp: [22, 35], damage: [4, 9], speed: 0.5, xpValue: 20, armor: 0,
-    ai: 'melee', abilities: [], resistances: r({ acid: 100 }),
+    ai: 'melee', abilities: ['acid-touch'], resistances: r({ acid: 100 }),
     unlockFloor: 10, boss: false,
   },
 
@@ -234,7 +234,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'white-wolf', name: 'White Wolf', sprite: 'white-wolf',
     hp: [28, 42], damage: [7, 15], speed: 1.3, xpValue: 32, armor: 2,
-    ai: 'melee', abilities: [], resistances: r({ cold: 50 }),
+    ai: 'melee', abilities: ['cold-touch'], resistances: r({ cold: 50 }),
     unlockFloor: 15, boss: false,
   },
   {
@@ -256,7 +256,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'animated-wooden-statue', name: 'Animated Wooden Statue', sprite: 'animated-wooden-statue',
     hp: [30, 44], damage: [7, 14], speed: 0.8, xpValue: 34, armor: 5,
-    ai: 'melee', abilities: [], resistances: r({ fire: -50, cold: 50, drain: 100 }),
+    ai: 'melee', abilities: ['cold-touch'], resistances: r({ fire: -50, cold: 50, drain: 100 }),
     unlockFloor: 17, boss: false,
   },
   {
@@ -278,7 +278,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'animated-bronze-statue', name: 'Animated Bronze Statue', sprite: 'animated-bronze-statue',
     hp: [36, 52], damage: [8, 16], speed: 0.7, xpValue: 42, armor: 8,
-    ai: 'melee', abilities: [], resistances: r({ lightning: 50, drain: 100 }),
+    ai: 'melee', abilities: ['fire-touch'], resistances: r({ lightning: 50, drain: 100 }),
     unlockFloor: 19, boss: false,
   },
   {
@@ -323,7 +323,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'animated-iron-statue', name: 'Animated Iron Statue', sprite: 'animated-iron-statue',
     hp: [50, 72], damage: [10, 20], speed: 0.6, xpValue: 58, armor: 10,
-    ai: 'melee', abilities: [], resistances: r({ lightning: 75, drain: 100 }),
+    ai: 'melee', abilities: ['fire-touch'], resistances: r({ lightning: 75, drain: 100 }),
     unlockFloor: 23, boss: false,
   },
   {
@@ -363,7 +363,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'animated-marble-statue', name: 'Animated Marble Statue', sprite: 'animated-marble-statue',
     hp: [56, 80], damage: [11, 22], speed: 0.6, xpValue: 70, armor: 12,
-    ai: 'melee', abilities: [],
+    ai: 'melee', abilities: ['cold-touch'],
     resistances: r({ lightning: 100, drain: 100 }),
     unlockFloor: 26, boss: false,
   },
@@ -386,7 +386,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'hill-giant', name: 'Hill Giant', sprite: 'hill-giant',
     hp: [64, 95], damage: [14, 28], speed: 0.8, xpValue: 100, armor: 6,
-    ai: 'melee', abilities: ['throw-boulder'], resistances: NO_RESIST,
+    ai: 'ranged', abilities: ['throw-boulder'], resistances: NO_RESIST,
     unlockFloor: 28, boss: false,
   },
 
@@ -401,7 +401,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'wind-elemental', name: 'Wind Elemental', sprite: 'wind-elemental',
     hp: [46, 68], damage: [10, 20], speed: 1.5, xpValue: 80, armor: 2,
-    ai: 'melee', abilities: [],
+    ai: 'melee', abilities: ['cold-touch'],
     resistances: r({ lightning: 50, drain: 100 }),
     unlockFloor: 29, boss: false,
   },
@@ -419,7 +419,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'two-headed-giant', name: 'Two-Headed Giant', sprite: 'two-headed-giant',
     hp: [75, 110], damage: [16, 32], speed: 0.8, xpValue: 125, armor: 7,
-    ai: 'melee', abilities: ['throw-boulder'], resistances: NO_RESIST,
+    ai: 'ranged', abilities: ['throw-boulder'], resistances: NO_RESIST,
     unlockFloor: 31, boss: false,
   },
   {
@@ -434,7 +434,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'water-elemental', name: 'Water Elemental', sprite: 'water-elemental',
     hp: [56, 82], damage: [12, 24], speed: 1, xpValue: 100, armor: 4,
-    ai: 'melee', abilities: [],
+    ai: 'melee', abilities: ['cold-touch'],
     resistances: r({ fire: 50, cold: 50, drain: 100 }),
     unlockFloor: 32, boss: false,
   },
@@ -443,14 +443,14 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'frost-giant', name: 'Frost Giant', sprite: 'frost-giant',
     hp: [80, 120], damage: [16, 32], speed: 0.9, xpValue: 140, armor: 8,
-    ai: 'melee', abilities: ['throw-ice-ball'],
+    ai: 'ranged', abilities: ['throw-ice-ball'],
     resistances: r({ cold: 100, fire: -50 }),
     unlockFloor: 33, boss: false,
   },
   {
     id: 'spiked-devil', name: 'Spiked Devil', sprite: 'spiked-devil',
     hp: [65, 95], damage: [14, 28], speed: 1.1, xpValue: 130, armor: 8,
-    ai: 'melee', abilities: [],
+    ai: 'melee', abilities: ['fire-touch'],
     resistances: r({ cold: 50, fire: 100, drain: 50 }),
     unlockFloor: 33, boss: false,
   },
@@ -468,7 +468,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'earth-elemental', name: 'Earth Elemental', sprite: 'earth-elemental',
     hp: [70, 105], damage: [14, 30], speed: 0.6, xpValue: 120, armor: 10,
-    ai: 'melee', abilities: [],
+    ai: 'melee', abilities: ['acid-touch'],
     resistances: r({ lightning: 50, drain: 100 }),
     unlockFloor: 35, boss: false,
   },
@@ -484,7 +484,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'stone-giant', name: 'Stone Giant', sprite: 'stone-giant',
     hp: [90, 130], damage: [18, 36], speed: 0.7, xpValue: 155, armor: 12,
-    ai: 'melee', abilities: ['throw-boulder'],
+    ai: 'ranged', abilities: ['throw-boulder'],
     resistances: r({ lightning: 50 }),
     unlockFloor: 36, boss: false,
   },
@@ -500,7 +500,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'fire-giant', name: 'Fire Giant', sprite: 'fire-giant',
     hp: [90, 130], damage: [18, 36], speed: 0.9, xpValue: 170, armor: 10,
-    ai: 'melee', abilities: ['fire-touch', 'throw-boulder'],
+    ai: 'ranged', abilities: ['fire-touch', 'throw-boulder'],
     resistances: r({ fire: 100, cold: -50 }),
     unlockFloor: 37, boss: false,
   },
@@ -534,7 +534,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'abyss-fiend', name: 'Abyss Fiend', sprite: 'abyss-fiend',
     hp: [100, 145], damage: [20, 40], speed: 1.1, xpValue: 240, armor: 12,
-    ai: 'summoner', abilities: ['summon-devil', 'teleport'],
+    ai: 'summoner', abilities: ['summon-devil', 'teleport', 'fire-touch'],
     resistances: r({ cold: 50, fire: 100, drain: 100 }),
     unlockFloor: 40, boss: false,
   },
@@ -550,39 +550,39 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: 'hill-giant-king', name: 'Hrungnir, Hill Giant Lord', sprite: 'hill-giant-king',
     hp: [120, 160], damage: [20, 40], speed: 0.9, xpValue: 350, armor: 10,
-    ai: 'melee', abilities: ['throw-boulder'], resistances: NO_RESIST,
+    ai: 'ranged', abilities: ['throw-boulder'], resistances: NO_RESIST,
     unlockFloor: 99, boss: true, bossFloor: 15,
   },
   {
     id: 'wolf-man', name: 'Wolf-Man', sprite: 'wolf-man',
     hp: [100, 130], damage: [16, 32], speed: 1.3, xpValue: 250, armor: 8,
-    ai: 'melee', abilities: [], resistances: NO_RESIST,
+    ai: 'melee', abilities: ['cold-touch'], resistances: r({ cold: 50 }),
     unlockFloor: 99, boss: true, bossFloor: 20,
   },
   {
     id: 'bear-man', name: 'Bear-Man', sprite: 'bear-man',
     hp: [130, 170], damage: [18, 38], speed: 1, xpValue: 320, armor: 10,
-    ai: 'melee', abilities: [], resistances: NO_RESIST,
+    ai: 'melee', abilities: ['fire-touch'], resistances: r({ fire: 50 }),
     unlockFloor: 99, boss: true, bossFloor: 25,
   },
   {
     id: 'frost-giant-king', name: 'Frost Giant King', sprite: 'frost-giant-king',
     hp: [140, 190], damage: [22, 44], speed: 0.9, xpValue: 400, armor: 12,
-    ai: 'melee', abilities: ['throw-ice-ball'],
+    ai: 'ranged', abilities: ['throw-ice-ball'],
     resistances: r({ cold: 100, fire: -50 }),
     unlockFloor: 99, boss: true, bossFloor: 30,
   },
   {
     id: 'stone-giant-king', name: 'Stone Giant King', sprite: 'stone-giant-king',
     hp: [160, 210], damage: [24, 48], speed: 0.7, xpValue: 450, armor: 15,
-    ai: 'melee', abilities: ['throw-boulder'],
+    ai: 'ranged', abilities: ['throw-boulder'],
     resistances: r({ lightning: 75 }),
     unlockFloor: 99, boss: true, bossFloor: 33,
   },
   {
     id: 'fire-giant-king', name: 'Fire Giant King', sprite: 'fire-giant-king',
     hp: [170, 220], damage: [26, 50], speed: 0.9, xpValue: 500, armor: 14,
-    ai: 'melee', abilities: ['fire-touch', 'throw-boulder'],
+    ai: 'ranged', abilities: ['fire-touch', 'throw-boulder'],
     resistances: r({ fire: 100, cold: -50 }),
     unlockFloor: 99, boss: true, bossFloor: 36,
   },

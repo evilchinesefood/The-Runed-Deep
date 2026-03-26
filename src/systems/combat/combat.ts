@@ -352,6 +352,7 @@ function worldsplitterAoe(state: GameState, hero: Hero, primaryPos: { x: number;
         messages: [...result.messages, { text: `Worldsplitter cleaves ${cm.name} for ${aoeDmg} damage, killing it! (+${cm.xpValue} XP)`, severity: "combat" as const, turn: result.turn }],
       };
       trackMonsterKill(cm.templateId, cm.xpValue >= 250);
+      if (cm.templateId === "surtur") return { ...result, screen: "victory" };
     } else {
       const newMonsters = [...curFloor.monsters];
       newMonsters[mIdx] = { ...cm, hp: newHp };

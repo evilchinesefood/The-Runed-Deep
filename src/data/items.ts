@@ -41,40 +41,40 @@ export interface ItemTemplate {
 
 const WEAPONS: ItemTemplate[] = [
   { id: 'club', name: 'Club', category: 'weapon', sprite: 'club', equipSlot: 'weapon',
-    weight: 1500, value: 5, depthMin: 1, depthMax: 8, damageMin: 1, damageMax: 4, accuracy: 0 },
+    weight: 1500, value: 5, depthMin: 1, depthMax: 8, damageMin: 2, damageMax: 4, accuracy: 0 },
   { id: 'dagger', name: 'Dagger', category: 'weapon', sprite: 'dagger', equipSlot: 'weapon',
-    weight: 500, value: 10, depthMin: 1, depthMax: 10, damageMin: 1, damageMax: 5, accuracy: 1 },
+    weight: 500, value: 10, depthMin: 1, depthMax: 10, damageMin: 3, damageMax: 5, accuracy: 1 },
   { id: 'spear', name: 'Spear', category: 'weapon', sprite: 'spear', equipSlot: 'weapon',
-    weight: 2500, value: 15, depthMin: 2, depthMax: 12, damageMin: 2, damageMax: 6, accuracy: 0 },
+    weight: 2500, value: 15, depthMin: 2, depthMax: 12, damageMin: 4, damageMax: 6, accuracy: 0 },
   { id: 'mace', name: 'Mace', category: 'weapon', sprite: 'mace', equipSlot: 'weapon',
-    weight: 3000, value: 30, depthMin: 3, depthMax: 18, damageMin: 3, damageMax: 8, accuracy: 0 },
+    weight: 3000, value: 30, depthMin: 3, depthMax: 18, damageMin: 5, damageMax: 8, accuracy: 0 },
   { id: 'short-sword', name: 'Short Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
-    weight: 1500, value: 35, depthMin: 5, depthMax: 18, damageMin: 2, damageMax: 8, accuracy: 1 },
+    weight: 1500, value: 35, depthMin: 5, depthMax: 18, damageMin: 5, damageMax: 8, accuracy: 1 },
   { id: 'flail', name: 'Flail', category: 'weapon', sprite: 'flail', equipSlot: 'weapon',
-    weight: 3000, value: 40, depthMin: 7, depthMax: 22, damageMin: 3, damageMax: 10, accuracy: -1 },
+    weight: 3000, value: 40, depthMin: 7, depthMax: 22, damageMin: 7, damageMax: 10, accuracy: -1 },
   { id: 'long-sword', name: 'Long Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
-    weight: 2000, value: 60, depthMin: 10, depthMax: 99, damageMin: 4, damageMax: 13, accuracy: 1 },
+    weight: 2000, value: 60, depthMin: 10, depthMax: 99, damageMin: 9, damageMax: 13, accuracy: 1 },
   { id: 'morning-star', name: 'Morning Star', category: 'weapon', sprite: 'morning-star', equipSlot: 'weapon',
-    weight: 4000, value: 55, depthMin: 12, depthMax: 28, damageMin: 4, damageMax: 12, accuracy: 0 },
+    weight: 4000, value: 55, depthMin: 12, depthMax: 28, damageMin: 8, damageMax: 12, accuracy: 0 },
   { id: 'battle-axe', name: 'Battle Axe', category: 'weapon', sprite: 'axe', equipSlot: 'weapon',
-    weight: 4000, value: 70, depthMin: 14, depthMax: 99, damageMin: 4, damageMax: 13, accuracy: 0, twoHanded: true },
+    weight: 4000, value: 70, depthMin: 14, depthMax: 99, damageMin: 9, damageMax: 13, accuracy: 0, twoHanded: true },
   { id: 'two-handed-sword', name: 'Two-Handed Sword', category: 'weapon', sprite: 'sword', equipSlot: 'weapon',
-    weight: 4500, value: 120, depthMin: 18, depthMax: 99, damageMin: 6, damageMax: 18, accuracy: 0, twoHanded: true },
+    weight: 4500, value: 120, depthMin: 18, depthMax: 99, damageMin: 12, damageMax: 18, accuracy: 0, twoHanded: true },
 ];
 
 // ── Elven Weapons ─────────────────────────────────────────
 
 const ELVEN_WEAPONS: ItemTemplate[] = [
   { id: 'elven-long-sword', name: 'Elven Long Sword', category: 'weapon', sprite: 'sword-enchanted', equipSlot: 'weapon',
-    weight: 1500, value: 200, depthMin: 15, depthMax: 99, damageMin: 4, damageMax: 12, accuracy: 3, materialTier: 'elven' },
+    weight: 1500, value: 200, depthMin: 15, depthMax: 99, damageMin: 8, damageMax: 12, accuracy: 3, materialTier: 'elven' },
   { id: 'elven-dagger', name: 'Elven Dagger', category: 'weapon', sprite: 'dagger-enchanted', equipSlot: 'weapon',
-    weight: 300, value: 120, depthMin: 12, depthMax: 99, damageMin: 2, damageMax: 8, accuracy: 4, materialTier: 'elven' },
+    weight: 300, value: 120, depthMin: 12, depthMax: 99, damageMin: 5, damageMax: 8, accuracy: 4, materialTier: 'elven' },
   { id: 'elven-spear', name: 'Elven Spear', category: 'weapon', sprite: 'spear-enchanted', equipSlot: 'weapon',
-    weight: 1800, value: 150, depthMin: 14, depthMax: 99, damageMin: 3, damageMax: 10, accuracy: 3, materialTier: 'elven' },
+    weight: 1800, value: 150, depthMin: 14, depthMax: 99, damageMin: 7, damageMax: 10, accuracy: 3, materialTier: 'elven' },
   { id: 'elven-mace', name: 'Elven Mace', category: 'weapon', sprite: 'mace-enchanted', equipSlot: 'weapon',
-    weight: 2200, value: 180, depthMin: 14, depthMax: 99, damageMin: 4, damageMax: 11, accuracy: 2, materialTier: 'elven' },
+    weight: 2200, value: 180, depthMin: 14, depthMax: 99, damageMin: 8, damageMax: 11, accuracy: 2, materialTier: 'elven' },
   { id: 'elven-battle-axe', name: 'Elven Battle Axe', category: 'weapon', sprite: 'axe-enchanted', equipSlot: 'weapon',
-    weight: 3500, value: 250, depthMin: 15, depthMax: 99, damageMin: 5, damageMax: 14, accuracy: 2, twoHanded: true, materialTier: 'elven' },
+    weight: 3500, value: 250, depthMin: 15, depthMax: 99, damageMin: 10, damageMax: 14, accuracy: 2, twoHanded: true, materialTier: 'elven' },
 ];
 
 const ELVEN_ARMOR: ItemTemplate[] = [
@@ -102,15 +102,15 @@ const ELVEN_ARMOR: ItemTemplate[] = [
 
 const METEORIC_WEAPONS: ItemTemplate[] = [
   { id: 'meteoric-long-sword', name: 'Meteoric Long Sword', category: 'weapon', sprite: 'meteoric-sword', equipSlot: 'weapon',
-    weight: 2200, value: 500, depthMin: 25, depthMax: 99, damageMin: 6, damageMax: 16, accuracy: 2, materialTier: 'meteoric' },
+    weight: 2200, value: 500, depthMin: 25, depthMax: 99, damageMin: 11, damageMax: 16, accuracy: 2, materialTier: 'meteoric' },
   { id: 'meteoric-battle-axe', name: 'Meteoric Battle Axe', category: 'weapon', sprite: 'axe-cursed', equipSlot: 'weapon',
-    weight: 3500, value: 450, depthMin: 28, depthMax: 99, damageMin: 7, damageMax: 18, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
+    weight: 3500, value: 450, depthMin: 28, depthMax: 99, damageMin: 13, damageMax: 18, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
   { id: 'meteoric-flail', name: 'Meteoric Flail', category: 'weapon', sprite: 'flail-cursed', equipSlot: 'weapon',
-    weight: 3200, value: 420, depthMin: 27, depthMax: 99, damageMin: 6, damageMax: 17, accuracy: 0, materialTier: 'meteoric' },
+    weight: 3200, value: 420, depthMin: 27, depthMax: 99, damageMin: 12, damageMax: 17, accuracy: 0, materialTier: 'meteoric' },
   { id: 'meteoric-morning-star', name: 'Meteoric Morning Star', category: 'weapon', sprite: 'morning-star-cursed', equipSlot: 'weapon',
-    weight: 3500, value: 440, depthMin: 27, depthMax: 99, damageMin: 7, damageMax: 17, accuracy: 1, materialTier: 'meteoric' },
+    weight: 3500, value: 440, depthMin: 27, depthMax: 99, damageMin: 12, damageMax: 17, accuracy: 1, materialTier: 'meteoric' },
   { id: 'meteoric-two-handed-sword', name: 'Meteoric Two-Handed Sword', category: 'weapon', sprite: 'meteoric-two-handed-sword', equipSlot: 'weapon',
-    weight: 4000, value: 600, depthMin: 30, depthMax: 99, damageMin: 8, damageMax: 22, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
+    weight: 4000, value: 600, depthMin: 30, depthMax: 99, damageMin: 16, damageMax: 22, accuracy: 1, twoHanded: true, materialTier: 'meteoric' },
 ];
 
 const METEORIC_ARMOR: ItemTemplate[] = [
@@ -362,7 +362,7 @@ const UNIQUE_ITEMS: ItemTemplate[] = [
   { id: 'belt-of-the-titan', name: 'Belt of the Titan', category: 'belt', sprite: 'belt-enchanted', equipSlot: 'belt',
     weight: 400, value: 600, depthMin: 20, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'titan-power' },
   { id: 'blooddrinker', name: 'Blooddrinker', category: 'weapon', sprite: 'meteoric-sword', equipSlot: 'weapon',
-    weight: 2500, value: 800, depthMin: 20, depthMax: 99, damageMin: 8, damageMax: 18, accuracy: 3, unique: true, uniqueAbility: 'blooddrinker' },
+    weight: 2500, value: 800, depthMin: 20, depthMax: 99, damageMin: 13, damageMax: 18, accuracy: 3, unique: true, uniqueAbility: 'blooddrinker' },
   { id: 'ring-of-the-archmage', name: 'Ring of the Archmage', category: 'ring', sprite: 'meteoric-ring', equipSlot: 'ringLeft',
     weight: 50, value: 800, depthMin: 25, depthMax: 99, ac: 3, unique: true, uniqueAbility: 'archmage-power' },
   { id: 'aegis-of-the-fallen', name: 'Aegis of the Fallen', category: 'shield', sprite: 'meteoric-shield', equipSlot: 'shield',
@@ -372,7 +372,7 @@ const UNIQUE_ITEMS: ItemTemplate[] = [
   { id: 'demonhide-armor', name: 'Demonhide Armor', category: 'armor', sprite: 'meteoric-chain-mail', equipSlot: 'body',
     weight: 5000, value: 1500, depthMin: 30, depthMax: 99, ac: 12, unique: true, uniqueAbility: 'demonhide-power' },
   { id: 'worldsplitter', name: 'Worldsplitter', category: 'weapon', sprite: 'meteoric-two-handed-sword', equipSlot: 'weapon',
-    weight: 4500, value: 2000, depthMin: 35, depthMax: 99, damageMin: 15, damageMax: 35, accuracy: 2, twoHanded: true, unique: true, uniqueAbility: 'worldsplitter' },
+    weight: 4500, value: 2000, depthMin: 35, depthMax: 99, damageMin: 25, damageMax: 35, accuracy: 2, twoHanded: true, unique: true, uniqueAbility: 'worldsplitter' },
 ];
 
 // ============================================================

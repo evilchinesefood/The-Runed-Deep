@@ -21,8 +21,11 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 
 ### Combat & Monsters
 - **68 monster types** across 5 AI behaviors (melee, ranged, caster, thief, summoner)
+- **Elemental melee attacks** — 15+ monsters deal cold, fire, acid, or drain damage on hit (reduced by resistances)
+- **Drain resistance** — Soul Ward amulet and drain resist reduce drain-stat, drain-level, and drain-hp chances
+- **Giants throw projectiles** — Hill Giants, Frost Giants, Fire Giants, and their bosses use ranged boulder/ice attacks
 - **Flee-once mechanic** — monsters flee at low HP once, then fight to the death
-- **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, and traps
+- **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, melee touches, and traps
 - **Evasion system** — dodge chance from gear affixes
 
 ### Magic
@@ -30,7 +33,8 @@ This project is a full rewrite — not a port. The original game ran on Windows 
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks
   - **15 spellbook-only** (found as dungeon loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
 - **Spellbooks must be identified** before use — adds strategy to the sage and identify spell
-- **Spell hotkeys** — up to 7 spells bound to number keys for quick-cast
+- **Spell hotkeys** — up to 5 spells bound to number keys for quick-cast
+- **Resist spells** — add +50 elemental resistance via active effects, properly computed and expired
 
 ### Items & Equipment
 - **100+ item templates** — weapons, armor, potions, scrolls, spellbooks, wands, containers
