@@ -19,6 +19,14 @@ import { ITEM_BY_ID } from "../../data/items";
 
 // ── Helpers ─────────────────────────────────────────────────
 
+function getDetectRange(state: GameState): number {
+  let range = 20;
+  for (const eq of Object.values(state.hero.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'shadow-cloak') { range -= 3; break; }
+  }
+  return range;
+}
+
 function rollRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -731,9 +739,11 @@ function processMelee(
     // Attack
     let s = monsterAttacksPlayer(state, monster);
     // Check flee trigger at low HP (only once per monster)
+    // Re-find by ID since thorns kills may have shifted indices
     const updatedFloor = s.floors[floorKey];
-    if (updatedFloor) {
-      const updatedMonster = updatedFloor.monsters[idx];
+    const newIdx = updatedFloor?.monsters.findIndex(m => m.id === monster.id) ?? -1;
+    if (updatedFloor && newIdx >= 0) {
+      const updatedMonster = updatedFloor.monsters[newIdx];
       if (
         updatedMonster &&
         !updatedMonster.hasFled &&
@@ -741,7 +751,7 @@ function processMelee(
         Math.random() < 0.4
       ) {
         const fleeTurns = rollRange(5, 10);
-        s = updateMonster(s, floorKey, idx, {
+        s = updateMonster(s, floorKey, newIdx, {
           ...updatedMonster,
           fleeing: fleeTurns,
           hasFled: true,
@@ -751,7 +761,7 @@ function processMelee(
     return s;
   }
 
-  if (manhattan(monster.position, hero.position) <= 20) {
+  if (manhattan(monster.position, hero.position) <= getDetectRange(state)) {
     // Low HP flee check before moving (only once per monster)
     if (!monster.hasFled && monster.hp / monster.maxHp <= 0.25 && Math.random() < 0.4) {
       const fleeTurns = rollRange(5, 10);
@@ -807,7 +817,7 @@ function processRanged(
     return monsterAttacksPlayer(state, monster);
   }
 
-  if (dist <= 20) {
+  if (dist <= getDetectRange(state)) {
     return moveToRange(state, floorKey, idx, hero.position, 3, 6);
   }
 
@@ -844,7 +854,7 @@ function processCaster(
     return monsterRangedAttack(state, monster, spell);
   }
 
-  if (dist <= 20) {
+  if (dist <= getDetectRange(state)) {
     return moveToRange(state, floorKey, idx, hero.position, 4, 8);
   }
 
@@ -908,7 +918,7 @@ function processThief(
     return s;
   }
 
-  if (manhattan(monster.position, hero.position) <= 20) {
+  if (manhattan(monster.position, hero.position) <= getDetectRange(state)) {
     return moveToward(state, floorKey, idx, hero.position);
   }
 
@@ -974,7 +984,7 @@ function processSummoner(
     return monsterAttacksPlayer(state, monster);
   }
 
-  if (dist <= 20) {
+  if (dist <= getDetectRange(state)) {
     return moveToRange(state, floorKey, idx, hero.position, 5, 8);
   }
 

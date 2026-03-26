@@ -123,13 +123,21 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const hp = Math.min(hero.hp, maxHp);
   const mp = Math.min(hero.mp, maxMp);
 
-  const baseResistances = hero.resistances;
+  // ── Active spell resist buffs ──────────────────────────────
+  let spellResist = { cold: 0, fire: 0, lightning: 0 };
+  for (const eff of hero.activeEffects ?? []) {
+    if (eff.id === 'resist-cold') spellResist.cold += 50;
+    if (eff.id === 'resist-fire') spellResist.fire += 50;
+    if (eff.id === 'resist-lightning') spellResist.lightning += 50;
+  }
+
+  // Use createDefaultResistances base (0 for all) + all bonuses
   const resistances = {
-    cold:      Math.min(100, baseResistances.cold + magicResistBonus + coldResistBonus + uniqueResist.cold),
-    fire:      Math.min(100, baseResistances.fire + magicResistBonus + fireResistBonus + uniqueResist.fire),
-    lightning: Math.min(100, baseResistances.lightning + magicResistBonus + lightningResistBonus + uniqueResist.lightning),
-    acid:      Math.min(100, baseResistances.acid + magicResistBonus + uniqueResist.acid),
-    drain:     Math.min(100, baseResistances.drain + magicResistBonus + uniqueResist.drain),
+    cold:      Math.min(100, magicResistBonus + coldResistBonus + uniqueResist.cold + spellResist.cold),
+    fire:      Math.min(100, magicResistBonus + fireResistBonus + uniqueResist.fire + spellResist.fire),
+    lightning: Math.min(100, magicResistBonus + lightningResistBonus + uniqueResist.lightning + spellResist.lightning),
+    acid:      Math.min(100, magicResistBonus + uniqueResist.acid),
+    drain:     Math.min(100, magicResistBonus + uniqueResist.drain),
   };
 
   return {

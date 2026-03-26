@@ -5,6 +5,7 @@ import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
 import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../utils/Enchants";
 import { ITEM_BY_ID } from "../data/items";
+// Resist spell bonuses now computed by recomputeDerivedStats from active effects
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -108,7 +109,7 @@ export class GameLoop {
 
     // Poison damage tick
     const poisoned = hero.activeEffects.find(
-      (e) => e.id === "poisoned" && e.turnsRemaining > 1,
+      (e) => e.id === "poisoned" && e.turnsRemaining > 0,
     );
     if (poisoned) {
       const poisonDmg = 3;
@@ -133,14 +134,9 @@ export class GameLoop {
         },
       ];
 
+      // Shield armor bonus removed manually; resist spells handled by recomputeDerivedStats
       if (e.id === "shield") {
         hero = { ...hero, armorValue: Math.max(0, hero.armorValue - 4) };
-      } else if (e.id === "resist-cold") {
-        hero = { ...hero, resistances: { ...hero.resistances, cold: Math.max(0, hero.resistances.cold - 50) } };
-      } else if (e.id === "resist-fire") {
-        hero = { ...hero, resistances: { ...hero.resistances, fire: Math.max(0, hero.resistances.fire - 50) } };
-      } else if (e.id === "resist-lightning") {
-        hero = { ...hero, resistances: { ...hero.resistances, lightning: Math.max(0, hero.resistances.lightning - 50) } };
       }
     }
 

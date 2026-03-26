@@ -166,16 +166,26 @@ function createActionIcon(id: string): SVGSVGElement {
       rect(9, 13, 4, 6, c, 1);
       rect(9, 9, 4, 4, c, 1);
       break;
+    case "menu": // Hamburger menu icon
+      rect(3, 5, 16, 2, c, 1);
+      rect(3, 10, 16, 2, c, 1);
+      rect(3, 15, 16, 2, c, 1);
+      break;
   }
   return svg;
 }
+
+export type MenuActionHandler = (action: string) => void;
 
 export class TouchControls {
   private container: HTMLElement;
   private dpad: HTMLElement;
   private actionBar: HTMLElement;
+  private menuPanel: HTMLElement = document.createElement("div");
+  private menuOpen = false;
   private handler: TouchActionHandler | null = null;
   private autoExploreHandler: (() => void) | null = null;
+  private menuHandler: MenuActionHandler | null = null;
   private visible = false;
   private dpadVisible = true;
 
@@ -280,35 +290,92 @@ export class TouchControls {
       }
     }
 
-    // D-pad toggle button
-    const toggleBtn = makeBtn(44, () => {
-      this.dpadVisible = !this.dpadVisible;
-      this.dpad.style.display = this.dpadVisible ? "grid" : "none";
-      toggleBtn.style.opacity = this.dpadVisible ? "1" : "0.5";
-    });
-    if (isMobile) {
-      toggleBtn.appendChild(createActionIcon("dpad"));
-    } else {
-      toggleBtn.textContent = "\u2630";
-    }
-    toggleBtn.title = "D-pad";
-    if (!isMobile) {
-      const toggleRow = document.createElement("div");
-      toggleRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px;";
-      toggleRow.appendChild(toggleBtn);
-      const toggleLbl = document.createElement("div");
-      toggleLbl.textContent = "D-pad";
-      toggleLbl.style.cssText = "color:#666;font-size:11px;font-family:sans-serif;width:40px;";
-      toggleRow.appendChild(toggleLbl);
-      this.actionBar.appendChild(toggleRow);
-    } else {
-      this.actionBar.appendChild(toggleBtn);
+    // Menu button — in the action bar grid/stack like the other buttons
+    const menuBtn = makeBtn(44, () => this.toggleMenu());
+    menuBtn.appendChild(createActionIcon("menu"));
+    menuBtn.title = "Commands";
+    this.actionBar.appendChild(menuBtn);
+
+    // Commands screen — full overlay with button list
+    this.menuPanel = document.createElement("div");
+    this.menuPanel.style.cssText = `
+      position:fixed;inset:0;z-index:1001;
+      background:rgba(0,0,0,0.85);
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      gap:8px;padding:20px;
+    `;
+
+    const menuTitle = document.createElement("div");
+    menuTitle.textContent = "Commands";
+    menuTitle.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;margin-bottom:8px;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
+    this.menuPanel.appendChild(menuTitle);
+
+    const menuItems: [string, () => void][] = [
+      ["Toggle D-Pad", () => {
+        this.dpadVisible = !this.dpadVisible;
+        this.dpad.style.display = this.dpadVisible ? "grid" : "none";
+        this.closeMenu();
+      }],
+      ["Character", () => {
+        this.handler?.({ type: "setScreen", screen: "character-info" });
+        this.closeMenu();
+      }],
+      ["Help", () => {
+        this.handler?.({ type: "setScreen", screen: "help" });
+        this.closeMenu();
+      }],
+      ["Achievements", () => {
+        this.handler?.({ type: "setScreen", screen: "achievements" as any });
+        this.closeMenu();
+      }],
+      ["Save Game", () => {
+        this.handler?.({ type: "save" });
+        this.closeMenu();
+      }],
+      ["Sound On/Off", () => {
+        this.menuHandler?.('toggle-sound');
+        this.closeMenu();
+      }],
+      ["Debug", () => {
+        this.menuHandler?.('debug');
+        this.closeMenu();
+      }],
+      ["Close", () => {
+        this.closeMenu();
+      }],
+    ];
+
+    const btnStyle = `
+      padding:10px 20px;min-width:200px;color:#c9a84c;font-size:14px;font-weight:bold;font-family:sans-serif;
+      text-shadow:0 1px 2px rgba(0,0,0,0.8);text-align:center;
+      background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
+      border:2px solid #555;border-bottom:3px solid #333;border-radius:6px;
+      cursor:pointer;user-select:none;touch-action:none;
+    `;
+    for (const [label, onClick] of menuItems) {
+      const row = document.createElement("div");
+      row.textContent = label;
+      row.style.cssText = btnStyle;
+      row.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); onClick(); });
+      row.addEventListener("mousedown", (e) => { e.preventDefault(); onClick(); });
+      this.menuPanel.appendChild(row);
     }
 
     this.container = document.createElement("div");
     this.container.id = "touch-controls";
     this.container.appendChild(this.dpad);
     this.container.appendChild(this.actionBar);
+    this.container.appendChild(this.menuPanel);
+  }
+
+  private toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+    this.menuPanel.style.display = this.menuOpen ? "flex" : "none";
+  }
+
+  private closeMenu(): void {
+    this.menuOpen = false;
+    this.menuPanel.style.display = "none";
   }
 
   setHandler(handler: TouchActionHandler): void {
@@ -317,6 +384,10 @@ export class TouchControls {
 
   setAutoExploreHandler(handler: () => void): void {
     this.autoExploreHandler = handler;
+  }
+
+  setMenuHandler(handler: MenuActionHandler): void {
+    this.menuHandler = handler;
   }
 
   show(): void {

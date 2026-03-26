@@ -13,13 +13,10 @@ function msg(text: string, turn: number, severity: Message['severity'] = 'normal
 export function processEquipItem(state: GameState, itemId: string): GameState {
   const hero = { ...state.hero };
   const item = hero.inventory.find(i => i.id === itemId);
-  console.log('[EQUIP] itemId:', itemId, 'found:', item ? `${item.name} (${item.templateId}, cat:${item.category})` : 'NOT FOUND');
   if (!item) return state;
 
   const template = ITEM_BY_ID[item.templateId];
-  console.log('[EQUIP] template:', template?.id, 'equipSlot:', template?.equipSlot ?? 'NONE');
   if (!template || !template.equipSlot) {
-    console.log('[EQUIP] REJECTED — no equipSlot. item:', item.name, 'templateId:', item.templateId, 'category:', item.category);
     showGameToast(`${getDisplayName(item)} cannot be equipped.`, 'warning');
     return {
       ...state,

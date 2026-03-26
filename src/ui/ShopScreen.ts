@@ -320,8 +320,6 @@ export function createShopScreen(
       () => "Buy",
       (i) => copper >= getBuyPrice(i, shopId),
       (id) => {
-        const buyTarget = shopInv.find((i) => i.id === id);
-        console.log('[SHOP-BUY] clicked id:', id, 'found:', buyTarget ? `${buyTarget.name} (${buyTarget.templateId})` : 'NOT FOUND');
         const next = buyItem(state, shopId, id);
         state = next;
         onTransaction(next);
@@ -344,7 +342,6 @@ export function createShopScreen(
       () => true,
       (id) => {
         const sellTarget = state.hero.inventory.find((i) => i.id === id);
-        console.log('[SHOP-SELL] clicked id:', id, 'found:', sellTarget ? `${sellTarget.name} (${sellTarget.templateId})` : 'NOT FOUND');
         if (sellTarget) soldKeys.add(`${sellTarget.templateId}|${sellTarget.enchantment}`);
         const next = sellItem(state, shopId, id);
         state = next;

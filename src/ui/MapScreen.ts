@@ -108,10 +108,12 @@ export function createMapScreen(
   // Legend
   const legend = el('div', {
     display: 'flex',
-    gap: '16px',
+    flexWrap: 'wrap',
+    gap: '8px 16px',
     marginTop: '8px',
     fontSize: '11px',
     color: '#888',
+    width: '100%',
   });
   const legendItems: [string, string][] = [
     ['#4f4', 'You'],

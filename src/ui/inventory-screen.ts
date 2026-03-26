@@ -6,8 +6,8 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
-import { createScreen, createPanel, createTitleBar, el } from "./Theme";
+import { attachItemTooltip, hideItemTooltip, buildTooltipContent } from "./item-tooltip";
+import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
 
 function sectionHeader(text: string): HTMLElement {
   return el(
@@ -133,6 +133,7 @@ export function createInventoryScreen(
   initialSelectedIdx: number = 0,
 ): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
   const h = state.hero;
+  const isMobileView = window.innerWidth <= 768;
   let selectedIdx = Math.min(initialSelectedIdx, Math.max(0, h.inventory.length - 1));
 
   const screen = createScreen();
@@ -147,15 +148,15 @@ export function createInventoryScreen(
   );
 
   // ── Equipment panel: paperdoll + slot legend ─────────────────
+  const isMobile = window.innerWidth <= 480;
   const equipPanel = createPanel();
   equipPanel.style.display = "flex";
-  equipPanel.style.gap = "12px";
+  equipPanel.style.gap = isMobile ? "8px" : "12px";
   equipPanel.style.padding = "8px";
-  equipPanel.style.flexWrap = "wrap";
+  equipPanel.style.flexWrap = isMobile ? "nowrap" : "wrap";
 
   // Left: paperdoll with overlaid equipment slots (fixed dims for positioning)
-  const isMobile = window.innerWidth <= 480;
-  const dollScale = isMobile ? 0.65 : 1;
+  const dollScale = isMobile ? 0.45 : 1;
   const dollW = Math.round(240 * dollScale);
   const dollH = Math.round(480 * dollScale);
   const dollWrapper = el("div", {
@@ -267,16 +268,16 @@ export function createInventoryScreen(
         );
       }
 
-      row.addEventListener("click", () =>
-        onAction({ type: "unequipItem", slot: slotKey }),
-      );
-      row.addEventListener("mouseenter", () => {
-        row.style.background = "#1a1a1a";
-      });
-      row.addEventListener("mouseleave", () => {
-        row.style.background = "";
-      });
-      attachItemTooltip(row, item);
+      if (isMobileView) {
+        row.addEventListener("click", () => openEquippedDrawer(item, slotKey));
+      } else {
+        row.addEventListener("click", () =>
+          onAction({ type: "unequipItem", slot: slotKey }),
+        );
+        row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
+        row.addEventListener("mouseleave", () => { row.style.background = ""; });
+        attachItemTooltip(row, item);
+      }
     } else {
       row.appendChild(el("span", { color: "#333", fontStyle: "italic" }, "—"));
     }
@@ -391,6 +392,85 @@ export function createInventoryScreen(
 
   let invRows: HTMLElement[] = [];
 
+  // ── Detail drawer (mobile) ──────────────────────────────
+  let drawerEl: HTMLElement | null = null;
+
+  const closeDrawer = () => {
+    if (drawerEl) { drawerEl.remove(); drawerEl = null; }
+  };
+
+  const openDrawer = (item: Item, tpl: any, equippedInSlot: Item | null) => {
+    closeDrawer();
+    drawerEl = el("div", {
+      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
+      background: "#1a1a1a", borderTop: "2px solid #555",
+      padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+      maxHeight: "60vh", overflowY: "auto",
+      boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
+    });
+
+    // Item tooltip content
+    drawerEl.appendChild(buildTooltipContent(item));
+
+    // Compare section
+    if (equippedInSlot && tpl?.equipSlot) {
+      const divider = el("div", { height: "1px", background: "#444", margin: "8px 0" });
+      drawerEl.appendChild(divider);
+      const compareLabel = el("div", {
+        color: "#886", fontSize: "11px", fontWeight: "bold", marginBottom: "4px",
+      }, "CURRENTLY EQUIPPED");
+      drawerEl.appendChild(compareLabel);
+      drawerEl.appendChild(buildTooltipContent(equippedInSlot));
+    }
+
+    // Action buttons
+    const btnRow = el("div", {
+      display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
+    });
+    const drawerBtn = (label: string, onClick: () => void) => {
+      const b = createButton(label);
+      b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+      b.addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); onClick(); });
+      return b;
+    };
+    if (tpl?.equipSlot) {
+      btnRow.appendChild(drawerBtn("Equip", () => onAction({ type: "equipItem", itemId: item.id })));
+    }
+    if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
+      btnRow.appendChild(drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })));
+    }
+    btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
+    btnRow.appendChild(drawerBtn("Close", () => closeDrawer()));
+    drawerEl.appendChild(btnRow);
+
+    document.body.appendChild(drawerEl);
+  };
+
+  const openEquippedDrawer = (item: Item, slotKey: EquipSlot) => {
+    closeDrawer();
+    drawerEl = el("div", {
+      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
+      background: "#1a1a1a", borderTop: "2px solid #555",
+      padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+      maxHeight: "60vh", overflowY: "auto",
+      boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
+    });
+    drawerEl.appendChild(buildTooltipContent(item));
+    const btnRow = el("div", {
+      display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
+    });
+    const drawerBtn = (label: string, onClick: () => void) => {
+      const b = createButton(label);
+      b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+      b.addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); onClick(); });
+      return b;
+    };
+    btnRow.appendChild(drawerBtn("Unequip", () => onAction({ type: "unequipItem", slot: slotKey })));
+    btnRow.appendChild(drawerBtn("Close", () => closeDrawer()));
+    drawerEl.appendChild(btnRow);
+    document.body.appendChild(drawerEl);
+  };
+
   const renderInvRows = () => {
     // Keep header + sort bar, remove the rest
     while (invPanel.children.length > 2)
@@ -490,51 +570,33 @@ export function createInventoryScreen(
         ),
       );
 
-      // Action buttons (act on first item in stack)
-      const actions = el("div", {
-        display: "flex",
-        gap: "4px",
-        marginLeft: "8px",
-      });
-      if (tpl?.equipSlot) {
-        actions.appendChild(
-          btn("[E]", () => {
-            console.log('[INV-E] equip clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId, 'tpl.equipSlot:', tpl?.equipSlot);
-            onAction({ type: "equipItem", itemId: item.id });
-          }),
-        );
-      }
-      if (
-        item.category === "potion" ||
-        item.category === "scroll" ||
-        item.category === "spellbook" ||
-        item.category === "wand"
-      ) {
-        actions.appendChild(
-          btn("[U]", () => {
-            console.log('[INV-U] use clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId);
-            onAction({ type: "useItem", itemId: item.id });
-          }),
-        );
-      }
-      actions.appendChild(
-        btn("[D]", () => {
-          console.log('[INV-D] drop clicked, item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId);
-          onAction({ type: "dropItem", itemId: item.id });
-        }),
-      );
-      row.appendChild(actions);
-
-      row.addEventListener("click", () => {
-        selectedIdx = i;
-        refreshSelection();
-      });
-      // Pass equipped item in same slot for Tab-compare
+      // Equipped item in same slot for compare
       const equipSlot = tpl?.equipSlot;
       let equippedInSlot = equipSlot ? h.equipment[equipSlot] : null;
-      // For rings, prefer the occupied slot for comparison
       if (equipSlot === 'ringLeft' && !equippedInSlot) equippedInSlot = h.equipment.ringRight;
-      attachItemTooltip(row, item, equippedInSlot);
+
+      if (!isMobileView) {
+        // Desktop: inline action buttons + tooltip
+        const actions = el("div", { display: "flex", gap: "4px", marginLeft: "8px" });
+        if (tpl?.equipSlot) {
+          actions.appendChild(btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })));
+        }
+        if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
+          actions.appendChild(btn("[U]", () => onAction({ type: "useItem", itemId: item.id })));
+        }
+        actions.appendChild(btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })));
+        row.appendChild(actions);
+        row.addEventListener("click", () => { selectedIdx = i; refreshSelection(); });
+        attachItemTooltip(row, item, equippedInSlot);
+      } else {
+        // Mobile: tap row to open detail drawer
+        row.addEventListener("click", () => {
+          selectedIdx = i;
+          refreshSelection();
+          openDrawer(item, tpl, equippedInSlot);
+        });
+      }
+
       invPanel.appendChild(row);
       invRows.push(row);
     }
@@ -618,7 +680,6 @@ export function createInventoryScreen(
 
     if (e.code === "KeyE") {
       const tpl = ITEM_BY_ID[item.templateId];
-      console.log('[INV-KEY-E] selectedIdx:', selectedIdx, 'item.id:', item.id, 'name:', item.name, 'templateId:', item.templateId, 'equipSlot:', tpl?.equipSlot ?? 'NONE');
       if (tpl?.equipSlot) {
         e.preventDefault();
         onAction({ type: "equipItem", itemId: item.id });
@@ -648,6 +709,7 @@ export function createInventoryScreen(
   const cleanup = () => {
     document.removeEventListener("keydown", keyHandler);
     hideItemTooltip();
+    closeDrawer();
   };
   const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number };
   result.cleanup = cleanup;

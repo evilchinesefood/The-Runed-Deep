@@ -3,7 +3,6 @@ import { showGameToast } from '../../ui/GameToast';
 import { getDisplayName } from './display-name';
 
 export function processDropItem(state: GameState, itemId: string): GameState {
-  console.log('[DROP] itemId:', itemId);
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -20,7 +19,6 @@ export function processDropItem(state: GameState, itemId: string): GameState {
   }
 
   const idx = state.hero.inventory.findIndex(i => i.id === itemId);
-  console.log('[DROP] found idx:', idx, idx >= 0 ? `${state.hero.inventory[idx].name} (${state.hero.inventory[idx].templateId})` : 'NOT FOUND');
   if (idx === -1) return state;
 
   const item = state.hero.inventory[idx];

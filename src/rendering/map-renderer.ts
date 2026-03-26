@@ -23,7 +23,8 @@ function calcViewportTiles(): { x: number; y: number } {
   const h = window.innerHeight;
   const scale = calcMapScale();
   const effectiveTile = TILE_SIZE * scale;
-  let tilesX = Math.floor(Math.min(w - 16, 672) / effectiveTile);
+  const sidePad = w <= 480 ? 4 : 16;
+  let tilesX = Math.floor(Math.min(w - sidePad, 672) / effectiveTile);
   if (tilesX % 2 === 0) tilesX--;
   tilesX = Math.max(9, Math.min(21, tilesX));
 

@@ -11,9 +11,19 @@ import { generateLoot } from "../items/loot";
 import { processMonsterAbility } from "../monsters/ai";
 import { Sound } from "../Sound";
 import { trackMonsterKill, trackFloorDamage } from "../Achievements";
-import { hasEnchant, equipAffixTotal } from "../../utils/Enchants";
+import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
 import { getDisplayName } from "../inventory/display-name";
+
+function fortuneXp(baseXp: number, equipment: any): number {
+  let xp = baseXp;
+  const pct = equipAffixTotal2(equipment, "fortune");
+  if (pct > 0) xp = Math.round(xp * (1 + pct / 100));
+  for (const eq of Object.values(equipment)) {
+    if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') { xp *= 2; break; }
+  }
+  return xp;
+}
 
 // ============================================================
 // Blood splatters
@@ -265,7 +275,7 @@ export function playerAttacksMonster(
       ...applyMessages(state, messages),
       hero: {
         ...state.hero,
-        xp: state.hero.xp + monster.xpValue,
+        xp: state.hero.xp + fortuneXp(monster.xpValue, state.hero.equipment),
       },
       floors: { ...state.floors, [floorKey]: newFloor },
       turn: state.turn + 1,
@@ -279,7 +289,8 @@ export function playerAttacksMonster(
       return { ...resultState, screen: "victory" };
     }
 
-    return resultState;
+    // Worldsplitter AoE: damage all other adjacent monsters
+    return worldsplitterAoe(resultState, state.hero, monster.position, damage, messages);
   } else {
     // Monster survives
     messages.push({
@@ -292,15 +303,66 @@ export function playerAttacksMonster(
     const newMonsters = [...floor.monsters];
     newMonsters[monsterIndex] = updatedMonster;
     let newFloor: Floor = { ...floor, monsters: newMonsters };
-    // Blood splatter when monster is badly wounded
     newFloor = maybeAddMonsterBlood(newFloor, updatedMonster, monsterIndex);
 
-    return {
+    let resultState: GameState = {
       ...applyMessages(state, messages),
       floors: { ...state.floors, [floorKey]: newFloor },
       turn: state.turn + 1,
     };
+
+    // Worldsplitter AoE: damage all other adjacent monsters
+    return worldsplitterAoe(resultState, state.hero, monster.position, damage, []);
   }
+}
+
+/** Worldsplitter: hit all monsters adjacent to the hero (except the primary target) */
+function worldsplitterAoe(state: GameState, hero: Hero, primaryPos: { x: number; y: number }, baseDmg: number, _msgs: Message[]): GameState {
+  const weapon = hero.equipment.weapon;
+  if (!weapon || ITEM_BY_ID[weapon.templateId]?.uniqueAbility !== 'worldsplitter') return state;
+
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const aoeDmg = Math.max(1, Math.floor(baseDmg * 0.5)); // 50% of primary damage
+  let result = state;
+
+  for (const m of [...floor.monsters]) {
+    if (m.position.x === primaryPos.x && m.position.y === primaryPos.y) continue;
+    const dx = Math.abs(m.position.x - hero.position.x);
+    const dy = Math.abs(m.position.y - hero.position.y);
+    if (dx > 1 || dy > 1) continue;
+
+    // Re-fetch floor each iteration (monsters may have been removed)
+    const curFloor = result.floors[floorKey];
+    if (!curFloor) break;
+    const mIdx = curFloor.monsters.findIndex(cm => cm.id === m.id);
+    if (mIdx === -1) continue;
+    const cm = curFloor.monsters[mIdx];
+    const newHp = cm.hp - aoeDmg;
+
+    if (newHp <= 0) {
+      const newMonsters = [...curFloor.monsters];
+      newMonsters.splice(mIdx, 1);
+      result = {
+        ...result,
+        hero: { ...result.hero, xp: result.hero.xp + fortuneXp(cm.xpValue, hero.equipment) },
+        floors: { ...result.floors, [floorKey]: { ...curFloor, monsters: newMonsters } },
+        messages: [...result.messages, { text: `Worldsplitter cleaves ${cm.name} for ${aoeDmg} damage, killing it! (+${cm.xpValue} XP)`, severity: "combat" as const, turn: result.turn }],
+      };
+      trackMonsterKill(cm.templateId, cm.xpValue >= 250);
+    } else {
+      const newMonsters = [...curFloor.monsters];
+      newMonsters[mIdx] = { ...cm, hp: newHp };
+      result = {
+        ...result,
+        floors: { ...result.floors, [floorKey]: { ...curFloor, monsters: newMonsters } },
+        messages: [...result.messages, { text: `Worldsplitter cleaves ${cm.name} for ${aoeDmg} damage. (${newHp}/${cm.maxHp})`, severity: "combat" as const, turn: result.turn }],
+      };
+    }
+  }
+  return result;
 }
 
 /**
@@ -450,7 +512,7 @@ export function monsterAttacksPlayer(
           }
           result = {
             ...result,
-            hero: { ...result.hero, xp: result.hero.xp + monster.xpValue },
+            hero: { ...result.hero, xp: result.hero.xp + fortuneXp(monster.xpValue, result.hero.equipment) },
             floors: { ...result.floors, [floorKey2]: newFloor2 },
             messages: [...result.messages, ...thornsMsgs],
           };

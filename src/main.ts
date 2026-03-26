@@ -492,6 +492,37 @@ touchControls.setAutoExploreHandler(() => {
   autoExploring = true;
   exploreNext();
 });
+touchControls.setMenuHandler((action) => {
+  if (action === 'toggle-sound') Sound.toggle();
+  if (action === 'debug') {
+    const input = prompt("Floor (1-40, 0=town):");
+    if (!input) return;
+    const num = parseInt(input);
+    if (isNaN(num) || num < 0 || num > 40) return;
+    const state = gameLoop.getState();
+    if (num === 0) {
+      gameLoop.setState(teleportToTown(state));
+    } else {
+      const targetFloor = num - 1;
+      const targetDungeon = getDungeonForFloor(targetFloor);
+      const floorKey = `${targetDungeon}-${targetFloor}`;
+      let floors = { ...state.floors };
+      if (!floors[floorKey]) {
+        const { floor: newFloor } = generateFloor(targetDungeon, targetFloor, state.rngSeed, true, true, state.difficulty);
+        floors = { ...floors, [floorKey]: newFloor };
+      }
+      const fl = floors[floorKey];
+      let pos = { x: 1, y: 1 };
+      for (let y = 0; y < fl.height; y++) {
+        for (let x = 0; x < fl.width; x++) {
+          if (fl.tiles[y][x].type === "stairs-up") { pos = { x, y }; break; }
+        }
+        if (pos.x !== 1 || pos.y !== 1) break;
+      }
+      gameLoop.setState({ ...state, currentFloor: targetFloor, currentDungeon: targetDungeon, floors, hero: { ...state.hero, position: pos }, messages: [...state.messages, { text: `Jumped to floor ${num}.`, severity: "system" as const, turn: state.turn }] });
+    }
+  }
+});
 
 function playPendingAnimations(): void {
   const groups = drainAnimations();
@@ -548,7 +579,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         inventory: [],
         copper: 1000,
         knownSpells: getAllSpellIds(),
-        spellHotkeys: getAllSpellIds().slice(0, 7),
+        spellHotkeys: getAllSpellIds().slice(0, 5),
         activeEffects: [],
         resistances: createDefaultResistances(),
         armorValue: 6,

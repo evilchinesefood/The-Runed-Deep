@@ -72,7 +72,7 @@ function statLine(text: string): HTMLElement {
   return row;
 }
 
-function buildTooltipContent(item: Item): HTMLElement {
+export function buildTooltipContent(item: Item): HTMLElement {
   const tpl = ITEM_BY_ID[item.templateId];
   const container = d('div');
 
@@ -81,16 +81,11 @@ function buildTooltipContent(item: Item): HTMLElement {
     fontSize: '14px', fontWeight: 'bold', color: nameColor(item), marginBottom: '4px',
   }, getDisplayName(item)));
 
-  // Category
-  let catText = categoryLabel(item);
-  if (item.properties['twoHanded']) catText += ' (Two-Handed)';
-  container.appendChild(d('div', { color: '#888', marginBottom: '4px' }, catText));
-
   // Material tier
   const tier = tpl?.materialTier;
   if (tier) {
     const tierColors: Record<string, string> = { elven: '#8f8', meteoric: '#f8f' };
-    container.appendChild(d('div', { color: tierColors[tier] ?? '#aaa', fontSize: '11px', marginBottom: '4px', fontStyle: 'italic' }, `${tier.charAt(0).toUpperCase() + tier.slice(1)} craftsmanship`));
+    container.appendChild(d('div', { color: tierColors[tier] ?? '#aaa', fontSize: '12px', marginBottom: '4px', fontStyle: 'italic' }, `${tier.charAt(0).toUpperCase() + tier.slice(1)} craftsmanship`));
   }
 
   // Stats
@@ -143,13 +138,15 @@ function buildTooltipContent(item: Item): HTMLElement {
       cloak: 'Cloak', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet',
       ringLeft: 'Ring', ringRight: 'Ring', amulet: 'Neck', pack: 'Pack', purse: 'Purse',
     };
-    statsBox.appendChild(d('div', { color: '#666', paddingLeft: '8px', fontSize: '11px' }, `Slot: ${slotNames[tpl.equipSlot] ?? tpl.equipSlot}`));
+    let slotText = `Slot: ${slotNames[tpl.equipSlot] ?? tpl.equipSlot}`;
+    if (item.properties['twoHanded']) slotText += ' (Two-Handed)';
+    statsBox.appendChild(d('div', { color: '#666', paddingLeft: '8px', fontSize: '12px' }, slotText));
     hasStats = true;
   }
 
   // Depth range
   if (tpl && item.identified) {
-    statsBox.appendChild(d('div', { color: '#555', paddingLeft: '8px', fontSize: '10px' }, `Floors ${tpl.depthMin}–${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
+    statsBox.appendChild(d('div', { color: '#555', paddingLeft: '8px', fontSize: '11px' }, `Floors ${tpl.depthMin}–${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
   }
 
   // Healing
@@ -209,7 +206,7 @@ function buildTooltipContent(item: Item): HTMLElement {
       if (ench) {
         const prefix = isCrit ? '★★' : '★';
         const desc = formatAffixDesc(eid, item.enchantment, isCrit);
-        enchBox.appendChild(d('div', { color: ench.color, fontSize: '11px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${desc}`));
+        enchBox.appendChild(d('div', { color: ench.color, fontSize: '12px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${desc}`));
       }
     }
     container.appendChild(enchBox);
@@ -239,7 +236,7 @@ function buildTooltipContent(item: Item): HTMLElement {
       'worldsplitter': 'Attacks hit all adjacent enemies',
     };
     const desc = abilityDesc[tplU.uniqueAbility] ?? tplU.uniqueAbility;
-    container.appendChild(d('div', { color: '#fc4', fontSize: '11px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
+    container.appendChild(d('div', { color: '#fc4', fontSize: '13px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
   }
 
   // Cursed
@@ -255,7 +252,7 @@ function buildTooltipContent(item: Item): HTMLElement {
   // Weight + value
   const weight = (item.weight / 1000).toFixed(1);
   container.appendChild(d('div', {
-    color: '#666', marginTop: '4px', fontSize: '11px',
+    color: '#666', marginTop: '4px', fontSize: '12px',
   }, `${weight} kg · ${item.value} gold`));
 
   return container;

@@ -24,8 +24,18 @@ import {
   buildTeleportAnimation,
   buildDetectAnimation,
 } from "../../rendering/animations";
-import { equipAffixTotal } from "../../utils/Enchants";
+import { equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
+
+function fortuneXp(baseXp: number, equipment: any): number {
+  let xp = baseXp;
+  const pct = equipAffixTotal2(equipment, "fortune");
+  if (pct > 0) xp = Math.round(xp * (1 + pct / 100));
+  for (const eq of Object.values(equipment)) {
+    if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') { xp *= 2; break; }
+  }
+  return xp;
+}
 
 // ============================================================
 // Spell Casting
@@ -400,19 +410,25 @@ function resolveBall(
         ax === currentState.hero.position.x &&
         ay === currentState.hero.position.y
       ) {
-        const selfDmg = rollRange(
+        let selfDmg = rollRange(
           Math.floor(minDmg / 2),
           Math.floor(maxDmg / 2),
         );
-        currentState = {
-          ...currentState,
-          hero: { ...currentState.hero, hp: currentState.hero.hp - selfDmg },
-        };
-        currentState = addMsg(
-          currentState,
-          `${currentState.hero.name} is caught in the blast for ${selfDmg} damage!`,
-          "combat",
-        );
+        // Apply hero's elemental resistance to self-damage
+        const heroResist = currentState.hero.resistances[element as keyof typeof currentState.hero.resistances] ?? 0;
+        if (heroResist >= 100) { selfDmg = 0; }
+        else if (heroResist > 0) { selfDmg = Math.round(selfDmg * (1 - heroResist / 100)); }
+        if (selfDmg > 0) {
+          currentState = {
+            ...currentState,
+            hero: { ...currentState.hero, hp: currentState.hero.hp - selfDmg },
+          };
+          currentState = addMsg(
+            currentState,
+            `${currentState.hero.name} is caught in the blast for ${selfDmg} damage!`,
+            "combat",
+          );
+        }
       }
     }
   }
@@ -507,7 +523,7 @@ function applySpellDamageToMonster(
       hero: {
         ...state.hero,
         mp: state.hero.mp,
-        xp: state.hero.xp + monster.xpValue,
+        xp: state.hero.xp + fortuneXp(monster.xpValue, state.hero.equipment),
       },
       floors: { ...state.floors, [floorKey]: newFloor },
     };
@@ -615,21 +631,11 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
   queueAnimation(buildBuffAnimation(state.hero.position, color));
   const hero = state.hero;
   const alreadyActive = hero.activeEffects.some((e) => e.id === spell.id);
-  // Always refresh duration
   const newEffects = [
     ...hero.activeEffects.filter((e) => e.id !== spell.id),
     { id: spell.id, name: spell.name, turnsRemaining: 50 },
   ];
-  // Only add resistance if not already active (prevents stacking on re-cast)
-  const newResistances = { ...hero.resistances };
-  if (!alreadyActive) {
-    if (element === "cold")
-      newResistances.cold = Math.min(75, newResistances.cold + 50);
-    else if (element === "fire")
-      newResistances.fire = Math.min(75, newResistances.fire + 50);
-    else if (element === "lightning")
-      newResistances.lightning = Math.min(75, newResistances.lightning + 50);
-  }
+  // Resist bonus is computed by recomputeDerivedStats from active effects
 
   const msg = alreadyActive
     ? `${hero.name} refreshes resistance to ${element}. (50 turns)`
@@ -637,7 +643,7 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
 
   return {
     ...addMsg(state, msg, "important"),
-    hero: { ...hero, activeEffects: newEffects, resistances: newResistances },
+    hero: { ...hero, activeEffects: newEffects },
   };
 }
 

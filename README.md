@@ -63,7 +63,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 | Aegis of the Fallen | Shield | +10 AC, reflect 30% melee damage |
 | Gauntlets of the Forge | Gauntlets | +20 STR, fire attacks +50% |
 | Demonhide Armor | Body | +15 AC, +50 fire/cold resist, 25% thorns |
-| Worldsplitter | Weapon (2H) | Highest base damage in game |
+| Worldsplitter | Weapon (2H) | Highest base damage, hits all adjacent enemies |
 
 - All uniques always roll +5 minimum enchantment and 2+ random affixes
 - Boss kills guarantee a unique drop (always in NG+, F30+ otherwise)
@@ -106,7 +106,11 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **18 achievements**
 - **18 synthesized sound effects** via Web Audio API
 - **Responsive layout** — scales to phone, tablet, and desktop
-- **Touch controls** — D-pad and action buttons for mobile play
+- **Touch controls** — SVG icon buttons, hideable D-pad, portrait 2-wide grid layout
+- **Mobile detail drawer** — tap inventory items for full tooltip + compare + Equip/Use/Drop buttons
+- **Commands menu** — access Character, Help, Achievements, Save, Sound, Debug from touch
+- **Action button attacks** adjacent monsters on mobile
+- **Portrait viewport** shrinks 25% to prevent overlap with touch controls
 - **Click-to-move** with A* pathfinding
 - **Save/load** — 3 slots + auto-save on stairs + cloud sync
 
@@ -122,7 +126,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 | C | Character info |
 | Z | Spell hotkey management |
 | M | Minimap |
-| 1-7 | Quick-cast spell |
+| 1-5 | Quick-cast spell |
 | Tab | Auto-explore (navigates to stairs when done) |
 | Tab (hold) | Compare hovered item with equipped |
 | F1 | Help |

@@ -126,6 +126,7 @@ export function createSpellScreen(
 
   // Category panels container — rebuild when hotkeys change
   const categoryContainer = document.createElement("div");
+  categoryContainer.style.width = "100%";
   screen.appendChild(categoryContainer);
 
   function renderCategoryPanels(): void {
@@ -155,14 +156,14 @@ export function createSpellScreen(
       if (!spells || spells.length === 0) continue;
 
       const catColor = CATEGORY_COLORS[cat] || "#aaa";
-      const panel = createPanel(cat);
+      const panel = createPanel(cat.charAt(0).toUpperCase() + cat.slice(1));
       const header = panel.firstElementChild as HTMLElement | null;
       if (header) header.style.color = catColor;
 
       for (const { spell, spellId } of spells) {
         const canCast = h.mp >= spell.manaCost;
         const inHotkeys = hotkeys.includes(spellId);
-        const canAdd = !inHotkeys && hotkeys.length < 7;
+        const canAdd = !inHotkeys && hotkeys.length < 5;
 
         const row = el("div", {
           display: "flex",

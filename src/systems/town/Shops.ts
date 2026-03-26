@@ -82,7 +82,6 @@ function addMsg(state: GameState, text: string, severity: 'normal' | 'important'
 export function buyItem(state: GameState, shopId: string, itemId: string): GameState {
   const shopInv = state.town.shopInventories[shopId] ?? [];
   const idx = shopInv.findIndex(i => i.id === itemId);
-  console.log('[BUY] shopId:', shopId, 'itemId:', itemId, 'found:', idx >= 0 ? `${shopInv[idx].name} (${shopInv[idx].templateId})` : 'NOT FOUND');
   if (idx === -1) return addMsg(state, 'Item not found.', 'system');
 
   const item = shopInv[idx];
@@ -110,7 +109,6 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
 
 export function sellItem(state: GameState, shopId: string, itemId: string): GameState {
   const idx = state.hero.inventory.findIndex(i => i.id === itemId);
-  console.log('[SELL] shopId:', shopId, 'itemId:', itemId, 'found:', idx >= 0 ? `${state.hero.inventory[idx].name} (${state.hero.inventory[idx].templateId})` : 'NOT FOUND');
   if (idx === -1) return addMsg(state, 'Item not found.', 'system');
 
   const item = state.hero.inventory[idx];

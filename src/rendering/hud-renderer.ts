@@ -33,13 +33,13 @@ export class HudRenderer {
     // Spell bar — scrollable, wraps within full width
     this.spellBarEl = el("div", {
       display: "flex",
-      flexWrap: "wrap",
+      flexWrap: "nowrap",
       width: "100%",
       maxWidth: "var(--game-width)",
-      maxHeight: "48px",
-      overflowY: "auto",
-      overflowX: "hidden",
-      margin: "2px auto",
+      overflowY: "hidden",
+      overflowX: "auto",
+      margin: "3px auto",
+      paddingBottom: "3px",
       gap: "3px",
       fontSize: "var(--fs-sm)",
       boxSizing: "border-box",
@@ -211,7 +211,7 @@ export class HudRenderer {
       return;
     }
 
-    const max = Math.min(hotkeys.length, 7);
+    const max = Math.min(hotkeys.length, 5);
     for (let i = 0; i < max; i++) {
       const spell = SPELL_BY_ID[hotkeys[i]];
       if (!spell) continue;
