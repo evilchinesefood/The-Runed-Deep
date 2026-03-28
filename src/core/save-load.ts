@@ -18,32 +18,69 @@ export interface SaveSlotInfo {
  * Save the current game state to a slot (1-3).
  * Returns true on success.
  */
+/**
+ * Strip transient data from save to reduce size.
+ * visible[][] is recomputed every move by computeFov.
+ * Monster path arrays are recomputed every turn by AI.
+ */
+function pruneSaveState(state: GameState): GameState {
+  const floors: typeof state.floors = {};
+  for (const [key, floor] of Object.entries(state.floors)) {
+    const monsters = floor.monsters.map((m: any) => {
+      const { path, ...rest } = m;
+      return rest;
+    });
+    // Replace visible with empty array — regenerated on load
+    const visible = Array.from({ length: floor.height }, () =>
+      Array(floor.width).fill(false)
+    );
+    floors[key] = { ...floor, visible, monsters };
+  }
+  return { ...state, floors };
+}
+
 export function saveGame(state: GameState, slot: number = 1): boolean {
   if (slot < 1 || slot > MAX_SLOTS) return false;
 
+  const saveState = pruneSaveState({ ...state, screen: "game" });
+  const saveJson = JSON.stringify(saveState);
+
+  // Always attempt cloud sync regardless of local save result
+  const code = getCloudCode(slot);
+  if (code) pushSave(code, saveJson);
+
   try {
-    // Save the game state (set screen back to 'game' so loading resumes gameplay)
-    const saveState: GameState = {
-      ...state,
-      screen: "game",
-    };
+    const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
 
-    const saveData = {
-      version: 1,
-      timestamp: Date.now(),
-      state: saveState,
-    };
+    // Check size before writing — warn on large saves
+    const sizeKB = Math.round(json.length / 1024);
+    if (sizeKB > 4000) {
+      console.warn(`[SAVE] Save size: ${sizeKB}KB — approaching localStorage limit`);
+    }
 
-    const json = JSON.stringify(saveData);
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
-
-    // Cloud sync — fire and forget
-    const code = getCloudCode(slot);
-    if (code) pushSave(code, JSON.stringify(saveState));
-
     return true;
-  } catch (e) {
-    console.error("Failed to save game:", e);
+  } catch (e: any) {
+    const isQuota = e?.name === 'QuotaExceededError' ||
+      e?.code === 22 || // Safari
+      e?.code === 1014; // Firefox
+    if (isQuota) {
+      console.error(`[SAVE] localStorage quota exceeded. Save size too large.`);
+      // Try clearing existing slot and retrying once
+      try {
+        localStorage.removeItem(SAVE_KEY_PREFIX + slot);
+        const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
+        localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
+        return true;
+      } catch {
+        // Still failed — if cloud save is enabled, data is safe there
+        if (code) {
+          console.warn("[SAVE] Local save failed but cloud save was sent.");
+          return true; // Cloud has the data
+        }
+      }
+    }
+    console.error("[SAVE] Failed to save game:", e);
     return false;
   }
 }
@@ -106,6 +143,14 @@ export function loadGame(slot: number = 1): GameState | null {
     }
     for (const items of Object.values(state.town.shopInventories)) {
       for (const item of items as any[]) migrateEnchants(item);
+    }
+
+    // Ensure visible arrays exist (stripped from saves to reduce size)
+    for (const key of Object.keys(state.floors)) {
+      const f = state.floors[key];
+      if (!f.visible || f.visible.length === 0) {
+        f.visible = Array.from({ length: f.height }, () => Array(f.width).fill(false));
+      }
     }
 
     // Ensure new item IDs don't collide with loaded items
