@@ -56,9 +56,9 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
   }
 
   if (cursedItems.length > 0) {
-    panel.appendChild(el('div', { color: '#c90', fontSize: '13px', fontWeight: 'bold', margin: '12px 0 6px', borderTop: '1px solid #444', paddingTop: '8px' }, 'Remove Curse (50g)'));
+    panel.appendChild(el('div', { color: '#c90', fontSize: '13px', fontWeight: 'bold', margin: '12px 0 6px', borderTop: '1px solid #444', paddingTop: '8px' }, 'Remove Curse (25g)'));
     for (const ci of cursedItems) {
-      const canAfford = state.hero.copper >= 50;
+      const canAfford = state.hero.copper >= 25;
       const btn = createButton(`Bless: ${ci.name}`);
       Object.assign(btn.style, { display: 'block', width: '100%', marginBottom: '4px', textAlign: 'left', fontSize: '12px' });
       greyBtn(btn, !canAfford);

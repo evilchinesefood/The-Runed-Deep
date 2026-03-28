@@ -77,6 +77,10 @@ export const AFFIXES: Affix[] = [
     base: 8, perLevel: 3, cap: 38, base2: 15, perLevel2: 5, cap2: 65, cursedOnly: true, weight: 1 },
   { id: 'dark-pact', name: 'Dark Pact', description: '+{v}% spell damage, +{v2}% MP cost', color: '#84f',
     base: 25, perLevel: 5, cap: 75, base2: 10, perLevel2: 3, cap2: 40, cursedOnly: true, weight: 1 },
+  { id: 'berserk-fury', name: 'Berserk Fury', description: '+{v}% melee damage, +{v2}% damage taken', color: '#f66',
+    base: 30, perLevel: 5, cap: 80, base2: 10, perLevel2: 3, cap2: 40, cursedOnly: true, weight: 2 },
+  { id: 'leech', name: 'Leech', description: 'Heal {v}% of damage, -{v2}% XP gained', color: '#6a4',
+    base: 15, perLevel: 4, cap: 55, base2: 10, perLevel2: 3, cap2: 40, cursedOnly: true, weight: 1 },
 ];
 
 // Keep ENCHANTMENTS alias for backward compat with tooltip code
@@ -145,7 +149,9 @@ export function getEquipAffixTotal(equipment: Record<string, any>, affixId: stri
     const isCrit = enchants.includes(`${affixId}:critical`);
     const has = isCrit || enchants.includes(affixId);
     if (has) {
-      total += getAffixValue(affixId, item.enchantment ?? 0, isCrit);
+      // Blessed items treat enchantment as +1 higher for affix scaling
+      const ench = (item.enchantment ?? 0) + (item.blessed ? 1 : 0);
+      total += getAffixValue(affixId, ench, isCrit);
     }
   }
   return total;
@@ -160,7 +166,8 @@ export function getEquipAffixTotal2(equipment: Record<string, any>, affixId: str
     const isCrit = enchants.includes(`${affixId}:critical`);
     const has = isCrit || enchants.includes(affixId);
     if (has) {
-      total += getAffixValue2(affixId, item.enchantment ?? 0, isCrit);
+      const ench = (item.enchantment ?? 0) + (item.blessed ? 1 : 0);
+      total += getAffixValue2(affixId, ench, isCrit);
     }
   }
   return total;

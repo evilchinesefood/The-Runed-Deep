@@ -22,6 +22,9 @@ function fortuneXp(baseXp: number, equipment: any): number {
   for (const eq of Object.values(equipment)) {
     if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') { xp *= 2; break; }
   }
+  // Leech: reduce XP gained (secondary value = % reduction)
+  const leechPenalty = equipAffixTotal2(equipment, "leech");
+  if (leechPenalty > 0) xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
   return xp;
 }
 
@@ -191,6 +194,10 @@ export function playerAttacksMonster(
   const rawDamage = calcPlayerDamage(state.hero);
   let damage = applyArmor(Math.max(1, rawDamage), monster.armor);
 
+  // Berserk Fury: bonus melee damage (primary value = % increase)
+  const berserkBonus = equipAffixTotal(state.hero.equipment, "berserk-fury");
+  if (berserkBonus > 0) damage = Math.round(damage * (1 + berserkBonus / 100));
+
   // Hit flash on the monster
   queueAnimation([
     {
@@ -203,6 +210,22 @@ export function playerAttacksMonster(
   Sound.meleeHit();
 
   const newHp = monster.hp - damage;
+
+  // Blood Price: lose HP per hit (secondary value)
+  const bloodCost = Math.round(equipAffixTotal2(state.hero.equipment, "blood-price"));
+  if (bloodCost > 0 && damage > 0) {
+    const newHeroHp = Math.max(1, state.hero.hp - bloodCost);
+    state = { ...state, hero: { ...state.hero, hp: newHeroHp } };
+    messages.push({ text: `Blood Price costs you ${bloodCost} HP.`, severity: "combat", turn: state.turn });
+  }
+
+  // Leech: heal % of damage dealt (primary value)
+  const leechPct = equipAffixTotal(state.hero.equipment, "leech");
+  if (leechPct > 0 && damage > 0) {
+    const heal = Math.max(1, Math.floor(damage * leechPct / 100));
+    const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
+    state = { ...state, hero: { ...state.hero, hp: healedHp } };
+  }
 
   // Vampiric — scaled heal % from affix
   if (hasEnchant(state.hero.equipment, "vampiric") && damage > 0) {
@@ -400,7 +423,11 @@ export function monsterAttacksPlayer(
   }
 
   const rawDamage = calcMonsterDamage(monster);
-  const damage = applyArmor(rawDamage, state.hero.armorValue);
+  let damage = applyArmor(rawDamage, state.hero.armorValue);
+
+  // Berserk Fury: take more damage (secondary value = % increase)
+  const berserkPenalty = equipAffixTotal2(state.hero.equipment, "berserk-fury");
+  if (berserkPenalty > 0) damage = Math.round(damage * (1 + berserkPenalty / 100));
 
   if (damage === 0) {
     messages.push({

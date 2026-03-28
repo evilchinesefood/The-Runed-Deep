@@ -64,7 +64,10 @@ export function castSpell(
   for (const eq of Object.values(state.hero.equipment)) {
     if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'archmage-power') costReduction += 25;
   }
-  const cost = Math.max(1, Math.round(spell.manaCost * (1 - Math.min(costReduction, 75) / 100)));
+  // Dark Pact: increase MP cost (secondary value = % increase)
+  const darkPactPenalty = equipAffixTotal2(state.hero.equipment, "dark-pact");
+  const costMult = (1 - Math.min(costReduction, 75) / 100) * (1 + darkPactPenalty / 100);
+  const cost = Math.max(1, Math.round(spell.manaCost * costMult));
   if (state.hero.mp < cost) {
     return addMsg(
       state,
@@ -459,6 +462,10 @@ function applySpellDamageToMonster(
   // Spell Power affix (scaled)
   const spellPower = equipAffixTotal(state.hero.equipment, "spell-power");
   if (spellPower > 0) damage = Math.round(damage * (1 + spellPower / 100));
+
+  // Dark Pact: bonus spell damage (primary value)
+  const darkPactDmg = equipAffixTotal(state.hero.equipment, "dark-pact");
+  if (darkPactDmg > 0) damage = Math.round(damage * (1 + darkPactDmg / 100));
 
   // Elemental Touched affix bonuses (primary = damage %)
   if (element === "fire") {

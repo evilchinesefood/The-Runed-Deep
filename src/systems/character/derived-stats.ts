@@ -34,10 +34,11 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const eq = hero.equipment;
 
   // ── Scaled affix attribute bonuses ────────────────────────
-  const bonusStr = Math.round(getEquipAffixTotal(eq, 'might'));
-  const bonusInt = Math.round(getEquipAffixTotal(eq, 'brilliance'));
-  const bonusCon = Math.round(getEquipAffixTotal(eq, 'fortitude'));
-  const bonusDex = Math.round(getEquipAffixTotal(eq, 'grace'));
+  const soulDrainAll = Math.round(getEquipAffixTotal(eq, 'soul-drain'));
+  const bonusStr = Math.round(getEquipAffixTotal(eq, 'might')) + soulDrainAll;
+  const bonusInt = Math.round(getEquipAffixTotal(eq, 'brilliance')) + soulDrainAll;
+  const bonusCon = Math.round(getEquipAffixTotal(eq, 'fortitude')) + soulDrainAll;
+  const bonusDex = Math.round(getEquipAffixTotal(eq, 'grace')) + soulDrainAll;
 
   // ── Unique item attribute bonuses ─────────────────────────
   let uStr = 0, uInt = 0, uCon = 0, uDex = 0;
@@ -61,6 +62,9 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   let maxMp = computeMaxMp(effInt, hero.level);
   maxHp += Math.round(getEquipAffixTotal(eq, 'vitality'));
   maxMp += Math.round(getEquipAffixTotal(eq, 'arcane-well'));
+  // Soul Drain: reduce max HP (secondary value)
+  const soulDrainHpPenalty = Math.round(getEquipAffixTotal2(eq, 'soul-drain'));
+  if (soulDrainHpPenalty > 0) maxHp = Math.max(10, maxHp - soulDrainHpPenalty);
 
   // ── Armor value + Hardened affix ──────────────────────────
   let armorValue = computeTotalArmorValue(effDex, eq);

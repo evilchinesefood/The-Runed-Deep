@@ -70,7 +70,7 @@ export function templeCurePoison(state: GameState): GameState {
 }
 
 export function templeRemoveCurse(state: GameState, itemId: string): GameState {
-  const cost = 50;
+  const cost = 25;
   const err = checkCopper(state, cost);
   if (err) return err;
 
