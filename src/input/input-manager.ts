@@ -186,8 +186,8 @@ export class InputManager {
         return;
       }
 
-      // Number keys 1-7: quick cast spell from hotkey slots
-      const digitMatch = e.code.match(/^Digit([1-7])$/);
+      // Number keys 1-5: quick cast spell from hotkey slots
+      const digitMatch = e.code.match(/^Digit([1-5])$/);
       if (digitMatch && !e.shiftKey && !e.ctrlKey) {
         const idx = parseInt(digitMatch[1]) - 1;
         if (idx < this.spellHotkeys.length) {

@@ -58,7 +58,7 @@ export function createSpellScreen(
       hotkeyPanel.removeChild(hotkeyPanel.lastChild);
     }
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
       const slotId = hotkeys[i];
       const spell = slotId ? SPELL_BY_ID[slotId] : null;
       const row = el("div", {

@@ -301,7 +301,7 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
   const newHotkeys =
-    state.hero.spellHotkeys.length < 7
+    state.hero.spellHotkeys.length < 5
       ? [...state.hero.spellHotkeys, spellId]
       : state.hero.spellHotkeys;
   const hero = removeFromInventory(

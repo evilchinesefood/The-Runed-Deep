@@ -978,6 +978,8 @@ function switchScreen(state: GameState): void {
           (action) => {
             saveInvPosition(); // save BEFORE destroying DOM
             gameLoop.handleAction(action);
+            // If the action changed the screen (e.g. Scroll of Return), don't re-render inventory
+            if (gameLoop.getState().screen !== "inventory") return;
             root.replaceChildren();
             renderInventory();
           },
