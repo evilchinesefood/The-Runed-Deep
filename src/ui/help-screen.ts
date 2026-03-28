@@ -117,7 +117,7 @@ export function createHelpScreen(
     el(
       "div",
       { marginBottom: "3px", fontSize: "12px", color: "#888" },
-      "Equipping unidentified items reveals their true nature.",
+      "Visit the Sage to enchant your equipment for gold.",
     ),
   );
   tips.appendChild(

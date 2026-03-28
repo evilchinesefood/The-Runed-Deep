@@ -72,7 +72,7 @@ function stackItems(items: Item[]): ItemStack[] {
       stacks.push({ item, count: 1 });
       continue;
     }
-    const key = `${item.templateId}|${item.enchantment}|${item.identified}|${item.cursed}`;
+    const key = `${item.templateId}|${item.enchantment}|${item.cursed}`;
     const existing = map.get(key);
     if (existing) {
       existing.count++;

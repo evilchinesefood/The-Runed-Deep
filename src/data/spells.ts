@@ -312,16 +312,6 @@ export const SPELLS: SpellDef[] = [
     description: 'Reveals all traps within a 10-tile radius.',
   },
   {
-    id: 'identify',
-    name: 'Identify',
-    category: 'divination',
-    level: 2,
-    manaCost: 2,
-    targeting: 'self',
-    aoe: false,
-    description: 'Identifies an item, revealing its true properties.',
-  },
-  {
     id: 'clairvoyance',
     name: 'Clairvoyance',
     category: 'divination',

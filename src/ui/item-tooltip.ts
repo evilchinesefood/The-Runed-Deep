@@ -47,7 +47,6 @@ function getTooltip(): HTMLElement {
 }
 
 function nameColor(item: Item): string {
-  if (!item.identified) return '#ddd';
   const tpl = ITEM_BY_ID[item.templateId];
   if (tpl?.unique || item.specialEnchantments?.length) return '#f90';
   if (item.cursed) return '#f44';
@@ -56,16 +55,6 @@ function nameColor(item: Item): string {
   return '#ddd';
 }
 
-function categoryLabel(item: Item): string {
-  const labels: Record<string, string> = {
-    weapon: 'Weapon', armor: 'Body Armor', shield: 'Shield', helmet: 'Helmet',
-    cloak: 'Cloak', gauntlets: 'Gloves', belt: 'Belt',
-    boots: 'Boots', ring: 'Ring', amulet: 'Amulet', potion: 'Potion',
-    scroll: 'Scroll', spellbook: 'Spellbook', wand: 'Wand', staff: 'Staff',
-    container: 'Container', currency: 'Currency', misc: 'Misc',
-  };
-  return labels[item.category] || item.category;
-}
 
 function statLine(text: string): HTMLElement {
   const row = d('div', { color: '#aeb', paddingLeft: '8px' });
@@ -170,9 +159,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
     const spellName = tpl.spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     statsBox.appendChild(statLine(`Spell: ${spellName}`));
     if (item.category === 'spellbook') {
-      if (!item.identified) {
-        statsBox.appendChild(d('div', { color: '#886', paddingLeft: '8px', fontSize: '12px', fontStyle: 'italic' }, 'Must identify to read'));
-      } else if (_knownSpells.includes(tpl.spellId)) {
+      if (_knownSpells.includes(tpl.spellId)) {
         statsBox.appendChild(d('div', { color: '#4a4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, '\u2713 Learned'));
       } else {
         statsBox.appendChild(d('div', { color: '#fa4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, 'Unlearned'));
@@ -260,10 +247,6 @@ export function buildTooltipContent(item: Item): HTMLElement {
     container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed'));
   }
 
-  // Unidentified
-  if (!item.identified) {
-    container.appendChild(d('div', { color: '#886', fontStyle: 'italic' }, 'Unidentified'));
-  }
 
   // Weight + value
   const weight = (item.weight / 1000).toFixed(1);
@@ -290,18 +273,7 @@ export function showItemTooltip(item: Item, x: number, y: number): void {
   const tip = getTooltip();
   tip.replaceChildren();
 
-  if (!item.identified && item.enchantment !== 0) {
-    // Minimal info for unidentified enchanted items
-    tip.appendChild(d('div', { fontSize: '14px', fontWeight: 'bold', color: '#ddd', marginBottom: '4px' }, getDisplayName(item)));
-    tip.appendChild(d('div', { color: '#888' }, categoryLabel(item)));
-    tip.appendChild(d('div', { color: '#886', fontStyle: 'italic', marginTop: '4px' }, 'Unidentified'));
-    if (item.specialEnchantments && item.specialEnchantments.length > 0) {
-      tip.appendChild(d('div', { color: '#a8f', fontStyle: 'italic', fontSize: '11px', marginTop: '2px' }, 'Has magical properties'));
-    }
-    tip.appendChild(d('div', { color: '#666', marginTop: '4px', fontSize: '11px' }, `${(item.weight / 1000).toFixed(1)} kg`));
-  } else {
-    tip.appendChild(buildTooltipContent(item));
-  }
+  tip.appendChild(buildTooltipContent(item));
 
   positionTooltip(tip, x, y);
 }

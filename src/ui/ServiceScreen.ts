@@ -3,14 +3,14 @@
 // ============================================================
 
 import type { GameState } from '../core/types';
+import { ITEM_BY_ID } from '../data/items';
 import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
 import {
   templeHealHP, templeHealMP, templeCurePoison, templeRemoveCurse,
-  sageIdentifyOne, sageIdentifyAll,
+  sageEnchantItem,
   bankDeposit, bankWithdraw,
   innRest,
 } from '../systems/town/Services';
-import { getDisplayName } from '../systems/inventory/display-name';
 
 const BUILDING_NAMES: Record<string, string> = {
   temple: 'Temple of Odin',
@@ -51,8 +51,8 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
   for (const item of state.hero.inventory) {
     if (item.cursed) cursedItems.push({ id: item.id, name: item.name, source: 'inv' });
   }
-  for (const [slot, item] of Object.entries(state.hero.equipment)) {
-    if (item?.cursed) cursedItems.push({ id: item.id, name: `${item.name} (equipped)`, source: slot });
+  for (const [, item] of Object.entries(state.hero.equipment)) {
+    if (item?.cursed) cursedItems.push({ id: item.id, name: `${item.name} (equipped)`, source: 'eq' });
   }
 
   if (cursedItems.length > 0) {
@@ -71,35 +71,34 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
 }
 
 function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
-  const panel = createPanel('Identify Items');
+  const panel = createPanel('Enchantment (100g)');
 
-  const unidentInv = state.hero.inventory.filter(i => !i.identified);
-  const eq = state.hero.equipment;
-  const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const unidentEq = slots.filter(s => eq[s] && !eq[s]!.identified).map(s => eq[s]!);
-  const allUnident = [...unidentInv, ...unidentEq];
-
-  if (allUnident.length === 0) {
-    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic', marginBottom: '8px' }, 'All items are identified.'));
-  } else {
-    for (const item of allUnident) {
-      const row = el('div', { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
-      row.appendChild(el('div', { flex: '1', fontSize: '13px', color: '#ccc' }, getDisplayName(item)));
-      const btn = createButton('Identify 8g', 'sm');
-      const disabled = state.hero.copper < 8;
-      greyBtn(btn, disabled);
-      btn.addEventListener('click', () => onUpdate(sageIdentifyOne(state, item.id)));
-      row.appendChild(btn);
-      panel.appendChild(row);
+  // List equippable items from inventory + equipment
+  const enchantable: { id: string; name: string }[] = [];
+  for (const item of state.hero.inventory) {
+    if (ITEM_BY_ID[item.templateId]?.equipSlot && !item.cursed) {
+      enchantable.push({ id: item.id, name: item.name });
+    }
+  }
+  for (const [, item] of Object.entries(state.hero.equipment)) {
+    if (item && !item.cursed) {
+      enchantable.push({ id: item.id, name: `${item.name} (equipped)` });
     }
   }
 
-  const totalCost = 6 * allUnident.length;
-  const allBtn = createButton(`Identify All — ${totalCost} gold`);
-  Object.assign(allBtn.style, { display: 'block', width: '100%', marginTop: '8px' });
-  greyBtn(allBtn, allUnident.length === 0 || state.hero.copper < totalCost);
-  allBtn.addEventListener('click', () => onUpdate(sageIdentifyAll(state)));
-  panel.appendChild(allBtn);
+  if (enchantable.length === 0) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'No items to enchant.'));
+  } else {
+    panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, 'The sage can enhance your equipment by +1.'));
+    for (const ei of enchantable) {
+      const canAfford = state.hero.copper >= 100;
+      const btn = createButton(`+1: ${ei.name}`);
+      Object.assign(btn.style, { display: 'block', width: '100%', marginBottom: '4px', textAlign: 'left', fontSize: '12px' });
+      greyBtn(btn, !canAfford);
+      btn.addEventListener('click', () => onUpdate(sageEnchantItem(state, ei.id)));
+      panel.appendChild(btn);
+    }
+  }
 
   return panel;
 }

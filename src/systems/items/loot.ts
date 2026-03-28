@@ -152,7 +152,7 @@ export function createItemFromTemplate(
     weight: template.weight,
     bulk: Math.floor(template.weight / 5),
     value: Math.max(1, template.value + enchantment * 20),
-    identified: !!template.unique || (template.category !== 'spellbook' && !cursed && enchantment === 0),
+    identified: true,
     cursed,
     enchantment,
     properties,
@@ -205,7 +205,7 @@ export function createItemFromTemplate(
     return {
       ...base,
       name: `${base.name} ${suffix}`,
-      identified: isUnique, // uniques always identified
+      identified: true,
       specialEnchantments: specials,
     };
   }

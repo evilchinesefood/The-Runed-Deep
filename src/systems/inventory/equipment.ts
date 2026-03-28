@@ -54,8 +54,7 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   }
 
   // Remove new item from inventory and place in slot
-  // Equipping an item immediately identifies it
-  const equippedItem = item.identified ? item : { ...item, identified: true };
+  const equippedItem = item;
   inventory = inventory.filter(i => i.id !== itemId);
   equipment = { ...equipment, [slot]: equippedItem };
   messages.push(msg(`Equipped ${equippedItem.name}.`, state.turn));

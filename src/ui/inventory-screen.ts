@@ -26,9 +26,7 @@ function sectionHeader(text: string): HTMLElement {
 
 
 function itemDisplayLabel(item: Item): string {
-  const name = getDisplayName(item);
-  if (!item.identified) return `${name} (unidentified)`;
-  return name;
+  return getDisplayName(item);
 }
 
 function btn(label: string, onClick: () => void): HTMLElement {
@@ -296,7 +294,7 @@ export function createInventoryScreen(
   invPanel.style.overflowY = "auto";
 
   // Sort controls
-  type SortMode = "newest" | "oldest" | "identified" | "unidentified" | "type";
+  type SortMode = "newest" | "oldest" | "type";
   let sortMode: SortMode = (localStorage.getItem("rd-inv-sort") as SortMode) || "newest";
 
   const sortBar = el("div", {
@@ -308,8 +306,6 @@ export function createInventoryScreen(
   const sortModes: [SortMode, string][] = [
     ["newest", "Newest"],
     ["oldest", "Oldest"],
-    ["identified", "Identified"],
-    ["unidentified", "Unidentified"],
     ["type", "By Type"],
   ];
   const sortButtons: HTMLElement[] = [];
@@ -356,7 +352,7 @@ export function createInventoryScreen(
         stacks.push({ item, count: 1 });
         continue;
       }
-      const key = `${item.templateId}|${item.enchantment}|${item.identified}|${item.cursed}`;
+      const key = `${item.templateId}|${item.enchantment}|${item.cursed}`;
       const existing = map.get(key);
       if (existing) {
         existing.count++;
@@ -376,14 +372,6 @@ export function createInventoryScreen(
         return inv.reverse();
       case "oldest":
         return inv;
-      case "identified":
-        return inv.sort((a, b) =>
-          a.identified === b.identified ? 0 : a.identified ? -1 : 1,
-        );
-      case "unidentified":
-        return inv.sort((a, b) =>
-          a.identified === b.identified ? a.name.localeCompare(b.name) : a.identified ? 1 : -1,
-        );
       case "type":
         return inv.sort((a, b) => a.category.localeCompare(b.category));
       default:

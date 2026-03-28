@@ -146,10 +146,7 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
   const messages: Message[] = [];
   let hero = { ...state.hero };
 
-  if (item.templateId === "scroll-identify") {
-    hero = identifyFirstUnknown(hero, messages, state.turn);
-    showGameToast('Scroll of Identify used', 'info');
-  } else if (item.templateId === "scroll-teleport") {
+  if (item.templateId === "scroll-teleport") {
     const result = teleportHero(state, hero, messages);
     hero = result.hero;
     state = result.state;
@@ -185,47 +182,6 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
   };
 }
 
-/** Identify the first unidentified item in inventory or equipment. */
-export function identifyFirstUnknown(
-  hero: Hero,
-  messages: Message[],
-  turn: number,
-): Hero {
-  // Check inventory first
-  const unidIdx = hero.inventory.findIndex((i) => !i.identified);
-  if (unidIdx !== -1) {
-    const inv = [...hero.inventory];
-    const identified = { ...inv[unidIdx], identified: true };
-    inv[unidIdx] = identified;
-    messages.push({
-      text: `Identified: ${identified.name}!`,
-      severity: "important",
-      turn,
-    });
-    return { ...hero, inventory: inv };
-  }
-
-  // Check equipment
-  const eqSlots = Object.keys(
-    hero.equipment,
-  ) as (keyof typeof hero.equipment)[];
-  for (const slot of eqSlots) {
-    const eq = hero.equipment[slot];
-    if (eq && !eq.identified) {
-      const identified = { ...eq, identified: true };
-      messages.push({
-        text: `Identified: ${identified.name}!`,
-        severity: "important",
-        turn,
-      });
-      return { ...hero, equipment: { ...hero.equipment, [slot]: identified } };
-    }
-  }
-
-  messages.push({ text: "Nothing to identify.", severity: "system", turn });
-  return hero;
-}
-
 /** Remove curse from the first cursed equipped item. */
 export function removeCurseFromFirst(
   hero: Hero,
@@ -252,21 +208,6 @@ export function removeCurseFromFirst(
 }
 
 function useSpellbook(state: GameState, item: Item, idx: number): GameState {
-  // Must be identified to read
-  if (!item.identified) {
-    return {
-      ...state,
-      messages: [
-        ...state.messages,
-        {
-          text: `You can't read this spellbook — it must be identified first.`,
-          severity: "system" as const,
-          turn: state.turn,
-        },
-      ],
-    };
-  }
-
   const tpl = ITEM_BY_ID[item.templateId];
   const spellId = tpl?.spellId;
   if (!spellId) {

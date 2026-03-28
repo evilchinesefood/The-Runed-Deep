@@ -210,8 +210,6 @@ const POTIONS: ItemTemplate[] = [
 // ── Scrolls ───────────────────────────────────────────────
 
 const SCROLLS: ItemTemplate[] = [
-  { id: 'scroll-identify', name: 'Scroll of Identify', category: 'scroll', sprite: 'scroll-identify',
-    weight: 50, value: 30, depthMin: 1, depthMax: 99, spellId: 'identify' },
   { id: 'scroll-teleport', name: 'Scroll of Teleport', category: 'scroll', sprite: 'scroll-teleport',
     weight: 50, value: 40, depthMin: 3, depthMax: 99, spellId: 'teleport' },
   { id: 'scroll-rune-of-return', name: 'Scroll of Rune of Return', category: 'scroll', sprite: 'scroll-return',

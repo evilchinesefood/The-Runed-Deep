@@ -98,7 +98,7 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 9:
   'detect-monsters',
   // Level 10:
-  'identify',
+  'detect-traps',
   // Level 11:
   'neutralize-poison',
   // Level 12:

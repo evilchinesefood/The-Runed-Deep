@@ -10,7 +10,6 @@ import { SPELL_BY_ID, type SpellDef } from "../../data/spells";
 import { Sound } from "../Sound";
 import { getDirectionVector, teleportToTown } from "../../core/actions";
 import {
-  identifyFirstUnknown,
   removeCurseFromFirst,
 } from "../inventory/use-item";
 import { getMonstersForDepth } from "../../data/monsters";
@@ -221,11 +220,6 @@ function resolveSpellEffect(
       return resolveDetectMonsters(state);
     case "detect-traps":
       return resolveDetectTraps(state);
-    case "identify": {
-      const msgs: Message[] = [];
-      const hero = identifyFirstUnknown(state.hero, msgs, state.turn);
-      return { ...state, hero, messages: [...state.messages, ...msgs] };
-    }
     case "clairvoyance":
       return resolveClairvoyance(state);
 

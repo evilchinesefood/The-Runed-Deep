@@ -11,8 +11,9 @@ export function processPickupItem(state: GameState): GameState {
   if (!floor) return state;
 
   const pos = state.hero.position;
+  // Pick up items within 1 tile of the player (3x3 area)
   const itemsHere = floor.items.filter(
-    (i) => i.position.x === pos.x && i.position.y === pos.y,
+    (i) => Math.abs(i.position.x - pos.x) <= 1 && Math.abs(i.position.y - pos.y) <= 1,
   );
 
   if (itemsHere.length === 0) {
@@ -74,13 +75,10 @@ export function processPickupItem(state: GameState): GameState {
         showGameToast("Your pack is too full!", "warning");
         continue;
       }
-      const pickedItem = (placed.item.category === 'potion' || placed.item.category === 'scroll')
-        ? { ...placed.item, identified: true }
-        : placed.item;
-      inventory.push(pickedItem);
+      inventory.push(placed.item);
       pickedIds.add(placed.item.id);
       messages.push({
-        text: `Picked up ${getDisplayName(pickedItem)}.`,
+        text: `Picked up ${getDisplayName(placed.item)}.`,
         severity: "normal",
         turn: state.turn,
       });

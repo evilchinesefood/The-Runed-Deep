@@ -119,74 +119,51 @@ function blessItem(item: import("../../core/types").Item): import("../../core/ty
   };
 }
 
-// ── Sage ─────────────────────────────────────────────────
+// ── Sage (Enchanter) ────────────────────────────────────
 
-export function sageIdentifyOne(state: GameState, itemId: string): GameState {
-  const cost = 8;
+export function sageEnchantItem(state: GameState, itemId: string): GameState {
+  const cost = 100;
   const err = checkCopper(state, cost);
   if (err) return err;
 
-  const invIdx = state.hero.inventory.findIndex((i) => i.id === itemId);
+  // Search inventory
+  const invIdx = state.hero.inventory.findIndex(i => i.id === itemId);
   if (invIdx !== -1) {
     const item = state.hero.inventory[invIdx];
-    const identified = { ...item, identified: true };
-    const inv = state.hero.inventory.map((i, idx) =>
-      idx === invIdx ? identified : i,
-    );
+    const enhanced = enchantItem(item);
+    const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? enhanced : i);
     return addMsg(
-      spendCopper({ ...state, hero: { ...state.hero, inventory: inv } }, cost),
-      `The sage identifies your ${identified.name}.`,
+      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      `The sage enchants your ${enhanced.name}!`,
     );
   }
 
+  // Search equipment
   const eq = state.hero.equipment;
   const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const slot = slots.find((s) => eq[s]?.id === itemId);
+  const slot = slots.find(s => eq[s]?.id === itemId);
   if (slot) {
     const item = eq[slot]!;
-    const identified = { ...item, identified: true };
+    const enhanced = enchantItem(item);
     return addMsg(
-      spendCopper(
-        {
-          ...state,
-          hero: { ...state.hero, equipment: { ...eq, [slot]: identified } },
-        },
-        cost,
-      ),
-      `The sage identifies your ${identified.name}.`,
+      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: enhanced } }) }, cost),
+      `The sage enchants your ${enhanced.name}!`,
     );
   }
 
   return addMsg(state, "Item not found.", "system");
 }
 
-export function sageIdentifyAll(state: GameState): GameState {
-  const unidentInv = state.hero.inventory.filter((i) => !i.identified);
-  const eq = state.hero.equipment;
-  const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const unidentEqSlots = slots.filter((s) => eq[s] && !eq[s]!.identified);
-
-  const count = unidentInv.length + unidentEqSlots.length;
-  if (count === 0)
-    return addMsg(state, "All your items are already identified.", "system");
-
-  const cost = 6 * count;
-  const err = checkCopper(state, cost);
-  if (err) return err;
-
-  const inv = state.hero.inventory.map((i) => ({ ...i, identified: true }));
-  const newEq = { ...eq };
-  for (const s of unidentEqSlots) {
-    newEq[s] = { ...newEq[s]!, identified: true };
-  }
-
-  return addMsg(
-    spendCopper(
-      { ...state, hero: { ...state.hero, inventory: inv, equipment: newEq } },
-      cost,
-    ),
-    `The sage identifies all ${count} item${count > 1 ? "s" : ""} for ${cost} gold.`,
-  );
+/** Add +1 enchantment to an item */
+function enchantItem(item: import("../../core/types").Item): import("../../core/types").Item {
+  const newEnch = item.enchantment + 1;
+  const baseName = item.name.replace(/\s*[+-]\d+$/, '');
+  return {
+    ...item,
+    enchantment: newEnch,
+    name: newEnch !== 0 ? `${baseName} +${newEnch}` : baseName,
+    value: item.value + 20,
+  };
 }
 
 // ── Bank ─────────────────────────────────────────────────
