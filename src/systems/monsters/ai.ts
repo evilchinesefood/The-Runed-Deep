@@ -807,7 +807,12 @@ function processRanged(
   const hasRanged = rangedAbilities.length > 0;
   const los = hasLineOfSight(floor, monster.position, hero.position);
 
-  // Stay in 3-6 tile range
+  // Melee fallback when adjacent
+  if (cDist <= 1) {
+    return monsterAttacksPlayer(state, monster);
+  }
+
+  // Try to maintain 3-6 tile range for ranged attacks
   if (cDist < 3) {
     return moveAwayFrom(state, floorKey, idx, hero.position);
   }
@@ -816,11 +821,6 @@ function processRanged(
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
     return monsterRangedAttack(state, monster, ability);
-  }
-
-  // Out of range or no LOS — move toward or melee if adjacent
-  if (cDist <= 1) {
-    return monsterAttacksPlayer(state, monster);
   }
 
   if (dist <= getDetectRange(state)) {
