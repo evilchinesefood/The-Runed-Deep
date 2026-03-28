@@ -72,6 +72,10 @@ function statLine(text: string): HTMLElement {
   return row;
 }
 
+// Set by UI screens so tooltips can show spell learned status
+let _knownSpells: string[] = [];
+export function setTooltipKnownSpells(spells: string[]): void { _knownSpells = spells; }
+
 export function buildTooltipContent(item: Item): HTMLElement {
   const tpl = ITEM_BY_ID[item.templateId];
   const container = d('div');
@@ -164,8 +168,14 @@ export function buildTooltipContent(item: Item): HTMLElement {
   if ((item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') && tpl?.spellId) {
     const spellName = tpl.spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     statsBox.appendChild(statLine(`Spell: ${spellName}`));
-    if (item.category === 'spellbook' && !item.identified) {
-      statsBox.appendChild(d('div', { color: '#886', paddingLeft: '8px', fontSize: '11px', fontStyle: 'italic' }, 'Must identify to read'));
+    if (item.category === 'spellbook') {
+      if (!item.identified) {
+        statsBox.appendChild(d('div', { color: '#886', paddingLeft: '8px', fontSize: '12px', fontStyle: 'italic' }, 'Must identify to read'));
+      } else if (_knownSpells.includes(tpl.spellId)) {
+        statsBox.appendChild(d('div', { color: '#4a4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, '\u2713 Learned'));
+      } else {
+        statsBox.appendChild(d('div', { color: '#fa4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, 'Unlearned'));
+      }
     }
     hasStats = true;
   }

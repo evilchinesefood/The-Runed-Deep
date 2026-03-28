@@ -6,7 +6,7 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip, buildTooltipContent } from "./item-tooltip";
+import { attachItemTooltip, hideItemTooltip, buildTooltipContent, setTooltipKnownSpells } from "./item-tooltip";
 import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
 
 function sectionHeader(text: string): HTMLElement {
@@ -133,6 +133,7 @@ export function createInventoryScreen(
   initialSelectedIdx: number = 0,
 ): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
   const h = state.hero;
+  setTooltipKnownSpells(h.knownSpells);
   const isMobileView = window.innerWidth <= 768;
   let selectedIdx = Math.min(initialSelectedIdx, Math.max(0, h.inventory.length - 1));
 

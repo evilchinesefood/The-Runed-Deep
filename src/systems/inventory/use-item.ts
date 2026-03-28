@@ -283,12 +283,14 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     };
   }
   if (state.hero.knownSpells.includes(spellId)) {
+    const name = spellId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    showGameToast(`Already learned ${name}`, 'warning');
     return {
       ...state,
       messages: [
         ...state.messages,
         {
-          text: `You already know that spell.`,
+          text: `You already know ${name}.`,
           severity: "system" as const,
           turn: state.turn,
         },

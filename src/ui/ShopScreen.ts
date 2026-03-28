@@ -23,7 +23,7 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip, buildTooltipContent } from "./item-tooltip";
+import { attachItemTooltip, hideItemTooltip, buildTooltipContent, setTooltipKnownSpells } from "./item-tooltip";
 import { ITEM_BY_ID } from "../data/items";
 
 const IS_MOBILE_SHOP = window.innerWidth <= 768;
@@ -286,6 +286,7 @@ export function createShopScreen(
   const shopName = shop?.name ?? shopId;
 
   let state = initialState;
+  setTooltipKnownSpells(state.hero.knownSpells);
   let shopScrollTop = 0;
   let invScrollTop = 0;
   let shopSort: ShopSort = "cost";
