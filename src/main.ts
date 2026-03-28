@@ -97,6 +97,11 @@ input.setPathClickCallback((target) => {
 let autoExploring = false;
 let autoSearchOnArrival = false;
 
+/** Items worth stopping auto-explore for (ignore junk/broken/blank with value <= 5) */
+function isWorthStoppingFor(item: import("./core/types").Item): boolean {
+  return item.value > 5;
+}
+
 function aeMsg(text: string): void {
   const state = gameLoop.getState();
   gameLoop.setState({
@@ -287,13 +292,14 @@ function stepAutoPathExplore(): void {
     return;
   }
 
-  // Check for items at current position
-  const itemsHere = floor.items.some(
+  // Check for valuable items at current position (ignore junk)
+  const valuableHere = floor.items.some(
     (i) =>
       i.position.x === state.hero.position.x &&
-      i.position.y === state.hero.position.y,
+      i.position.y === state.hero.position.y &&
+      isWorthStoppingFor(i.item),
   );
-  if (itemsHere) {
+  if (valuableHere) {
     aeMsg("Auto-explore stopped — item found on the ground.");
     autoExploring = false;
     autoPath = [];
@@ -304,10 +310,11 @@ function stepAutoPathExplore(): void {
   const dx = next.x - state.hero.position.x;
   const dy = next.y - state.hero.position.y;
 
-  // Stop at closed/locked doors or traps
+  // Stop at traps (doors are opened automatically by the move action)
   const nextTile = floor.tiles[next.y]?.[next.x];
-  if (nextTile && (nextTile.type === "door-closed" || nextTile.type === "door-locked")) {
-    aeMsg("Auto-explore stopped — door ahead.");
+  if (nextTile?.type === "door-locked") {
+    // Only stop at locked doors — closed doors open automatically
+    aeMsg("Auto-explore stopped — locked door ahead.");
     autoExploring = false;
     autoPath = [];
     return;
@@ -319,11 +326,11 @@ function stepAutoPathExplore(): void {
     return;
   }
 
-  // Stop if next tile has items on the ground
-  const nextHasItems = floor.items.some(
-    (i) => i.position.x === next.x && i.position.y === next.y,
+  // Stop if next tile has valuable items on the ground (ignore junk)
+  const nextHasValuable = floor.items.some(
+    (i) => i.position.x === next.x && i.position.y === next.y && isWorthStoppingFor(i.item),
   );
-  if (nextHasItems) {
+  if (nextHasValuable) {
     autoExploring = false;
     autoPath = [];
     return;
@@ -398,21 +405,18 @@ function stepAutoPath(): void {
       return;
     }
 
-    // Stop at closed/locked doors
+    // Stop at locked doors only — closed doors open automatically on move
     const nextTile = floor.tiles[next.y]?.[next.x];
-    if (
-      nextTile &&
-      (nextTile.type === "door-closed" || nextTile.type === "door-locked")
-    ) {
+    if (nextTile?.type === "door-locked") {
       autoPath = [];
       return;
     }
 
-    // Stop at items on the ground
-    const nextHasItems = floor.items.some(
-      (i) => i.position.x === next.x && i.position.y === next.y,
+    // Stop at valuable items on the ground (ignore junk)
+    const nextHasValuable = floor.items.some(
+      (i) => i.position.x === next.x && i.position.y === next.y && isWorthStoppingFor(i.item),
     );
-    if (nextHasItems) {
+    if (nextHasValuable) {
       autoPath = [];
       return;
     }
@@ -459,17 +463,19 @@ function dxdyToDirection(
   return map[`${dx},${dy}`] ?? null;
 }
 
-// Input handler — cancels auto-walk on manual movement
-input.setHandler((action) => {
-  if ((autoPath.length > 0 || autoExploring) && action.type === "move") {
+// Cancel auto-move helper — called on any player input
+function cancelAutoMove(): void {
+  if (autoPath.length > 0 || autoExploring) {
     autoPath = [];
     autoExploring = false;
     autoSearchOnArrival = false;
-    if (autoWalkTimer) {
-      clearTimeout(autoWalkTimer);
-      autoWalkTimer = null;
-    }
+    if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
   }
+}
+
+// Input handler — cancels auto-walk on ANY action
+input.setHandler((action) => {
+  cancelAutoMove();
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
   playPendingAnimations();
@@ -478,6 +484,7 @@ input.setHandler((action) => {
 // Touch controls
 const touchControls = new TouchControls();
 touchControls.setHandler((action) => {
+  cancelAutoMove();
   if (animRenderer?.isPlaying()) return;
   gameLoop.handleAction(action);
   playPendingAnimations();

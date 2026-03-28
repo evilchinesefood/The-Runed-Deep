@@ -84,25 +84,7 @@ function createArrowIcon(rotation: number): SVGSVGElement {
   return svg;
 }
 
-function createPauseIcon(): SVGSVGElement {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", "16");
-  svg.setAttribute("height", "16");
-  svg.setAttribute("viewBox", "0 0 16 16");
-  const r1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  r1.setAttribute("x", "3"); r1.setAttribute("y", "2");
-  r1.setAttribute("width", "4"); r1.setAttribute("height", "12");
-  r1.setAttribute("rx", "1"); r1.setAttribute("fill", "#666");
-  const r2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  r2.setAttribute("x", "9"); r2.setAttribute("y", "2");
-  r2.setAttribute("width", "4"); r2.setAttribute("height", "12");
-  r2.setAttribute("rx", "1"); r2.setAttribute("fill", "#666");
-  svg.appendChild(r1);
-  svg.appendChild(r2);
-  return svg;
-}
-
-// SVG icons for mobile action buttons
+// SVG icons for action buttons
 function createActionIcon(id: string): SVGSVGElement {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "22");
@@ -174,6 +156,10 @@ function createActionIcon(id: string): SVGSVGElement {
       rect(9, 13, 4, 6, c, 1);
       rect(9, 9, 4, 4, c, 1);
       break;
+    case "rest": // Pause/rest icon
+      rect(5, 4, 4, 14, c, 1);
+      rect(13, 4, 4, 14, c, 1);
+      break;
     case "menu": // Hamburger menu icon
       rect(3, 5, 16, 2, c, 1);
       rect(3, 10, 16, 2, c, 1);
@@ -223,10 +209,10 @@ export class TouchControls {
       const [row, col] = pos.split("/");
       const isCenter = dir === null;
       const btn = makeBtn(48, () => {
-        if (isCenter) this.handler?.({ type: "rest" });
+        if (isCenter) this.autoExploreHandler?.();
         else this.handler?.({ type: "move", direction: dir! });
       }, true, !isCenter);
-      btn.appendChild(isCenter ? createPauseIcon() : createArrowIcon(rot));
+      btn.appendChild(isCenter ? createActionIcon("auto") : createArrowIcon(rot));
       btn.style.gridRow = row;
       btn.style.gridColumn = col;
       if (isCenter) {
@@ -260,9 +246,9 @@ export class TouchControls {
       `;
     }
 
-    const actions: [string, GameAction | null][] = [
+    const actions: [string, GameAction][] = [
       ["action", { type: "contextAction" }],
-      ["auto", null],
+      ["rest", { type: "rest" }],
       ["items", { type: "setScreen", screen: "inventory" }],
       ["spells", { type: "setScreen", screen: "spells" }],
       ["map", { type: "setScreen", screen: "map" }],
@@ -270,20 +256,14 @@ export class TouchControls {
 
     for (const [id, action] of actions) {
       const btn = makeBtn(44, () => {
-        if (action === null) this.autoExploreHandler?.();
-        else this.handler?.(action);
+        this.handler?.(action);
       });
       if (isMobile) {
         btn.appendChild(createActionIcon(id));
       } else {
-        // Desktop: use icon for auto, letters for rest
-        if (id === "auto") {
-          btn.appendChild(createActionIcon("auto"));
-        } else {
-          btn.textContent = { action: "E", items: "I", spells: "Z", map: "M" }[id] ?? "";
-        }
+        btn.textContent = { action: "E", rest: "Q", items: "I", spells: "Z", map: "M" }[id] ?? "";
       }
-      btn.title = { action: "Action", items: "Items", spells: "Spells", map: "Map", auto: "Auto-Explore" }[id] ?? "";
+      btn.title = { action: "Action", rest: "Rest", items: "Items", spells: "Spells", map: "Map" }[id] ?? "";
       if (!isMobile) {
         const row = document.createElement("div");
         row.style.cssText = "display:flex;align-items:center;gap:6px;";
