@@ -3,6 +3,7 @@ import type { GameAction } from "../core/types";
 export type TouchActionHandler = (action: GameAction) => void;
 
 let activeBtn: HTMLElement | null = null;
+let repeatTimer: number | null = null;
 
 function releaseActive(): void {
   if (activeBtn) {
@@ -11,6 +12,7 @@ function releaseActive(): void {
     activeBtn.style.borderBottomWidth = "3px";
     activeBtn = null;
   }
+  if (repeatTimer) { clearInterval(repeatTimer); repeatTimer = null; }
 }
 
 document.addEventListener("touchend", releaseActive, { passive: true });
@@ -21,10 +23,13 @@ function haptic(): void {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
+const BTN_BOTTOM = "calc(36px + env(safe-area-inset-bottom, 0px))";
+
 function makeBtn(
   size: number,
   onClick: () => void,
   isDpad = false,
+  repeatable = false,
 ): HTMLElement {
   const btn = document.createElement("div");
   const bg = "linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%)";
@@ -48,6 +53,9 @@ function makeBtn(
     btn.style.transform = "translateY(1px)";
     btn.style.borderBottomWidth = "2px";
     haptic();
+    if (repeatable) {
+      repeatTimer = window.setInterval(() => { onClick(); }, 150);
+    }
   };
   btn.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -193,7 +201,7 @@ export class TouchControls {
     // D-pad — consistent SVG arrows in a 3x3 grid
     this.dpad = document.createElement("div");
     this.dpad.style.cssText = `
-      position:fixed;bottom:calc(16px + env(safe-area-inset-bottom, 0px));left:12px;z-index:1000;
+      position:fixed;bottom:${BTN_BOTTOM};left:12px;z-index:1000;
       display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px 48px;
       gap:3px;touch-action:none;
     `;
@@ -217,7 +225,7 @@ export class TouchControls {
       const btn = makeBtn(48, () => {
         if (isCenter) this.handler?.({ type: "rest" });
         else this.handler?.({ type: "move", direction: dir! });
-      }, true);
+      }, true, !isCenter);
       btn.appendChild(isCenter ? createPauseIcon() : createArrowIcon(rot));
       btn.style.gridRow = row;
       btn.style.gridColumn = col;
@@ -237,17 +245,17 @@ export class TouchControls {
     this.actionBar = document.createElement("div");
     if (isPortrait) {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:calc(16px + env(safe-area-inset-bottom, 0px));right:12px;z-index:1000;
+        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
         display:grid;grid-template-columns:44px 44px;gap:6px;touch-action:none;
       `;
     } else if (isMobile) {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:calc(16px + env(safe-area-inset-bottom, 0px));right:12px;z-index:1000;
+        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
         display:flex;flex-direction:column;gap:6px;touch-action:none;
       `;
     } else {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:calc(16px + env(safe-area-inset-bottom, 0px));right:12px;z-index:1000;
+        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
         display:flex;flex-direction:column;gap:6px;touch-action:none;
       `;
     }

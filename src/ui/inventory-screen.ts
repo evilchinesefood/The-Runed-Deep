@@ -139,13 +139,13 @@ export function createInventoryScreen(
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
 
-  // ── Title bar ──────────────────────────────────────────────
-  screen.appendChild(
-    createTitleBar("Equipment", () => {
-      cleanup();
-      onClose();
-    }),
-  );
+  // ── Title bar with items-only toggle ────────────────────────
+  let itemsOnlyMode = false;
+  const titleBar = createTitleBar("Equipment", () => { cleanup(); onClose(); });
+  const toggleViewBtn = createButton("Items", "sm");
+  toggleViewBtn.style.cssText += "margin-left:auto;margin-right:8px;padding:4px 10px;font-size:12px;";
+  titleBar.insertBefore(toggleViewBtn, titleBar.lastChild);
+  screen.appendChild(titleBar);
 
   // ── Equipment panel: paperdoll + slot legend ─────────────────
   const isMobile = window.innerWidth <= 480;
@@ -648,6 +648,16 @@ export function createInventoryScreen(
   );
 
   screen.appendChild(footer);
+
+  // ── Items-only toggle ──────────────────────────────────────
+  toggleViewBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    itemsOnlyMode = !itemsOnlyMode;
+    toggleViewBtn.textContent = itemsOnlyMode ? "Equip" : "Items";
+    equipPanel.style.display = itemsOnlyMode ? "none" : (isMobile ? "flex" : "flex");
+    footer.style.display = itemsOnlyMode ? "none" : "";
+    invPanel.style.maxHeight = itemsOnlyMode ? "none" : "clamp(200px, 40vh, 300px)";
+  });
 
   // ── Keyboard handler ───────────────────────────────────────
   const keyHandler = (e: KeyboardEvent) => {

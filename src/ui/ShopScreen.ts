@@ -23,8 +23,39 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip } from "./item-tooltip";
+import { attachItemTooltip, hideItemTooltip, buildTooltipContent } from "./item-tooltip";
 import { ITEM_BY_ID } from "../data/items";
+
+const IS_MOBILE_SHOP = window.innerWidth <= 768;
+let shopDrawerEl: HTMLElement | null = null;
+
+function closeShopDrawer(): void {
+  if (shopDrawerEl) { shopDrawerEl.remove(); shopDrawerEl = null; }
+}
+
+function openShopDrawer(item: Item, price: number, actionLabel: string, onAction: () => void): void {
+  closeShopDrawer();
+  shopDrawerEl = el("div", {
+    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
+    background: "#1a1a1a", borderTop: "2px solid #555",
+    padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+    maxHeight: "60vh", overflowY: "auto",
+    boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
+  });
+  shopDrawerEl.appendChild(buildTooltipContent(item));
+  shopDrawerEl.appendChild(el("div", { color: "#a70", fontSize: "13px", marginTop: "6px" }, `Price: ${price} gold`));
+  const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center" });
+  const actionBtn = createButton(actionLabel);
+  actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+  actionBtn.addEventListener("click", (e) => { e.stopPropagation(); closeShopDrawer(); onAction(); });
+  btnRow.appendChild(actionBtn);
+  const closeBtn = createButton("Close");
+  closeBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+  closeBtn.addEventListener("click", (e) => { e.stopPropagation(); closeShopDrawer(); });
+  btnRow.appendChild(closeBtn);
+  shopDrawerEl.appendChild(btnRow);
+  document.body.appendChild(shopDrawerEl);
+}
 
 interface ItemStack {
   item: Item;
@@ -69,6 +100,7 @@ function itemRow(
   btnDisabled: boolean,
   onClick: () => void,
   nameColor?: string,
+  priceNum?: number,
 ): HTMLElement {
   const row = el("div", {
     display: "flex",
@@ -76,15 +108,11 @@ function itemRow(
     gap: "8px",
     padding: "3px 6px",
     borderRadius: "4px",
-    cursor: "default",
+    cursor: IS_MOBILE_SHOP ? "pointer" : "default",
     transition: "background 0.1s",
   });
-  row.addEventListener("mouseenter", () => {
-    row.style.background = "#1a1a1a";
-  });
-  row.addEventListener("mouseleave", () => {
-    row.style.background = "";
-  });
+  row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
+  row.addEventListener("mouseleave", () => { row.style.background = ""; });
 
   // Sprite with count badge
   const spriteWrap = el("div", {
@@ -101,63 +129,42 @@ function itemRow(
   if (glow) sp.style.filter = glow;
   spriteWrap.appendChild(sp);
   if (count > 1) {
-    const badge = el(
-      "span",
-      {
-        position: "absolute",
-        bottom: "-2px",
-        right: "-2px",
-        background: "#c90",
-        color: "#000",
-        fontSize: "10px",
-        fontWeight: "bold",
-        padding: "0 3px",
-        borderRadius: "3px",
-        lineHeight: "14px",
-      },
-      `${count}`,
-    );
+    const badge = el("span", {
+      position: "absolute", bottom: "-2px", right: "-2px",
+      background: "#c90", color: "#000", fontSize: "10px",
+      fontWeight: "bold", padding: "0 3px", borderRadius: "3px", lineHeight: "14px",
+    }, `${count}`);
     spriteWrap.appendChild(badge);
   }
   row.appendChild(spriteWrap);
 
   const displayName =
     count > 1 ? `${getDisplayName(item)} (x${count})` : getDisplayName(item);
-  const name = el(
-    "div",
-    {
-      flex: "1",
-      fontSize: "13px",
-      color: nameColor ?? "#ccc",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-    },
-    displayName,
-  );
-  row.appendChild(name);
+  row.appendChild(el("div", {
+    flex: "1", fontSize: "13px", color: nameColor ?? "#ccc",
+    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+  }, displayName));
 
-  const price = el(
-    "div",
-    { fontSize: "12px", color: "#a70", flexShrink: "0" },
-    priceLabel,
-  );
-  row.appendChild(price);
+  row.appendChild(el("div", { fontSize: "12px", color: "#a70", flexShrink: "0" }, priceLabel));
 
-  const btn = createButton(btnText, "sm");
-  if (btnDisabled) {
-    btn.disabled = true;
-    btn.style.opacity = "0.4";
-    btn.style.cursor = "not-allowed";
-  } else {
-    btn.addEventListener("click", () => {
-      hideItemTooltip();
-      onClick();
+  if (IS_MOBILE_SHOP) {
+    // Mobile: tap row to open drawer
+    row.addEventListener("click", () => {
+      if (!btnDisabled) openShopDrawer(item, priceNum ?? 0, btnText, onClick);
     });
+  } else {
+    // Desktop: inline button + tooltip
+    const btn = createButton(btnText, "sm");
+    if (btnDisabled) {
+      btn.disabled = true;
+      btn.style.opacity = "0.4";
+      btn.style.cursor = "not-allowed";
+    } else {
+      btn.addEventListener("click", () => { hideItemTooltip(); onClick(); });
+    }
+    row.appendChild(btn);
+    attachItemTooltip(row, item);
   }
-  row.appendChild(btn);
-
-  attachItemTooltip(row, item);
   return row;
 }
 
@@ -224,7 +231,7 @@ function buildPanel(
   panel.appendChild(sortBar);
 
   const list = el("div", {
-    maxHeight: "clamp(200px, 40vh, 400px)",
+    maxHeight: IS_MOBILE_SHOP ? "clamp(200px, 50vh, 500px)" : "clamp(200px, 40vh, 400px)",
     overflowY: "auto",
   });
   list.setAttribute("data-shop-list", "1");
@@ -259,6 +266,7 @@ function buildPanel(
         disabled,
         () => onAction(item.id),
         isSold ? "#7a8a5a" : itemNameColor(item),
+        price,
       );
       list.appendChild(row);
     }
@@ -380,7 +388,7 @@ export function createShopScreen(
   };
   document.addEventListener("keydown", onKey);
 
-  screen.cleanup = () => document.removeEventListener("keydown", onKey);
+  screen.cleanup = () => { document.removeEventListener("keydown", onKey); closeShopDrawer(); };
 
   return screen;
 }

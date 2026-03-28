@@ -908,26 +908,34 @@ function switchScreen(state: GameState): void {
         input.startSpellCast(spellId);
       });
 
-      // Map click → direction for spell targeting or click-to-move
-      mapRenderer
-        .getMapContainer()
-        .addEventListener("click", (e: MouseEvent) => {
-          const state = gameLoop.getState();
-          const worldPos = mapRenderer!.screenToWorld(
-            e.clientX,
-            e.clientY,
-            state.hero.position,
+      // Map click/tap → direction for spell targeting or click-to-move
+      const mapEl = mapRenderer.getMapContainer();
+      const handleMapTap = (x: number, y: number) => {
+        const state = gameLoop.getState();
+        const worldPos = mapRenderer!.screenToWorld(x, y, state.hero.position);
+        if (worldPos) {
+          input.handleMapClick(
+            state.hero.position.x,
+            state.hero.position.y,
+            worldPos.x,
+            worldPos.y,
           );
-          if (worldPos) {
-            input.handleMapClick(
-              state.hero.position.x,
-              state.hero.position.y,
-              worldPos.x,
-              worldPos.y,
-            );
-            playPendingAnimations();
-          }
-        });
+          playPendingAnimations();
+        }
+      };
+      // Touch: use touchend for faster response with correct coordinates
+      let mapTouchHandled = false;
+      mapEl.addEventListener("touchend", (e: TouchEvent) => {
+        if (e.changedTouches.length === 0) return;
+        const t = e.changedTouches[0];
+        mapTouchHandled = true;
+        handleMapTap(t.clientX, t.clientY);
+      }, { passive: true });
+      // Mouse: fallback click for desktop
+      mapEl.addEventListener("click", (e: MouseEvent) => {
+        if (mapTouchHandled) { mapTouchHandled = false; return; } // skip if touch handled
+        handleMapTap(e.clientX, e.clientY);
+      });
 
       break;
     }
