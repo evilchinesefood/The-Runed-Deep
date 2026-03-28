@@ -85,7 +85,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
   // Stats
   const statsBox = d('div', { marginBottom: '4px' });
   let hasStats = false;
-  const ench = item.identified ? item.enchantment : 0;
+  const ench = item.enchantment;
 
   // Damage — show effective range including enchantment
   if (item.properties['damageMin'] !== undefined && item.properties['damageMax'] !== undefined) {
@@ -139,7 +139,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
   }
 
   // Depth range
-  if (tpl && item.identified) {
+  if (tpl) {
     statsBox.appendChild(d('div', { color: '#555', paddingLeft: '8px', fontSize: '11px' }, `Floors ${tpl.depthMin}–${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
   }
 
@@ -212,7 +212,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
 
   // Unique ability
   const tplU = ITEM_BY_ID[item.templateId];
-  if (tplU?.uniqueAbility && item.identified) {
+  if (tplU?.uniqueAbility) {
     const abilityDesc: Record<string, string> = {
       'resist-fire-75': item.properties?.['wardUpgraded'] ? '+99 Fire Resistance' : '+75 Fire Resistance',
       'resist-cold-75': item.properties?.['wardUpgraded'] ? '+99 Cold Resistance' : '+75 Cold Resistance',
@@ -238,12 +238,12 @@ export function buildTooltipContent(item: Item): HTMLElement {
   }
 
   // Blessed
-  if (item.blessed && item.identified) {
+  if (item.blessed) {
     container.appendChild(d('div', { color: '#c8f', fontStyle: 'italic', fontWeight: 'bold' }, '\u2728 Blessed'));
   }
 
   // Cursed
-  if (item.cursed && item.identified) {
+  if (item.cursed) {
     container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed'));
   }
 

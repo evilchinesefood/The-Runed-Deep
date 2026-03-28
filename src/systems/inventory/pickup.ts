@@ -91,15 +91,8 @@ export function processPickupItem(state: GameState): GameState {
 
   hero = { ...hero, inventory, copper };
 
-  // Only remove items that were actually picked up
-  const remaining = floor.items.filter(
-    (i) =>
-      !(
-        i.position.x === pos.x &&
-        i.position.y === pos.y &&
-        pickedIds.has(i.item.id)
-      ),
-  );
+  // Remove all picked-up items by ID (covers 3x3 area)
+  const remaining = floor.items.filter((i) => !pickedIds.has(i.item.id));
   const newFloor = { ...floor, items: remaining };
 
   return {

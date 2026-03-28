@@ -104,7 +104,7 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 12:
   'heal-medium-wounds',
   // Level 13:
-  'detect-traps',
+  'detect-objects',
   // Level 14:
   'rune-of-return',
   // Level 15:

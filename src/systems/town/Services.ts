@@ -161,7 +161,7 @@ function enchantItem(item: import("../../core/types").Item): import("../../core/
   return {
     ...item,
     enchantment: newEnch,
-    name: newEnch !== 0 ? `${baseName} +${newEnch}` : baseName,
+    name: newEnch > 0 ? `${baseName} +${newEnch}` : newEnch < 0 ? `${baseName} ${newEnch}` : baseName,
     value: item.value + 20,
   };
 }

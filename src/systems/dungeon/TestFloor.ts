@@ -144,7 +144,7 @@ export function generateTestFloor(): {
   const potionTpl = ALL_ITEM_TEMPLATES.find(
     (t) => t.id === "potion-heal-minor",
   )!;
-  const scrollTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "scroll-identify")!;
+  const scrollTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "scroll-teleport")!;
   const swordTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "long-sword")!;
   const armorTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "chain-mail")!;
   const ringTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "ring")!;
