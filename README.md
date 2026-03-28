@@ -29,10 +29,9 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Evasion system** — dodge chance from gear affixes
 
 ### Magic
-- **30 spells** split into two learning paths:
+- **29 spells** split into two learning paths:
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks
-  - **15 spellbook-only** (found as dungeon loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
-- **Spellbooks must be identified** before use — adds strategy to the sage and identify spell
+  - **14 spellbook-only** (found as dungeon loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
 - **Spell hotkeys** — up to 5 spells bound to number keys for quick-cast
 - **Resist spells** — add +50 elemental resistance via active effects, properly computed and expired
 
@@ -41,14 +40,15 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **3 material tiers** — regular, elven (green sprites), meteoric steel (dark sprites) with scaling enchantment ranges
 
 #### Affix System
-- **20 scaled affixes** — each has a base value that scales with the item's +N enchantment level
+- **25 scaled affixes** — each has a base value that scales with the item's +N enchantment level
 - **Offensive:** Sharpness (+dmg, weapons only), Might (+STR), Vampiric (% heal), Spell Power, Thorns, Fire/Frost/Storm Touched
 - **Defensive:** Hardened (+AC, armor only), Fortitude (+CON), Magic Resistance, Evasion, Vitality (+HP), Regeneration
 - **Utility:** Grace (+DEX), Brilliance (+INT), Swiftness (% extra actions), Arcane Well (+MP), Arcane Mastery (-MP cost + MP regen), Fortune (+gold/XP/drops)
+- **Cursed-only:** Blood Price (+dmg, lose HP), Soul Drain (+all stats, -max HP), Dark Pact (+spell dmg, +MP cost), Berserk Fury (+melee dmg, +dmg taken), Leech (heal %, -XP)
 - **Weighted drops** — Sharpness and Hardened have 3x drop weight on their respective item types
 - **Weapon/armor context** — weapon-only and armor-only affixes filtered during generation
 - **Named items** — items with affixes get suffixes: "of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"
-- **Color-coded rarity** — white (normal), blue (enchanted), orange (legendary/unique), red (cursed), gray (unidentified)
+- **Color-coded rarity** — white (normal), blue (enchanted), purple (blessed), orange (legendary/unique), red (cursed)
 
 #### 18 Unique Items
 | Item | Slot | Ability |
@@ -71,10 +71,12 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 
 - All uniques always roll +5 minimum enchantment and 2+ random affixes
 - Boss kills guarantee a unique drop (always in NG+, F30+ otherwise)
-- **Enchantment glow system** — blue glow for enchanted, red for cursed, orange for legendary/unique
-- **Cursed items** generate with negative enchantments but can be freely unequipped
-- **Auto-identify** potions and scrolls on pickup
+- **Enchantment glow system** — blue glow for enchanted, red for cursed, purple for blessed, orange for legendary/unique
+- **Blessed items** — cursed items converted at the Temple (25g): negative enchant flips to positive, +1 affix scaling bonus
+- **Cursed items** generate with negative enchantments, can get cursed-only affixes, freely unequipped
+- **No identification system** — all items show their full stats immediately
 - **Tab-compare tooltips** — hold Tab while hovering an equippable item to see it side-by-side with your equipped item
+- **Area pickup** — items collected from 3x3 area around player
 - **Pack enchantment** affects carry capacity (+5kg per level)
 - **Stat potions** — permanent +1 to STR/INT/CON/DEX, boosted drop rate from floor 5+
 
@@ -93,7 +95,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - PHP backend with rate limiting, save validation, flat-file storage
 
 ### Town
-- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage, Magic Shop, Junk Store, Temple, Bank
+- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter), Magic Shop, Junk Store, Temple (Heal/Bless), Bank
 - **Decorative buildings** — Keep, Silo, Wall Pieces, Huts
 - **Water feature**, sign posts at building entrances
 - **Town layout** built with visual map builder tool, exported as exact tile data
