@@ -51,6 +51,7 @@ function nameColor(item: Item): string {
   const tpl = ITEM_BY_ID[item.templateId];
   if (tpl?.unique || item.specialEnchantments?.length) return '#f90';
   if (item.cursed) return '#f44';
+  if (item.blessed) return '#c8f';
   if (item.enchantment > 0) return '#4af';
   return '#ddd';
 }
@@ -247,6 +248,11 @@ export function buildTooltipContent(item: Item): HTMLElement {
     };
     const desc = abilityDesc[tplU.uniqueAbility] ?? tplU.uniqueAbility;
     container.appendChild(d('div', { color: '#fc4', fontSize: '13px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
+  }
+
+  // Blessed
+  if (item.blessed && item.identified) {
+    container.appendChild(d('div', { color: '#c8f', fontStyle: 'italic', fontWeight: 'bold' }, '\u2728 Blessed'));
   }
 
   // Cursed

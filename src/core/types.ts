@@ -145,6 +145,7 @@ export interface Item {
   value: number; // copper pieces
   identified: boolean;
   cursed: boolean;
+  blessed?: boolean; // set when curse is removed at temple
   enchantment: number; // +/- modifier
   properties: Record<string, number>;
   contents?: Item[]; // for containers

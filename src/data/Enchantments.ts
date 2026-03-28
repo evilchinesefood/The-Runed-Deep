@@ -16,6 +16,7 @@ export interface Affix {
   cap2?: number;
   weaponOnly?: boolean;
   armorOnly?: boolean;
+  cursedOnly?: boolean; // only appears on cursed items
   weight: number;      // drop weight (higher = more common)
 }
 
@@ -68,6 +69,14 @@ export const AFFIXES: Affix[] = [
     base: 10, perLevel: 3, cap: 40, base2: 1, perLevel2: 0.5, cap2: 6, weight: 1 },
   { id: 'fortune', name: 'Fortune', description: '+{v}% gold, +{v2}% XP', color: '#fd4',
     base: 10, perLevel: 3, cap: 40, base2: 8, perLevel2: 2, cap2: 28, weight: 1 },
+
+  // ── Cursed-only affixes (appear only on cursed items, powerful when blessed) ──
+  { id: 'blood-price', name: 'Blood Price', description: '+{v}% damage, lose {v2} HP per hit', color: '#d44',
+    base: 20, perLevel: 5, cap: 70, base2: 3, perLevel2: 1, cap2: 13, cursedOnly: true, weight: 2 },
+  { id: 'soul-drain', name: 'Soul Drain', description: '+{v} to all stats, -{v2} max HP', color: '#a4d',
+    base: 8, perLevel: 3, cap: 38, base2: 15, perLevel2: 5, cap2: 65, cursedOnly: true, weight: 1 },
+  { id: 'dark-pact', name: 'Dark Pact', description: '+{v}% spell damage, +{v2}% MP cost', color: '#84f',
+    base: 25, perLevel: 5, cap: 75, base2: 10, perLevel2: 3, cap2: 40, cursedOnly: true, weight: 1 },
 ];
 
 // Keep ENCHANTMENTS alias for backward compat with tooltip code
@@ -164,6 +173,7 @@ export function getEquipAffixTotal2(equipment: Record<string, any>, affixId: str
 export function rollSpecialEnchantments(
   depth: number, isTierItem: boolean, ngPlus: number = 0,
   isWeapon: boolean = false, isArmor: boolean = false,
+  isCursed: boolean = false,
 ): string[] {
   const ngBonus = ngPlus * 0.15;
   let chance: number;
@@ -185,6 +195,7 @@ export function rollSpecialEnchantments(
   const pool = AFFIXES.filter(a => {
     if (a.weaponOnly && !isWeapon) return false;
     if (a.armorOnly && !isArmor) return false;
+    if (a.cursedOnly && !isCursed) return false; // cursed-only affixes need a cursed item
     return true;
   });
 

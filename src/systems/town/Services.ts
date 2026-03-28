@@ -69,6 +69,56 @@ export function templeCurePoison(state: GameState): GameState {
   );
 }
 
+export function templeRemoveCurse(state: GameState, itemId: string): GameState {
+  const cost = 50;
+  const err = checkCopper(state, cost);
+  if (err) return err;
+
+  // Search inventory
+  const invIdx = state.hero.inventory.findIndex(i => i.id === itemId);
+  if (invIdx !== -1) {
+    const item = state.hero.inventory[invIdx];
+    if (!item.cursed) return addMsg(state, "That item is not cursed.", "system");
+    const blessed = blessItem(item);
+    const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? blessed : i);
+    return addMsg(
+      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      `The curse is lifted! ${blessed.name} is now blessed.`,
+    );
+  }
+
+  // Search equipment
+  const eq = state.hero.equipment;
+  const slots = Object.keys(eq) as (keyof typeof eq)[];
+  const slot = slots.find(s => eq[s]?.id === itemId);
+  if (slot) {
+    const item = eq[slot]!;
+    if (!item.cursed) return addMsg(state, "That item is not cursed.", "system");
+    const blessed = blessItem(item);
+    return addMsg(
+      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed } }) }, cost),
+      `The curse is lifted! ${blessed.name} is now blessed.`,
+    );
+  }
+
+  return addMsg(state, "Item not found.", "system");
+}
+
+/** Convert a cursed item into a blessed one: flip negative enchant to positive */
+function blessItem(item: import("../../core/types").Item): import("../../core/types").Item {
+  const newEnch = Math.abs(item.enchantment);
+  const baseName = item.name.replace(/\s*-\d+$/, ''); // strip old " -N"
+  return {
+    ...item,
+    cursed: false,
+    blessed: true,
+    enchantment: newEnch,
+    name: newEnch > 0 ? `${baseName} +${newEnch}` : baseName,
+    identified: true,
+    value: Math.max(item.value, item.value * 3), // blessed items are more valuable
+  };
+}
+
 // ── Sage ─────────────────────────────────────────────────
 
 export function sageIdentifyOne(state: GameState, itemId: string): GameState {

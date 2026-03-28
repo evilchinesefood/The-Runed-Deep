@@ -175,11 +175,11 @@ export function createItemFromTemplate(
   if (isUnique) {
     // Always roll affixes for uniques, min count scales with NG+
     const minAffixes = ngPlus >= 3 ? 5 : ngPlus === 2 ? 4 : ngPlus === 1 ? 3 : 2;
-    specials = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor);
+    specials = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor, cursed);
     // Ensure minimum count — capped at 20 attempts to prevent infinite loop
     let attempts = 0;
     while (specials.length < minAffixes && attempts++ < 20) {
-      const extra = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor);
+      const extra = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor, cursed);
       if (extra.length === 0) continue; // roll returned empty due to random chance, retry
       for (const e of extra) {
         const eid = e.replace(':critical', '');
@@ -190,7 +190,7 @@ export function createItemFromTemplate(
       }
     }
   } else {
-    specials = rollSpecialEnchantments(depth, isTier, ngPlus, isWeapon, isArmor);
+    specials = rollSpecialEnchantments(depth, isTier, ngPlus, isWeapon, isArmor, cursed);
   }
 
   if (specials.length > 0) {
