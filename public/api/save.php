@@ -6,19 +6,9 @@
 // ============================================================
 
 header('Content-Type: application/json');
-
-// CORS: only allow known origins
-$allowedOrigins = [
-    'https://dev.jdayers.com',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-];
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins, true)) {
-    header("Access-Control-Allow-Origin: $origin");
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-}
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -73,33 +63,6 @@ function cleanRateFiles(): void {
     foreach (glob($RATE_DIR . '/*.json') as $f) {
         if (filemtime($f) < $cutoff) @unlink($f);
     }
-}
-
-// Block requests without a valid origin or referer (stops automated scripts)
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
-$validRequest = false;
-$matchedOrigin = '';
-if ($origin && in_array($origin, $allowedOrigins, true)) {
-    $validRequest = true;
-    $matchedOrigin = $origin;
-} elseif (!$origin && !$referer) {
-    // Same-origin fetch or mobile browser stripping headers — allow
-    $validRequest = true;
-} else {
-    foreach ($allowedOrigins as $ao) {
-        if (str_starts_with($referer, $ao)) {
-            $validRequest = true;
-            $matchedOrigin = $ao;
-            break;
-        }
-    }
-}
-if (!$validRequest) fail(403, 'Forbidden.');
-// Set CORS header for Referer-matched requests too (Safari sends Referer but not Origin)
-if ($matchedOrigin && !$origin) {
-    header("Access-Control-Allow-Origin: $matchedOrigin");
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
 }
 
 $ip = getClientIp();
