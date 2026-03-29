@@ -36,12 +36,12 @@ function trap(trapType: string): Tile {
   return { type: 'trap', sprite: ts.floor, walkable: true, transparent: true, trapType, trapRevealed: false };
 }
 
-function decor(sprite: string, walkable = false): Tile {
-  return { type: 'decor', sprite, walkable, transparent: true };
+function decor(sprite: string): Tile {
+  return { type: 'decor', sprite, walkable: true, transparent: true };
 }
 
 function water(): Tile {
-  return { type: 'water', sprite: 'water', walkable: false, transparent: true };
+  return { type: 'water', sprite: 'water', walkable: true, transparent: true };
 }
 
 // ── Grid helpers ──────────────────────────────────────────
@@ -141,14 +141,14 @@ function rand01(): number {
 
 // ── Boss floor decoration ────────────────────────────────
 
-const BOSS_DECOR: { sprite: string; walkable: boolean; minDepth: number; weight: number }[] = [
-  { sprite: 'pillar-stone', walkable: false, minDepth: 1, weight: 4 },
-  { sprite: 'pillar-broken', walkable: true, minDepth: 5, weight: 3 },
-  { sprite: 'altar', walkable: false, minDepth: 10, weight: 1 },
-  { sprite: 'altar-2', walkable: false, minDepth: 20, weight: 1 },
-  { sprite: 'statue', walkable: false, minDepth: 10, weight: 2 },
-  { sprite: 'stone-coffin', walkable: false, minDepth: 15, weight: 2 },
-  { sprite: 'fountain', walkable: false, minDepth: 10, weight: 1 },
+const BOSS_DECOR: { sprite: string; minDepth: number; weight: number }[] = [
+  { sprite: 'pillar-stone', minDepth: 1, weight: 4 },
+  { sprite: 'pillar-broken', minDepth: 5, weight: 3 },
+  { sprite: 'altar', minDepth: 10, weight: 1 },
+  { sprite: 'altar-2', minDepth: 20, weight: 1 },
+  { sprite: 'statue', minDepth: 10, weight: 2 },
+  { sprite: 'stone-coffin', minDepth: 15, weight: 2 },
+  { sprite: 'fountain', minDepth: 10, weight: 1 },
 ];
 
 function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2, count: number, items: PlacedItem[] = []): void {
@@ -180,18 +180,7 @@ function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2,
     if (near) continue;
 
     const d = pick();
-
-    // For non-walkable decor, don't block corridors/doorways
-    if (!d.walkable) {
-      let walkable = 0;
-      for (const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {
-        const nx = x+dx, ny = y+dy;
-        if (ny >= 0 && ny < H && nx >= 0 && nx < W && tiles[ny][nx].walkable) walkable++;
-      }
-      if (walkable < 3) continue;
-    }
-
-    tiles[y][x] = decor(d.sprite, d.walkable);
+    tiles[y][x] = decor(d.sprite);
     placed++;
   }
 

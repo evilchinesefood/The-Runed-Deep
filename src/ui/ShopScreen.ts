@@ -47,7 +47,7 @@ function openShopDrawer(item: Item, price: number, actionLabel: string, onAction
   const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center" });
   const actionBtn = createButton(actionLabel);
   actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-  actionBtn.addEventListener("click", (e) => { e.stopPropagation(); closeShopDrawer(); onAction(); });
+  actionBtn.addEventListener("click", (e) => { e.stopPropagation(); onAction(); });
   btnRow.appendChild(actionBtn);
   const closeBtn = createButton("Close");
   closeBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
@@ -291,6 +291,7 @@ export function createShopScreen(
   let invScrollTop = 0;
   let shopSort: ShopSort = "cost";
   let invSort: ShopSort = "cost";
+  let itemsOnlyMode = false;
   const soldKeys = new Set<string>();
 
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
@@ -307,12 +308,13 @@ export function createShopScreen(
     const shopInv = state.town.shopInventories[shopId] ?? [];
 
     const titleBar = createTitleBar(`${shopName}`, onClose);
-    const copperLabel = el(
-      "div",
-      { color: "#c90", fontSize: "13px" },
-      `Gold: ${copper}`,
-    );
+    const copperLabel = el("div", { color: "#c90", fontSize: "13px" }, `Gold: ${copper}`);
     titleBar.insertBefore(copperLabel, titleBar.lastChild);
+    // Items toggle button
+    const itemsBtn = createButton(itemsOnlyMode ? "Shop" : "Items", "sm");
+    itemsBtn.style.cssText += "margin-left:auto;margin-right:8px;padding:4px 10px;font-size:12px;";
+    itemsBtn.addEventListener("click", (e) => { e.stopPropagation(); itemsOnlyMode = !itemsOnlyMode; render(); });
+    titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
 
     const row = el("div", {
@@ -322,29 +324,28 @@ export function createShopScreen(
       flexWrap: "wrap",
     });
 
-    const forSale = buildPanel(
-      "FOR SALE",
-      shopInv,
-      (i) => getBuyPrice(i, shopId),
-      () => "Buy",
-      (i) => copper >= getBuyPrice(i, shopId),
-      (id) => {
-        const next = buyItem(state, shopId, id);
-        state = next;
-        onTransaction(next);
-        render();
-      },
-      shopSort,
-      (mode) => {
-        shopSort = mode;
-        render();
-      },
-      soldKeys,
-    );
-    row.appendChild(forSale);
+    if (!itemsOnlyMode) {
+      const forSale = buildPanel(
+        "FOR SALE",
+        shopInv,
+        (i) => getBuyPrice(i, shopId),
+        () => "Buy",
+        (i) => copper >= getBuyPrice(i, shopId),
+        (id) => {
+          const next = buyItem(state, shopId, id);
+          state = next;
+          onTransaction(next);
+          render();
+        },
+        shopSort,
+        (mode) => { shopSort = mode; render(); },
+        soldKeys,
+      );
+      row.appendChild(forSale);
+    }
 
     const yourItems = buildPanel(
-      "YOUR ITEMS",
+      itemsOnlyMode ? "INVENTORY" : "YOUR ITEMS",
       state.hero.inventory,
       (i) => getSellPrice(i, shopId),
       () => "Sell",
@@ -358,13 +359,11 @@ export function createShopScreen(
         render();
       },
       invSort,
-      (mode) => {
-        invSort = mode;
-        render();
-      },
+      (mode) => { invSort = mode; render(); },
       undefined,
       true,
     );
+    if (itemsOnlyMode) yourItems.style.minWidth = "100%";
     row.appendChild(yourItems);
 
     screen.appendChild(row);

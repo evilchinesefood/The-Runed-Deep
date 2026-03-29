@@ -737,14 +737,14 @@ interface DecorDef {
 }
 
 const DECOR_TYPES: DecorDef[] = [
-  { sprite: 'pillar-stone', walkable: false, transparent: false, minDepth: 1, weight: 5 },
+  { sprite: 'pillar-stone', walkable: true, transparent: true, minDepth: 1, weight: 5 },
   { sprite: 'pillar-broken', walkable: true, transparent: true, minDepth: 5, weight: 3 },
-  { sprite: 'altar', walkable: false, transparent: true, minDepth: 10, weight: 1 },
-  { sprite: 'altar-2', walkable: false, transparent: true, minDepth: 15, weight: 1 },
-  { sprite: 'statue', walkable: false, transparent: true, minDepth: 8, weight: 2 },
-  { sprite: 'water', walkable: false, transparent: true, minDepth: 1, weight: 3 },
-  { sprite: 'stone-coffin', walkable: false, transparent: true, minDepth: 12, weight: 2 },
-  { sprite: 'fountain', walkable: false, transparent: true, minDepth: 10, weight: 1 },
+  { sprite: 'altar', walkable: true, transparent: true, minDepth: 10, weight: 1 },
+  { sprite: 'altar-2', walkable: true, transparent: true, minDepth: 15, weight: 1 },
+  { sprite: 'statue', walkable: true, transparent: true, minDepth: 8, weight: 2 },
+  { sprite: 'water', walkable: true, transparent: true, minDepth: 1, weight: 3 },
+  { sprite: 'stone-coffin', walkable: true, transparent: true, minDepth: 12, weight: 2 },
+  { sprite: 'fountain', walkable: true, transparent: true, minDepth: 10, weight: 1 },
 ];
 
 function placeDecor(
@@ -795,19 +795,6 @@ function placeDecor(
 
         const decor = pickDecor();
 
-        // For non-walkable decor, check it won't block a path
-        // Count walkable cardinal neighbors — if < 3, it might be a corridor/doorway
-        if (!decor.walkable) {
-          let walkableNeighbors = 0;
-          for (const [dx, dy] of adj) {
-            const nx = x + dx, ny = y + dy;
-            if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
-              if (floor.tiles[ny][nx].walkable) walkableNeighbors++;
-            }
-          }
-          if (walkableNeighbors < 3) continue; // skip — might block a path
-        }
-
         // Water can spread 1-3 tiles
         if (decor.sprite === 'water') {
           const spread = 1 + Math.floor(rand() * 3);
@@ -817,15 +804,15 @@ function placeDecor(
             if (wx > 0 && wx < floor.width - 1 && wy > 0 && wy < floor.height - 1) {
               const wt = floor.tiles[wy][wx];
               if (wt.type === 'floor') {
-                floor.tiles[wy][wx] = { type: 'water', sprite: 'water', walkable: false, transparent: true };
+                floor.tiles[wy][wx] = { type: 'water', sprite: 'water', walkable: true, transparent: true };
               }
             }
           }
-          floor.tiles[y][x] = { type: 'water', sprite: 'water', walkable: false, transparent: true };
+          floor.tiles[y][x] = { type: 'water', sprite: 'water', walkable: true, transparent: true };
         } else {
           floor.tiles[y][x] = {
             type: 'decor', sprite: decor.sprite,
-            walkable: decor.walkable, transparent: decor.transparent,
+            walkable: true, transparent: true,
           };
         }
         break;

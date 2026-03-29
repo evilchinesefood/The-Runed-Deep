@@ -606,18 +606,40 @@ export class TouchControls {
   private buildSpellPicker(): void {
     this.spellPickerPanel.replaceChildren();
 
+    // Header row: title left, manage hotkeys right
+    const header = document.createElement("div");
+    header.style.cssText = "display:flex;justify-content:space-between;align-items:center;width:100%;max-width:320px;margin-bottom:8px;";
+
     const title = document.createElement("div");
     title.textContent = "Cast Spell";
-    title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;margin-bottom:12px;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
-    this.spellPickerPanel.appendChild(title);
+    title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
+    header.appendChild(title);
 
-    const grid = document.createElement("div");
-    grid.style.cssText = "display:flex;flex-direction:column;gap:6px;width:100%;max-width:320px;";
+    const manageBtn = document.createElement("div");
+    manageBtn.textContent = "Hotkeys";
+    manageBtn.style.cssText = `
+      padding:6px 12px;color:#888;font-size:12px;font-family:sans-serif;
+      border:1px solid #555;border-radius:4px;cursor:pointer;user-select:none;touch-action:none;
+    `;
+    const openManage = () => { this.closeSpellPicker(); this.handler?.({ type: "setScreen", screen: "spells" }); };
+    manageBtn.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); openManage(); });
+    manageBtn.addEventListener("mousedown", (e) => { e.preventDefault(); openManage(); });
+    header.appendChild(manageBtn);
 
-    for (const id of this.knownSpells) {
-      const spell = SPELL_BY_ID[id];
+    this.spellPickerPanel.appendChild(header);
+
+    // Scrollable spell list
+    const list = document.createElement("div");
+    list.style.cssText = "display:flex;flex-direction:column;gap:6px;width:100%;max-width:320px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;";
+
+    // Sort alphabetically
+    const sorted = [...this.knownSpells]
+      .map(id => ({ id, spell: SPELL_BY_ID[id] }))
+      .filter(s => s.spell)
+      .sort((a, b) => a.spell!.name.localeCompare(b.spell!.name));
+
+    for (const { id, spell } of sorted) {
       if (!spell) continue;
-
       const canCast = this.heroMp >= spell.manaCost;
       const row = document.createElement("div");
       const targetLabel = spell.targeting === 'self' || spell.targeting === 'none'
@@ -628,47 +650,24 @@ export class TouchControls {
         font-family:sans-serif;text-shadow:0 1px 2px rgba(0,0,0,0.8);
         background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
         border:2px solid ${canCast ? '#555' : '#333'};border-bottom:3px solid #333;border-radius:6px;
-        cursor:${canCast ? 'pointer' : 'default'};user-select:none;touch-action:none;
+        cursor:${canCast ? 'pointer' : 'default'};user-select:none;touch-action:none;flex-shrink:0;
       `;
-
       if (canCast) {
-        const cast = () => {
-          this.closeSpellPicker();
-          this.spellCastHandler?.(id);
-        };
+        const cast = () => { this.closeSpellPicker(); this.spellCastHandler?.(id); };
         row.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); cast(); });
         row.addEventListener("mousedown", (e) => { e.preventDefault(); cast(); });
       }
-      grid.appendChild(row);
+      list.appendChild(row);
     }
 
-    this.spellPickerPanel.appendChild(grid);
+    this.spellPickerPanel.appendChild(list);
 
-    // Manage Spells button at bottom
-    const manageBtn = document.createElement("div");
-    manageBtn.textContent = "Manage Hotkeys";
-    manageBtn.style.cssText = `
-      padding:10px 20px;margin-top:12px;color:#888;font-size:13px;font-family:sans-serif;
-      text-align:center;cursor:pointer;user-select:none;touch-action:none;
-    `;
-    manageBtn.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      this.closeSpellPicker();
-      this.handler?.({ type: "setScreen", screen: "spells" });
-    });
-    manageBtn.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      this.closeSpellPicker();
-      this.handler?.({ type: "setScreen", screen: "spells" });
-    });
-    this.spellPickerPanel.appendChild(manageBtn);
-
-    // Cancel button
+    // Cancel button at bottom
     const cancelBtn = document.createElement("div");
     cancelBtn.textContent = "Cancel";
     cancelBtn.style.cssText = `
-      padding:10px 20px;margin-top:4px;color:#f44;font-size:14px;font-weight:bold;
-      font-family:sans-serif;text-align:center;cursor:pointer;user-select:none;touch-action:none;
+      padding:10px 20px;margin-top:8px;color:#f44;font-size:14px;font-weight:bold;
+      font-family:sans-serif;text-align:center;cursor:pointer;user-select:none;touch-action:none;flex-shrink:0;
     `;
     cancelBtn.addEventListener("touchstart", (e) => { e.preventDefault(); this.closeSpellPicker(); });
     cancelBtn.addEventListener("mousedown", (e) => { e.preventDefault(); this.closeSpellPicker(); });

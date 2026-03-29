@@ -7,7 +7,7 @@ import { ITEM_BY_ID } from '../data/items';
 import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
 import {
   templeHealHP, templeHealMP, templeCurePoison, templeRemoveCurse,
-  sageEnchantItem,
+  sageEnchantItem, getEnchanterCap,
   bankDeposit, bankWithdraw,
   innRest,
 } from '../systems/town/Services';
@@ -74,28 +74,32 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   const panel = createPanel('Enchantment (100g)');
 
   // List equippable items from inventory + equipment
-  const enchantable: { id: string; name: string }[] = [];
+  const cap = getEnchanterCap(state.ngPlusCount ?? 0);
+  const enchantable: { id: string; name: string; atCap: boolean }[] = [];
   for (const item of state.hero.inventory) {
     if (ITEM_BY_ID[item.templateId]?.equipSlot && !item.cursed) {
-      enchantable.push({ id: item.id, name: item.name });
+      const ups = item.properties['enchanterUps'] ?? 0;
+      enchantable.push({ id: item.id, name: item.name, atCap: ups >= cap });
     }
   }
   for (const [, item] of Object.entries(state.hero.equipment)) {
     if (item && !item.cursed) {
-      enchantable.push({ id: item.id, name: `${item.name} (equipped)` });
+      const ups = item.properties['enchanterUps'] ?? 0;
+      enchantable.push({ id: item.id, name: `${item.name} (equipped)`, atCap: ups >= cap });
     }
   }
 
   if (enchantable.length === 0) {
     panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'No items to enchant.'));
   } else {
-    panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, 'The sage can enhance your equipment by +1.'));
+    panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Enhance equipment by +1. (Limit: +${cap} per item)`));
     for (const ei of enchantable) {
-      const canAfford = state.hero.copper >= 100;
-      const btn = createButton(`+1: ${ei.name}`);
+      const canAfford = state.hero.copper >= 100 && !ei.atCap;
+      const label = ei.atCap ? `MAX: ${ei.name}` : `+1: ${ei.name}`;
+      const btn = createButton(label);
       Object.assign(btn.style, { display: 'block', width: '100%', marginBottom: '4px', textAlign: 'left', fontSize: '12px' });
       greyBtn(btn, !canAfford);
-      btn.addEventListener('click', () => onUpdate(sageEnchantItem(state, ei.id)));
+      if (!ei.atCap) btn.addEventListener('click', () => onUpdate(sageEnchantItem(state, ei.id)));
       panel.appendChild(btn);
     }
   }

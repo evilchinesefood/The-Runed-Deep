@@ -412,10 +412,10 @@ export function createInventoryScreen(
     const btnRow = el("div", {
       display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
     });
-    const drawerBtn = (label: string, onClick: () => void) => {
+    const drawerBtn = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
       b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-      b.addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); onClick(); });
+      b.addEventListener("click", (e) => { e.stopPropagation(); if (close) closeDrawer(); onClick(); });
       return b;
     };
     if (tpl?.equipSlot) {
@@ -425,7 +425,7 @@ export function createInventoryScreen(
       btnRow.appendChild(drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })));
     }
     btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
-    btnRow.appendChild(drawerBtn("Close", () => closeDrawer()));
+    btnRow.appendChild(drawerBtn("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
 
     document.body.appendChild(drawerEl);
@@ -444,14 +444,14 @@ export function createInventoryScreen(
     const btnRow = el("div", {
       display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
     });
-    const drawerBtn = (label: string, onClick: () => void) => {
+    const drawerBtn2 = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
       b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-      b.addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); onClick(); });
+      b.addEventListener("click", (e) => { e.stopPropagation(); if (close) closeDrawer(); onClick(); });
       return b;
     };
-    btnRow.appendChild(drawerBtn("Unequip", () => onAction({ type: "unequipItem", slot: slotKey })));
-    btnRow.appendChild(drawerBtn("Close", () => closeDrawer()));
+    btnRow.appendChild(drawerBtn2("Unequip", () => onAction({ type: "unequipItem", slot: slotKey })));
+    btnRow.appendChild(drawerBtn2("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
     document.body.appendChild(drawerEl);
   };

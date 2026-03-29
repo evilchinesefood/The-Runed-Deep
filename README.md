@@ -16,7 +16,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **40-floor dungeon** with 3 tilesets (Mine, Fortress, Castle) and 7 hand-designed boss floors
 - **Procedural generation** — 5 room shapes, locked/secret doors, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental with resistance checks (fire, acid, lightning, wind, rune), special (portal, cobweb)
-- **Dungeon decor** — pillars, altars, statues, coffins, fountains, water pools scattered in rooms and boss lairs
+- **Dungeon decor** — pillars, altars, statues, coffins, fountains, water pools (all walkable, visual only)
 - **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored, emergency stairway spawn if map has no exit
 - **Revealed trap indicators** — red tint behind revealed trap sprites for visibility on dark floors
 
@@ -96,10 +96,11 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Auto-sync** — every save pushes to server, splash screen auto-pulls latest on load
 - **Load by code** — enter a code on any device to download a save
 - **Shared dev/prod** — local Vite dev and live server use the same cloud storage
-- PHP backend with origin-locked CORS, IP-based rate limiting, save validation, flat-file storage
+- **Save pruning** — only current + previous floor saved, town regenerated on entry (~400KB vs ~2.8MB)
+- PHP backend with CORS, IP-based rate limiting, save validation, flat-file storage
 
 ### Town
-- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter), Magic Shop, Junk Store, Temple (Heal/Bless), Bank
+- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Bank
 - **Decorative buildings** — Keep, Silo, Wall Pieces, Huts
 - **Water feature**, sign posts at building entrances
 - **Town layout** built with visual map builder tool, exported as exact tile data
@@ -116,12 +117,17 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **18 achievements**
 - **18 synthesized sound effects** via Web Audio API
 - **Responsive layout** — scales to phone, tablet, and desktop
-- **Touch controls** — SVG icon buttons, hideable D-pad, portrait 2-wide grid layout
-- **Mobile spell picker** — tap book icon to open full spell list, cast any known spell directly
+- **Touch controls** — SVG icon buttons, repositionable D-pad + action bar, resize S/M/L, portrait 2-wide grid
+- **Adjust Controls** — move, resize, show/hide D-pad and action buttons from Commands menu
+- **Landscape mode** — full-screen map with overlay HUD (stats top, messages bottom), compact controls
+- **Orientation change** — full screen rebuild on portrait/landscape switch (debounced resize listener)
+- **Mobile spell picker** — alphabetized spell list, "Hotkeys" button top-right, scrollable
+- **Spell info drawer** — tap spell in Manage Hotkeys for details + description instead of casting
 - **D-pad spell targeting** — D-pad switches to targeting mode for directional spells (gold tint, center = cancel)
 - **Auto-target** — direction spells auto-fire at the nearest monster when only one is visible
-- **Mobile detail drawer** — tap inventory items for full tooltip + compare + Equip/Use/Drop buttons
-- **Commands menu** — access Character, Help, Achievements, Save, Sound, Debug from touch
+- **Mobile detail drawer** — tap inventory/shop items for tooltip + actions; actions keep drawer open
+- **Shop items view** — toggle between full shop and items-only inventory while shopping
+- **Commands menu** — access Character, Help, Achievements, Save, Sound, Adjust Controls, Debug from touch
 - **Action button attacks** adjacent monsters on mobile
 - **Portrait viewport** shrinks 25% to prevent overlap with touch controls
 - **Click-to-move** with A* pathfinding

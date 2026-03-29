@@ -2,23 +2,10 @@ import type { GameState } from "../core/types";
 import { SPELL_BY_ID, type SpellDef } from "../data/spells";
 import { createScreen, createPanel, createTitleBar, el } from "./Theme";
 
-const CATEGORY_ORDER = [
-  "attack",
-  "healing",
-  "defense",
-  "control",
-  "movement",
-  "divination",
-  "misc",
-];
+const CATEGORY_ORDER = ["attack", "healing", "defense", "control", "movement", "divination", "misc"];
 const CATEGORY_COLORS: Record<string, string> = {
-  attack: "#f64",
-  healing: "#4f4",
-  defense: "#48f",
-  control: "#c4f",
-  movement: "#fc4",
-  divination: "#4af",
-  misc: "#aaa",
+  attack: "#f64", healing: "#4f4", defense: "#48f", control: "#c4f",
+  movement: "#fc4", divination: "#4af", misc: "#aaa",
 };
 
 export function createSpellScreen(
@@ -29,20 +16,13 @@ export function createSpellScreen(
 ): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
   let hotkeys = [...h.spellHotkeys];
+  let drawerEl: HTMLElement | null = null;
 
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
 
-  // Title bar with MP display
-  const titleBar = createTitleBar("Spells", () => {
-    cleanup();
-    onClose();
-  });
-  const mpSpan = el(
-    "span",
-    { color: "#48f", fontSize: "14px" },
-    `MP: ${h.mp}/${h.maxMp}`,
-  );
+  const titleBar = createTitleBar("Manage Hotkeys", () => { cleanup(); onClose(); });
+  const mpSpan = el("span", { color: "#48f", fontSize: "14px" }, `MP: ${h.mp}/${h.maxMp}`);
   const closeBtn = titleBar.lastChild;
   titleBar.insertBefore(mpSpan, closeBtn);
   screen.appendChild(titleBar);
@@ -52,64 +32,21 @@ export function createSpellScreen(
   screen.appendChild(hotkeyPanel);
 
   function renderHotkeyPanel(): void {
-    // Remove all children after the header
     const header = hotkeyPanel.firstElementChild;
-    while (hotkeyPanel.lastChild && hotkeyPanel.lastChild !== header) {
-      hotkeyPanel.removeChild(hotkeyPanel.lastChild);
-    }
+    while (hotkeyPanel.lastChild && hotkeyPanel.lastChild !== header) hotkeyPanel.removeChild(hotkeyPanel.lastChild);
 
     for (let i = 0; i < 5; i++) {
       const slotId = hotkeys[i];
       const spell = slotId ? SPELL_BY_ID[slotId] : null;
-      const row = el("div", {
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "3px 8px",
-        fontSize: "12px",
-      });
-      row.appendChild(
-        el(
-          "span",
-          {
-            color: "#888",
-            width: "16px",
-            textAlign: "center",
-            fontFamily: "monospace",
-          },
-          String(i + 1),
-        ),
-      );
-      row.appendChild(
-        el(
-          "span",
-          { flex: "1", color: spell ? "#ddd" : "#444" },
-          spell ? spell.name : "— empty —",
-        ),
-      );
+      const row = el("div", { display: "flex", alignItems: "center", gap: "8px", padding: "3px 8px", fontSize: "12px" });
+      row.appendChild(el("span", { color: "#888", width: "16px", textAlign: "center", fontFamily: "monospace" }, String(i + 1)));
+      row.appendChild(el("span", { flex: "1", color: spell ? "#ddd" : "#444" }, spell ? spell.name : "\u2014 empty \u2014"));
       if (spell) {
-        const removeBtn = el(
-          "div",
-          {
-            color: "#fff",
-            cursor: "pointer",
-            fontSize: "12px",
-            background: "#622",
-            border: "1px solid #844",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            userSelect: "none",
-            fontWeight: "bold",
-            transition: "background 0.1s",
-          },
-          "Remove",
-        );
-        removeBtn.addEventListener("mouseenter", () => {
-          removeBtn.style.background = "#833";
-        });
-        removeBtn.addEventListener("mouseleave", () => {
-          removeBtn.style.background = "#622";
-        });
+        const removeBtn = el("div", {
+          color: "#fff", cursor: "pointer", fontSize: "12px", background: "#622",
+          border: "1px solid #844", borderRadius: "4px", padding: "6px 12px",
+          userSelect: "none", fontWeight: "bold",
+        }, "Remove");
         removeBtn.addEventListener("click", () => {
           hotkeys.splice(i, 1);
           onUpdateHotkeys([...hotkeys]);
@@ -124,10 +61,89 @@ export function createSpellScreen(
 
   renderHotkeyPanel();
 
-  // Category panels container — rebuild when hotkeys change
+  // Category panels
   const categoryContainer = document.createElement("div");
   categoryContainer.style.width = "100%";
   screen.appendChild(categoryContainer);
+
+  function closeDrawer(): void {
+    if (drawerEl) { drawerEl.remove(); drawerEl = null; }
+  }
+
+  function openDrawer(spell: SpellDef, spellId: string): void {
+    closeDrawer();
+    const inHotkeys = hotkeys.includes(spellId);
+    const canAdd = !inHotkeys && hotkeys.length < 5;
+
+    drawerEl = el("div", {
+      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "200",
+      background: "#1a1a1a", borderTop: "2px solid #555",
+      padding: "16px", maxHeight: "50vh", overflowY: "auto",
+    });
+
+    // Spell name + category
+    const nameRow = el("div", { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" });
+    nameRow.appendChild(el("div", { color: "#c9a84c", fontSize: "16px", fontWeight: "bold" }, spell.name));
+    const catColor = CATEGORY_COLORS[spell.category] ?? "#aaa";
+    nameRow.appendChild(el("span", { color: catColor, fontSize: "12px" }, spell.category));
+    drawerEl.appendChild(nameRow);
+
+    // Stats row
+    const stats = el("div", { display: "flex", gap: "12px", fontSize: "12px", color: "#888", marginBottom: "8px" });
+    stats.appendChild(el("span", {}, `${spell.manaCost} MP`));
+    stats.appendChild(el("span", {}, `Level ${spell.level}`));
+    const targetNames: Record<string, string> = { self: "Self", direction: "Directional", target: "Targeted", none: "Instant", area: "Area" };
+    stats.appendChild(el("span", {}, targetNames[spell.targeting] ?? spell.targeting));
+    if (spell.aoe) stats.appendChild(el("span", { color: "#f90" }, "AoE"));
+    drawerEl.appendChild(stats);
+
+    // Description
+    drawerEl.appendChild(el("div", { color: "#ccc", fontSize: "13px", lineHeight: "1.4", marginBottom: "12px" }, spell.description));
+
+    // Action buttons
+    const btnRow = el("div", { display: "flex", gap: "8px", justifyContent: "center" });
+
+    if (inHotkeys) {
+      const rmBtn = el("div", {
+        padding: "8px 20px", color: "#fff", fontSize: "13px", fontWeight: "bold",
+        background: "#622", border: "1px solid #844", borderRadius: "4px",
+        cursor: "pointer", userSelect: "none",
+      }, "Remove from Hotkeys");
+      rmBtn.addEventListener("click", () => {
+        hotkeys = hotkeys.filter(id => id !== spellId);
+        onUpdateHotkeys([...hotkeys]);
+        renderHotkeyPanel();
+        renderCategoryPanels();
+        closeDrawer();
+      });
+      btnRow.appendChild(rmBtn);
+    } else if (canAdd) {
+      const addBtn = el("div", {
+        padding: "8px 20px", color: "#fff", fontSize: "13px", fontWeight: "bold",
+        background: "#264", border: "1px solid #486", borderRadius: "4px",
+        cursor: "pointer", userSelect: "none",
+      }, "Add to Hotkeys");
+      addBtn.addEventListener("click", () => {
+        hotkeys.push(spellId);
+        onUpdateHotkeys([...hotkeys]);
+        renderHotkeyPanel();
+        renderCategoryPanels();
+        closeDrawer();
+      });
+      btnRow.appendChild(addBtn);
+    }
+
+    const closeBtn2 = el("div", {
+      padding: "8px 20px", color: "#aaa", fontSize: "13px",
+      border: "1px solid #444", borderRadius: "4px",
+      cursor: "pointer", userSelect: "none",
+    }, "Close");
+    closeBtn2.addEventListener("click", closeDrawer);
+    btnRow.appendChild(closeBtn2);
+
+    drawerEl.appendChild(btnRow);
+    document.body.appendChild(drawerEl);
+  }
 
   function renderCategoryPanels(): void {
     categoryContainer.replaceChildren();
@@ -146,14 +162,16 @@ export function createSpellScreen(
     for (const sid of h.knownSpells) {
       const spell = SPELL_BY_ID[sid];
       if (!spell) continue;
-      const cat = spell.category;
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push({ spell, spellId: sid });
+      if (!grouped[spell.category]) grouped[spell.category] = [];
+      grouped[spell.category].push({ spell, spellId: sid });
     }
 
     for (const cat of CATEGORY_ORDER) {
       const spells = grouped[cat];
       if (!spells || spells.length === 0) continue;
+
+      // Sort alphabetically within category
+      spells.sort((a, b) => a.spell.name.localeCompare(b.spell.name));
 
       const catColor = CATEGORY_COLORS[cat] || "#aaa";
       const panel = createPanel(cat.charAt(0).toUpperCase() + cat.slice(1));
@@ -161,154 +179,47 @@ export function createSpellScreen(
       if (header) header.style.color = catColor;
 
       for (const { spell, spellId } of spells) {
-        const canCast = h.mp >= spell.manaCost;
         const inHotkeys = hotkeys.includes(spellId);
         const canAdd = !inHotkeys && hotkeys.length < 5;
 
         const row = el("div", {
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "4px 8px",
-          cursor: canCast ? "pointer" : "default",
-          borderRadius: "3px",
-          opacity: canCast ? "1" : "0.4",
+          display: "flex", alignItems: "center", gap: "10px",
+          padding: "4px 8px", cursor: "pointer", borderRadius: "3px",
         });
 
-        // Hotkey slot badge
+        // Hotkey badge
         const hkIdx = hotkeys.indexOf(spellId);
-        const badge = hkIdx !== -1 ? String(hkIdx + 1) : "";
-        row.appendChild(
-          el(
-            "span",
-            {
-              width: "20px",
-              textAlign: "center",
-              fontSize: "11px",
-              color: "#888",
-              fontFamily: "monospace",
-            },
-            badge,
-          ),
-        );
+        row.appendChild(el("span", {
+          width: "20px", textAlign: "center", fontSize: "11px", color: "#888", fontFamily: "monospace",
+        }, hkIdx !== -1 ? String(hkIdx + 1) : ""));
 
-        // Spell name
-        row.appendChild(
-          el(
-            "span",
-            {
-              flex: "1",
-              fontSize: "13px",
-              color: canCast ? "#ddd" : "#666",
-            },
-            spell.name,
-          ),
-        );
-
-        // Level
-        row.appendChild(
-          el(
-            "span",
-            {
-              fontSize: "11px",
-              color: "#666",
-              width: "30px",
-            },
-            `L${spell.level}`,
-          ),
-        );
+        // Name
+        row.appendChild(el("span", { flex: "1", fontSize: "13px", color: "#ddd" }, spell.name));
 
         // MP cost
-        row.appendChild(
-          el(
-            "span",
-            {
-              fontSize: "11px",
-              color: canCast ? "#48f" : "#335",
-              width: "35px",
-              textAlign: "right",
-            },
-            `${spell.manaCost} MP`,
-          ),
-        );
+        row.appendChild(el("span", { fontSize: "11px", color: "#48f", width: "35px", textAlign: "right" }, `${spell.manaCost} MP`));
 
-        // Targeting type (hidden on small screens)
-        if (window.innerWidth > 480) {
-          row.appendChild(
-            el(
-              "span",
-              {
-                fontSize: "10px",
-                color: "#555",
-                width: "50px",
-                textAlign: "right",
-              },
-              spell.targeting,
-            ),
-          );
-        }
-
-        // Hotkey toggle button
+        // +/- button
         if (inHotkeys) {
-          const removeBtn = el(
-            "div",
-            {
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: "14px",
-              background: "#622",
-              border: "1px solid #844",
-              borderRadius: "4px",
-              padding: "4px 10px",
-              userSelect: "none",
-              fontWeight: "bold",
-              transition: "background 0.1s",
-              flexShrink: "0",
-              minWidth: "28px",
-              textAlign: "center",
-            },
-            "\u2212",
-          ); // minus sign
-          removeBtn.addEventListener("mouseenter", () => {
-            removeBtn.style.background = "#833";
-          });
-          removeBtn.addEventListener("mouseleave", () => {
-            removeBtn.style.background = "#622";
-          });
-          removeBtn.addEventListener("click", (e) => {
+          const rmBtn = el("div", {
+            color: "#fff", cursor: "pointer", fontSize: "14px", background: "#622",
+            border: "1px solid #844", borderRadius: "4px", padding: "4px 10px",
+            userSelect: "none", fontWeight: "bold", flexShrink: "0", minWidth: "28px", textAlign: "center",
+          }, "\u2212");
+          rmBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            hotkeys = hotkeys.filter((id) => id !== spellId);
+            hotkeys = hotkeys.filter(id => id !== spellId);
             onUpdateHotkeys([...hotkeys]);
             renderHotkeyPanel();
             renderCategoryPanels();
           });
-          row.appendChild(removeBtn);
+          row.appendChild(rmBtn);
         } else if (canAdd) {
-          const addBtn = el(
-            "div",
-            {
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: "14px",
-              background: "#264",
-              border: "1px solid #486",
-              borderRadius: "4px",
-              padding: "4px 10px",
-              userSelect: "none",
-              fontWeight: "bold",
-              transition: "background 0.1s",
-              flexShrink: "0",
-              minWidth: "28px",
-              textAlign: "center",
-            },
-            "+",
-          );
-          addBtn.addEventListener("mouseenter", () => {
-            addBtn.style.background = "#386";
-          });
-          addBtn.addEventListener("mouseleave", () => {
-            addBtn.style.background = "#264";
-          });
+          const addBtn = el("div", {
+            color: "#fff", cursor: "pointer", fontSize: "14px", background: "#264",
+            border: "1px solid #486", borderRadius: "4px", padding: "4px 10px",
+            userSelect: "none", fontWeight: "bold", flexShrink: "0", minWidth: "28px", textAlign: "center",
+          }, "+");
           addBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             hotkeys.push(spellId);
@@ -321,69 +232,34 @@ export function createSpellScreen(
           row.appendChild(el("span", { width: "32px" }, ""));
         }
 
-        if (canCast) {
-          row.addEventListener("click", () => {
-            cleanup();
-            onCast(spell.id);
-          });
-          row.addEventListener("mouseenter", () => {
-            row.style.background = "#1a1a2a";
-          });
-          row.addEventListener("mouseleave", () => {
-            row.style.background = "";
-          });
-        }
+        // Click row → open drawer (NOT cast)
+        row.addEventListener("click", () => openDrawer(spell, spellId));
+        row.addEventListener("mouseenter", () => { row.style.background = "#1a1a2a"; });
+        row.addEventListener("mouseleave", () => { row.style.background = ""; });
 
         panel.appendChild(row);
       }
-
       categoryContainer.appendChild(panel);
     }
   }
 
   renderCategoryPanels();
 
-  // Description footer
-  screen.appendChild(
-    el(
-      "div",
-      {
-        width: "100%",
-        fontSize: "11px",
-        color: "#555",
-        marginTop: "4px",
-        textAlign: "center",
-      },
-      "Click a spell to cast it. Use [+]/[-] to manage hotkey slots 1-5.",
-    ),
-  );
+  screen.appendChild(el("div", {
+    width: "100%", fontSize: "11px", color: "#555", marginTop: "4px", textAlign: "center",
+  }, "Tap a spell for details. Use [+]/[-] to manage hotkey slots 1-5."));
 
-  // Keyboard
   const keyHandler = (e: KeyboardEvent) => {
     if (e.code === "Escape" || e.code === "KeyZ") {
       e.preventDefault();
       cleanup();
       onClose();
-      return;
-    }
-    // Number keys to quick-cast via hotkeys
-    const digit = e.code.match(/^Digit([1-5])$/);
-    if (digit) {
-      const idx = parseInt(digit[1]) - 1;
-      if (idx < hotkeys.length) {
-        const sid = hotkeys[idx];
-        const spell = SPELL_BY_ID[sid];
-        if (spell && h.mp >= spell.manaCost) {
-          e.preventDefault();
-          cleanup();
-          onCast(sid);
-        }
-      }
     }
   };
   document.addEventListener("keydown", keyHandler);
   const cleanup = () => {
     document.removeEventListener("keydown", keyHandler);
+    closeDrawer();
   };
   (screen as HTMLElement & { cleanup: () => void }).cleanup = cleanup;
   return screen as HTMLElement & { cleanup: () => void };
