@@ -6,9 +6,19 @@
 // ============================================================
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+
+// CORS: only allow known origins
+$allowedOrigins = [
+    'https://dev.jdayers.com',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -31,8 +41,9 @@ function fail(int $code, string $msg): void {
 }
 
 function getClientIp(): string {
-    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    return preg_replace('/[^a-fA-F0-9.:_-]/', '', explode(',', $ip)[0]);
+    // Use REMOTE_ADDR only — X-Forwarded-For is trivially spoofed
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    return preg_replace('/[^a-fA-F0-9.:_-]/', '', $ip);
 }
 
 function checkRate(string $ip, string $action, int $max, int $window): void {
@@ -63,6 +74,18 @@ function cleanRateFiles(): void {
         if (filemtime($f) < $cutoff) @unlink($f);
     }
 }
+
+// Block requests without a valid origin or referer (stops automated scripts)
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$validRequest = false;
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    $validRequest = true;
+} else {
+    foreach ($allowedOrigins as $ao) {
+        if (str_starts_with($referer, $ao)) { $validRequest = true; break; }
+    }
+}
+if (!$validRequest) fail(403, 'Forbidden.');
 
 $ip = getClientIp();
 cleanRateFiles();

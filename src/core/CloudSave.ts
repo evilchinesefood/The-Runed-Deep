@@ -3,7 +3,9 @@
 // Saves are gzip-compressed before upload, decompressed on download
 // ============================================================
 
-const API_BASE = '/rd/api/save.php';
+const API_BASE = location.hostname === 'dev.jdayers.com'
+  ? '/rd/api/save.php'
+  : 'https://dev.jdayers.com/rd/api/save.php';
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
 
 async function compress(str: string): Promise<string> {
