@@ -13,6 +13,7 @@ import { Sound } from "../Sound";
 import { trackMonsterKill, trackFloorDamage } from "../Achievements";
 import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
+import { MONSTER_BY_ID } from "../../data/monsters";
 import { getDisplayName } from "../inventory/display-name";
 
 function fortuneXp(baseXp: number, equipment: any): number {
@@ -264,12 +265,14 @@ export function playerAttacksMonster(
     const newMonsters = [...floor.monsters];
     newMonsters.splice(monsterIndex, 1);
 
-    // Loot drop
+    // Loot drop — bosses always drop, guaranteed unique on F30+ or NG+
+    const isBoss = !!MONSTER_BY_ID[monster.templateId]?.boss;
     const loot = generateLoot(
       state.currentFloor,
       monster.position,
       state.ngPlusCount,
       state.hero.equipment,
+      isBoss,
     );
     let newItems = [...floor.items];
     if (loot) {
@@ -506,11 +509,13 @@ export function monsterAttacksPlayer(
           newMonsters.splice(mIdx, 1);
           Sound.monsterDeath();
           trackMonsterKill(monster.templateId, monster.xpValue >= 250);
+          const thornsBoss = !!MONSTER_BY_ID[monster.templateId]?.boss;
           const loot = generateLoot(
             result.currentFloor,
             m.position,
             result.ngPlusCount,
             result.hero.equipment,
+            thornsBoss,
           );
           let newItems = [...floor2.items];
           const thornsMsgs: Message[] = [

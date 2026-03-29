@@ -21,7 +21,7 @@ const KEYS: [string, string][] = [
   ["Esc", "Close current screen / Return to game"],
   ["", ""],
   // Spells
-  ["1-7", "Quick-cast spell (by hotkey slot)"],
+  ["1-5", "Quick-cast spell (by hotkey slot)"],
   ["Click spell bar", "Select spell to cast"],
   ["Direction key / Click map", "Aim directional spell"],
   ["", ""],

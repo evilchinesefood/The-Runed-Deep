@@ -812,19 +812,16 @@ function processRanged(
     return monsterAttacksPlayer(state, monster);
   }
 
-  // Try to maintain 3-6 tile range for ranged attacks
-  if (cDist < 3) {
-    return moveAwayFrom(state, floorKey, idx, hero.position);
-  }
-
+  // Ranged attack if in range and LOS — stand and fire, no retreat
   if (hasRanged && los && dist <= 8) {
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
     return monsterRangedAttack(state, monster, ability);
   }
 
+  // Close distance to get into firing range
   if (dist <= getDetectRange(state)) {
-    return moveToRange(state, floorKey, idx, hero.position, 3, 6);
+    return moveToward(state, floorKey, idx, hero.position);
   }
 
   return state;

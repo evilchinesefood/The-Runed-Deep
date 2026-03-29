@@ -102,7 +102,7 @@ export interface Hero {
   inventory: Item[];
   copper: number;
   knownSpells: string[];
-  spellHotkeys: string[]; // up to 7 spell IDs for quick-cast slots 1-7
+  spellHotkeys: string[]; // up to 5 spell IDs for quick-cast slots 1-5
   activeEffects: StatusEffect[];
   resistances: ElementalResistances;
   armorValue: number;

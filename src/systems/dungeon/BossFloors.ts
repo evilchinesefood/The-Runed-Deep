@@ -255,12 +255,12 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
     monsters.push(createMonster(bossTpl, { x: 15, y: 13 }, depth, rand01, difficulty));
   }
 
-  // 3 hill-giant minions: 2 in side rooms, 1 in arena
-  const hillGiant = MONSTER_BY_ID['hill-giant'];
-  if (hillGiant) {
-    monsters.push(createMonster(hillGiant, { x: 3, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(hillGiant, { x: 26, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(hillGiant, { x: 11, y: 15 }, depth, rand01, difficulty));
+  // 3 ogre minions: 2 in side rooms, 1 in arena
+  const ogre = MONSTER_BY_ID['ogre'];
+  if (ogre) {
+    monsters.push(createMonster(ogre, { x: 3, y: 12 }, depth, rand01, difficulty));
+    monsters.push(createMonster(ogre, { x: 26, y: 12 }, depth, rand01, difficulty));
+    monsters.push(createMonster(ogre, { x: 11, y: 15 }, depth, rand01, difficulty));
   }
 
   // 3 bonus loot items in arena

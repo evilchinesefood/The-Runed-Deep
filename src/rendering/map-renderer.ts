@@ -449,6 +449,10 @@ export class MapRenderer {
     return this.mapContainer;
   }
 
+  getViewportTiles(): { x: number; y: number } {
+    return { x: VIEWPORT_TILES_X, y: VIEWPORT_TILES_Y };
+  }
+
   /** Convert a click/tap position on the map to world coordinates */
   screenToWorld(
     screenX: number,

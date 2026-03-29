@@ -62,18 +62,52 @@ const input = new InputManager();
 
 const gameLoop = new GameLoop(createInitialGameState(), render);
 
-// Spell mode indicator
+// Spell mode indicator + touch targeting mode
 input.setSpellModeCallback((spellId) => {
   const indicator = document.getElementById("spell-mode-indicator");
   if (indicator) {
     if (spellId) {
       const spell = SPELL_BY_ID[spellId];
-      indicator.textContent = `Casting: ${spell?.name ?? spellId} — pick a direction (Esc to cancel)`;
+      indicator.textContent = `Casting: ${spell?.name ?? spellId} — pick a direction`;
       indicator.style.display = "block";
     } else {
       indicator.style.display = "none";
     }
   }
+  // Sync touch controls targeting mode
+  if (spellId) {
+    touchControls.enterSpellTargetMode(spellId);
+  } else {
+    touchControls.cancelSpellTarget();
+  }
+});
+
+// Auto-target: if exactly one visible monster, return direction to it
+input.setAutoTargetCallback(() => {
+  const state = gameLoop.getState();
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return null;
+  const hero = state.hero.position;
+  const visible = floor.monsters.filter(m => {
+    if (m.hp <= 0) return false;
+    const { x, y } = m.position;
+    return y >= 0 && y < floor.height && x >= 0 && x < floor.width && floor.visible[y][x];
+  });
+  if (visible.length !== 1) return null;
+  const m = visible[0];
+  const dx = m.position.x - hero.x;
+  const dy = m.position.y - hero.y;
+  if (dx === 0 && dy === 0) return null;
+  const a = ((Math.atan2(dy, dx) * 180 / Math.PI) % 360 + 360) % 360;
+  if (a >= 337.5 || a < 22.5) return 'E' as const;
+  if (a < 67.5) return 'SE' as const;
+  if (a < 112.5) return 'S' as const;
+  if (a < 157.5) return 'SW' as const;
+  if (a < 202.5) return 'W' as const;
+  if (a < 247.5) return 'NW' as const;
+  if (a < 292.5) return 'N' as const;
+  return 'NE' as const;
 });
 
 // Click-to-move: pathfind and auto-walk
@@ -501,6 +535,14 @@ touchControls.setAutoExploreHandler(() => {
   autoExploring = true;
   exploreNext();
 });
+// Spell picker → start casting via InputManager (handles self-cast vs targeting)
+touchControls.setSpellCastHandler((spellId) => {
+  cancelAutoMove();
+  if (animRenderer?.isPlaying()) return;
+  input.startSpellCast(spellId);
+  playPendingAnimations();
+});
+
 touchControls.setMenuHandler((action) => {
   if (action === 'toggle-sound') Sound.toggle();
   if (action === 'debug') {
@@ -537,12 +579,11 @@ function playPendingAnimations(): void {
   const groups = drainAnimations();
   if (groups.length === 0 || !animRenderer) return;
 
-  // Set camera for animation positioning
+  // Set camera for animation positioning — use actual viewport size (varies by device)
   const state = gameLoop.getState();
-  const VIEWPORT_X = 21;
-  const VIEWPORT_Y = 15;
-  const cameraX = state.hero.position.x - Math.floor(VIEWPORT_X / 2);
-  const cameraY = state.hero.position.y - Math.floor(VIEWPORT_Y / 2);
+  const vp = mapRenderer!.getViewportTiles();
+  const cameraX = state.hero.position.x - Math.floor(vp.x / 2);
+  const cameraY = state.hero.position.y - Math.floor(vp.y / 2);
   animRenderer.setCamera(cameraX, cameraY);
 
   for (const group of groups) {
@@ -731,6 +772,7 @@ function render(state: GameState): void {
       // Sync known spells to input manager for number-key casting
       input.setKnownSpells(state.hero.knownSpells);
       input.setSpellHotkeys(state.hero.spellHotkeys);
+      touchControls.setSpellState(state.hero.knownSpells, state.hero.mp);
 
       // Compute FOV before rendering map
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;

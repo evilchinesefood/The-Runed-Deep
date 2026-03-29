@@ -74,7 +74,8 @@ export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps =
       if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
 
       const tile = floor.tiles[ny][nx];
-      if (!tile.walkable) continue;
+      // Treat closed doors as passable (move action opens them)
+      if (!tile.walkable && tile.type !== "door-closed") continue;
 
       // Allow moving to goal even if monster is there (to attack it)
       if (!(nx === goal.x && ny === goal.y)) {

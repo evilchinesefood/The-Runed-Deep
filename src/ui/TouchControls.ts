@@ -1,6 +1,8 @@
-import type { GameAction } from "../core/types";
+import type { GameAction, Direction } from "../core/types";
+import { SPELL_BY_ID } from "../data/spells";
 
 export type TouchActionHandler = (action: GameAction) => void;
+export type SpellCastHandler = (spellId: string) => void;
 
 let activeBtn: HTMLElement | null = null;
 let repeatTimer: number | null = null;
@@ -176,12 +178,18 @@ export class TouchControls {
   private dpad: HTMLElement;
   private actionBar: HTMLElement;
   private menuPanel: HTMLElement = document.createElement("div");
+  private spellPickerPanel: HTMLElement = document.createElement("div");
   private menuOpen = false;
   private handler: TouchActionHandler | null = null;
   private autoExploreHandler: (() => void) | null = null;
   private menuHandler: MenuActionHandler | null = null;
+  private spellCastHandler: SpellCastHandler | null = null;
   private visible = false;
   private dpadVisible = true;
+  private spellTargetMode = false;
+  private pendingSpellId: string | null = null;
+  private dpadBtns: { dir: Direction; btn: HTMLElement }[] = [];
+  private dpadCenter: HTMLElement | null = null;
 
   constructor() {
     // D-pad — consistent SVG arrows in a 3x3 grid
@@ -193,7 +201,7 @@ export class TouchControls {
     `;
 
     // Direction: [gridPos, svgRotation, direction]
-    const dirs: [string, number, import("../core/types").Direction | null][] = [
+    const dirs: [string, number, Direction | null][] = [
       ["1/1", -45, "NW"],
       ["1/2", 0, "N"],
       ["1/3", 45, "NE"],
@@ -209,9 +217,19 @@ export class TouchControls {
       const [row, col] = pos.split("/");
       const isCenter = dir === null;
       const btn = makeBtn(48, () => {
-        if (isCenter) this.autoExploreHandler?.();
-        else this.handler?.({ type: "move", direction: dir! });
-      }, true, !isCenter);
+        if (isCenter) {
+          if (this.spellTargetMode) {
+            this.cancelSpellTarget();
+          } else {
+            this.autoExploreHandler?.();
+          }
+        } else if (this.spellTargetMode && this.pendingSpellId) {
+          this.handler?.({ type: "castSpell", spellId: this.pendingSpellId, direction: dir! });
+          this.cancelSpellTarget();
+        } else {
+          this.handler?.({ type: "move", direction: dir! });
+        }
+      }, true, !isCenter && !this.spellTargetMode);
       btn.appendChild(isCenter ? createActionIcon("auto") : createArrowIcon(rot));
       btn.style.gridRow = row;
       btn.style.gridColumn = col;
@@ -220,24 +238,19 @@ export class TouchControls {
         btn.style.background = centerBg;
         btn.dataset.defaultBg = centerBg;
         btn.style.borderColor = "#4a3a20";
+        this.dpadCenter = btn;
       }
+      if (dir) this.dpadBtns.push({ dir: dir!, btn });
       this.dpad.appendChild(btn);
     }
 
     // Action buttons — right side
-    // Mobile: 2-wide grid with icons, no labels. Desktop: vertical stack with labels.
-    const isMobile = true; // always use mobile icon view
-    const isPortrait = isMobile && window.innerHeight > window.innerWidth;
+    const isPortrait = window.innerHeight > window.innerWidth;
     this.actionBar = document.createElement("div");
     if (isPortrait) {
       this.actionBar.style.cssText = `
         position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
         display:grid;grid-template-columns:44px 44px;gap:6px;touch-action:none;
-      `;
-    } else if (isMobile) {
-      this.actionBar.style.cssText = `
-        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
-        display:flex;flex-direction:column;gap:6px;touch-action:none;
       `;
     } else {
       this.actionBar.style.cssText = `
@@ -256,29 +269,19 @@ export class TouchControls {
 
     for (const [id, action] of actions) {
       const btn = makeBtn(44, () => {
+        // Long-press on spells button opens spell management, tap opens spell picker
+        if (id === "spells") {
+          this.openSpellPicker();
+          return;
+        }
         this.handler?.(action);
       });
-      if (isMobile) {
-        btn.appendChild(createActionIcon(id));
-      } else {
-        btn.textContent = { action: "E", rest: "Q", items: "I", spells: "Z", map: "M" }[id] ?? "";
-      }
-      btn.title = { action: "Action", rest: "Rest", items: "Items", spells: "Spells", map: "Map" }[id] ?? "";
-      if (!isMobile) {
-        const row = document.createElement("div");
-        row.style.cssText = "display:flex;align-items:center;gap:6px;";
-        row.appendChild(btn);
-        const lbl = document.createElement("div");
-        lbl.textContent = btn.title;
-        lbl.style.cssText = "color:#666;font-size:11px;font-family:sans-serif;width:40px;";
-        row.appendChild(lbl);
-        this.actionBar.appendChild(row);
-      } else {
-        this.actionBar.appendChild(btn);
-      }
+      btn.appendChild(createActionIcon(id));
+      btn.title = { action: "Action", rest: "Rest", items: "Items", spells: "Cast Spell", map: "Map" }[id] ?? "";
+      this.actionBar.appendChild(btn);
     }
 
-    // Menu button — in the action bar grid/stack like the other buttons
+    // Menu button
     const menuBtn = makeBtn(44, () => this.toggleMenu());
     menuBtn.appendChild(createActionIcon("menu"));
     menuBtn.title = "Commands";
@@ -349,11 +352,21 @@ export class TouchControls {
       this.menuPanel.appendChild(row);
     }
 
+    // Spell picker overlay
+    this.spellPickerPanel = document.createElement("div");
+    this.spellPickerPanel.style.cssText = `
+      position:fixed;inset:0;z-index:1001;
+      background:rgba(0,0,0,0.9);
+      display:none;flex-direction:column;align-items:center;
+      padding:20px 12px;overflow-y:auto;
+    `;
+
     this.container = document.createElement("div");
     this.container.id = "touch-controls";
     this.container.appendChild(this.dpad);
     this.container.appendChild(this.actionBar);
     this.container.appendChild(this.menuPanel);
+    this.container.appendChild(this.spellPickerPanel);
   }
 
   private toggleMenu(): void {
@@ -364,6 +377,147 @@ export class TouchControls {
   private closeMenu(): void {
     this.menuOpen = false;
     this.menuPanel.style.display = "none";
+  }
+
+  private openSpellPicker(): void {
+    if (!this.knownSpells || this.knownSpells.length === 0) {
+      // No spells known — open spell management screen instead
+      this.handler?.({ type: "setScreen", screen: "spells" });
+      return;
+    }
+    this.buildSpellPicker();
+    this.spellPickerPanel.style.display = "flex";
+  }
+
+  private closeSpellPicker(): void {
+    this.spellPickerPanel.style.display = "none";
+  }
+
+  private knownSpells: string[] = [];
+  private heroMp = 0;
+
+  /** Update known spells and MP for the spell picker */
+  setSpellState(knownSpells: string[], mp: number): void {
+    this.knownSpells = knownSpells;
+    this.heroMp = mp;
+  }
+
+  private buildSpellPicker(): void {
+    this.spellPickerPanel.replaceChildren();
+
+    const title = document.createElement("div");
+    title.textContent = "Cast Spell";
+    title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;margin-bottom:12px;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
+    this.spellPickerPanel.appendChild(title);
+
+    const grid = document.createElement("div");
+    grid.style.cssText = "display:flex;flex-direction:column;gap:6px;width:100%;max-width:320px;";
+
+    for (const id of this.knownSpells) {
+      const spell = SPELL_BY_ID[id];
+      if (!spell) continue;
+
+      const canCast = this.heroMp >= spell.manaCost;
+      const row = document.createElement("div");
+      const targetLabel = spell.targeting === 'self' || spell.targeting === 'none'
+        ? '' : spell.targeting === 'direction' ? ' \u2190\u2191\u2192\u2193' : ' \u25ce';
+      row.textContent = `${spell.name} (${spell.manaCost} MP)${targetLabel}`;
+      row.style.cssText = `
+        padding:10px 14px;color:${canCast ? '#c9a84c' : '#555'};font-size:14px;font-weight:bold;
+        font-family:sans-serif;text-shadow:0 1px 2px rgba(0,0,0,0.8);
+        background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
+        border:2px solid ${canCast ? '#555' : '#333'};border-bottom:3px solid #333;border-radius:6px;
+        cursor:${canCast ? 'pointer' : 'default'};user-select:none;touch-action:none;
+      `;
+
+      if (canCast) {
+        const cast = () => {
+          this.closeSpellPicker();
+          this.spellCastHandler?.(id);
+        };
+        row.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); cast(); });
+        row.addEventListener("mousedown", (e) => { e.preventDefault(); cast(); });
+      }
+      grid.appendChild(row);
+    }
+
+    this.spellPickerPanel.appendChild(grid);
+
+    // Manage Spells button at bottom
+    const manageBtn = document.createElement("div");
+    manageBtn.textContent = "Manage Hotkeys";
+    manageBtn.style.cssText = `
+      padding:10px 20px;margin-top:12px;color:#888;font-size:13px;font-family:sans-serif;
+      text-align:center;cursor:pointer;user-select:none;touch-action:none;
+    `;
+    manageBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      this.closeSpellPicker();
+      this.handler?.({ type: "setScreen", screen: "spells" });
+    });
+    manageBtn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      this.closeSpellPicker();
+      this.handler?.({ type: "setScreen", screen: "spells" });
+    });
+    this.spellPickerPanel.appendChild(manageBtn);
+
+    // Cancel button
+    const cancelBtn = document.createElement("div");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.cssText = `
+      padding:10px 20px;margin-top:4px;color:#f44;font-size:14px;font-weight:bold;
+      font-family:sans-serif;text-align:center;cursor:pointer;user-select:none;touch-action:none;
+    `;
+    cancelBtn.addEventListener("touchstart", (e) => { e.preventDefault(); this.closeSpellPicker(); });
+    cancelBtn.addEventListener("mousedown", (e) => { e.preventDefault(); this.closeSpellPicker(); });
+    this.spellPickerPanel.appendChild(cancelBtn);
+  }
+
+  /** Enter spell targeting mode — D-pad fires spell instead of moving */
+  enterSpellTargetMode(spellId: string): void {
+    this.spellTargetMode = true;
+    this.pendingSpellId = spellId;
+    // Visual: tint D-pad buttons to indicate targeting mode
+    const targetBg = "linear-gradient(180deg, #4a3a20 0%, #3a2a10 40%, #2a1a08 100%)";
+    for (const { btn } of this.dpadBtns) {
+      btn.style.background = targetBg;
+      btn.dataset.defaultBg = targetBg;
+      btn.style.borderColor = "#6a5a30";
+    }
+    if (this.dpadCenter) {
+      // Center becomes cancel (X)
+      this.dpadCenter.replaceChildren();
+      const x = document.createElement("span");
+      x.textContent = "\u2715";
+      x.style.cssText = "color:#f44;font-size:18px;";
+      this.dpadCenter.appendChild(x);
+      const cancelBg = "linear-gradient(180deg, #4a2020 0%, #3a1010 40%, #2a0808 100%)";
+      this.dpadCenter.style.background = cancelBg;
+      this.dpadCenter.dataset.defaultBg = cancelBg;
+      this.dpadCenter.style.borderColor = "#6a3030";
+    }
+  }
+
+  /** Exit spell targeting mode */
+  cancelSpellTarget(): void {
+    this.spellTargetMode = false;
+    this.pendingSpellId = null;
+    // Restore D-pad appearance
+    const normalBg = "linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%)";
+    for (const { btn } of this.dpadBtns) {
+      btn.style.background = normalBg;
+      btn.dataset.defaultBg = normalBg;
+      btn.style.borderColor = "#555";
+    }
+    if (this.dpadCenter) {
+      this.dpadCenter.replaceChildren();
+      this.dpadCenter.appendChild(createActionIcon("auto"));
+      const centerBg = "linear-gradient(180deg, #3a3020 0%, #2a2010 40%, #1a1508 100%)";
+      this.dpadCenter.style.background = centerBg;
+      this.dpadCenter.dataset.defaultBg = centerBg;
+      this.dpadCenter.style.borderColor = "#4a3a20";
+    }
   }
 
   setHandler(handler: TouchActionHandler): void {
@@ -378,6 +532,10 @@ export class TouchControls {
     this.menuHandler = handler;
   }
 
+  setSpellCastHandler(handler: SpellCastHandler): void {
+    this.spellCastHandler = handler;
+  }
+
   show(): void {
     if (!this.visible) {
       document.body.appendChild(this.container);
@@ -388,6 +546,8 @@ export class TouchControls {
   hide(): void {
     if (this.visible) {
       releaseActive();
+      this.cancelSpellTarget();
+      this.closeSpellPicker();
       this.container.remove();
       this.visible = false;
     }

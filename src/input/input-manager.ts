@@ -4,6 +4,7 @@ import { SPELL_BY_ID } from '../data/spells';
 export type ActionHandler = (action: GameAction) => void;
 export type SpellModeCallback = (spellId: string | null) => void;
 export type PathClickCallback = (target: Vector2) => void;
+export type AutoTargetCallback = () => Direction | null;
 
 const KEY_TO_DIRECTION: Record<string, Direction> = {
   ArrowUp: 'N', ArrowDown: 'S', ArrowLeft: 'W', ArrowRight: 'E',
@@ -22,6 +23,7 @@ export class InputManager {
   private spellHotkeys: string[] = [];
   private onPathClick: PathClickCallback | null = null;
   private onAutoExplore: (() => void) | null = null;
+  private onAutoTarget: AutoTargetCallback | null = null;
 
   constructor() {
     this.setupKeyboard();
@@ -55,6 +57,10 @@ export class InputManager {
 
   setAutoExploreCallback(cb: () => void): void {
     this.onAutoExplore = cb;
+  }
+
+  setAutoTargetCallback(cb: AutoTargetCallback): void {
+    this.onAutoTarget = cb;
   }
 
   isInSpellMode(): boolean {
@@ -125,6 +131,15 @@ export class InputManager {
     if (spell.targeting === 'self' || spell.targeting === 'none') {
       this.emit({ type: 'castSpell', spellId });
       return;
+    }
+
+    // Auto-target: if exactly one visible monster, cast at it immediately
+    if (spell.targeting === 'direction' && this.onAutoTarget) {
+      const dir = this.onAutoTarget();
+      if (dir) {
+        this.emit({ type: 'castSpell', spellId, direction: dir });
+        return;
+      }
     }
 
     // Direction/target spells need a second input

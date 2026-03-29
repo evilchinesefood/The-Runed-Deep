@@ -50,32 +50,55 @@ export function generateLoot(
   _position: Vector2,
   ngPlus: number = 0,
   equipment?: Record<string, any>,
+  isBoss: boolean = false,
 ): Item | null {
-  // Fortune affix: boost drop chance
-  let fortuneDropBonus = 0;
-  if (equipment) {
-    fortuneDropBonus = getEquipAffixTotal(equipment, "fortune") / 100;
-    // fortune-power unique: +25% drop rate
-    for (const eq of Object.values(equipment)) {
-      if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') {
-        fortuneDropBonus += 0.25;
-        break;
+  // Bosses always drop loot
+  if (!isBoss) {
+    // Fortune affix: boost drop chance
+    let fortuneDropBonus = 0;
+    if (equipment) {
+      fortuneDropBonus = getEquipAffixTotal(equipment, "fortune") / 100;
+      // fortune-power unique: +25% drop rate
+      for (const eq of Object.values(equipment)) {
+        if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') {
+          fortuneDropBonus += 0.25;
+          break;
+        }
       }
     }
-  }
 
-  const dropChance = 0.3 + depth * 0.005 + fortuneDropBonus;
-  if (Math.random() > dropChance) return null;
+    const dropChance = 0.3 + depth * 0.005 + fortuneDropBonus;
+    if (Math.random() > dropChance) return null;
 
-  // 20% chance of copper instead of an item
-  if (Math.random() < 0.2) {
-    return createCopperDrop(depth, equipment);
+    // 20% chance of copper instead of an item
+    if (Math.random() < 0.2) {
+      return createCopperDrop(depth, equipment);
+    }
   }
 
   const candidates = getItemsForDepth(depth);
   if (candidates.length === 0) return null;
 
-  const template = candidates[Math.floor(Math.random() * candidates.length)];
+  // Boss guaranteed unique drop (F30+ or NG+)
+  if (isBoss && (ngPlus >= 1 || depth >= 30)) {
+    const uniqueCandidates = candidates.filter(t => t.unique);
+    if (uniqueCandidates.length > 0) {
+      const template = uniqueCandidates[Math.floor(Math.random() * uniqueCandidates.length)];
+      return createItemFromTemplate(template, depth, ngPlus);
+    }
+  }
+
+  // Unique drop gate: if a unique is selected, 97% chance to re-roll as non-unique
+  // NG+ increases unique chance: 3% / 4.5% / 6% / 8%
+  const uniqueChance = 0.03 + ngPlus * 0.015;
+  let template = candidates[Math.floor(Math.random() * candidates.length)];
+  if (template.unique && Math.random() > uniqueChance) {
+    const nonUnique = candidates.filter(t => !t.unique);
+    if (nonUnique.length > 0) {
+      template = nonUnique[Math.floor(Math.random() * nonUnique.length)];
+    }
+  }
+
   return createItemFromTemplate(template, depth, ngPlus);
 }
 

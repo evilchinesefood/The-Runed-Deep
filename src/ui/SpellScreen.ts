@@ -48,7 +48,7 @@ export function createSpellScreen(
   screen.appendChild(titleBar);
 
   // Hotkey bar panel
-  const hotkeyPanel = createPanel("Hotkeys (1-7)");
+  const hotkeyPanel = createPanel("Hotkeys (1-5)");
   screen.appendChild(hotkeyPanel);
 
   function renderHotkeyPanel(): void {
@@ -354,7 +354,7 @@ export function createSpellScreen(
         marginTop: "4px",
         textAlign: "center",
       },
-      "Click a spell to cast it. Use [+]/[-] to manage hotkey slots 1-7.",
+      "Click a spell to cast it. Use [+]/[-] to manage hotkey slots 1-5.",
     ),
   );
 
@@ -367,7 +367,7 @@ export function createSpellScreen(
       return;
     }
     // Number keys to quick-cast via hotkeys
-    const digit = e.code.match(/^Digit([1-7])$/);
+    const digit = e.code.match(/^Digit([1-5])$/);
     if (digit) {
       const idx = parseInt(digit[1]) - 1;
       if (idx < hotkeys.length) {
