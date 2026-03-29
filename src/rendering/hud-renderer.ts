@@ -46,6 +46,7 @@ export class HudRenderer {
     });
     this.container.appendChild(this.spellBarEl);
 
+    const isMobileHud = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
     const hud = el("div", {
       display: "flex",
       width: "100%",
@@ -53,6 +54,7 @@ export class HudRenderer {
       margin: "4px auto",
       gap: "6px",
       fontSize: "var(--fs-md)",
+      paddingBottom: isMobileHud ? "180px" : "0",
     });
 
     this.messagesEl = el("div", {
