@@ -153,8 +153,8 @@ export const TOWN_BUILDINGS: TownBuilding[] = [
   },
   {
     id: "bank",
-    name: "Bank",
-    flavor: "Keep your wealth safe from the dangers below.",
+    name: "Blacksmith",
+    flavor: "Forge new enchantments onto your gear.",
     x: 22,
     y: 26,
     w: 5,

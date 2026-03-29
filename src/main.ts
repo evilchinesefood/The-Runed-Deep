@@ -1206,12 +1206,15 @@ function switchScreen(state: GameState): void {
         const deathDungeon = s.currentDungeon;
         const deathKey = `${deathDungeon}-${deathFloor}`;
 
-        // Regenerate town + death floor
+        // Regenerate town + death floor (skip if died in town somehow)
         const { floor: townFloor } = generateTownMap();
-        const { floor: newDungeonFloor } = generateFloor(
-          deathDungeon, deathFloor, Date.now(), true, true, s.difficulty,
-        );
-        const floors = { ...s.floors, 'town-0': townFloor, [deathKey]: newDungeonFloor };
+        const floors = { ...s.floors, 'town-0': townFloor };
+        if (deathDungeon !== 'town') {
+          const { floor: newDungeonFloor } = generateFloor(
+            deathDungeon, deathFloor, Date.now(), true, true, s.difficulty,
+          );
+          floors[deathKey] = newDungeonFloor;
+        }
 
         // Refresh shop inventories
         const deepest = Math.max(s.town.deepestFloor, deathFloor + 1);

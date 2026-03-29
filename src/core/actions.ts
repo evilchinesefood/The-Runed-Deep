@@ -98,6 +98,12 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processUnequipItem(state, action.slot);
     case "useItem":
       return processUseItem(state, action.itemId);
+    case "toggleMarkForSale": {
+      const inv = state.hero.inventory.map(i =>
+        i.id === action.itemId ? { ...i, markedForSale: !i.markedForSale } : i,
+      );
+      return { ...state, hero: { ...state.hero, inventory: inv } };
+    }
     case "search":
       return processSearch(state);
     case "enterBuilding": {

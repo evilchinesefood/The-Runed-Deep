@@ -426,6 +426,16 @@ export function createInventoryScreen(
       btnRow.appendChild(drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })));
     }
     btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
+    // Mark/Unmark for sale — dispatched through game loop
+    const markLabel = item.markedForSale ? "Unmark" : "Mark Sale";
+    const markBtn = createButton(markLabel);
+    markBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+    if (item.markedForSale) { markBtn.style.color = "#f90"; markBtn.style.borderColor = "#a60"; }
+    markBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      onAction({ type: "toggleMarkForSale", itemId: item.id });
+    });
+    btnRow.appendChild(markBtn);
     btnRow.appendChild(drawerBtn("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
 
@@ -525,6 +535,15 @@ export function createInventoryScreen(
           lineHeight: "14px",
         }, `${count}`);
         spriteWrap.appendChild(badge);
+      }
+      if (item.markedForSale) {
+        spriteWrap.appendChild(el("span", {
+          position: "absolute",
+          top: "-2px",
+          left: "-2px",
+          fontSize: "12px",
+          lineHeight: "12px",
+        }, "\uD83D\uDCB0"));
       }
       row.appendChild(spriteWrap);
 

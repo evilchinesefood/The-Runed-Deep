@@ -150,6 +150,7 @@ export interface Item {
   properties: Record<string, number>;
   contents?: Item[]; // for containers
   specialEnchantments?: string[]; // e.g. ['vampiric', 'might', 'regeneration']
+  markedForSale?: boolean;
 }
 
 // ============================================================
@@ -239,7 +240,7 @@ export type DungeonId = "mine" | "fortress" | "castle" | "town";
 export interface TownState {
   id: string;
   shopInventories: Record<string, Item[]>;
-  bankBalance: number;
+  bankBalance: number; // deprecated — kept for save compat
   deepestFloor: number;
 }
 
@@ -303,4 +304,5 @@ export type GameAction =
   | { type: "save" }
   | { type: "load" }
   | { type: "newGame" }
+  | { type: "toggleMarkForSale"; itemId: string }
   | { type: "setScreen"; screen: Screen };

@@ -368,6 +368,29 @@ export function createShopScreen(
 
     screen.appendChild(row);
 
+    // Sell Marked button
+    const shop = SHOP_DEFS[shopId];
+    const isJunk = shopId === 'junk-store';
+    const markedItems = state.hero.inventory.filter(i => {
+      if (!i.markedForSale) return false;
+      if (isJunk) return true;
+      return shop?.categories.includes(i.category);
+    });
+    if (markedItems.length > 0) {
+      const totalGold = markedItems.reduce((s, i) => s + getSellPrice(i, shopId), 0);
+      const sellMarkedBtn = createButton(`Sell Marked (${markedItems.length}) — ${totalGold}g`);
+      sellMarkedBtn.style.cssText += "display:block;width:100%;margin-top:8px;padding:10px;font-size:14px;";
+      sellMarkedBtn.addEventListener("click", () => {
+        for (const item of markedItems) {
+          soldKeys.add(`${item.templateId}|${item.enchantment}`);
+          state = sellItem(state, shopId, item.id);
+        }
+        onTransaction(state);
+        render();
+      });
+      screen.appendChild(sellMarkedBtn);
+    }
+
     const hint = el(
       "div",
       { color: "#555", fontSize: "11px", marginTop: "4px" },

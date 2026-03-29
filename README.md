@@ -78,6 +78,8 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Blessed items** — cursed items converted at the Temple (25g): negative enchant flips to positive, +1 affix scaling bonus
 - **Cursed items** generate with negative enchantments, can get cursed-only affixes, freely unequipped
 - **No identification system** — all items show their full stats immediately
+- **Mark for sale** — tag items in inventory, bulk sell at matching shops (Junk Store sells all marked)
+- **Blacksmith** — add or reroll affixes, pick from 3 weighted options, cost scales with affix count
 - **Tab-compare tooltips** — hold Tab while hovering an equippable item to see it side-by-side with your equipped item
 - **Area pickup** — items collected from 3x3 area around player
 - **Pack enchantment** affects carry capacity (+5kg per level)
@@ -100,7 +102,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - PHP backend with CORS, IP-based rate limiting, save validation, flat-file storage
 
 ### Town
-- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Bank
+- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Blacksmith (add/reroll affixes)
 - **Decorative buildings** — Keep, Silo, Wall Pieces, Huts
 - **Water feature**, sign posts at building entrances
 - **Town layout** built with visual map builder tool, exported as exact tile data

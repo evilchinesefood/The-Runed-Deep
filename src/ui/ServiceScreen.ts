@@ -8,14 +8,15 @@ import { createScreen, createTitleBar, createPanel, createButton, el } from './T
 import {
   templeHealHP, templeHealMP, templeCurePoison, templeRemoveCurse,
   sageEnchantItem, getEnchanterCap,
-  bankDeposit, bankWithdraw,
+  getBlacksmithCost, getBlacksmithCap, rollBlacksmithOptions, blacksmithApplyAffix,
   innRest,
 } from '../systems/town/Services';
+import { AFFIX_BY_ID, formatAffixDesc } from '../data/Enchantments';
 
 const BUILDING_NAMES: Record<string, string> = {
   temple: 'Temple of Odin',
   sage: 'The Sage',
-  bank: 'Bank',
+  bank: 'The Blacksmith',
   inn: 'The Resting Stag Inn',
 };
 
@@ -107,29 +108,157 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   return panel;
 }
 
-function buildBank(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
-  const panel = createPanel('Banking');
+function buildBlacksmith(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('Forge');
+  const ngPlus = state.ngPlusCount ?? 0;
+  const cap = getBlacksmithCap(ngPlus);
 
-  panel.appendChild(el('div', { display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }, ''));
-  const onHand = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '4px' }, `On hand: ${state.hero.copper} gold`);
-  const inBank = el('div', { fontSize: '13px', color: '#ccc', marginBottom: '12px' }, `In bank: ${state.town.bankBalance} gold`);
-  panel.appendChild(onHand);
-  panel.appendChild(inBank);
+  // List equippable items
+  const items: { id: string; name: string; item: import('../../core/types').Item; equipped: boolean }[] = [];
+  for (const item of state.hero.inventory) {
+    if (ITEM_BY_ID[item.templateId]?.equipSlot && !item.cursed) {
+      items.push({ id: item.id, name: item.name, item, equipped: false });
+    }
+  }
+  for (const [, item] of Object.entries(state.hero.equipment)) {
+    if (item && !item.cursed) {
+      items.push({ id: item.id, name: `${item.name} (equipped)`, item, equipped: true });
+    }
+  }
 
-  const btnRow = el('div', { display: 'flex', gap: '8px' });
+  if (items.length === 0) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'No items to work on.'));
+    return panel;
+  }
 
-  const depBtn = createButton('Deposit All');
-  greyBtn(depBtn, state.hero.copper <= 0);
-  depBtn.addEventListener('click', () => onUpdate(bankDeposit(state, state.hero.copper)));
-  btnRow.appendChild(depBtn);
+  panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Add or reroll affixes. (Cap: ${cap} per item)`));
 
-  const wdBtn = createButton('Withdraw All');
-  greyBtn(wdBtn, state.town.bankBalance <= 0);
-  wdBtn.addEventListener('click', () => onUpdate(bankWithdraw(state, state.town.bankBalance)));
-  btnRow.appendChild(wdBtn);
+  for (const entry of items) {
+    const cost = getBlacksmithCost(entry.item);
+    const affixCount = entry.item.specialEnchantments?.length ?? 0;
+    const atCap = affixCount >= cap;
+    const canAfford = state.hero.copper >= cost;
 
-  panel.appendChild(btnRow);
+    const row = el('div', { marginBottom: '6px', padding: '4px', background: '#111', borderRadius: '4px' });
+    row.appendChild(el('div', { color: '#ccc', fontSize: '12px', fontWeight: 'bold' }, entry.name));
+    row.appendChild(el('div', { color: '#888', fontSize: '11px' }, `Affixes: ${affixCount}/${cap} · Cost: ${cost}g`));
+
+    const btnRow2 = el('div', { display: 'flex', gap: '6px', marginTop: '4px' });
+
+    // Add Affix button
+    if (!atCap) {
+      const addBtn = createButton('Add Affix');
+      Object.assign(addBtn.style, { fontSize: '11px', padding: '4px 8px' });
+      greyBtn(addBtn, !canAfford);
+      if (canAfford) {
+        addBtn.addEventListener('click', () => {
+          const options = rollBlacksmithOptions(entry.item, ngPlus);
+          showAffixPicker(panel, state, entry.item, options, undefined, onUpdate);
+        });
+      }
+      btnRow2.appendChild(addBtn);
+    }
+
+    // Reroll buttons for each existing affix
+    if (affixCount > 0) {
+      const rerollBtn = createButton('Reroll Affix');
+      Object.assign(rerollBtn.style, { fontSize: '11px', padding: '4px 8px' });
+      greyBtn(rerollBtn, !canAfford);
+      if (canAfford) {
+        rerollBtn.addEventListener('click', () => {
+          showAffixSelect(panel, state, entry.item, ngPlus, onUpdate);
+        });
+      }
+      btnRow2.appendChild(rerollBtn);
+    }
+
+    row.appendChild(btnRow2);
+    panel.appendChild(row);
+  }
+
   return panel;
+}
+
+function showAffixSelect(
+  container: HTMLElement, state: GameState, item: import('../../core/types').Item,
+  ngPlus: number, onUpdate: (s: GameState) => void,
+): void {
+  const enchants = item.specialEnchantments ?? [];
+  const overlay = el('div', {
+    position: 'fixed', inset: '0', zIndex: '300', background: 'rgba(0,0,0,0.9)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    gap: '8px', padding: '20px',
+  });
+
+  overlay.appendChild(el('div', { color: '#c9a84c', fontSize: '16px', fontWeight: 'bold' }, 'Select affix to replace'));
+
+  for (let i = 0; i < enchants.length; i++) {
+    const raw = enchants[i];
+    const isCrit = raw.endsWith(':critical');
+    const id = isCrit ? raw.replace(':critical', '') : raw;
+    const aff = AFFIX_BY_ID[id];
+    if (!aff) continue;
+    const desc = formatAffixDesc(id, item.enchantment, isCrit);
+    const prefix = isCrit ? '\u2605\u2605' : '\u2605';
+
+    const btn = createButton(`${prefix} ${aff.name}: ${desc}`);
+    Object.assign(btn.style, { display: 'block', width: '100%', maxWidth: '320px', textAlign: 'left', fontSize: '12px', color: aff.color });
+    btn.addEventListener('click', () => {
+      overlay.remove();
+      const options = rollBlacksmithOptions(item, ngPlus, [id]);
+      showAffixPicker(container, state, item, options, i, onUpdate);
+    });
+    overlay.appendChild(btn);
+  }
+
+  const cancelBtn = createButton('Cancel');
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  overlay.appendChild(cancelBtn);
+  document.body.appendChild(overlay);
+}
+
+function showAffixPicker(
+  container: HTMLElement, state: GameState, item: import('../../core/types').Item,
+  options: { id: string; critical: boolean }[], replaceIdx: number | undefined,
+  onUpdate: (s: GameState) => void,
+): void {
+  const overlay = el('div', {
+    position: 'fixed', inset: '0', zIndex: '300', background: 'rgba(0,0,0,0.9)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    gap: '8px', padding: '20px',
+  });
+
+  if (options.length === 0) {
+    overlay.appendChild(el('div', { color: '#f44', fontSize: '14px', fontWeight: 'bold' }, 'No affixes available for this item.'));
+    const okBtn = createButton('OK');
+    okBtn.addEventListener('click', () => overlay.remove());
+    overlay.appendChild(okBtn);
+    document.body.appendChild(overlay);
+    return;
+  }
+
+  overlay.appendChild(el('div', { color: '#c9a84c', fontSize: '16px', fontWeight: 'bold' }, 'Choose an affix'));
+  overlay.appendChild(el('div', { color: '#888', fontSize: '12px', marginBottom: '4px' }, `Cost: ${getBlacksmithCost(item)}g`));
+
+  for (const opt of options) {
+    const aff = AFFIX_BY_ID[opt.id];
+    if (!aff) continue;
+    const desc = formatAffixDesc(opt.id, item.enchantment, opt.critical);
+    const prefix = opt.critical ? '\u2605\u2605' : '\u2605';
+
+    const btn = createButton(`${prefix} ${aff.name}: ${desc}`);
+    Object.assign(btn.style, { display: 'block', width: '100%', maxWidth: '320px', textAlign: 'left', fontSize: '12px', color: aff.color });
+    btn.addEventListener('click', () => {
+      overlay.remove();
+      onUpdate(blacksmithApplyAffix(state, item.id, opt.id, opt.critical, replaceIdx));
+    });
+    overlay.appendChild(btn);
+  }
+
+  const cancelBtn = createButton('Cancel');
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  overlay.appendChild(cancelBtn);
+  document.body.appendChild(overlay);
 }
 
 function buildInn(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
@@ -181,7 +310,7 @@ export function createServiceScreen(
     switch (buildingId) {
       case 'temple':  content = buildTemple(state, handleUpdate); break;
       case 'sage':    content = buildSage(state, handleUpdate); break;
-      case 'bank':    content = buildBank(state, handleUpdate); break;
+      case 'bank':    content = buildBlacksmith(state, handleUpdate); break;
       case 'inn':     content = buildInn(state, handleUpdate); break;
       default:
         content = createPanel('Unknown Service');
