@@ -393,6 +393,38 @@ export function createSplashScreen(
     }
 
     splash.appendChild(slotPanel);
+
+    // Background cloud sync — pull latest for each cloud-enabled slot
+    for (let i = 0; i < slots.length; i++) {
+      const info = slots[i];
+      if (!info) continue;
+      const code = getCloudCode(info.slot);
+      if (!code) continue;
+      const slotNum = info.slot;
+      (async () => {
+        try {
+          const remote = await pullSave(code);
+          if (!remote) return;
+          const state = JSON.parse(remote) as GameState;
+          if (!state.hero?.name) return;
+          // Compare turns — only update if remote is ahead
+          const localJson = localStorage.getItem(`rd-save-${slotNum}`);
+          const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+          if (state.turn <= localTurn) return;
+          // Remote is newer — update localStorage
+          const saveData = { version: 1, timestamp: Date.now(), state };
+          localStorage.setItem(`rd-save-${slotNum}`, JSON.stringify(saveData));
+          // Update the slot display in-place
+          const row = slotPanel.children[i] as HTMLElement;
+          if (!row) return;
+          const details = row.querySelector("div") as HTMLElement;
+          if (!details) return;
+          const children = details.children;
+          if (children[1]) children[1].textContent = `Level ${state.hero.level} | Floor ${(state.currentFloor ?? 0) + 1} | Turn ${state.turn}`;
+          if (children[2]) children[2].textContent = `\u2601 Synced from cloud`;
+        } catch { /* ignore sync errors */ }
+      })();
+    }
   }
 
   container.appendChild(splash);
