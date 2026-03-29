@@ -129,7 +129,6 @@ input.setPathClickCallback((target) => {
 
 // Auto-explore: find nearest unexplored tile and walk toward it
 let autoExploring = false;
-let autoSearchOnArrival = false;
 
 /** Items worth stopping auto-explore for (ignore junk/broken/blank with value <= 5) */
 function isWorthStoppingFor(item: import("./core/types").Item): boolean {
@@ -147,7 +146,6 @@ function aeMsg(text: string): void {
 input.setAutoExploreCallback(() => {
   if (autoExploring) {
     autoExploring = false;
-    autoSearchOnArrival = false;
     autoPath = [];
     return;
   }
@@ -232,7 +230,12 @@ function exploreNext(): void {
     // Floor fully explored — navigate to stairs down
     for (let y = 0; y < floor.height && !bestTarget; y++) {
       for (let x = 0; x < floor.width && !bestTarget; x++) {
-        if (floor.tiles[y][x].type === 'stairs-down' && !(x === hero.x && y === hero.y)) {
+        if (floor.tiles[y][x].type === 'stairs-down') {
+          if (x === hero.x && y === hero.y) {
+            aeMsg("Auto-explore stopped — standing on stairs.");
+            autoExploring = false;
+            return;
+          }
           bestTarget = { x, y };
         }
       }
@@ -240,37 +243,17 @@ function exploreNext(): void {
     if (bestTarget) {
       aeMsg("Floor explored — heading to stairs.");
     } else {
-      // No stairs found — look for secret doors adjacent to explored walkable tiles
-      let secretTarget: { x: number; y: number } | null = null;
-      let secretDist = Infinity;
-      for (let y = 0; y < floor.height; y++) {
-        for (let x = 0; x < floor.width; x++) {
-          if (floor.tiles[y][x].type !== 'door-secret') continue;
-          // Find nearest explored walkable tile adjacent to this secret door
-          for (let dy = -1; dy <= 1; dy++) {
-            for (let dx = -1; dx <= 1; dx++) {
-              if (dx === 0 && dy === 0) continue;
-              const nx = x + dx, ny = y + dy;
-              if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
-              if (!floor.tiles[ny][nx].walkable || !floor.explored[ny][nx]) continue;
-              const dist = Math.abs(nx - hero.x) + Math.abs(ny - hero.y);
-              if (dist < secretDist) {
-                secretDist = dist;
-                secretTarget = { x: nx, y: ny };
-              }
-            }
-          }
-        }
-      }
-      if (secretTarget) {
-        bestTarget = secretTarget;
-        autoSearchOnArrival = true;
-        aeMsg("Searching for hidden passages...");
-      } else {
-        aeMsg("Auto-explore stopped — floor fully explored.");
+      // No stairs-down on the map at all — emergency spawn at hero's feet
+      const tile = floor.tiles[hero.y][hero.x];
+      if (tile.walkable) {
+        floor.tiles[hero.y][hero.x] = { ...tile, type: 'stairs-down', sprite: 'stairs-down' };
+        aeMsg("The ground crumbles, revealing a stairway down!");
         autoExploring = false;
         return;
       }
+      aeMsg("Auto-explore stopped — floor fully explored.");
+      autoExploring = false;
+      return;
     }
   }
 
@@ -395,11 +378,16 @@ function stepAutoPathExplore(): void {
     if (autoPath.length > 0) {
       autoWalkTimer = window.setTimeout(stepAutoPathExplore, 80);
     } else {
-      // Path exhausted — if we were heading to a secret door, search it
-      if (autoSearchOnArrival) {
-        autoSearchOnArrival = false;
-        gameLoop.handleAction({ type: "search" });
-        playPendingAnimations();
+      // Stop at stairs-down
+      const postState2 = gameLoop.getState();
+      const pk2 = `${postState2.currentDungeon}-${postState2.currentFloor}`;
+      const pf2 = postState2.floors[pk2];
+      const heroTile2 = pf2?.tiles[postState2.hero.position.y]?.[postState2.hero.position.x];
+      if (heroTile2?.type === 'stairs-down') {
+        aeMsg("Auto-explore stopped — stairs found.");
+        autoExploring = false;
+        autoPath = [];
+        return;
       }
       // Find next unexplored target
       setTimeout(exploreNext, 100);
@@ -504,7 +492,6 @@ function cancelAutoMove(): void {
   if (autoPath.length > 0 || autoExploring) {
     autoPath = [];
     autoExploring = false;
-    autoSearchOnArrival = false;
     if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
   }
 }
@@ -528,7 +515,6 @@ touchControls.setHandler((action) => {
 touchControls.setAutoExploreHandler(() => {
   if (autoExploring) {
     autoExploring = false;
-    autoSearchOnArrival = false;
     autoPath = [];
     return;
   }

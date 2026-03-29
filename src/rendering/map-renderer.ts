@@ -214,6 +214,7 @@ export class MapRenderer {
         cell.ground.style.opacity = "";
         cell.ground.style.transform = "";
         cell.ground.style.filter = "";
+        cell.ground.style.boxShadow = "";
         cell.entity.className = "";
         cell.entity.style.display = "none";
 
@@ -282,6 +283,10 @@ export class MapRenderer {
             cell.ground.className = tile.sprite;
             cell.ground.style.display = "block";
             cell.ground.style.opacity = opacity;
+            // Revealed traps get a red tint so faint sprites are visible
+            if (tile.type === "trap" && tile.trapRevealed) {
+              cell.ground.style.boxShadow = "inset 0 0 0 20px rgba(180, 40, 40, 0.3)";
+            }
           }
         } else if (tile.sprite === "town-wall") {
           // Town fence: grass underneath, fence sprite on ground layer

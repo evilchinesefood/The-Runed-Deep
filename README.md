@@ -17,13 +17,16 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Procedural generation** — 5 room shapes, locked/secret doors, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental with resistance checks (fire, acid, lightning, wind, rune), special (portal, cobweb)
 - **Dungeon decor** — pillars, altars, statues, coffins, fountains, water pools scattered in rooms and boss lairs
-- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored, seeks out secret doors when no path to next floor
+- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored, emergency stairway spawn if map has no exit
+- **Revealed trap indicators** — red tint behind revealed trap sprites for visibility on dark floors
 
 ### Combat & Monsters
 - **68 monster types** across 5 AI behaviors (melee, ranged, caster, thief, summoner)
 - **Elemental melee attacks** — 15+ monsters deal cold, fire, acid, or drain damage on hit (reduced by resistances)
 - **Drain resistance** — Soul Ward amulet and drain resist reduce drain-stat, drain-level, and drain-hp chances
-- **Giants throw projectiles** — Hill Giants, Frost Giants, Fire Giants, and their bosses use ranged boulder/ice attacks
+- **Giants throw projectiles** — Hill Giants, Frost Giants, Fire Giants, and their bosses use ranged boulder/ice attacks (stand and fire, no kiting)
+- **Boss guaranteed drops** — bosses always drop loot, guaranteed unique on floor 30+ or NG+
+- **Unique item drop gating** — ~3% chance from random loot (was uncapped), scales with NG+
 - **Flee-once mechanic** — monsters flee at low HP once, then fight to the death
 - **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, melee touches, and traps
 - **Evasion system** — dodge chance from gear affixes
@@ -86,7 +89,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - Meteoric enchantment range: +8 / +15 / +20 / +25
 - Unique items scale: min enchant +5/+7/+9/+10, min affixes 2/3/4/5
 - Boss guaranteed unique drops in all NG+ cycles
-- Unique drop rate bonus: +50% / +100% / +150% per NG level
+- Unique drop gate: 3% / 4.5% / 6% / 8% pass-through chance per NG level
 
 ### Cloud Saves
 - **Cross-device sync** — enable cloud saves per slot with a 5-character code
@@ -114,6 +117,9 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **18 synthesized sound effects** via Web Audio API
 - **Responsive layout** — scales to phone, tablet, and desktop
 - **Touch controls** — SVG icon buttons, hideable D-pad, portrait 2-wide grid layout
+- **Mobile spell picker** — tap book icon to open full spell list, cast any known spell directly
+- **D-pad spell targeting** — D-pad switches to targeting mode for directional spells (gold tint, center = cancel)
+- **Auto-target** — direction spells auto-fire at the nearest monster when only one is visible
 - **Mobile detail drawer** — tap inventory items for full tooltip + compare + Equip/Use/Drop buttons
 - **Commands menu** — access Character, Help, Achievements, Save, Sound, Debug from touch
 - **Action button attacks** adjacent monsters on mobile
