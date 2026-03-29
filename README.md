@@ -90,9 +90,10 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 
 ### Cloud Saves
 - **Cross-device sync** — enable cloud saves per slot with a 5-character code
-- **Auto-sync** — every save pushes to server, loading pulls latest
+- **Auto-sync** — every save pushes to server, splash screen auto-pulls latest on load
 - **Load by code** — enter a code on any device to download a save
-- PHP backend with rate limiting, save validation, flat-file storage
+- **Shared dev/prod** — local Vite dev and live server use the same cloud storage
+- PHP backend with origin-locked CORS, IP-based rate limiting, save validation, flat-file storage
 
 ### Town
 - **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter), Magic Shop, Junk Store, Temple (Heal/Bless), Bank

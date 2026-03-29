@@ -332,8 +332,13 @@ export function createSplashScreen(
             try {
               const state = JSON.parse(remote) as GameState;
               if (state.hero?.name) {
-                const saveData = { version: 1, timestamp: Date.now(), state };
-                localStorage.setItem(`rd-save-${info.slot}`, JSON.stringify(saveData));
+                // Only overwrite local if remote is actually newer
+                const localJson = localStorage.getItem(`rd-save-${info.slot}`);
+                const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+                if (state.turn > localTurn) {
+                  const saveData = { version: 1, timestamp: Date.now(), state };
+                  localStorage.setItem(`rd-save-${info.slot}`, JSON.stringify(saveData));
+                }
               }
             } catch { /* use local */ }
           }
