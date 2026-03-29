@@ -168,7 +168,8 @@ function exploreNext(): void {
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
       if (!floor.explored[y][x]) continue;
-      if (!floor.tiles[y][x].walkable) continue;
+      const t = floor.tiles[y][x];
+      if (!t.walkable && t.type !== "door-closed") continue;
       if (x === hero.x && y === hero.y) continue;
       let hasFrontier = false;
       for (let dy = -1; dy <= 1 && !hasFrontier; dy++) {
@@ -177,7 +178,8 @@ function exploreNext(): void {
           const nx = x + dx,
             ny = y + dy;
           if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
-            if (!floor.explored[ny][nx] && floor.tiles[ny][nx].walkable) {
+            const nt = floor.tiles[ny][nx];
+            if (!floor.explored[ny][nx] && (nt.walkable || nt.type === "door-closed")) {
               hasFrontier = true;
             }
           }
