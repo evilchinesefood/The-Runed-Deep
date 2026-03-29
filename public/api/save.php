@@ -78,14 +78,29 @@ function cleanRateFiles(): void {
 // Block requests without a valid origin or referer (stops automated scripts)
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
 $validRequest = false;
+$matchedOrigin = '';
 if ($origin && in_array($origin, $allowedOrigins, true)) {
+    $validRequest = true;
+    $matchedOrigin = $origin;
+} elseif (!$origin && !$referer) {
+    // Same-origin fetch or mobile browser stripping headers — allow
     $validRequest = true;
 } else {
     foreach ($allowedOrigins as $ao) {
-        if (str_starts_with($referer, $ao)) { $validRequest = true; break; }
+        if (str_starts_with($referer, $ao)) {
+            $validRequest = true;
+            $matchedOrigin = $ao;
+            break;
+        }
     }
 }
 if (!$validRequest) fail(403, 'Forbidden.');
+// Set CORS header for Referer-matched requests too (Safari sends Referer but not Origin)
+if ($matchedOrigin && !$origin) {
+    header("Access-Control-Allow-Origin: $matchedOrigin");
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+}
 
 $ip = getClientIp();
 cleanRateFiles();
