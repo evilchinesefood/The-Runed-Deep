@@ -311,8 +311,8 @@ export function createShopScreen(
     const copperLabel = el("div", { color: "#c90", fontSize: "13px" }, `Gold: ${copper}`);
     titleBar.insertBefore(copperLabel, titleBar.lastChild);
     // Items toggle button
-    const itemsBtn = createButton(itemsOnlyMode ? "Shop" : "Items", "sm");
-    itemsBtn.style.cssText += "margin-left:auto;margin-right:8px;padding:4px 10px;font-size:12px;";
+    const itemsBtn = createButton(itemsOnlyMode ? "Shop" : "Items");
+    itemsBtn.style.cssText += "margin-left:auto;margin-right:8px;";
     itemsBtn.addEventListener("click", (e) => { e.stopPropagation(); itemsOnlyMode = !itemsOnlyMode; render(); });
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);

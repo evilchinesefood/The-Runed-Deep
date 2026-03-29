@@ -129,6 +129,7 @@ export function createInventoryScreen(
   onAction: (action: GameAction) => void,
   onClose: () => void,
   initialSelectedIdx: number = 0,
+  openDrawerForId?: string,
 ): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
   const h = state.hero;
   setTooltipKnownSpells(h.knownSpells);
@@ -141,8 +142,8 @@ export function createInventoryScreen(
   // ── Title bar with items-only toggle ────────────────────────
   let itemsOnlyMode = false;
   const titleBar = createTitleBar("Equipment", () => { cleanup(); onClose(); });
-  const toggleViewBtn = createButton("Items", "sm");
-  toggleViewBtn.style.cssText += "margin-left:auto;margin-right:8px;padding:4px 10px;font-size:12px;";
+  const toggleViewBtn = createButton("Items");
+  toggleViewBtn.style.cssText += "margin-left:auto;margin-right:8px;";
   titleBar.insertBefore(toggleViewBtn, titleBar.lastChild);
   screen.appendChild(titleBar);
 
@@ -704,6 +705,25 @@ export function createInventoryScreen(
     hideItemTooltip();
     closeDrawer();
   };
+  // Auto-open drawer for a specific item (used after re-render to keep drawer open)
+  if (openDrawerForId) {
+    const sorted = getSortedInventory();
+    const stacks = stackItems(sorted);
+    for (let i = 0; i < stacks.length; i++) {
+      const { item } = stacks[i];
+      if (item.id === openDrawerForId) {
+        const tpl = ITEM_BY_ID[item.templateId];
+        const equipSlot = tpl?.equipSlot;
+        let equippedInSlot = equipSlot ? h.equipment[equipSlot] : null;
+        if (equipSlot === 'ringLeft' && !equippedInSlot) equippedInSlot = h.equipment.ringRight;
+        selectedIdx = i;
+        refreshSelection();
+        openDrawer(item, tpl, equippedInSlot);
+        break;
+      }
+    }
+  }
+
   const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number };
   result.cleanup = cleanup;
   result.getSelectedIdx = () => selectedIdx;

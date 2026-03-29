@@ -56,10 +56,14 @@ function nameColor(item: Item): string {
 }
 
 
+const TT_SIZE = '12px';
+
 function statLine(text: string): HTMLElement {
-  const row = d('div', { color: '#aeb', paddingLeft: '8px' });
-  row.textContent = `• ${text}`;
-  return row;
+  return d('div', { color: '#aeb', paddingLeft: '6px', fontSize: TT_SIZE }, `\u2022 ${text}`);
+}
+
+function iconLine(icon: string, text: string, color = '#aeb'): HTMLElement {
+  return d('div', { color, paddingLeft: '6px', fontSize: TT_SIZE }, `${icon} ${text}`);
 }
 
 // Set by UI screens so tooltips can show spell learned status
@@ -69,100 +73,96 @@ export function setTooltipKnownSpells(spells: string[]): void { _knownSpells = s
 export function buildTooltipContent(item: Item): HTMLElement {
   const tpl = ITEM_BY_ID[item.templateId];
   const container = d('div');
+  const ench = item.enchantment;
 
   // Name
   container.appendChild(d('div', {
-    fontSize: '14px', fontWeight: 'bold', color: nameColor(item), marginBottom: '4px',
+    fontSize: '14px', fontWeight: 'bold', color: nameColor(item), marginBottom: '2px',
   }, getDisplayName(item)));
 
-  // Material tier
-  const tier = tpl?.materialTier;
-  if (tier) {
-    const tierColors: Record<string, string> = { elven: '#8f8', meteoric: '#f8f' };
-    container.appendChild(d('div', { color: tierColors[tier] ?? '#aaa', fontSize: '12px', marginBottom: '4px', fontStyle: 'italic' }, `${tier.charAt(0).toUpperCase() + tier.slice(1)} craftsmanship`));
-  }
-
-  // Stats
-  const statsBox = d('div', { marginBottom: '4px' });
-  let hasStats = false;
-  const ench = item.enchantment;
-
-  // Damage — show effective range including enchantment
-  if (item.properties['damageMin'] !== undefined && item.properties['damageMax'] !== undefined) {
-    const baseMin = item.properties['damageMin'];
-    const baseMax = item.properties['damageMax'];
-    const effMin = baseMin + ench;
-    const effMax = baseMax + ench;
-    if (ench !== 0) {
-      statsBox.appendChild(statLine(`${effMin}–${effMax} damage (base ${baseMin}–${baseMax})`));
-    } else {
-      statsBox.appendChild(statLine(`${baseMin}–${baseMax} damage`));
-    }
-    hasStats = true;
-  }
-
-  // Accuracy — show effective value including enchantment
-  const baseAcc = item.properties['accuracy'] ?? 0;
-  if (item.category === 'weapon') {
-    const effAcc = baseAcc + ench;
-    if (ench !== 0) {
-      statsBox.appendChild(statLine(`${effAcc > 0 ? '+' : ''}${effAcc} accuracy (base ${baseAcc > 0 ? '+' : ''}${baseAcc})`));
-    } else if (baseAcc !== 0) {
-      statsBox.appendChild(statLine(`${baseAcc > 0 ? '+' : ''}${baseAcc} accuracy`));
-    }
-    hasStats = true;
-  }
-
-  // AC — show effective value including enchantment
-  if (item.properties['ac'] !== undefined) {
-    const baseAC = item.properties['ac'];
-    const effAC = baseAC + ench;
-    if (ench !== 0) {
-      statsBox.appendChild(statLine(`+${effAC} AC (base +${baseAC})`));
-    } else if (baseAC > 0) {
-      statsBox.appendChild(statLine(`+${baseAC} AC`));
-    }
-    hasStats = true;
-  }
-
-  // Equip slot
+  // Slot + floors — right below name
   if (tpl?.equipSlot) {
     const slotNames: Record<string, string> = {
       weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body',
       cloak: 'Cloak', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet',
       ringLeft: 'Ring', ringRight: 'Ring', amulet: 'Neck', pack: 'Pack', purse: 'Purse',
     };
-    let slotText = `Slot: ${slotNames[tpl.equipSlot] ?? tpl.equipSlot}`;
+    let slotText = slotNames[tpl.equipSlot] ?? tpl.equipSlot;
     if (item.properties['twoHanded']) slotText += ' (Two-Handed)';
-    statsBox.appendChild(d('div', { color: '#666', paddingLeft: '8px', fontSize: '12px' }, slotText));
+    slotText += ` (Floors ${tpl.depthMin}\u2013${tpl.depthMax === 99 ? '40' : tpl.depthMax})`;
+    container.appendChild(d('div', { color: '#777', fontSize: TT_SIZE, marginBottom: '4px' }, slotText));
+  } else if (tpl) {
+    container.appendChild(d('div', { color: '#777', fontSize: TT_SIZE, marginBottom: '4px' }, `Floors ${tpl.depthMin}\u2013${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
+  }
+
+  // Blessed/Cursed + Material tier on one line
+  const tier = tpl?.materialTier;
+  const statusParts: string[] = [];
+  if (item.blessed) statusParts.push('\u2728 Blessed');
+  if (item.cursed) statusParts.push('\u2620 Cursed');
+  if (tier) statusParts.push(`${tier.charAt(0).toUpperCase() + tier.slice(1)} craftsmanship`);
+  if (statusParts.length > 0) {
+    const tierColors: Record<string, string> = { elven: '#8f8', meteoric: '#f8f' };
+    const color = item.blessed ? '#c8f' : item.cursed ? '#f44' : tierColors[tier!] ?? '#aaa';
+    container.appendChild(d('div', { color, fontSize: TT_SIZE, marginBottom: '4px', fontStyle: 'italic' }, statusParts.join(' \u00B7 ')));
+  }
+
+  // Stats
+  const statsBox = d('div', { marginBottom: '4px' });
+  let hasStats = false;
+
+  // Damage
+  if (item.properties['damageMin'] !== undefined && item.properties['damageMax'] !== undefined) {
+    const baseMin = item.properties['damageMin'];
+    const baseMax = item.properties['damageMax'];
+    const effMin = baseMin + ench;
+    const effMax = baseMax + ench;
+    const txt = ench !== 0 ? `${effMin}\u2013${effMax} damage (base ${baseMin}\u2013${baseMax})` : `${baseMin}\u2013${baseMax} damage`;
+    statsBox.appendChild(iconLine('\u2694', txt));
     hasStats = true;
   }
 
-  // Depth range
-  if (tpl) {
-    statsBox.appendChild(d('div', { color: '#555', paddingLeft: '8px', fontSize: '11px' }, `Floors ${tpl.depthMin}–${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
+  // Accuracy
+  const baseAcc = item.properties['accuracy'] ?? 0;
+  if (item.category === 'weapon') {
+    const effAcc = baseAcc + ench;
+    if (ench !== 0) {
+      statsBox.appendChild(iconLine('\uD83C\uDFAF', `${effAcc > 0 ? '+' : ''}${effAcc} accuracy (base ${baseAcc > 0 ? '+' : ''}${baseAcc})`));
+    } else if (baseAcc !== 0) {
+      statsBox.appendChild(iconLine('\uD83C\uDFAF', `${baseAcc > 0 ? '+' : ''}${baseAcc} accuracy`));
+    }
+    hasStats = true;
+  }
+
+  // AC
+  if (item.properties['ac'] !== undefined) {
+    const baseAC = item.properties['ac'];
+    const effAC = baseAC + ench;
+    const txt = ench !== 0 ? `+${effAC} AC (base +${baseAC})` : `+${baseAC} AC`;
+    statsBox.appendChild(iconLine('\uD83D\uDEE1', txt));
+    hasStats = true;
   }
 
   // Healing
   if (item.properties['healPct']) {
     const pct = Math.round(item.properties['healPct'] * 100);
     const flat = item.properties['healAmount'] ?? 0;
-    statsBox.appendChild(statLine(`Heals ${pct}% HP (min ${flat})`));
+    statsBox.appendChild(iconLine('\u2764', `Heals ${pct}% HP (min ${flat})`, '#4f4'));
     hasStats = true;
   } else if (item.properties['healAmount']) {
-    statsBox.appendChild(statLine(`Heals ${item.properties['healAmount']} HP`));
+    statsBox.appendChild(iconLine('\u2764', `Heals ${item.properties['healAmount']} HP`, '#4f4'));
     hasStats = true;
   }
 
   // Scroll/spellbook/wand spell
   if ((item.category === 'scroll' || item.category === 'spellbook' || item.category === 'wand') && tpl?.spellId) {
     const spellName = tpl.spellId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    statsBox.appendChild(statLine(`Spell: ${spellName}`));
+    statsBox.appendChild(iconLine('\u2728', `Spell: ${spellName}`, '#aaf'));
     if (item.category === 'spellbook') {
       if (_knownSpells.includes(tpl.spellId)) {
-        statsBox.appendChild(d('div', { color: '#4a4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, '\u2713 Learned'));
+        statsBox.appendChild(iconLine('\u2713', 'Learned', '#4a4'));
       } else {
-        statsBox.appendChild(d('div', { color: '#fa4', paddingLeft: '8px', fontSize: '12px', fontWeight: 'bold' }, 'Unlearned'));
+        statsBox.appendChild(iconLine('\u2717', 'Unlearned', '#fa4'));
       }
     }
     hasStats = true;
@@ -170,49 +170,54 @@ export function buildTooltipContent(item: Item): HTMLElement {
 
   // Charges
   if (item.properties['charges'] !== undefined) {
-    statsBox.appendChild(statLine(`Charges: ${item.properties['charges']}`));
+    statsBox.appendChild(iconLine('\u26A1', `Charges: ${item.properties['charges']}`));
     hasStats = true;
   }
 
-  // Container capacity (enchantment modifies: +5kg per level)
+  // Container capacity
   if (tpl?.weightCapacity) {
     const enchBonus = item.enchantment * 5000;
     const effectiveCap = Math.max(0, tpl.weightCapacity + enchBonus);
-    const capText = item.enchantment !== 0
+    const txt = item.enchantment !== 0
       ? `Capacity: ${(effectiveCap / 1000).toFixed(0)} kg (base ${(tpl.weightCapacity / 1000).toFixed(0)})`
       : `Capacity: ${(tpl.weightCapacity / 1000).toFixed(0)} kg`;
-    statsBox.appendChild(statLine(capText));
+    statsBox.appendChild(iconLine('\uD83C\uDF92', txt));
     hasStats = true;
   }
 
   // Potion stat gain
   if (item.templateId.startsWith('potion-gain-')) {
     const attr = item.templateId.replace('potion-gain-', '');
-    statsBox.appendChild(statLine(`Permanently +1 ${attr.charAt(0).toUpperCase() + attr.slice(1)}`));
+    statsBox.appendChild(iconLine('\u2B06', `Permanently +1 ${attr.charAt(0).toUpperCase() + attr.slice(1)}`, '#4f4'));
     hasStats = true;
   }
 
   if (hasStats) container.appendChild(statsBox);
 
-  // Special enchantments
+  // Enchanter upgrades — above affixes
+  const enchanterUps = item.properties['enchanterUps'];
+  if (enchanterUps && enchanterUps > 0) {
+    container.appendChild(iconLine('\u25C6', `Enchanted +${enchanterUps}`, '#4af'));
+  }
+
+  // Affixes
   if (item.specialEnchantments && item.specialEnchantments.length > 0) {
     const enchBox = d('div', { marginBottom: '4px' });
     for (const rawEid of item.specialEnchantments) {
       const isCrit = rawEid.endsWith(':critical');
       const eid = isCrit ? rawEid.replace(':critical', '') : rawEid;
-      const ench = ENCHANTMENT_BY_ID[eid];
-      if (ench) {
-        const prefix = isCrit ? '★★' : '★';
+      const aff = ENCHANTMENT_BY_ID[eid];
+      if (aff) {
+        const icon = isCrit ? '\u2605\u2605' : '\u2605';
         const desc = formatAffixDesc(eid, item.enchantment, isCrit);
-        enchBox.appendChild(d('div', { color: ench.color, fontSize: '12px', paddingLeft: '6px' }, `${prefix} ${ench.name}: ${desc}`));
+        enchBox.appendChild(iconLine(icon, `${aff.name}: ${desc}`, aff.color));
       }
     }
     container.appendChild(enchBox);
   }
 
   // Unique ability
-  const tplU = ITEM_BY_ID[item.templateId];
-  if (tplU?.uniqueAbility) {
+  if (tpl?.uniqueAbility) {
     const abilityDesc: Record<string, string> = {
       'resist-fire-75': item.properties?.['wardUpgraded'] ? '+99 Fire Resistance' : '+75 Fire Resistance',
       'resist-cold-75': item.properties?.['wardUpgraded'] ? '+99 Cold Resistance' : '+75 Cold Resistance',
@@ -233,26 +238,15 @@ export function buildTooltipContent(item: Item): HTMLElement {
       'demonhide-power': '+15 AC, +50 fire/cold resist, 25% thorns',
       'worldsplitter': 'Attacks hit all adjacent enemies',
     };
-    const desc = abilityDesc[tplU.uniqueAbility] ?? tplU.uniqueAbility;
-    container.appendChild(d('div', { color: '#fc4', fontSize: '13px', fontStyle: 'italic', marginTop: '4px' }, '\u2726 ' + desc));
+    const desc = abilityDesc[tpl.uniqueAbility] ?? tpl.uniqueAbility;
+    container.appendChild(iconLine('\u2726', desc, '#fc4'));
   }
-
-  // Blessed
-  if (item.blessed) {
-    container.appendChild(d('div', { color: '#c8f', fontStyle: 'italic', fontWeight: 'bold' }, '\u2728 Blessed'));
-  }
-
-  // Cursed
-  if (item.cursed) {
-    container.appendChild(d('div', { color: '#f44', fontStyle: 'italic' }, 'Cursed'));
-  }
-
 
   // Weight + value
   const weight = (item.weight / 1000).toFixed(1);
   container.appendChild(d('div', {
-    color: '#666', marginTop: '4px', fontSize: '12px',
-  }, `${weight} kg · ${item.value} gold`));
+    color: '#666', marginTop: '2px', fontSize: TT_SIZE,
+  }, `${weight} kg \u00B7 ${item.value} gold`));
 
   return container;
 }

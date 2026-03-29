@@ -358,7 +358,7 @@ export function createTitleBar(
   if (onClose) {
     const btn = document.createElement("button");
     btn.className = "btn";
-    btn.textContent = "Close (Esc)";
+    btn.textContent = "Close";
     btn.addEventListener("click", onClose);
     bar.appendChild(btn);
   }

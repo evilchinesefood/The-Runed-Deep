@@ -1,6 +1,6 @@
 import type { GameState } from "../core/types";
 import { SPELL_BY_ID, type SpellDef } from "../data/spells";
-import { createScreen, createPanel, createTitleBar, el } from "./Theme";
+import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
 
 const CATEGORY_ORDER = ["attack", "healing", "defense", "control", "movement", "divination", "misc"];
 const CATEGORY_COLORS: Record<string, string> = {
@@ -13,6 +13,7 @@ export function createSpellScreen(
   onCast: (spellId: string) => void,
   onClose: () => void,
   onUpdateHotkeys: (hotkeys: string[]) => void,
+  onSpells?: () => void,
 ): HTMLElement & { cleanup: () => void } {
   const h = state.hero;
   let hotkeys = [...h.spellHotkeys];
@@ -22,9 +23,19 @@ export function createSpellScreen(
   screen.classList.add("screen-scrollable");
 
   const titleBar = createTitleBar("Manage Hotkeys", () => { cleanup(); onClose(); });
-  const mpSpan = el("span", { color: "#48f", fontSize: "14px" }, `MP: ${h.mp}/${h.maxMp}`);
-  const closeBtn = titleBar.lastChild;
-  titleBar.insertBefore(mpSpan, closeBtn);
+
+  if (onSpells) {
+    // Wrap Spells + Close together so they sit adjacent
+    const closeBtnEl = titleBar.lastChild as HTMLElement;
+    const btnGroup = el("div", { display: "flex", gap: "8px", alignItems: "center" });
+    const spellsBtn = createButton("Spells");
+    spellsBtn.addEventListener("click", () => { cleanup(); onSpells(); });
+    btnGroup.appendChild(spellsBtn);
+    titleBar.removeChild(closeBtnEl);
+    btnGroup.appendChild(closeBtnEl);
+    titleBar.appendChild(btnGroup);
+  }
+
   screen.appendChild(titleBar);
 
   // Hotkey bar panel

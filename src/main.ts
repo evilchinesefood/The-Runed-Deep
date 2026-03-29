@@ -15,7 +15,7 @@ import { createShopScreen } from "./ui/ShopScreen";
 import { createServiceScreen } from "./ui/ServiceScreen";
 import { createIntroScreen } from "./ui/IntroScreen";
 import { createVictoryScreen } from "./ui/VictoryScreen";
-import { generateTownMap, TOWN_START_INITIAL } from "./systems/town/TownMap";
+import { generateTownMap, TOWN_START_INITIAL, TOWN_START_RETURN } from "./systems/town/TownMap";
 import { initShopInventory } from "./systems/town/Shops";
 import { findPath } from "./utils/Pathfinding";
 import { generateFloor, getDungeonForFloor } from "./systems/dungeon/generator";
@@ -23,7 +23,7 @@ import { SPELL_BY_ID } from "./data/spells";
 import { AnimationRenderer } from "./rendering/animations";
 import { drainAnimations } from "./rendering/animation-queue";
 import { computeFov } from "./utils/fov";
-import { loadGame } from "./core/save-load";
+import { loadGame, saveGame } from "./core/save-load";
 import type { GameState, Screen } from "./core/types";
 import { generateTestFloor, getAllSpellIds } from "./systems/dungeon/TestFloor";
 import {
@@ -1011,6 +1011,7 @@ function switchScreen(state: GameState): void {
       let invCleanup: (() => void) | null = null;
       let invSelectedIdx = 0;
       let invScrollTop = 0;
+      let invDrawerItemId: string | undefined;
       let currentInvScreen: ReturnType<typeof createInventoryScreen> | null = null;
 
       const saveInvPosition = () => {
@@ -1022,18 +1023,23 @@ function switchScreen(state: GameState): void {
 
       const renderInventory = () => {
         if (invCleanup) invCleanup();
+        const reopenId = invDrawerItemId;
         const invScreen = createInventoryScreen(
           gameLoop.getState(),
           (action) => {
-            saveInvPosition(); // save BEFORE destroying DOM
+            saveInvPosition();
+            // Track which item the action is on so we can re-open its drawer
+            const actionId = (action as any).itemId;
             gameLoop.handleAction(action);
-            // If the action changed the screen (e.g. Scroll of Return), don't re-render inventory
             if (gameLoop.getState().screen !== "inventory") return;
+            // If item still exists in inventory, keep drawer open for it
+            invDrawerItemId = actionId && gameLoop.getState().hero.inventory.some(i => i.id === actionId) ? actionId : undefined;
             root.replaceChildren();
             renderInventory();
           },
           () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
           invSelectedIdx,
+          reopenId,
         );
         currentInvScreen = invScreen;
         invCleanup = invScreen.cleanup;
@@ -1056,7 +1062,6 @@ function switchScreen(state: GameState): void {
         gameLoop.getState(),
         (spellId) => {
           gameLoop.handleAction({ type: "setScreen", screen: "game" });
-          // After returning to game, start spell casting
           setTimeout(() => input.startSpellCast(spellId), 50);
         },
         () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
@@ -1066,6 +1071,10 @@ function switchScreen(state: GameState): void {
             ...s,
             hero: { ...s.hero, spellHotkeys: hotkeys },
           });
+        },
+        () => {
+          gameLoop.handleAction({ type: "setScreen", screen: "game" });
+          setTimeout(() => touchControls.openSpellPicker(), 50);
         },
       );
       addScreenCleanup(spellScreen.cleanup);
@@ -1189,11 +1198,58 @@ function switchScreen(state: GameState): void {
 
     case "death": {
       input.setEnabled(false);
-      createDeathScreen(root, gameLoop.getState(), (action) => {
-        if (action.type === "setScreen" && action.screen === "splash") {
-          const freshState = createInitialGameState();
-          gameLoop.setState(freshState);
+      touchControls.hide();
+      createDeathScreen(root, gameLoop.getState(), () => {
+        // Respawn in town — keep hero, regenerate death floor, refresh shops
+        const s = gameLoop.getState();
+        const deathFloor = s.currentFloor;
+        const deathDungeon = s.currentDungeon;
+        const deathKey = `${deathDungeon}-${deathFloor}`;
+
+        // Regenerate town + death floor
+        const { floor: townFloor } = generateTownMap();
+        const { floor: newDungeonFloor } = generateFloor(
+          deathDungeon, deathFloor, Date.now(), true, true, s.difficulty,
+        );
+        const floors = { ...s.floors, 'town-0': townFloor, [deathKey]: newDungeonFloor };
+
+        // Refresh shop inventories
+        const deepest = Math.max(s.town.deepestFloor, deathFloor + 1);
+        const shopInventories: Record<string, any> = {};
+        for (const sid of ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store']) {
+          shopInventories[sid] = initShopInventory(sid, deepest);
         }
+
+        const respawned: GameState = {
+          ...s,
+          screen: 'game',
+          currentDungeon: 'town',
+          currentFloor: 0,
+          returnFloor: deathFloor,
+          floors,
+          hero: {
+            ...s.hero,
+            hp: s.hero.maxHp,
+            mp: s.hero.maxMp,
+            position: { ...TOWN_START_RETURN },
+            activeEffects: [],
+          },
+          town: { ...s.town, shopInventories, deepestFloor: deepest },
+          messages: [
+            {
+              text: `${s.hero.name} awakens in town, battered but alive.`,
+              severity: 'important' as const,
+              turn: s.turn,
+            },
+            {
+              text: 'The dungeon floor has shifted. You must try again.',
+              severity: 'system' as const,
+              turn: s.turn,
+            },
+          ],
+        };
+        gameLoop.setState(respawned);
+        saveGame(respawned, 1);
       });
       break;
     }

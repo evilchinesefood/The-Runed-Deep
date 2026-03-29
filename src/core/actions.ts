@@ -599,11 +599,18 @@ function goToFloor(
     };
   }
 
-  // Check if the floor being left was cleared
+  // Check if the floor being left was cleared — refresh shops if so
   const oldFloorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const oldFloor = state.floors[oldFloorKey];
-  if (oldFloor && oldFloor.monsters.length === 0) {
+  const floorCleared = oldFloor && oldFloor.monsters.length === 0;
+  if (floorCleared) {
     trackFloorCleared(oldFloorKey, 0);
+    const deepest = Math.max(state.town.deepestFloor, targetFloor + 1);
+    const shopInvs = { ...state.town.shopInventories };
+    for (const sid of SHOP_IDS) {
+      shopInvs[sid] = shopInvs[sid]?.length ? restockShop(shopInvs[sid], sid, deepest) : initShopInventory(sid, deepest);
+    }
+    state = { ...state, town: { ...state.town, shopInventories: shopInvs, deepestFloor: deepest } };
   }
 
   trackFloorReached(targetFloor);

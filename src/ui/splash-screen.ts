@@ -1,6 +1,5 @@
 import type { GameAction, GameState } from "../core/types";
 import { getSaveSlots, deleteSave } from "../core/save-load";
-import { getLeaderboard } from "../systems/Scoring";
 import { createScreen, createPanel, createButton, el } from "./Theme";
 import { getCloudCode, setCloudCode, clearCloudCode, generateCode, pushSave, pullSave } from "../core/CloudSave";
 
@@ -32,9 +31,6 @@ export function createSplashScreen(
   const newGameBtn = createButton("New Game");
   newGameBtn.addEventListener("click", () => onAction({ type: "newGame" }));
   buttons.appendChild(newGameBtn);
-
-  const lbBtn = createButton("Leaderboard");
-  buttons.appendChild(lbBtn);
 
   const cloudLoadBtn = createButton("Load Cloud Save");
   buttons.appendChild(cloudLoadBtn);
@@ -122,83 +118,6 @@ export function createSplashScreen(
     cloudPanel.style.display =
       cloudPanel.style.display === "none" ? "block" : "none";
   });
-
-  // Leaderboard panel (toggled)
-  const lbPanel = createPanel("Hall of the Fallen");
-  lbPanel.style.display = "none";
-
-  const renderLeaderboard = () => {
-    // Clear previous entries (keep header)
-    while (lbPanel.children.length > 1) lbPanel.removeChild(lbPanel.lastChild!);
-
-    const entries = getLeaderboard();
-    if (entries.length === 0) {
-      lbPanel.appendChild(
-        el(
-          "div",
-          { color: "#555", textAlign: "center", fontSize: "13px" },
-          "No runs recorded yet.",
-        ),
-      );
-      return;
-    }
-
-    const table = el("div", {
-      display: "grid",
-      gridTemplateColumns:
-        window.innerWidth <= 480
-          ? "20px 1fr 50px 50px"
-          : "24px 1fr 70px 50px 50px 80px",
-      gap: "2px 8px",
-      fontSize: "12px",
-    });
-
-    for (const h of ["#", "Name", "Score", "Lvl", "Floor", "Diff"]) {
-      table.appendChild(
-        el(
-          "div",
-          { color: "#555", fontWeight: "bold", paddingBottom: "4px" },
-          h,
-        ),
-      );
-    }
-
-    for (let i = 0; i < entries.length; i++) {
-      const e = entries[i];
-      table.appendChild(el("div", { color: "#666" }, `${i + 1}`));
-      table.appendChild(
-        el(
-          "div",
-          {
-            color: "#aaa",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          },
-          e.name,
-        ),
-      );
-      table.appendChild(el("div", { color: "#666" }, e.score.toLocaleString()));
-      table.appendChild(el("div", { color: "#666" }, `${e.level}`));
-      table.appendChild(el("div", { color: "#666" }, `${e.floor}`));
-      table.appendChild(
-        el("div", { color: "#666", fontSize: "11px" }, e.difficulty),
-      );
-    }
-
-    lbPanel.appendChild(table);
-  };
-
-  lbBtn.addEventListener("click", () => {
-    if (lbPanel.style.display === "none") {
-      renderLeaderboard();
-      lbPanel.style.display = "block";
-    } else {
-      lbPanel.style.display = "none";
-    }
-  });
-
-  splash.appendChild(lbPanel);
 
   // Save slots
   const slots = getSaveSlots();

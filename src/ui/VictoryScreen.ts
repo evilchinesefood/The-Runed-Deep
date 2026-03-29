@@ -1,5 +1,5 @@
 import { createScreen, el } from "./Theme";
-import { calculateScore, addToLeaderboard } from "../systems/Scoring";
+import { calculateScore } from "../systems/Scoring";
 import type { GameState } from "../core/types";
 import { Sound } from "../systems/Sound";
 
@@ -18,17 +18,6 @@ export function createVictoryScreen(
     hero.copper,
     state.difficulty,
   );
-
-  const rank = addToLeaderboard({
-    name: hero.name,
-    score,
-    level: hero.level,
-    floor: state.currentFloor + 1,
-    turns: state.turn,
-    difficulty: state.difficulty,
-    causeOfDeath: "Victory — Surtur slain",
-    timestamp: Date.now(),
-  });
 
   Sound.victory();
 
@@ -189,21 +178,6 @@ The The Runed Deep grows silent. You have avenged Bjarnarhaven. Your name will b
   scoreRow.appendChild(scoreLbl);
   scoreRow.appendChild(scoreVal);
   parchment.appendChild(scoreRow);
-
-  if (rank > 0) {
-    parchment.appendChild(
-      el(
-        "div",
-        {
-          textAlign: "center",
-          fontSize: "12px",
-          color: "#8a7550",
-          marginBottom: "16px",
-        },
-        `Rank #${rank} on the leaderboard`,
-      ),
-    );
-  }
 
   // Buttons
   const btnRow = el("div", {

@@ -113,7 +113,6 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Auto-explore feedback** — messages explain every stop reason (monster spotted, low HP, item found, door, trap, fully explored)
 - **Character creation** — name, gender, 4 attributes with hold-to-repeat buttons, difficulty, starting spell
 - **4 difficulty levels** — Easy, Intermediate, Hard, Impossible
-- **Scoring and leaderboard** persisted to localStorage
 - **18 achievements**
 - **18 synthesized sound effects** via Web Audio API
 - **Responsive layout** — scales to phone, tablet, and desktop
@@ -131,7 +130,9 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Action button attacks** adjacent monsters on mobile
 - **Portrait viewport** shrinks 25% to prevent overlap with touch controls
 - **Click-to-move** with A* pathfinding
-- **Save/load** — 3 slots + auto-save on stairs + cloud sync
+- **Death respawn** — no game over; die → death summary → Continue → respawn in town, floor regenerated
+- **Shop refresh** — town shops restock on floor clear and on death
+- **Save/load** — 3 slots + auto-save on stairs/death + cloud sync
 
 ## Controls
 

@@ -1,5 +1,6 @@
 import type { GameAction, Direction } from "../core/types";
 import { SPELL_BY_ID } from "../data/spells";
+import { createButton as themeBtn } from "./Theme";
 
 export type TouchActionHandler = (action: GameAction) => void;
 export type SpellCastHandler = (spellId: string) => void;
@@ -580,7 +581,7 @@ export class TouchControls {
     this.actionBar.style.right = `${12 + l.actionOffsetX}px`;
   }
 
-  private openSpellPicker(): void {
+  public openSpellPicker(): void {
     if (!this.knownSpells || this.knownSpells.length === 0) {
       // No spells known — open spell management screen instead
       this.handler?.({ type: "setScreen", screen: "spells" });
@@ -615,17 +616,21 @@ export class TouchControls {
     title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
     header.appendChild(title);
 
-    const manageBtn = document.createElement("div");
-    manageBtn.textContent = "Hotkeys";
-    manageBtn.style.cssText = `
-      padding:6px 12px;color:#888;font-size:12px;font-family:sans-serif;
-      border:1px solid #555;border-radius:4px;cursor:pointer;user-select:none;touch-action:none;
-    `;
+    const btnRow = document.createElement("div");
+    btnRow.style.cssText = "display:flex;gap:6px;";
+
+    const manageBtn = themeBtn("Hotkeys");
     const openManage = () => { this.closeSpellPicker(); this.handler?.({ type: "setScreen", screen: "spells" }); };
     manageBtn.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); openManage(); });
-    manageBtn.addEventListener("mousedown", (e) => { e.preventDefault(); openManage(); });
-    header.appendChild(manageBtn);
+    manageBtn.addEventListener("click", (e) => { e.preventDefault(); openManage(); });
+    btnRow.appendChild(manageBtn);
 
+    const closeBtn = themeBtn("Close");
+    closeBtn.addEventListener("touchstart", (e) => { e.preventDefault(); this.closeSpellPicker(); });
+    closeBtn.addEventListener("click", (e) => { e.preventDefault(); this.closeSpellPicker(); });
+    btnRow.appendChild(closeBtn);
+
+    header.appendChild(btnRow);
     this.spellPickerPanel.appendChild(header);
 
     // Scrollable spell list
@@ -661,17 +666,6 @@ export class TouchControls {
     }
 
     this.spellPickerPanel.appendChild(list);
-
-    // Cancel button at bottom
-    const cancelBtn = document.createElement("div");
-    cancelBtn.textContent = "Cancel";
-    cancelBtn.style.cssText = `
-      padding:10px 20px;margin-top:8px;color:#f44;font-size:14px;font-weight:bold;
-      font-family:sans-serif;text-align:center;cursor:pointer;user-select:none;touch-action:none;flex-shrink:0;
-    `;
-    cancelBtn.addEventListener("touchstart", (e) => { e.preventDefault(); this.closeSpellPicker(); });
-    cancelBtn.addEventListener("mousedown", (e) => { e.preventDefault(); this.closeSpellPicker(); });
-    this.spellPickerPanel.appendChild(cancelBtn);
   }
 
   /** Enter spell targeting mode — D-pad fires spell instead of moving */
