@@ -92,18 +92,25 @@ export function createSplashScreen(
     // Parse and validate
     try {
       const state = JSON.parse(json) as GameState;
-      if (!state.hero?.name) throw new Error("Invalid save");
+      if (!state.hero?.name) throw new Error("No hero name in save data");
 
       // Wrap in save format and store locally
       const saveData = { version: 1, timestamp: Date.now(), state };
-      localStorage.setItem(`rd-save-${targetSlot}`, JSON.stringify(saveData));
+      const saveStr = JSON.stringify(saveData);
+      try {
+        localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
+      } catch {
+        // localStorage full — clear everything and retry
+        localStorage.clear();
+        localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
+      }
       setCloudCode(targetSlot, code);
 
       cloudMsg.textContent = `Loaded into slot ${targetSlot}! Refreshing...`;
       cloudMsg.style.color = "#4f4";
       setTimeout(() => location.reload(), 800);
-    } catch {
-      cloudMsg.textContent = "Invalid save data.";
+    } catch (err: any) {
+      cloudMsg.textContent = `Error: ${err?.message ?? "Invalid save data."}`;
       cloudMsg.style.color = "#f44";
     }
   });
@@ -332,12 +339,16 @@ export function createSplashScreen(
             try {
               const state = JSON.parse(remote) as GameState;
               if (state.hero?.name) {
-                // Only overwrite local if remote is actually newer
-                const localJson = localStorage.getItem(`rd-save-${info.slot}`);
-                const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
-                if (state.turn >= localTurn) {
-                  const saveData = { version: 1, timestamp: Date.now(), state };
-                  localStorage.setItem(`rd-save-${info.slot}`, JSON.stringify(saveData));
+                // Always overwrite local with cloud version
+                const saveData = { version: 1, timestamp: Date.now(), state };
+                const saveStr = JSON.stringify(saveData);
+                localStorage.removeItem(`rd-save-${info.slot}`);
+                try {
+                  localStorage.setItem(`rd-save-${info.slot}`, saveStr);
+                } catch {
+                  localStorage.clear();
+                  setCloudCode(info.slot, cloudCode);
+                  try { localStorage.setItem(`rd-save-${info.slot}`, saveStr); } catch { /* give up */ }
                 }
               }
             } catch { /* use local */ }
@@ -400,31 +411,40 @@ export function createSplashScreen(
     splash.appendChild(slotPanel);
 
     // Background cloud sync — pull latest for each cloud-enabled slot
+    // Cloud is source of truth — always overwrite local
     for (let i = 0; i < slots.length; i++) {
       const info = slots[i];
       if (!info) continue;
       const code = getCloudCode(info.slot);
       if (!code) continue;
       const slotNum = info.slot;
+      const rowEl = slotPanel.children[i] as HTMLElement | undefined;
       (async () => {
         try {
           const remote = await pullSave(code);
           if (!remote) return;
           const state = JSON.parse(remote) as GameState;
           if (!state.hero?.name) return;
-          // Compare turns — only update if remote is ahead
-          const localJson = localStorage.getItem(`rd-save-${slotNum}`);
-          const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
-          if (state.turn < localTurn) return;
-          // Remote is newer — update localStorage
+          // Always overwrite local with cloud version
           const saveData = { version: 1, timestamp: Date.now(), state };
-          localStorage.setItem(`rd-save-${slotNum}`, JSON.stringify(saveData));
+          const saveStr = JSON.stringify(saveData);
+          // Clear existing slot first to free space, then write
+          localStorage.removeItem(`rd-save-${slotNum}`);
+          try {
+            localStorage.setItem(`rd-save-${slotNum}`, saveStr);
+          } catch {
+            // Still full — clear everything and retry
+            localStorage.clear();
+            try { localStorage.setItem(`rd-save-${slotNum}`, saveStr); } catch { return; }
+          }
+          // Restore cloud code if cleared
+          setCloudCode(slotNum, code);
           // Update the slot display in-place
-          const row = slotPanel.children[i] as HTMLElement;
-          if (!row) return;
-          const details = row.querySelector("div") as HTMLElement;
+          if (!rowEl) return;
+          const details = rowEl.querySelector("div") as HTMLElement;
           if (!details) return;
           const children = details.children;
+          if (children[0]) children[0].textContent = state.hero.name;
           if (children[1]) children[1].textContent = `Level ${state.hero.level} | Floor ${(state.currentFloor ?? 0) + 1} | Turn ${state.turn}`;
           if (children[2]) children[2].textContent = `\u2601 Synced from cloud`;
         } catch { /* ignore sync errors */ }

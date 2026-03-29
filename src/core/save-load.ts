@@ -1,6 +1,9 @@
 import type { GameState } from "./types";
 import { syncItemIdCounter } from "../systems/items/loot";
 import { getCloudCode, pushSave } from "./CloudSave";
+import { getDungeonForFloor } from "../systems/dungeon/Tilesets";
+import { generateTownMap } from "../systems/town/TownMap";
+import { generateFloor } from "../systems/dungeon/generator";
 
 const SAVE_KEY_PREFIX = "rd-save-";
 const MAX_SLOTS = 3;
@@ -24,13 +27,30 @@ export interface SaveSlotInfo {
  * Monster path arrays are recomputed every turn by AI.
  */
 function pruneSaveState(state: GameState): GameState {
+  // Build set of floor keys to keep
+  const keep = new Set<string>();
+
+  if (state.currentDungeon === 'town') {
+    // In town: keep the return floor + its previous floor
+    const rf = state.returnFloor;
+    keep.add(`${getDungeonForFloor(rf)}-${rf}`);
+    if (rf > 0) keep.add(`${getDungeonForFloor(rf - 1)}-${rf - 1}`);
+  } else {
+    // In dungeon: keep current floor + previous floor
+    const cf = state.currentFloor;
+    keep.add(`${state.currentDungeon}-${cf}`);
+    if (cf > 0) keep.add(`${getDungeonForFloor(cf - 1)}-${cf - 1}`);
+  }
+  // Town is regenerated on entry — never save it
+
   const floors: typeof state.floors = {};
   for (const [key, floor] of Object.entries(state.floors)) {
+    if (!keep.has(key)) continue;
+
     const monsters = floor.monsters.map((m: any) => {
       const { path, ...rest } = m;
       return rest;
     });
-    // Replace visible with empty array — regenerated on load
     const visible = Array.from({ length: floor.height }, () =>
       Array(floor.width).fill(false)
     );
@@ -144,6 +164,20 @@ export function loadGame(slot: number = 1): GameState | null {
       const f = state.floors[key];
       if (!f.visible || f.visible.length === 0) {
         f.visible = Array.from({ length: f.height }, () => Array(f.width).fill(false));
+      }
+    }
+
+    // Regenerate missing floors (pruned from save)
+    const currentKey = `${state.currentDungeon}-${state.currentFloor}`;
+    if (!state.floors[currentKey]) {
+      if (state.currentDungeon === 'town') {
+        const { floor: townFloor } = generateTownMap();
+        state.floors['town-0'] = townFloor;
+      } else {
+        const { floor: newFloor } = generateFloor(
+          state.currentDungeon, state.currentFloor, state.rngSeed, true, true, state.difficulty,
+        );
+        state.floors[currentKey] = newFloor;
       }
     }
 

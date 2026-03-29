@@ -264,6 +264,11 @@ export function injectTheme(): void {
 
     /* Responsive — large phone */
     @media (max-width: 480px) {
+      .game-layout {
+        max-width: 100%;
+        padding-top: 0;
+        margin: 0;
+      }
       :root {
         --sp-lg: 10px;
         --sp-xl: 14px;
@@ -289,6 +294,17 @@ export function injectTheme(): void {
       }
       .screen { padding: var(--sp-sm); }
       .btn { padding: 8px 12px; font-size: 12px; }
+    }
+
+    /* Landscape mobile — full-screen map, overlaid HUD */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .game-layout {
+        max-width: 100%;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+        justify-content: center;
+      }
     }
 
     /* iOS standalone (Add to Home Screen) */

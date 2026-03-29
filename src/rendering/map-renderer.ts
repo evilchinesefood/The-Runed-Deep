@@ -23,13 +23,25 @@ function calcViewportTiles(): { x: number; y: number } {
   const h = window.innerHeight;
   const scale = calcMapScale();
   const effectiveTile = TILE_SIZE * scale;
+  const isLandscape = h <= 500 && w > h;
+  const isPortrait = w <= 480 && h > w;
+
+  if (isLandscape) {
+    // Landscape: fill the screen, leave 20px top for stats overlay
+    let tilesX = Math.floor(w / effectiveTile);
+    if (tilesX % 2 === 0) tilesX--;
+    tilesX = Math.max(9, Math.min(27, tilesX));
+    let tilesY = Math.floor((h - 20) / effectiveTile);
+    if (tilesY % 2 === 0) tilesY--;
+    tilesY = Math.max(7, Math.min(15, tilesY));
+    return { x: tilesX, y: tilesY };
+  }
+
   const sidePad = w <= 480 ? 4 : 16;
   let tilesX = Math.floor(Math.min(w - sidePad, 672) / effectiveTile);
   if (tilesX % 2 === 0) tilesX--;
   tilesX = Math.max(9, Math.min(21, tilesX));
 
-  // Portrait mobile: reserve more space for touch controls + HUD
-  const isPortrait = w <= 480 && h > w;
   const hudHeight = w <= 480 ? 160 : 220;
   const touchPadding = isPortrait ? Math.floor(h * 0.25) : 0;
   let tilesY = Math.floor((h - hudHeight - touchPadding) / effectiveTile);
@@ -63,12 +75,13 @@ export class MapRenderer {
     VIEWPORT_TILES_Y = vp.y;
 
     // Wrapper clips and sizes the scaled map properly
+    const isMobileMap = window.innerWidth <= 480;
     this.mapWrapper = document.createElement("div");
     this.mapWrapper.style.cssText = `
       width: ${VIEWPORT_TILES_X * TILE_SIZE * this.scale}px;
       height: ${VIEWPORT_TILES_Y * TILE_SIZE * this.scale}px;
       overflow: hidden;
-      margin: 0 auto;
+      margin: ${isMobileMap ? '0' : '0 auto'};
     `;
 
     this.mapContainer = document.createElement("div");

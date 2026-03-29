@@ -25,7 +25,7 @@ function haptic(): void {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-const BTN_BOTTOM = "calc(36px + env(safe-area-inset-bottom, 0px))";
+const BTN_BOTTOM = "12px";
 
 function makeBtn(
   size: number,
@@ -173,11 +173,40 @@ function createActionIcon(id: string): SVGSVGElement {
 
 export type MenuActionHandler = (action: string) => void;
 
+interface LayoutSettings {
+  dpadVisible: boolean;
+  actionVisible: boolean;
+  dpadOffsetX: number;
+  dpadOffsetY: number;
+  actionOffsetX: number;
+  actionOffsetY: number;
+  scale: number; // 0.75, 1, 1.25
+}
+
+const DEFAULT_LAYOUT: LayoutSettings = {
+  dpadVisible: true, actionVisible: true,
+  dpadOffsetX: 0, dpadOffsetY: 0,
+  actionOffsetX: 0, actionOffsetY: 0,
+  scale: 1,
+};
+
+function loadLayout(): LayoutSettings {
+  try {
+    const s = localStorage.getItem('rd-touch-layout');
+    return s ? { ...DEFAULT_LAYOUT, ...JSON.parse(s) } : { ...DEFAULT_LAYOUT };
+  } catch { return { ...DEFAULT_LAYOUT }; }
+}
+
+function saveLayout(l: LayoutSettings): void {
+  try { localStorage.setItem('rd-touch-layout', JSON.stringify(l)); } catch {}
+}
+
 export class TouchControls {
   private container: HTMLElement;
   private dpad: HTMLElement;
   private actionBar: HTMLElement;
   private menuPanel: HTMLElement = document.createElement("div");
+  private layoutPanel: HTMLElement = document.createElement("div");
   private spellPickerPanel: HTMLElement = document.createElement("div");
   private menuOpen = false;
   private handler: TouchActionHandler | null = null;
@@ -185,19 +214,26 @@ export class TouchControls {
   private menuHandler: MenuActionHandler | null = null;
   private spellCastHandler: SpellCastHandler | null = null;
   private visible = false;
-  private dpadVisible = true;
+  private layout: LayoutSettings;
   private spellTargetMode = false;
   private pendingSpellId: string | null = null;
   private dpadBtns: { dir: Direction; btn: HTMLElement }[] = [];
   private dpadCenter: HTMLElement | null = null;
 
   constructor() {
+    this.layout = loadLayout();
+    const s = this.layout.scale;
+    const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
+    const dpadSize = Math.round((isLandscape ? 36 : 48) * s);
+    const dpadGap = isLandscape ? 2 : 3;
+    const actionSize = Math.round((isLandscape ? 34 : 44) * s);
+
     // D-pad — consistent SVG arrows in a 3x3 grid
     this.dpad = document.createElement("div");
     this.dpad.style.cssText = `
-      position:fixed;bottom:${BTN_BOTTOM};left:12px;z-index:1000;
-      display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px 48px;
-      gap:3px;touch-action:none;
+      position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.dpadOffsetY}px);left:${12 + this.layout.dpadOffsetX}px;z-index:1000;
+      display:${this.layout.dpadVisible ? 'grid' : 'none'};grid-template-columns:${dpadSize}px ${dpadSize}px ${dpadSize}px;grid-template-rows:${dpadSize}px ${dpadSize}px ${dpadSize}px;
+      gap:${dpadGap}px;touch-action:none;
     `;
 
     // Direction: [gridPos, svgRotation, direction]
@@ -216,7 +252,7 @@ export class TouchControls {
     for (const [pos, rot, dir] of dirs) {
       const [row, col] = pos.split("/");
       const isCenter = dir === null;
-      const btn = makeBtn(48, () => {
+      const btn = makeBtn(dpadSize, () => {
         if (isCenter) {
           if (this.spellTargetMode) {
             this.cancelSpellTarget();
@@ -245,17 +281,19 @@ export class TouchControls {
     }
 
     // Action buttons — right side
-    const isPortrait = window.innerHeight > window.innerWidth;
     this.actionBar = document.createElement("div");
-    if (isPortrait) {
+    const actDisplay = this.layout.actionVisible ? (isLandscape ? 'flex' : 'grid') : 'none';
+    if (isLandscape) {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
-        display:grid;grid-template-columns:44px 44px;gap:6px;touch-action:none;
+        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:${12 + this.layout.actionOffsetX}px;z-index:1000;
+        display:${actDisplay};flex-direction:row;flex-wrap:wrap;gap:4px;touch-action:none;
+        max-width:calc(100vw - ${dpadSize * 3 + dpadGap * 2 + 20}px);
+        justify-content:flex-end;
       `;
     } else {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:${BTN_BOTTOM};right:12px;z-index:1000;
-        display:flex;flex-direction:column;gap:6px;touch-action:none;
+        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:${12 + this.layout.actionOffsetX}px;z-index:1000;
+        display:${actDisplay};grid-template-columns:${actionSize}px ${actionSize}px;gap:6px;touch-action:none;
       `;
     }
 
@@ -268,8 +306,7 @@ export class TouchControls {
     ];
 
     for (const [id, action] of actions) {
-      const btn = makeBtn(44, () => {
-        // Long-press on spells button opens spell management, tap opens spell picker
+      const btn = makeBtn(actionSize, () => {
         if (id === "spells") {
           this.openSpellPicker();
           return;
@@ -282,7 +319,7 @@ export class TouchControls {
     }
 
     // Menu button
-    const menuBtn = makeBtn(44, () => this.toggleMenu());
+    const menuBtn = makeBtn(actionSize, () => this.toggleMenu());
     menuBtn.appendChild(createActionIcon("menu"));
     menuBtn.title = "Commands";
     this.actionBar.appendChild(menuBtn);
@@ -302,10 +339,9 @@ export class TouchControls {
     this.menuPanel.appendChild(menuTitle);
 
     const menuItems: [string, () => void][] = [
-      ["Toggle D-Pad", () => {
-        this.dpadVisible = !this.dpadVisible;
-        this.dpad.style.display = this.dpadVisible ? "grid" : "none";
+      ["Adjust Controls", () => {
         this.closeMenu();
+        this.openLayoutEditor();
       }],
       ["Character", () => {
         this.handler?.({ type: "setScreen", screen: "character-info" });
@@ -361,12 +397,22 @@ export class TouchControls {
       padding:20px 12px;overflow-y:auto;
     `;
 
+    // Layout editor overlay
+    this.layoutPanel = document.createElement("div");
+    this.layoutPanel.style.cssText = `
+      position:fixed;inset:0;z-index:1001;
+      background:rgba(0,0,0,0.85);
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      gap:6px;padding:16px;
+    `;
+
     this.container = document.createElement("div");
     this.container.id = "touch-controls";
     this.container.appendChild(this.dpad);
     this.container.appendChild(this.actionBar);
     this.container.appendChild(this.menuPanel);
     this.container.appendChild(this.spellPickerPanel);
+    this.container.appendChild(this.layoutPanel);
   }
 
   private toggleMenu(): void {
@@ -377,6 +423,161 @@ export class TouchControls {
   private closeMenu(): void {
     this.menuOpen = false;
     this.menuPanel.style.display = "none";
+  }
+
+  private openLayoutEditor(): void {
+    this.layoutPanel.replaceChildren();
+    const l = this.layout;
+    const step = 10;
+
+    const title = document.createElement("div");
+    title.textContent = "Adjust Controls";
+    title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;margin-bottom:4px;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
+    this.layoutPanel.appendChild(title);
+
+    const btnCss = `
+      width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(180deg,#4a4a4a 0%,#2a2a2a 40%,#1a1a1a 100%);
+      color:#c9a84c;border:2px solid #555;border-radius:6px;font-size:16px;
+      cursor:pointer;user-select:none;touch-action:none;font-weight:bold;
+    `;
+    const toggleCss = (on: boolean) => `
+      padding:8px 16px;font-size:13px;font-weight:bold;font-family:sans-serif;
+      color:${on ? '#4f4' : '#f44'};text-shadow:0 1px 2px rgba(0,0,0,0.8);
+      background:linear-gradient(180deg,#4a4a4a 0%,#2a2a2a 40%,#1a1a1a 100%);
+      border:2px solid ${on ? '#4a4' : '#644'};border-radius:6px;
+      cursor:pointer;user-select:none;touch-action:none;text-align:center;
+    `;
+
+    const tap = (el: HTMLElement, fn: () => void) => {
+      el.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); fn(); });
+      el.addEventListener("mousedown", (e) => { e.preventDefault(); fn(); });
+    };
+
+    const makeSection = (label: string, visKey: 'dpadVisible' | 'actionVisible', xKey: 'dpadOffsetX' | 'actionOffsetX', yKey: 'dpadOffsetY' | 'actionOffsetY') => {
+      const sec = document.createElement("div");
+      sec.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0;";
+
+      const lbl = document.createElement("div");
+      lbl.style.cssText = "color:#aaa;font-size:13px;font-family:sans-serif;";
+      lbl.textContent = label;
+      sec.appendChild(lbl);
+
+      // Show/Hide toggle
+      const vis = document.createElement("div");
+      vis.textContent = l[visKey] ? "Visible" : "Hidden";
+      vis.style.cssText = toggleCss(l[visKey]);
+      tap(vis, () => {
+        l[visKey] = !l[visKey];
+        vis.textContent = l[visKey] ? "Visible" : "Hidden";
+        vis.style.cssText = toggleCss(l[visKey]);
+        this.applyLayout();
+      });
+      sec.appendChild(vis);
+
+      // Arrow pad for nudging
+      const grid = document.createElement("div");
+      grid.style.cssText = "display:grid;grid-template-columns:40px 40px 40px;gap:2px;";
+
+      const empty = () => { const d = document.createElement("div"); d.style.width = "40px"; return d; };
+      const arrow = (text: string, fn: () => void) => {
+        const b = document.createElement("div");
+        b.textContent = text;
+        b.style.cssText = btnCss;
+        tap(b, fn);
+        return b;
+      };
+
+      grid.appendChild(empty());
+      grid.appendChild(arrow("\u2191", () => { l[yKey] += step; this.applyLayout(); }));
+      grid.appendChild(empty());
+      grid.appendChild(arrow("\u2190", () => { l[xKey] -= step; this.applyLayout(); }));
+      grid.appendChild(empty());
+      grid.appendChild(arrow("\u2192", () => { l[xKey] += step; this.applyLayout(); }));
+      grid.appendChild(empty());
+      grid.appendChild(arrow("\u2193", () => { l[yKey] -= step; this.applyLayout(); }));
+      grid.appendChild(empty());
+
+      sec.appendChild(grid);
+      return sec;
+    };
+
+    // D-pad section
+    this.layoutPanel.appendChild(makeSection("D-Pad", "dpadVisible", "dpadOffsetX", "dpadOffsetY"));
+
+    // Action bar section
+    this.layoutPanel.appendChild(makeSection("Action Buttons", "actionVisible", "actionOffsetX", "actionOffsetY"));
+
+    // Scale buttons
+    const scaleRow = document.createElement("div");
+    scaleRow.style.cssText = "display:flex;gap:6px;align-items:center;margin:4px 0;";
+    const scaleLbl = document.createElement("div");
+    scaleLbl.style.cssText = "color:#aaa;font-size:13px;font-family:sans-serif;margin-right:4px;";
+    scaleLbl.textContent = "Size:";
+    scaleRow.appendChild(scaleLbl);
+    for (const [label, val] of [["S", 0.75], ["M", 1], ["L", 1.25]] as [string, number][]) {
+      const b = document.createElement("div");
+      b.textContent = label;
+      b.style.cssText = `
+        padding:8px 16px;font-size:14px;font-weight:bold;font-family:sans-serif;
+        color:${l.scale === val ? '#c9a84c' : '#666'};text-shadow:0 1px 2px rgba(0,0,0,0.8);
+        background:linear-gradient(180deg,#4a4a4a 0%,#2a2a2a 40%,#1a1a1a 100%);
+        border:2px solid ${l.scale === val ? '#c9a84c' : '#444'};border-radius:6px;
+        cursor:pointer;user-select:none;touch-action:none;text-align:center;
+      `;
+      tap(b, () => {
+        l.scale = val;
+        saveLayout(l);
+        location.reload();
+      });
+      scaleRow.appendChild(b);
+    }
+    this.layoutPanel.appendChild(scaleRow);
+
+    // Reset + Done buttons
+    const bottomRow = document.createElement("div");
+    bottomRow.style.cssText = "display:flex;gap:12px;margin-top:8px;";
+
+    const resetBtn = document.createElement("div");
+    resetBtn.textContent = "Reset";
+    resetBtn.style.cssText = `
+      padding:10px 24px;color:#f44;font-size:14px;font-weight:bold;font-family:sans-serif;
+      background:linear-gradient(180deg,#4a4a4a 0%,#2a2a2a 40%,#1a1a1a 100%);
+      border:2px solid #644;border-radius:6px;cursor:pointer;user-select:none;touch-action:none;
+    `;
+    tap(resetBtn, () => {
+      this.layout = { ...DEFAULT_LAYOUT };
+      saveLayout(this.layout);
+      location.reload();
+    });
+    bottomRow.appendChild(resetBtn);
+
+    const doneBtn = document.createElement("div");
+    doneBtn.textContent = "Done";
+    doneBtn.style.cssText = `
+      padding:10px 24px;color:#4f4;font-size:14px;font-weight:bold;font-family:sans-serif;
+      background:linear-gradient(180deg,#4a4a4a 0%,#2a2a2a 40%,#1a1a1a 100%);
+      border:2px solid #4a4;border-radius:6px;cursor:pointer;user-select:none;touch-action:none;
+    `;
+    tap(doneBtn, () => {
+      saveLayout(this.layout);
+      this.layoutPanel.style.display = "none";
+    });
+    bottomRow.appendChild(doneBtn);
+
+    this.layoutPanel.appendChild(bottomRow);
+    this.layoutPanel.style.display = "flex";
+  }
+
+  private applyLayout(): void {
+    const l = this.layout;
+    this.dpad.style.display = l.dpadVisible ? "grid" : "none";
+    this.dpad.style.bottom = `calc(${BTN_BOTTOM} + ${l.dpadOffsetY}px)`;
+    this.dpad.style.left = `${12 + l.dpadOffsetX}px`;
+    const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
+    this.actionBar.style.display = l.actionVisible ? (isLandscape ? "flex" : "grid") : "none";
+    this.actionBar.style.bottom = `calc(${BTN_BOTTOM} + ${l.actionOffsetY}px)`;
+    this.actionBar.style.right = `${12 + l.actionOffsetX}px`;
   }
 
   private openSpellPicker(): void {

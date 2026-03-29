@@ -446,6 +446,11 @@ function processUseStairs(state: GameState): GameState {
     if (state.currentFloor === 0) {
       return teleportToTown(state);
     }
+    // If the floor below doesn't exist (pruned), go to town instead
+    const belowKey = `${getDungeonForFloor(state.currentFloor - 1)}-${state.currentFloor - 1}`;
+    if (!state.floors[belowKey]) {
+      return teleportToTown(state);
+    }
     return goToFloor(state, state.currentFloor - 1, "ascend");
   }
 

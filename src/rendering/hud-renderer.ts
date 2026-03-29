@@ -18,7 +18,16 @@ function bar(pct: number, color: string): HTMLElement {
   return track;
 }
 
+function compactBar(pct: number, color: string): HTMLElement {
+  const track = el("div", { background: "#333", height: "4px", width: "60px", display: "inline-block", verticalAlign: "middle", marginLeft: "4px", borderRadius: "2px" });
+  const fill = el("div", { background: color, height: "100%", width: `${pct}%`, borderRadius: "2px" });
+  track.appendChild(fill);
+  return track;
+}
+
 export type SpellClickHandler = (spellId: string) => void;
+
+const isLandscapeMobile = () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
 
 export class HudRenderer {
   private container: HTMLElement;
@@ -26,13 +35,15 @@ export class HudRenderer {
   private messagesEl: HTMLElement;
   private spellBarEl: HTMLElement;
   private onSpellClick: SpellClickHandler | null = null;
+  private landscape: boolean;
 
   constructor(container: HTMLElement) {
     this.container = container;
+    this.landscape = isLandscapeMobile();
 
-    // Spell bar — scrollable, wraps within full width
+    // Spell bar — hidden in landscape
     this.spellBarEl = el("div", {
-      display: "flex",
+      display: this.landscape ? "none" : "flex",
       flexWrap: "nowrap",
       width: "100%",
       maxWidth: "var(--game-width)",
@@ -46,38 +57,78 @@ export class HudRenderer {
     });
     this.container.appendChild(this.spellBarEl);
 
-    const isMobileHud = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
-    const hud = el("div", {
-      display: "flex",
-      width: "100%",
-      maxWidth: "var(--game-width)",
-      margin: "4px auto",
-      gap: "6px",
-      fontSize: "var(--fs-md)",
-      paddingBottom: isMobileHud ? "180px" : "0",
-    });
+    if (this.landscape) {
+      // Landscape: overlays pinned to screen edges
+      this.statsEl = el("div", {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        right: "0",
+        zIndex: "50",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "4px 8px 4px calc(8px + env(safe-area-inset-left, 0px))",
+        background: "rgba(0,0,0,0.7)",
+        fontSize: "11px",
+        color: "#ccc",
+        pointerEvents: "none",
+      });
 
-    this.messagesEl = el("div", {
-      flex: "1",
-      minWidth: "0",
-      height: "clamp(100px, 20vh, 160px)",
-      overflowY: "auto",
-      background: "#111",
-      border: "1px solid #333",
-      padding: "4px 6px",
-    });
+      this.messagesEl = el("div", {
+        position: "fixed",
+        bottom: "120px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: "50",
+        width: "60%",
+        maxWidth: "400px",
+        maxHeight: "60px",
+        overflowY: "hidden",
+        background: "rgba(0,0,0,0.6)",
+        borderRadius: "4px",
+        padding: "3px 8px",
+        fontSize: "10px",
+        pointerEvents: "none",
+      });
 
-    this.statsEl = el("div", {
-      width: "clamp(140px, 30%, 220px)",
-      flexShrink: "0",
-      background: "#111",
-      border: "1px solid #333",
-      padding: "4px 6px",
-    });
+      document.body.appendChild(this.statsEl);
+      document.body.appendChild(this.messagesEl);
+    } else {
+      // Portrait + Desktop: normal flow layout below map
+      const isPortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+      const hud = el("div", {
+        display: "flex",
+        width: "100%",
+        maxWidth: "var(--game-width)",
+        margin: "4px auto",
+        gap: "6px",
+        fontSize: "var(--fs-md)",
+        paddingBottom: "0",
+      });
 
-    hud.appendChild(this.messagesEl);
-    hud.appendChild(this.statsEl);
-    this.container.appendChild(hud);
+      this.messagesEl = el("div", {
+        flex: "1",
+        minWidth: "0",
+        height: "clamp(100px, 20vh, 160px)",
+        overflowY: "auto",
+        background: "#111",
+        border: "1px solid #333",
+        padding: "4px 6px",
+      });
+
+      this.statsEl = el("div", {
+        width: "clamp(140px, 30%, 220px)",
+        flexShrink: "0",
+        background: "#111",
+        border: "1px solid #333",
+        padding: "4px 6px",
+      });
+
+      hud.appendChild(this.messagesEl);
+      hud.appendChild(this.statsEl);
+      this.container.appendChild(hud);
+    }
   }
 
   setSpellClickHandler(handler: SpellClickHandler): void {
@@ -86,10 +137,61 @@ export class HudRenderer {
 
   render(state: GameState): void {
     this.renderSpellBar(state);
-    this.renderStats(state);
+    if (this.landscape) {
+      this.renderStatsCompact(state);
+    } else {
+      this.renderStats(state);
+    }
     this.renderMessages(state.messages);
   }
 
+  /** Remove overlay elements (call when leaving game screen) */
+  cleanup(): void {
+    // Remove fixed overlays (landscape + portrait mobile)
+    if (this.statsEl.style.position === "fixed") this.statsEl.remove();
+    if (this.messagesEl.style.position === "fixed") this.messagesEl.remove();
+  }
+
+  // ── Compact stats bar for landscape ──────────────────────
+  private renderStatsCompact(state: GameState): void {
+    const h = state.hero;
+    const hpPct = Math.round((h.hp / h.maxHp) * 100);
+    const mpPct = h.maxMp > 0 ? Math.round((h.mp / h.maxMp) * 100) : 0;
+    const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
+
+    this.statsEl.replaceChildren();
+
+    // All in one row: Name Lv | HP bar | MP bar | Floor | Turn
+    const add = (text: string, color = "#ccc") => {
+      this.statsEl.appendChild(el("span", { color, whiteSpace: "nowrap" }, text));
+    };
+
+    add(`${h.name} Lv${h.level}`, "#fff");
+    const hpSpan = el("span", { whiteSpace: "nowrap" }, `HP:${h.hp}/${h.maxHp}`);
+    hpSpan.style.color = hpColor;
+    hpSpan.appendChild(compactBar(hpPct, hpColor));
+    this.statsEl.appendChild(hpSpan);
+
+    const mpSpan = el("span", { whiteSpace: "nowrap" }, `MP:${h.mp}/${h.maxMp}`);
+    mpSpan.style.color = "#48f";
+    mpSpan.appendChild(compactBar(mpPct, "#48f"));
+    this.statsEl.appendChild(mpSpan);
+
+    const floorLabel = state.currentDungeon !== "town" ? `F${state.currentFloor + 1}` : "Town";
+    add(`${floorLabel} T:${state.turn}`, "#888");
+
+    // Status effects
+    if (h.activeEffects.length > 0) {
+      const icons: Record<string, string> = {
+        shield: "🛡", "resist-cold": "❄", "resist-fire": "🔥",
+        "resist-lightning": "⚡", poisoned: "☠", levitation: "🪶", light: "💡",
+      };
+      const effectStr = h.activeEffects.map(e => `${icons[e.id] ?? "✦"}${e.turnsRemaining}`).join(" ");
+      add(effectStr, "#aaa");
+    }
+  }
+
+  // ── Full stats panel for portrait ────────────────────────
   private renderStats(state: GameState): void {
     const h = state.hero;
     const hpPct = Math.round((h.hp / h.maxHp) * 100);
@@ -99,7 +201,6 @@ export class HudRenderer {
 
     this.statsEl.replaceChildren();
 
-    // Name + level + status icons row
     const nameRow = el("div", {
       marginBottom: "4px",
       display: "flex",
@@ -112,51 +213,28 @@ export class HudRenderer {
     nameRow.appendChild(strong);
     nameRow.appendChild(el("span", { fontSize: "12px" }, `Lv.${h.level}`));
 
-    // AC badge (first, before status effects)
-    const acBadge = el(
-      "span",
-      {
-        fontSize: "9px",
-        color: "#bbb",
-        background: "#1a1a1a",
-        border: "1px solid #bbb",
-        borderRadius: "3px",
-        padding: "0px 3px",
-        whiteSpace: "nowrap",
-      },
-      `🛡${h.armorValue}`,
-    );
+    const acBadge = el("span", {
+      fontSize: "9px", color: "#bbb", background: "#1a1a1a",
+      border: "1px solid #bbb", borderRadius: "3px",
+      padding: "0px 3px", whiteSpace: "nowrap",
+    }, `🛡${h.armorValue}`);
     acBadge.title = `Armor Class: ${h.armorValue}`;
     nameRow.appendChild(acBadge);
 
-    // Status effect icons inline with name/level
     if (h.activeEffects.length > 0) {
       const effectStyles: Record<string, [string, string]> = {
-        shield: ["🛡", "#48f"],
-        "resist-cold": ["❄", "#4af"],
-        "resist-fire": ["🔥", "#f64"],
-        "resist-lightning": ["⚡", "#ff4"],
-        poisoned: ["☠", "#4f4"],
-        paralyzed: ["⛓", "#f84"],
-        blinded: ["👁", "#888"],
-        levitation: ["🪶", "#aaf"],
-        light: ["💡", "#ff8"],
+        shield: ["🛡", "#48f"], "resist-cold": ["❄", "#4af"],
+        "resist-fire": ["🔥", "#f64"], "resist-lightning": ["⚡", "#ff4"],
+        poisoned: ["☠", "#4f4"], paralyzed: ["⛓", "#f84"],
+        blinded: ["👁", "#888"], levitation: ["🪶", "#aaf"], light: ["💡", "#ff8"],
       };
       for (const eff of h.activeEffects) {
         const [icon, color] = effectStyles[eff.id] ?? ["✦", "#aaa"];
-        const badge = el(
-          "span",
-          {
-            fontSize: "9px",
-            color,
-            background: "#1a1a1a",
-            border: `1px solid ${color}33`,
-            borderRadius: "3px",
-            padding: "0px 3px",
-            whiteSpace: "nowrap",
-          },
-          `${icon}${eff.turnsRemaining}`,
-        );
+        const badge = el("span", {
+          fontSize: "9px", color, background: "#1a1a1a",
+          border: `1px solid ${color}33`, borderRadius: "3px",
+          padding: "0px 3px", whiteSpace: "nowrap",
+        }, `${icon}${eff.turnsRemaining}`);
         badge.title = `${eff.name} (${eff.turnsRemaining} turns)`;
         nameRow.appendChild(badge);
       }
@@ -164,37 +242,21 @@ export class HudRenderer {
     this.statsEl.appendChild(nameRow);
 
     const hpLabel = el("div", {}, `HP: `);
-    const hpVal = el("span", { color: hpColor }, `${h.hp}/${h.maxHp}`);
-    hpLabel.appendChild(hpVal);
+    hpLabel.appendChild(el("span", { color: hpColor }, `${h.hp}/${h.maxHp}`));
     this.statsEl.appendChild(hpLabel);
     this.statsEl.appendChild(bar(hpPct, hpColor));
 
     const mpLabel = el("div", {}, `MP: `);
-    const mpVal = el("span", { color: mpColor }, `${h.mp}/${h.maxMp}`);
-    mpLabel.appendChild(mpVal);
+    mpLabel.appendChild(el("span", { color: mpColor }, `${h.mp}/${h.maxMp}`));
     this.statsEl.appendChild(mpLabel);
     this.statsEl.appendChild(bar(mpPct, mpColor));
 
     const xpNeeded = xpToNextLevel(h, state.difficulty);
-    const xpDisplay =
-      xpNeeded === Infinity ? "MAX" : `${h.xp} (${xpNeeded} to next)`;
-    const xpRow = el(
-      "div",
-      { fontSize: "11px", marginTop: "4px" },
-      `XP: ${xpDisplay}`,
-    );
-    this.statsEl.appendChild(xpRow);
+    const xpDisplay = xpNeeded === Infinity ? "MAX" : `${h.xp} (${xpNeeded} to next)`;
+    this.statsEl.appendChild(el("div", { fontSize: "11px", marginTop: "4px" }, `XP: ${xpDisplay}`));
 
-    const floorLabel =
-      state.currentDungeon !== "town"
-        ? `Floor: ${state.currentFloor + 1}`
-        : "Town";
-    const floorInfo = el(
-      "div",
-      { fontSize: "11px", marginTop: "2px" },
-      `${floorLabel} | Turn: ${state.turn}`,
-    );
-    this.statsEl.appendChild(floorInfo);
+    const floorLabel = state.currentDungeon !== "town" ? `Floor: ${state.currentFloor + 1}` : "Town";
+    this.statsEl.appendChild(el("div", { fontSize: "11px", marginTop: "2px" }, `${floorLabel} | Turn: ${state.turn}`));
   }
 
   private renderSpellBar(state: GameState): void {
@@ -203,13 +265,7 @@ export class HudRenderer {
     const mp = state.hero.mp;
 
     if (hotkeys.length === 0) {
-      this.spellBarEl.appendChild(
-        el(
-          "div",
-          { color: "#555", padding: "2px 4px" },
-          "Press Z to manage spells",
-        ),
-      );
+      this.spellBarEl.appendChild(el("div", { color: "#555", padding: "2px 4px" }, "Press Z to manage spells"));
       return;
     }
 
@@ -217,63 +273,45 @@ export class HudRenderer {
     for (let i = 0; i < max; i++) {
       const spell = SPELL_BY_ID[hotkeys[i]];
       if (!spell) continue;
-
       const canCast = mp >= spell.manaCost;
       const spellId = hotkeys[i];
-      const label = `${i + 1}:${spell.name}`;
-      const btn = el(
-        "div",
-        {
-          padding: "4px 7px",
-          background: canCast ? "#1a1a2a" : "#1a1a1a",
-          border: `1px solid ${canCast ? "#446" : "#222"}`,
-          color: canCast ? "#aac" : "#555",
-          cursor: canCast ? "pointer" : "default",
-          whiteSpace: "nowrap",
-          userSelect: "none",
-          borderRadius: "3px",
-          minHeight: "28px",
-          display: "flex",
-          alignItems: "center",
-        },
-        label,
-      );
-
-      if (canCast) {
-        btn.addEventListener("click", () => {
-          this.onSpellClick?.(spellId);
-        });
-      }
-
+      const btn = el("div", {
+        padding: "4px 7px",
+        background: canCast ? "#1a1a2a" : "#1a1a1a",
+        border: `1px solid ${canCast ? "#446" : "#222"}`,
+        color: canCast ? "#aac" : "#555",
+        cursor: canCast ? "pointer" : "default",
+        whiteSpace: "nowrap",
+        userSelect: "none",
+        borderRadius: "3px",
+        minHeight: "28px",
+        display: "flex",
+        alignItems: "center",
+      }, `${i + 1}:${spell.name}`);
+      if (canCast) btn.addEventListener("click", () => { this.onSpellClick?.(spellId); });
       this.spellBarEl.appendChild(btn);
     }
   }
 
   private renderMessages(messages: Message[]): void {
-    const recent = messages.slice(-50);
+    const recent = this.landscape ? messages.slice(-3) : messages.slice(-50);
     this.messagesEl.replaceChildren();
     const colors: Record<string, string> = {
-      combat: '#fa0',
-      important: '#4f4',
-      system: '#888',
-      normal: '#ccc',
+      combat: '#fa0', important: '#4f4', system: '#888', normal: '#ccc',
     };
     for (const m of recent) {
       const baseColor = colors[m.severity] ?? '#ccc';
       const line = document.createElement('div');
       line.style.margin = '1px 0';
-      // Split on: enchanted items (+N), cursed items (-N), plain numbers, and item suffixes
       const parts = m.text.split(/(\S+ \+\d+|\S+ -\d+|\d+)/g);
       for (const part of parts) {
         if (/\S+ \+\d+$/.test(part)) {
-          // Enchanted item name — blue
           const span = document.createElement('span');
           span.textContent = part;
           span.style.color = '#4af';
           span.style.fontWeight = 'bold';
           line.appendChild(span);
         } else if (/\S+ -\d+$/.test(part)) {
-          // Cursed item name — red
           const span = document.createElement('span');
           span.textContent = part;
           span.style.color = '#f44';
@@ -294,6 +332,6 @@ export class HudRenderer {
       }
       this.messagesEl.appendChild(line);
     }
-    this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+    if (!this.landscape) this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   }
 }

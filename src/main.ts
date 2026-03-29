@@ -747,6 +747,24 @@ function addScreenCleanup(fn: () => void): void {
 // Initial render
 render(gameLoop.getState());
 
+// Re-render on orientation/resize change (debounced)
+let resizeTimer: number | null = null;
+let lastW = window.innerWidth;
+let lastH = window.innerHeight;
+window.addEventListener("resize", () => {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => {
+    const w = window.innerWidth, h = window.innerHeight;
+    if (w === lastW && h === lastH) return;
+    lastW = w; lastH = h;
+    // Force full screen rebuild
+    const state = gameLoop.getState();
+    root.dataset.screen = "";
+    touchControls.hide();
+    render(state);
+  }, 300);
+});
+
 function render(state: GameState): void {
   try {
     const currentScreen = root.dataset.screen as Screen | undefined;
@@ -809,6 +827,7 @@ function switchScreen(state: GameState): void {
 
   root.replaceChildren();
   root.dataset.screen = state.screen;
+  hudRenderer?.cleanup();
   mapRenderer = null;
   hudRenderer = null;
   animRenderer = null;
