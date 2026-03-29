@@ -43,8 +43,8 @@ function openShopDrawer(item: Item, price: number, actionLabel: string, onAction
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
   shopDrawerEl.appendChild(buildTooltipContent(item));
-  shopDrawerEl.appendChild(el("div", { color: "#a70", fontSize: "13px", marginTop: "6px" }, `Price: ${price} gold`));
-  const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center" });
+  shopDrawerEl.appendChild(el("div", { color: "#c9a84c", fontSize: "14px", marginTop: "6px", textAlign: "center", fontWeight: "bold" }, `Price: ${price} gold`));
+  const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap" });
   const actionBtn = createButton(actionLabel);
   actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
   actionBtn.addEventListener("click", (e) => { e.stopPropagation(); onAction(); });
@@ -92,6 +92,10 @@ function spriteEl(sprite: string): HTMLElement {
   return s;
 }
 
+function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
+  if (disabled) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
+}
+
 function itemRow(
   item: Item,
   count: number,
@@ -106,10 +110,9 @@ function itemRow(
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "3px 6px",
+    padding: "4px 6px",
     borderRadius: "4px",
-    cursor: IS_MOBILE_SHOP ? "pointer" : "default",
-    transition: "background 0.1s",
+    cursor: "pointer",
   });
   row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
   row.addEventListener("mouseleave", () => { row.style.background = ""; });
@@ -147,24 +150,20 @@ function itemRow(
 
   row.appendChild(el("div", { fontSize: "12px", color: "#a70", flexShrink: "0" }, priceLabel));
 
-  if (IS_MOBILE_SHOP) {
-    // Mobile: tap row to open drawer
-    row.addEventListener("click", () => {
-      if (!btnDisabled) openShopDrawer(item, priceNum ?? 0, btnText, onClick);
-    });
-  } else {
-    // Desktop: inline button + tooltip
-    const btn = createButton(btnText, "sm");
-    if (btnDisabled) {
-      btn.disabled = true;
-      btn.style.opacity = "0.4";
-      btn.style.cursor = "not-allowed";
-    } else {
-      btn.addEventListener("click", () => { hideItemTooltip(); onClick(); });
-    }
-    row.appendChild(btn);
-    attachItemTooltip(row, item);
+  // Inline button + always-on drawer
+  const btn = createButton(btnText, "sm");
+  greyBtn(btn, btnDisabled);
+  if (!btnDisabled) {
+    btn.addEventListener("click", (e) => { e.stopPropagation(); hideItemTooltip(); onClick(); });
   }
+  row.appendChild(btn);
+  if (!IS_MOBILE_SHOP) attachItemTooltip(row, item);
+
+  // Click row opens drawer
+  row.addEventListener("click", () => {
+    if (!btnDisabled) openShopDrawer(item, priceNum ?? 0, btnText, onClick);
+  });
+
   return row;
 }
 
@@ -231,7 +230,7 @@ function buildPanel(
   panel.appendChild(sortBar);
 
   const list = el("div", {
-    maxHeight: IS_MOBILE_SHOP ? "clamp(200px, 50vh, 500px)" : "clamp(200px, 40vh, 400px)",
+    maxHeight: "clamp(200px, 50vh, 400px)",
     overflowY: "auto",
   });
   list.setAttribute("data-shop-list", "1");
@@ -308,14 +307,15 @@ export function createShopScreen(
     const shopInv = state.town.shopInventories[shopId] ?? [];
 
     const titleBar = createTitleBar(`${shopName}`, onClose);
-    const copperLabel = el("div", { color: "#c90", fontSize: "13px" }, `Gold: ${copper}`);
-    titleBar.insertBefore(copperLabel, titleBar.lastChild);
     // Items toggle button
     const itemsBtn = createButton(itemsOnlyMode ? "Shop" : "Items");
     itemsBtn.style.cssText += "margin-left:auto;margin-right:8px;";
     itemsBtn.addEventListener("click", (e) => { e.stopPropagation(); itemsOnlyMode = !itemsOnlyMode; render(); });
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
+
+    const copperLine = el("div", { color: "#c90", fontSize: "13px", marginBottom: "8px" }, `Gold: ${copper}`);
+    screen.appendChild(copperLine);
 
     const row = el("div", {
       display: "flex",
@@ -344,6 +344,29 @@ export function createShopScreen(
       row.appendChild(forSale);
     }
 
+    // Sell Marked button — between shop inventory and player inventory
+    const shop = SHOP_DEFS[shopId];
+    const isJunk = shopId === 'junk-store';
+    const markedItems = state.hero.inventory.filter(i => {
+      if (!i.markedForSale) return false;
+      if (isJunk) return true;
+      return shop?.categories.includes(i.category);
+    });
+    if (markedItems.length > 0) {
+      const totalGold = markedItems.reduce((s, i) => s + getSellPrice(i, shopId), 0);
+      const sellMarkedBtn = createButton(`Sell Marked (${markedItems.length}) \u2014 ${totalGold}g`);
+      sellMarkedBtn.style.cssText += "display:block;width:100%;padding:10px;font-size:14px;";
+      sellMarkedBtn.addEventListener("click", () => {
+        for (const item of markedItems) {
+          soldKeys.add(`${item.templateId}|${item.enchantment}`);
+          state = sellItem(state, shopId, item.id);
+        }
+        onTransaction(state);
+        render();
+      });
+      row.appendChild(sellMarkedBtn);
+    }
+
     const yourItems = buildPanel(
       itemsOnlyMode ? "INVENTORY" : "YOUR ITEMS",
       state.hero.inventory,
@@ -367,29 +390,6 @@ export function createShopScreen(
     row.appendChild(yourItems);
 
     screen.appendChild(row);
-
-    // Sell Marked button
-    const shop = SHOP_DEFS[shopId];
-    const isJunk = shopId === 'junk-store';
-    const markedItems = state.hero.inventory.filter(i => {
-      if (!i.markedForSale) return false;
-      if (isJunk) return true;
-      return shop?.categories.includes(i.category);
-    });
-    if (markedItems.length > 0) {
-      const totalGold = markedItems.reduce((s, i) => s + getSellPrice(i, shopId), 0);
-      const sellMarkedBtn = createButton(`Sell Marked (${markedItems.length}) — ${totalGold}g`);
-      sellMarkedBtn.style.cssText += "display:block;width:100%;margin-top:8px;padding:10px;font-size:14px;";
-      sellMarkedBtn.addEventListener("click", () => {
-        for (const item of markedItems) {
-          soldKeys.add(`${item.templateId}|${item.enchantment}`);
-          state = sellItem(state, shopId, item.id);
-        }
-        onTransaction(state);
-        render();
-      });
-      screen.appendChild(sellMarkedBtn);
-    }
 
     const hint = el(
       "div",

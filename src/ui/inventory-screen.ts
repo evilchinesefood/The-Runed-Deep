@@ -130,7 +130,8 @@ export function createInventoryScreen(
   onClose: () => void,
   initialSelectedIdx: number = 0,
   openDrawerForId?: string,
-): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number } {
+  initialItemsOnly: boolean = false,
+): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number; getItemsOnlyMode: () => boolean } {
   const h = state.hero;
   setTooltipKnownSpells(h.knownSpells);
   const isMobileView = window.innerWidth <= 768;
@@ -140,134 +141,68 @@ export function createInventoryScreen(
   screen.classList.add("screen-scrollable");
 
   // ── Title bar with items-only toggle ────────────────────────
-  let itemsOnlyMode = false;
+  let itemsOnlyMode = initialItemsOnly;
   const titleBar = createTitleBar("Equipment", () => { cleanup(); onClose(); });
   const toggleViewBtn = createButton("Items");
   toggleViewBtn.style.cssText += "margin-left:auto;margin-right:8px;";
   titleBar.insertBefore(toggleViewBtn, titleBar.lastChild);
   screen.appendChild(titleBar);
 
-  // ── Equipment panel: paperdoll + slot legend ─────────────────
+  // ── Equipment panel: paperdoll (desktop only) + slot list ────
   const isMobile = window.innerWidth <= 480;
   const equipPanel = createPanel();
   equipPanel.style.display = "flex";
-  equipPanel.style.gap = isMobile ? "8px" : "12px";
+  equipPanel.style.gap = isMobile ? "0" : "12px";
   equipPanel.style.padding = "8px";
-  equipPanel.style.flexWrap = isMobile ? "nowrap" : "wrap";
 
-  // Left: paperdoll with overlaid equipment slots (fixed dims for positioning)
-  const dollScale = isMobile ? 0.45 : 1;
-  const dollW = Math.round(240 * dollScale);
-  const dollH = Math.round(480 * dollScale);
-  const dollWrapper = el("div", {
-    position: "relative",
-    width: `${dollW}px`,
-    height: `${dollH}px`,
-    flexShrink: "0",
-    overflow: "hidden",
-    background: "#fff",
-    boxSizing: "border-box",
-  });
-  const dollBg = el("div", {
-    width: "100%",
-    height: "100%",
-    backgroundSize: "contain",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  });
-  dollBg.className = "equipment-dude";
-  // Wrap paperdoll + slots in a scalable inner container
-  const dollInner = el("div", {
-    position: "relative",
-    width: "240px",
-    height: "480px",
-    transformOrigin: "top left",
-    transform: dollScale < 1 ? `scale(${dollScale})` : "",
-  });
-  dollInner.appendChild(dollBg);
-  dollWrapper.appendChild(dollInner);
-
-  // Overlay each slot at its position on the paperdoll
   const slotKeys: EquipSlot[] = [
-    "helmet",
-    "amulet",
-    "cloak",
-    "body",
-    "weapon",
-    "shield",
-    "gauntlets",
-    "belt",
-    "ringLeft",
-    "ringRight",
-    "boots",
-    "pack",
-    "purse",
+    "helmet", "amulet", "cloak", "body", "weapon", "shield",
+    "gauntlets", "belt", "ringLeft", "ringRight", "boots", "pack", "purse",
   ];
 
-  for (const slotKey of slotKeys) {
-    const item = h.equipment[slotKey];
-    const slotEl = createEquipSlot(slotKey, item, () =>
-      onAction({ type: "unequipItem", slot: slotKey }),
-    );
-    dollInner.appendChild(slotEl);
+  // Paperdoll — desktop only, no slot icons
+  if (!isMobile) {
+    const dollWrapper = el("div", {
+      position: "relative", width: "240px", height: "480px",
+      flexShrink: "0", overflow: "hidden", background: "#fff",
+    });
+    const dollBg = el("div", {
+      width: "100%", height: "100%",
+      backgroundSize: "contain", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+    });
+    dollBg.className = "equipment-dude";
+    dollWrapper.appendChild(dollBg);
+    equipPanel.appendChild(dollWrapper);
   }
 
-  equipPanel.appendChild(dollWrapper);
-
-  // Right: slot legend list (shows names for quick reference)
-  const legend = el("div", {
-    flex: "1",
-    padding: "4px 0",
-    overflowY: "auto",
-  });
+  // Equipment list with sprite icons
+  const legend = el("div", { flex: "1", padding: "4px 0", overflowY: "auto" });
   legend.appendChild(sectionHeader("Equipped Items"));
 
   for (const slotKey of slotKeys) {
     const item = h.equipment[slotKey];
     const row = el("div", {
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      marginBottom: "3px",
-      padding: "2px 4px",
-      fontSize: "12px",
-      cursor: item ? "pointer" : "default",
-      borderRadius: "2px",
+      display: "flex", alignItems: "center", gap: "6px",
+      marginBottom: "3px", padding: "2px 4px",
+      fontSize: "13px", cursor: item ? "pointer" : "default", borderRadius: "2px",
     });
 
+    // Sprite icon — 32px sprite scaled to 24px
+    const spriteWrap = el("div", { width: "24px", height: "24px", flexShrink: "0", overflow: "hidden" });
+    if (item) {
+      const sprite = el("div", { width: "32px", height: "32px", transform: "scale(0.75)", transformOrigin: "top left" });
+      sprite.className = getDisplaySprite(item);
+      const glow = getItemGlow(item);
+      if (glow) sprite.style.filter = glow;
+      spriteWrap.appendChild(sprite);
+    }
+    row.appendChild(spriteWrap);
+
     const label = SLOT_LABELS[slotKey] || slotKey;
-    row.appendChild(
-      el("span", { color: "#666", width: "65px", flexShrink: "0" }, label),
-    );
+    row.appendChild(el("span", { color: "#666", width: "55px", flexShrink: "0", fontSize: "11px" }, label));
 
     if (item) {
-      const nameSpan = el(
-        "span",
-        { color: itemNameColor(item) },
-        itemDisplayLabel(item),
-      );
-      row.appendChild(nameSpan);
-
-      if (item.properties["ac"]) {
-        row.appendChild(
-          el(
-            "span",
-            { color: "#586", fontSize: "11px", marginLeft: "4px" },
-            `AC+${item.properties["ac"] + item.enchantment}`,
-          ),
-        );
-      }
-      if (item.properties["damageMin"] !== undefined) {
-        const dmg = `${item.properties["damageMin"]}-${item.properties["damageMax"]}`;
-        row.appendChild(
-          el(
-            "span",
-            { color: "#865", fontSize: "11px", marginLeft: "4px" },
-            dmg,
-          ),
-        );
-      }
-
+      row.appendChild(el("span", { color: itemNameColor(item), flex: "1" }, itemDisplayLabel(item)));
       row.addEventListener("click", () => openEquippedDrawer(item, slotKey));
       if (!isMobileView) {
         row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
@@ -275,7 +210,7 @@ export function createInventoryScreen(
         attachItemTooltip(row, item);
       }
     } else {
-      row.appendChild(el("span", { color: "#333", fontStyle: "italic" }, "—"));
+      row.appendChild(el("span", { color: "#333", fontStyle: "italic" }, "\u2014"));
     }
 
     legend.appendChild(row);
@@ -427,7 +362,7 @@ export function createInventoryScreen(
     }
     btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
     // Mark/Unmark for sale — dispatched through game loop
-    const markLabel = item.markedForSale ? "Unmark" : "Mark Sale";
+    const markLabel = item.markedForSale ? "Unmark" : "Mark";
     const markBtn = createButton(markLabel);
     markBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
     if (item.markedForSale) { markBtn.style.color = "#f90"; markBtn.style.borderColor = "#a60"; }
@@ -656,11 +591,16 @@ export function createInventoryScreen(
   toggleViewBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     itemsOnlyMode = !itemsOnlyMode;
+    applyViewMode();
+  });
+
+  function applyViewMode(): void {
     toggleViewBtn.textContent = itemsOnlyMode ? "Equip" : "Items";
-    equipPanel.style.display = itemsOnlyMode ? "none" : (isMobile ? "flex" : "flex");
+    equipPanel.style.display = itemsOnlyMode ? "none" : "flex";
     footer.style.display = itemsOnlyMode ? "none" : "";
     invPanel.style.maxHeight = itemsOnlyMode ? "none" : "clamp(200px, 40vh, 300px)";
-  });
+  }
+  if (initialItemsOnly) applyViewMode();
 
   // ── Keyboard handler ───────────────────────────────────────
   const keyHandler = (e: KeyboardEvent) => {
@@ -743,9 +683,10 @@ export function createInventoryScreen(
     }
   }
 
-  const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number };
+  const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number; getItemsOnlyMode: () => boolean };
   result.cleanup = cleanup;
   result.getSelectedIdx = () => selectedIdx;
   result.getScrollTop = () => invPanel.scrollTop;
+  result.getItemsOnlyMode = () => itemsOnlyMode;
   return result;
 }

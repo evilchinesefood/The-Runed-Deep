@@ -205,10 +205,10 @@ function enchantItem(item: import("../../core/types").Item): import("../../core/
 
 // ── Blacksmith ──────────────────────────────────────────
 
-/** Cost to add or reroll an affix: 100 + 100 per existing affix */
+/** Cost to add or reroll an affix: 200 + 200 per existing affix */
 export function getBlacksmithCost(item: Item): number {
   const count = item.specialEnchantments?.length ?? 0;
-  return 100 + count * 100;
+  return 200 + count * 200;
 }
 
 /** Get affix cap for the blacksmith (same as loot: 5 + ngPlus*2) */
@@ -249,7 +249,7 @@ export function rollBlacksmithOptions(
   const critChance = ngPlus <= 0 ? 0.05 : ngPlus === 1 ? 0.15 : ngPlus === 2 ? 0.25 : 0.35;
   const results: { id: string; critical: boolean }[] = [];
   const used = new Set<string>();
-  for (let i = 0; i < 3 && used.size < pool.length; i++) {
+  for (let i = 0; i < 5 && used.size < pool.length; i++) {
     let a: Affix;
     let tries = 0;
     do { a = pick(); tries++; } while (used.has(a.id) && tries < 50);
@@ -260,15 +260,21 @@ export function rollBlacksmithOptions(
   return results;
 }
 
-/** Apply a chosen affix to an item (add or replace) */
+/** Charge gold upfront for blacksmith work */
+export function blacksmithCharge(state: GameState, itemId: string): GameState | null {
+  const item = findItem(state, itemId);
+  if (!item) return null;
+  const cost = getBlacksmithCost(item);
+  if (state.hero.copper < cost) return null;
+  return spendCopper(state, cost);
+}
+
+/** Apply a chosen affix to an item (add or replace) — gold already charged */
 export function blacksmithApplyAffix(
   state: GameState, itemId: string, affixId: string, critical: boolean, replaceIdx?: number,
 ): GameState {
   const item = findItem(state, itemId);
   if (!item) return addMsg(state, "Item not found.", "system");
-
-  const cost = getBlacksmithCost(item);
-  if (state.hero.copper < cost) return addMsg(state, "Not enough gold.", "system");
 
   const affixStr = critical ? `${affixId}:critical` : affixId;
   let enchants = [...(item.specialEnchantments ?? [])];
@@ -289,7 +295,7 @@ export function blacksmithApplyAffix(
 
   const updated = { ...item, specialEnchantments: enchants, name };
   return addMsg(
-    applyItemUpdate(spendCopper(state, cost), itemId, updated),
+    applyItemUpdate(state, itemId, updated),
     `The blacksmith forges a new enchantment onto your ${item.name}!`,
   );
 }

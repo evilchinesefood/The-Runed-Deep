@@ -1012,12 +1012,14 @@ function switchScreen(state: GameState): void {
       let invSelectedIdx = 0;
       let invScrollTop = 0;
       let invDrawerItemId: string | undefined;
+      let invItemsOnly = false;
       let currentInvScreen: ReturnType<typeof createInventoryScreen> | null = null;
 
       const saveInvPosition = () => {
         if (currentInvScreen) {
           invSelectedIdx = currentInvScreen.getSelectedIdx();
           invScrollTop = currentInvScreen.getScrollTop();
+          invItemsOnly = currentInvScreen.getItemsOnlyMode();
         }
       };
 
@@ -1028,11 +1030,9 @@ function switchScreen(state: GameState): void {
           gameLoop.getState(),
           (action) => {
             saveInvPosition();
-            // Track which item the action is on so we can re-open its drawer
             const actionId = (action as any).itemId;
             gameLoop.handleAction(action);
             if (gameLoop.getState().screen !== "inventory") return;
-            // If item still exists in inventory, keep drawer open for it
             invDrawerItemId = actionId && gameLoop.getState().hero.inventory.some(i => i.id === actionId) ? actionId : undefined;
             root.replaceChildren();
             renderInventory();
@@ -1040,6 +1040,7 @@ function switchScreen(state: GameState): void {
           () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
           invSelectedIdx,
           reopenId,
+          invItemsOnly,
         );
         currentInvScreen = invScreen;
         invCleanup = invScreen.cleanup;
