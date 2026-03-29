@@ -45,9 +45,11 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
   const saveState = pruneSaveState({ ...state, screen: "game" });
   const saveJson = JSON.stringify(saveState);
 
-  // Always attempt cloud sync regardless of local save result
-  const code = getCloudCode(slot);
-  if (code) pushSave(code, saveJson);
+  // Push to ALL cloud-enabled slots (any slot may have the cloud code)
+  for (let s = 1; s <= MAX_SLOTS; s++) {
+    const code = getCloudCode(s);
+    if (code) pushSave(code, saveJson);
+  }
 
   try {
     const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
@@ -73,10 +75,11 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
         localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
         return true;
       } catch {
-        // Still failed — if cloud save is enabled, data is safe there
-        if (code) {
+        // Still failed — if any cloud save is enabled, data is safe there
+        const hasCloud = Array.from({ length: MAX_SLOTS }, (_, i) => getCloudCode(i + 1)).some(Boolean);
+        if (hasCloud) {
           console.warn("[SAVE] Local save failed but cloud save was sent.");
-          return true; // Cloud has the data
+          return true;
         }
       }
     }
