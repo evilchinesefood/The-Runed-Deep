@@ -45,21 +45,18 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
   const saveState = pruneSaveState({ ...state, screen: "game" });
   const saveJson = JSON.stringify(saveState);
 
-  // Push to ALL cloud-enabled slots (any slot may have the cloud code)
+  // Push to ALL cloud-enabled slots — awaited to ensure completion
   for (let s = 1; s <= MAX_SLOTS; s++) {
     const code = getCloudCode(s);
-    if (code) pushSave(code, saveJson);
+    if (code) {
+      pushSave(code, saveJson).then(ok => {
+        if (!ok) console.warn(`[SAVE] Cloud push failed for code ${code}`);
+      });
+    }
   }
 
   try {
     const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
-
-    // Check size before writing — warn on large saves
-    const sizeKB = Math.round(json.length / 1024);
-    if (sizeKB > 4000) {
-      console.warn(`[SAVE] Save size: ${sizeKB}KB — approaching localStorage limit`);
-    }
-
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
     return true;
   } catch (e: any) {
@@ -67,20 +64,14 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
       e?.code === 22 || // Safari
       e?.code === 1014; // Firefox
     if (isQuota) {
-      console.error(`[SAVE] localStorage quota exceeded. Save size too large.`);
-      // Try clearing existing slot and retrying once
       try {
         localStorage.removeItem(SAVE_KEY_PREFIX + slot);
         const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
         localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
         return true;
       } catch {
-        // Still failed — if any cloud save is enabled, data is safe there
         const hasCloud = Array.from({ length: MAX_SLOTS }, (_, i) => getCloudCode(i + 1)).some(Boolean);
-        if (hasCloud) {
-          console.warn("[SAVE] Local save failed but cloud save was sent.");
-          return true;
-        }
+        if (hasCloud) return true;
       }
     }
     console.error("[SAVE] Failed to save game:", e);
