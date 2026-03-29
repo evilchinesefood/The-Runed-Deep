@@ -267,12 +267,8 @@ export function createInventoryScreen(
         );
       }
 
-      if (isMobileView) {
-        row.addEventListener("click", () => openEquippedDrawer(item, slotKey));
-      } else {
-        row.addEventListener("click", () =>
-          onAction({ type: "unequipItem", slot: slotKey }),
-        );
+      row.addEventListener("click", () => openEquippedDrawer(item, slotKey));
+      if (!isMobileView) {
         row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
         row.addEventListener("mouseleave", () => { row.style.background = ""; });
         attachItemTooltip(row, item);
@@ -575,16 +571,14 @@ export function createInventoryScreen(
         }
         actions.appendChild(btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })));
         row.appendChild(actions);
-        row.addEventListener("click", () => { selectedIdx = i; refreshSelection(); });
         attachItemTooltip(row, item, equippedInSlot);
-      } else {
-        // Mobile: tap row to open detail drawer
-        row.addEventListener("click", () => {
-          selectedIdx = i;
-          refreshSelection();
-          openDrawer(item, tpl, equippedInSlot);
-        });
       }
+      // Both desktop and mobile: click row to open drawer
+      row.addEventListener("click", () => {
+        selectedIdx = i;
+        refreshSelection();
+        openDrawer(item, tpl, equippedInSlot);
+      });
 
       invPanel.appendChild(row);
       invRows.push(row);
