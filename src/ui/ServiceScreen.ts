@@ -19,6 +19,7 @@ const SLOT_LABELS: Record<string, string> = {
   weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body',
   cloak: 'Cloak', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet',
   ringLeft: 'Ring L', ringRight: 'Ring R', amulet: 'Amulet',
+  pack: 'Pack', purse: 'Purse',
 };
 
 const BUILDING_NAMES: Record<string, string> = {
@@ -88,7 +89,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
 
   const sageSlots: import('../../core/types').EquipSlot[] = [
     'helmet', 'amulet', 'cloak', 'body', 'weapon', 'shield',
-    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots',
+    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots', 'pack', 'purse',
   ];
 
   panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Enhance equipment by +1. (Limit: +${cap} per item)`));
@@ -194,7 +195,7 @@ function buildBlacksmith(state: GameState, onUpdate: (s: GameState) => void): HT
 
   const slotOrder: import('../../core/types').EquipSlot[] = [
     'helmet', 'amulet', 'cloak', 'body', 'weapon', 'shield',
-    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots',
+    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots', 'pack', 'purse',
   ];
 
   const list = el('div', { maxHeight: 'clamp(200px, 50vh, 400px)', overflowY: 'auto' });

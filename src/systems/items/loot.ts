@@ -67,7 +67,7 @@ export function generateLoot(
       }
     }
 
-    const dropChance = 0.3 + depth * 0.005 + fortuneDropBonus;
+    const dropChance = 0.18 + depth * 0.003 + fortuneDropBonus;
     if (Math.random() > dropChance) return null;
 
     // 20% chance of copper instead of an item

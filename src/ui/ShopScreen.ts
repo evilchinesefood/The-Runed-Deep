@@ -168,18 +168,28 @@ function itemRow(
   return row;
 }
 
-type ShopSort = "cost" | "name";
+type ShopSort = "cost" | "name" | "type" | "preferred";
 
 function sortItems(
   items: Item[],
   mode: ShopSort,
   getPrice: (i: Item) => number,
+  preferredCats?: string[],
 ): Item[] {
   const sorted = [...items];
   if (mode === "cost") {
     sorted.sort((a, b) => getPrice(b) - getPrice(a));
-  } else {
+  } else if (mode === "name") {
     sorted.sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b)));
+  } else if (mode === "type") {
+    sorted.sort((a, b) => a.category.localeCompare(b.category));
+  } else if (mode === "preferred" && preferredCats && preferredCats.length > 0) {
+    sorted.sort((a, b) => {
+      const aP = preferredCats.includes(a.category) ? 0 : 1;
+      const bP = preferredCats.includes(b.category) ? 0 : 1;
+      if (aP !== bP) return aP - bP;
+      return getPrice(b) - getPrice(a);
+    });
   }
   return sorted;
 }
@@ -195,6 +205,7 @@ function buildPanel(
   onSortChange: (mode: ShopSort) => void,
   soldKeys?: Set<string>,
   noStack?: boolean,
+  shopCategories?: string[],
 ): HTMLElement {
   const panel = createPanel(header);
   panel.style.flex = "1";
@@ -205,11 +216,17 @@ function buildPanel(
     display: "flex",
     gap: "4px",
     marginBottom: "4px",
+    flexWrap: "wrap",
   });
-  for (const [mode, label] of [
+  const sortOptions: [ShopSort, string][] = [
     ["cost", "Cost"],
     ["name", "Name"],
-  ] as [ShopSort, string][]) {
+    ["type", "Type"],
+  ];
+  if (shopCategories && shopCategories.length > 0) {
+    sortOptions.push(["preferred", "Preferred"]);
+  }
+  for (const [mode, label] of sortOptions) {
     const active = mode === sortMode;
     const sb = el(
       "div",
@@ -236,7 +253,7 @@ function buildPanel(
   });
   list.setAttribute("data-shop-list", "1");
 
-  const sorted = sortItems(items, sortMode, getPrice);
+  const sorted = sortItems(items, sortMode, getPrice, shopCategories);
 
   if (sorted.length === 0) {
     list.appendChild(
@@ -386,6 +403,7 @@ export function createShopScreen(
       (mode) => { invSort = mode; render(); },
       undefined,
       true,
+      shop?.categories,
     );
     if (itemsOnlyMode) yourItems.style.minWidth = "100%";
     row.appendChild(yourItems);

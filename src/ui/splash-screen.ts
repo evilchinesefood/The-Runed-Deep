@@ -258,16 +258,20 @@ export function createSplashScreen(
             try {
               const state = JSON.parse(remote) as GameState;
               if (state.hero?.name) {
-                // Always overwrite local with cloud version
-                const saveData = { version: 1, timestamp: Date.now(), state };
-                const saveStr = JSON.stringify(saveData);
-                localStorage.removeItem(`rd-save-${info.slot}`);
-                try {
-                  localStorage.setItem(`rd-save-${info.slot}`, saveStr);
-                } catch {
-                  localStorage.clear();
-                  setCloudCode(info.slot, cloudCode);
-                  try { localStorage.setItem(`rd-save-${info.slot}`, saveStr); } catch { /* give up */ }
+                // Only overwrite local if cloud is newer (higher turn count)
+                const localJson = localStorage.getItem(`rd-save-${info.slot}`);
+                const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+                if (state.turn >= localTurn) {
+                  const saveData = { version: 1, timestamp: Date.now(), state };
+                  const saveStr = JSON.stringify(saveData);
+                  localStorage.removeItem(`rd-save-${info.slot}`);
+                  try {
+                    localStorage.setItem(`rd-save-${info.slot}`, saveStr);
+                  } catch {
+                    localStorage.clear();
+                    setCloudCode(info.slot, cloudCode);
+                    try { localStorage.setItem(`rd-save-${info.slot}`, saveStr); } catch { /* give up */ }
+                  }
                 }
               }
             } catch { /* use local */ }
@@ -344,15 +348,16 @@ export function createSplashScreen(
           if (!remote) return;
           const state = JSON.parse(remote) as GameState;
           if (!state.hero?.name) return;
-          // Always overwrite local with cloud version
+          // Only overwrite local if cloud has higher turn count
+          const localJson = localStorage.getItem(`rd-save-${slotNum}`);
+          const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+          if (state.turn < localTurn) return;
           const saveData = { version: 1, timestamp: Date.now(), state };
           const saveStr = JSON.stringify(saveData);
-          // Clear existing slot first to free space, then write
           localStorage.removeItem(`rd-save-${slotNum}`);
           try {
             localStorage.setItem(`rd-save-${slotNum}`, saveStr);
           } catch {
-            // Still full — clear everything and retry
             localStorage.clear();
             try { localStorage.setItem(`rd-save-${slotNum}`, saveStr); } catch { return; }
           }
