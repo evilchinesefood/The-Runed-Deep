@@ -109,7 +109,7 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
 }
 
 /** Convert a cursed item into a blessed one: flip negative enchant to positive */
-function blessItem(item: import("../../core/types").Item): import("../../core/types").Item {
+export function blessItem(item: import("../../core/types").Item): import("../../core/types").Item {
   const newEnch = Math.abs(item.enchantment);
   const tpl = ITEM_BY_ID[item.templateId];
   const baseName = tpl?.name ?? item.name.replace(/\s*[+-]\d+.*$/, '');
@@ -293,7 +293,12 @@ export function blacksmithApplyAffix(
     name = `${name} ${suffix}`;
   }
 
-  const updated = { ...item, specialEnchantments: enchants, name };
+  // Recalculate value: base + enchantment bonus + affix bonus
+  const tpl = ITEM_BY_ID[item.templateId];
+  const baseValue = tpl?.value ?? 50;
+  const newValue = Math.max(1, baseValue + item.enchantment * 20 + enchants.length * 50);
+
+  const updated = { ...item, specialEnchantments: enchants, name, value: newValue };
   return addMsg(
     applyItemUpdate(state, itemId, updated),
     `The blacksmith forges a new enchantment onto your ${item.name}!`,

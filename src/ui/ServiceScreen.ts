@@ -15,6 +15,12 @@ import { AFFIX_BY_ID, formatAffixDesc } from '../data/Enchantments';
 import { getDisplaySprite, getItemGlow, itemNameColor, getDisplayName } from '../systems/inventory/display-name';
 import { buildTooltipContent } from './item-tooltip';
 
+const SLOT_LABELS: Record<string, string> = {
+  weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body',
+  cloak: 'Cloak', gauntlets: 'Hands', belt: 'Belt', boots: 'Feet',
+  ringLeft: 'Ring L', ringRight: 'Ring R', amulet: 'Amulet',
+};
+
 const BUILDING_NAMES: Record<string, string> = {
   temple: 'Temple of Odin',
   sage: 'The Sage',
@@ -80,93 +86,94 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   const panel = createPanel('Enchantment (100g)');
   const cap = getEnchanterCap(state.ngPlusCount ?? 0);
 
-  type Entry = { id: string; item: import('../../core/types').Item; equipped: boolean; atCap: boolean };
-  const items: Entry[] = [];
-  for (const item of state.hero.inventory) {
-    if (ITEM_BY_ID[item.templateId]?.equipSlot && !item.cursed) {
-      items.push({ id: item.id, item, equipped: false, atCap: (item.properties['enchanterUps'] ?? 0) >= cap });
-    }
-  }
-  for (const [, item] of Object.entries(state.hero.equipment)) {
-    if (item && !item.cursed) {
-      items.push({ id: item.id, item, equipped: true, atCap: (item.properties['enchanterUps'] ?? 0) >= cap });
-    }
-  }
-
-  if (items.length === 0) {
-    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'No items to enchant.'));
-    return panel;
-  }
+  const sageSlots: import('../../core/types').EquipSlot[] = [
+    'helmet', 'amulet', 'cloak', 'body', 'weapon', 'shield',
+    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots',
+  ];
 
   panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Enhance equipment by +1. (Limit: +${cap} per item)`));
 
   const list = el('div', { maxHeight: 'clamp(200px, 50vh, 400px)', overflowY: 'auto' });
 
-  for (const entry of items) {
-    const ups = entry.item.properties['enchanterUps'] ?? 0;
-    const canAfford = state.hero.copper >= 100 && !entry.atCap;
+  for (const slotKey of sageSlots) {
+    const item = state.hero.equipment[slotKey];
+    const ups = item ? (item.properties['enchanterUps'] ?? 0) : 0;
+    const atCap = item ? ups >= cap : true;
+    const canAfford = item && !item.cursed && state.hero.copper >= 100 && !atCap;
 
     const row = el('div', {
       display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px',
-      cursor: 'pointer', borderRadius: '4px',
+      cursor: item && !item.cursed ? 'pointer' : 'default', borderRadius: '4px',
     });
-    row.addEventListener('mouseenter', () => { row.style.background = '#1a1a1a'; });
-    row.addEventListener('mouseleave', () => { row.style.background = ''; });
+    if (item && !item.cursed) {
+      row.addEventListener('mouseenter', () => { row.style.background = '#1a1a1a'; });
+      row.addEventListener('mouseleave', () => { row.style.background = ''; });
+    }
 
     // Sprite
     const spriteWrap = el('div', { width: '32px', height: '32px', flexShrink: '0' });
-    spriteWrap.className = getDisplaySprite(entry.item);
-    const glow = getItemGlow(entry.item);
-    if (glow) spriteWrap.style.filter = glow;
+    if (item) {
+      spriteWrap.className = getDisplaySprite(item);
+      const glow = getItemGlow(item);
+      if (glow) spriteWrap.style.filter = glow;
+    }
     row.appendChild(spriteWrap);
 
-    // Name + info
-    const info = el('div', { flex: '1', minWidth: '0' });
-    const nameText = entry.equipped ? `${getDisplayName(entry.item)} (eq)` : getDisplayName(entry.item);
-    info.appendChild(el('div', { color: itemNameColor(entry.item), fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, nameText));
-    info.appendChild(el('div', { color: '#888', fontSize: '11px' }, entry.atCap ? `Enchanted +${ups}/${cap} (MAX)` : `Enchanted +${ups}/${cap}`));
-    row.appendChild(info);
+    // Slot label
+    row.appendChild(el('span', { color: '#666', width: '50px', flexShrink: '0', fontSize: '11px' }, SLOT_LABELS[slotKey] ?? slotKey));
 
-    // Enchant button
-    const enchBtn = createButton(entry.atCap ? 'MAX' : '+1', 'sm');
-    greyBtn(enchBtn, !canAfford);
-    if (canAfford) {
-      enchBtn.addEventListener('click', (e) => { e.stopPropagation(); onUpdate(sageEnchantItem(state, entry.id)); });
-    }
-    row.appendChild(enchBtn);
+    if (item && !item.cursed) {
+      // Name + info
+      const info = el('div', { flex: '1', minWidth: '0' });
+      info.appendChild(el('div', { color: itemNameColor(item), fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, getDisplayName(item)));
+      info.appendChild(el('div', { color: '#888', fontSize: '11px' }, atCap ? `Enchanted +${ups}/${cap} (MAX)` : `Enchanted +${ups}/${cap}`));
+      row.appendChild(info);
 
-    // Click row opens drawer
-    row.addEventListener('click', () => {
-      closeSageDrawer();
-      sageDrawer = el('div', {
-        position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '2000',
-        background: '#1a1a1a', borderTop: '2px solid #555',
-        padding: '12px 16px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
-        maxHeight: '60vh', overflowY: 'auto',
-        boxShadow: '0 -4px 16px rgba(0,0,0,0.8)',
-      });
-      sageDrawer.appendChild(buildTooltipContent(entry.item));
-      sageDrawer.appendChild(el('div', { color: '#c9a84c', fontSize: '14px', marginTop: '6px', textAlign: 'center', fontWeight: 'bold' },
-        `Enchanted +${ups}/${cap} \u00B7 Cost: 100g`));
-
-      const btnRow = el('div', { display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' });
-      if (!entry.atCap) {
-        const drawerEnchBtn = createButton('Enchant +1');
-        drawerEnchBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
-        greyBtn(drawerEnchBtn, state.hero.copper < 100);
-        if (state.hero.copper >= 100) {
-          drawerEnchBtn.addEventListener('click', (e) => { e.stopPropagation(); closeSageDrawer(); onUpdate(sageEnchantItem(state, entry.id)); });
-        }
-        btnRow.appendChild(drawerEnchBtn);
+      // Enchant button
+      const enchBtn = createButton(atCap ? 'MAX' : '+1', 'sm');
+      greyBtn(enchBtn, !canAfford);
+      if (canAfford) {
+        enchBtn.addEventListener('click', (e) => { e.stopPropagation(); onUpdate(sageEnchantItem(state, item.id)); });
       }
-      const closeBtn = createButton('Close');
-      closeBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
-      closeBtn.addEventListener('click', closeSageDrawer);
+      row.appendChild(enchBtn);
+
+      // Click row opens drawer
+      row.addEventListener('click', () => {
+        closeSageDrawer();
+        sageDrawer = el('div', {
+          position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '2000',
+          background: '#1a1a1a', borderTop: '2px solid #555',
+          padding: '12px 16px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+          maxHeight: '60vh', overflowY: 'auto',
+          boxShadow: '0 -4px 16px rgba(0,0,0,0.8)',
+        });
+        sageDrawer.appendChild(buildTooltipContent(item));
+        sageDrawer.appendChild(el('div', { color: '#c9a84c', fontSize: '14px', marginTop: '6px', textAlign: 'center', fontWeight: 'bold' },
+          `Enchanted +${ups}/${cap} \u00B7 Cost: 100g`));
+
+        const btnRow = el('div', { display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' });
+        if (!atCap) {
+          const drawerEnchBtn = createButton('Enchant +1');
+          drawerEnchBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
+          greyBtn(drawerEnchBtn, state.hero.copper < 100);
+          if (state.hero.copper >= 100) {
+            drawerEnchBtn.addEventListener('click', (e) => { e.stopPropagation(); closeSageDrawer(); onUpdate(sageEnchantItem(state, item.id)); });
+          }
+          btnRow.appendChild(drawerEnchBtn);
+        }
+        const closeBtn = createButton('Close');
+        closeBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
+        closeBtn.addEventListener('click', closeSageDrawer);
       btnRow.appendChild(closeBtn);
 
       sageDrawer.appendChild(btnRow);
       document.body.appendChild(sageDrawer);
     });
+    } else if (item && item.cursed) {
+      row.appendChild(el('span', { color: '#f44', flex: '1', fontSize: '13px', fontStyle: 'italic' }, `${getDisplayName(item)} (cursed)`));
+    } else {
+      row.appendChild(el('span', { color: '#333', flex: '1', fontSize: '13px', fontStyle: 'italic' }, '\u2014 empty \u2014'));
+    }
 
     list.appendChild(row);
   }
@@ -183,71 +190,71 @@ function buildBlacksmith(state: GameState, onUpdate: (s: GameState) => void): HT
   const ngPlus = state.ngPlusCount ?? 0;
   const cap = getBlacksmithCap(ngPlus);
 
-  type Entry = { id: string; item: import('../../core/types').Item; equipped: boolean };
-  const items: Entry[] = [];
-  for (const item of state.hero.inventory) {
-    if (ITEM_BY_ID[item.templateId]?.equipSlot && !item.cursed) {
-      items.push({ id: item.id, item, equipped: false });
-    }
-  }
-  for (const [, item] of Object.entries(state.hero.equipment)) {
-    if (item && !item.cursed) {
-      items.push({ id: item.id, item, equipped: true });
-    }
-  }
-
-  if (items.length === 0) {
-    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'No items to work on.'));
-    return panel;
-  }
-
   panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Add or reroll affixes. (Cap: ${cap} per item)`));
+
+  const slotOrder: import('../../core/types').EquipSlot[] = [
+    'helmet', 'amulet', 'cloak', 'body', 'weapon', 'shield',
+    'gauntlets', 'belt', 'ringLeft', 'ringRight', 'boots',
+  ];
 
   const list = el('div', { maxHeight: 'clamp(200px, 50vh, 400px)', overflowY: 'auto' });
 
-  for (const entry of items) {
-    const cost = getBlacksmithCost(entry.item);
-    const affixCount = entry.item.specialEnchantments?.length ?? 0;
-    const atCap = affixCount >= cap;
-    const canAfford = state.hero.copper >= cost;
+  for (const slotKey of slotOrder) {
+    const item = state.hero.equipment[slotKey];
 
     const row = el('div', {
       display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px',
-      cursor: 'pointer', borderRadius: '4px',
+      cursor: item ? 'pointer' : 'default', borderRadius: '4px',
     });
-    row.addEventListener('mouseenter', () => { row.style.background = '#1a1a1a'; });
-    row.addEventListener('mouseleave', () => { row.style.background = ''; });
+    if (item) {
+      row.addEventListener('mouseenter', () => { row.style.background = '#1a1a1a'; });
+      row.addEventListener('mouseleave', () => { row.style.background = ''; });
+    }
 
     // Sprite
     const sprite = el('div', { width: '32px', height: '32px', flexShrink: '0' });
-    sprite.className = getDisplaySprite(entry.item);
-    const glow = getItemGlow(entry.item);
-    if (glow) sprite.style.filter = glow;
+    if (item) {
+      sprite.className = getDisplaySprite(item);
+      const glow = getItemGlow(item);
+      if (glow) sprite.style.filter = glow;
+    }
     row.appendChild(sprite);
 
-    // Name + info
-    const info = el('div', { flex: '1', minWidth: '0' });
-    const nameText = entry.equipped ? `${getDisplayName(entry.item)} (eq)` : getDisplayName(entry.item);
-    info.appendChild(el('div', { color: itemNameColor(entry.item), fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, nameText));
-    info.appendChild(el('div', { color: '#888', fontSize: '11px' }, `${affixCount}/${cap} affixes · ${cost}g`));
-    row.appendChild(info);
+    // Slot label
+    row.appendChild(el('span', { color: '#666', width: '50px', flexShrink: '0', fontSize: '11px' }, SLOT_LABELS[slotKey] ?? slotKey));
 
-    // Buttons
-    if (!atCap) {
-      const addBtn = createButton('Add', 'sm');
-      greyBtn(addBtn, !canAfford);
-      addBtn.addEventListener('click', (e) => { e.stopPropagation(); openBsDrawer(state, entry.item, 'add', ngPlus, cap, onUpdate); });
-      row.appendChild(addBtn);
-    }
-    if (affixCount > 0) {
-      const rerollBtn = createButton('Reroll', 'sm');
-      greyBtn(rerollBtn, !canAfford);
-      rerollBtn.addEventListener('click', (e) => { e.stopPropagation(); openBsDrawer(state, entry.item, 'reroll', ngPlus, cap, onUpdate); });
-      row.appendChild(rerollBtn);
-    }
+    if (item && !item.cursed) {
+      const cost = getBlacksmithCost(item);
+      const affixCount = item.specialEnchantments?.length ?? 0;
+      const atCap = affixCount >= cap;
+      const canAfford = state.hero.copper >= cost;
 
-    // Click row opens drawer
-    row.addEventListener('click', () => openBsDrawer(state, entry.item, atCap ? 'reroll' : 'add', ngPlus, cap, onUpdate));
+      // Name + info
+      const info = el('div', { flex: '1', minWidth: '0' });
+      info.appendChild(el('div', { color: itemNameColor(item), fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, getDisplayName(item)));
+      info.appendChild(el('div', { color: '#888', fontSize: '11px' }, `${affixCount}/${cap} affixes \u00B7 ${cost}g`));
+      row.appendChild(info);
+
+      // Buttons
+      if (!atCap) {
+        const addBtn = createButton('Add', 'sm');
+        greyBtn(addBtn, !canAfford);
+        if (canAfford) addBtn.addEventListener('click', (e) => { e.stopPropagation(); openBsDrawer(state, item, 'add', ngPlus, cap, onUpdate); });
+        row.appendChild(addBtn);
+      }
+      if (affixCount > 0) {
+        const rerollBtn = createButton('Reroll', 'sm');
+        greyBtn(rerollBtn, !canAfford);
+        if (canAfford) rerollBtn.addEventListener('click', (e) => { e.stopPropagation(); openBsDrawer(state, item, 'reroll', ngPlus, cap, onUpdate); });
+        row.appendChild(rerollBtn);
+      }
+
+      row.addEventListener('click', () => openBsDrawer(state, item, atCap ? 'reroll' : 'add', ngPlus, cap, onUpdate));
+    } else if (item && item.cursed) {
+      row.appendChild(el('span', { color: '#f44', flex: '1', fontSize: '13px', fontStyle: 'italic' }, `${getDisplayName(item)} (cursed)`));
+    } else {
+      row.appendChild(el('span', { color: '#333', flex: '1', fontSize: '13px', fontStyle: 'italic' }, '\u2014 empty \u2014'));
+    }
 
     list.appendChild(row);
   }

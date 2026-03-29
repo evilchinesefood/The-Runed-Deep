@@ -232,6 +232,8 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
   tiles[2][15] = stairsUp();
   const playerStart: Vector2 = { x: 15, y: 2 };
 
+  // Corridor: arena south -> stairs down
+  carveV(tiles, 17, 19, 15);
   // Stairs down behind boss (south of arena)
   tiles[19][15] = stairsDown();
 
@@ -245,7 +247,7 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
   }
 
   // 3 ogre minions: 2 in side rooms, 1 in arena
-  const ogre = MONSTER_BY_ID['ogre'];
+  const ogre = MONSTER_BY_ID['huge-ogre'];
   if (ogre) {
     monsters.push(createMonster(ogre, { x: 3, y: 12 }, depth, rand01, difficulty));
     monsters.push(createMonster(ogre, { x: 26, y: 12 }, depth, rand01, difficulty));
@@ -304,6 +306,8 @@ function buildFloor20(dungeonId: string, depth: number, difficulty: Difficulty):
   tiles[2][15] = stairsUp();
   const playerStart: Vector2 = { x: 15, y: 2 };
 
+  // Corridor: arena south -> stairs down
+  carveV(tiles, 17, 19, 15);
   // Stairs down south of arena
   tiles[19][15] = stairsDown();
 
@@ -758,15 +762,16 @@ export function generateBossFloor(
   if (!BOSS_FLOORS.has(floorNum)) return null;
   ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS['mine'];
 
+  // Use floorNum for boss/monster lookups, depth for scaling
   let result: { floor: Floor; playerStart: Vector2 } | null = null;
   switch (floorNum) {
-    case 15: result = buildFloor15(dungeonId, depth, difficulty); break;
-    case 20: result = buildFloor20(dungeonId, depth, difficulty); break;
-    case 25: result = buildFloor25(dungeonId, depth, difficulty); break;
-    case 30: result = buildFloor30(dungeonId, depth, difficulty); break;
-    case 33: result = buildFloor33(dungeonId, depth, difficulty); break;
-    case 36: result = buildFloor36(dungeonId, depth, difficulty); break;
-    case 40: result = buildFloor40(dungeonId, depth, difficulty); break;
+    case 15: result = buildFloor15(dungeonId, floorNum, difficulty); break;
+    case 20: result = buildFloor20(dungeonId, floorNum, difficulty); break;
+    case 25: result = buildFloor25(dungeonId, floorNum, difficulty); break;
+    case 30: result = buildFloor30(dungeonId, floorNum, difficulty); break;
+    case 33: result = buildFloor33(dungeonId, floorNum, difficulty); break;
+    case 36: result = buildFloor36(dungeonId, floorNum, difficulty); break;
+    case 40: result = buildFloor40(dungeonId, floorNum, difficulty); break;
   }
 
   // Add decorative elements to boss floors

@@ -27,6 +27,8 @@ import {
   TOWN_START_RETURN,
 } from "../systems/town/TownMap";
 import { initShopInventory, restockShop } from "../systems/town/Shops";
+import { blessItem as blessItemFn } from "../systems/town/Services";
+import { recomputeDerivedStats } from "../systems/character/derived-stats";
 import { Sound } from "../systems/Sound";
 import {
   trackSecretDoorFound,
@@ -103,6 +105,36 @@ export function processAction(state: GameState, action: GameAction): GameState {
         i.id === action.itemId ? { ...i, markedForSale: !i.markedForSale } : i,
       );
       return { ...state, hero: { ...state.hero, inventory: inv } };
+    }
+    case "removeCurseItem": {
+      const MP_COST = 3;
+      if (state.hero.mp < MP_COST) return addMessage(state, "Not enough MP.", "system");
+      // Search inventory
+      const invIdx = state.hero.inventory.findIndex(i => i.id === action.itemId);
+      if (invIdx !== -1) {
+        const item = state.hero.inventory[invIdx];
+        if (!item.cursed) return addMessage(state, "That item is not cursed.", "system");
+        const blessed = blessItemFn(item);
+        const inv = state.hero.inventory.map((i, j) => j === invIdx ? blessed : i);
+        return addMessage(
+          { ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv, mp: state.hero.mp - MP_COST }) },
+          `The curse is lifted! ${blessed.name} is now blessed.`,
+        );
+      }
+      // Search equipment
+      const eq = state.hero.equipment;
+      const slots = Object.keys(eq) as (keyof typeof eq)[];
+      const slot = slots.find(s => eq[s]?.id === action.itemId);
+      if (slot) {
+        const item = eq[slot]!;
+        if (!item.cursed) return addMessage(state, "That item is not cursed.", "system");
+        const blessed = blessItemFn(item);
+        return addMessage(
+          { ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed }, mp: state.hero.mp - MP_COST }) },
+          `The curse is lifted! ${blessed.name} is now blessed.`,
+        );
+      }
+      return addMessage(state, "Item not found.", "system");
     }
     case "search":
       return processSearch(state);

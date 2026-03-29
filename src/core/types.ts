@@ -305,4 +305,5 @@ export type GameAction =
   | { type: "load" }
   | { type: "newGame" }
   | { type: "toggleMarkForSale"; itemId: string }
+  | { type: "removeCurseItem"; itemId: string }
   | { type: "setScreen"; screen: Screen };

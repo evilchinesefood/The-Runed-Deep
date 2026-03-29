@@ -361,6 +361,10 @@ export function createInventoryScreen(
       btnRow.appendChild(drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })));
     }
     btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
+    // Remove Curse — if item is cursed and player knows the spell
+    if (item.cursed && h.knownSpells.includes('remove-curse') && h.mp >= 3) {
+      btnRow.appendChild(drawerBtn("Uncurse", () => onAction({ type: "removeCurseItem", itemId: item.id })));
+    }
     // Mark/Unmark for sale — dispatched through game loop
     const markLabel = item.markedForSale ? "Unmark" : "Mark";
     const markBtn = createButton(markLabel);
@@ -368,6 +372,7 @@ export function createInventoryScreen(
     if (item.markedForSale) { markBtn.style.color = "#f90"; markBtn.style.borderColor = "#a60"; }
     markBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      closeDrawer();
       onAction({ type: "toggleMarkForSale", itemId: item.id });
     });
     btnRow.appendChild(markBtn);
@@ -397,6 +402,9 @@ export function createInventoryScreen(
       return b;
     };
     btnRow.appendChild(drawerBtn2("Unequip", () => onAction({ type: "unequipItem", slot: slotKey })));
+    if (item.cursed && h.knownSpells.includes('remove-curse') && h.mp >= 3) {
+      btnRow.appendChild(drawerBtn2("Uncurse", () => onAction({ type: "removeCurseItem", itemId: item.id })));
+    }
     btnRow.appendChild(drawerBtn2("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
     document.body.appendChild(drawerEl);

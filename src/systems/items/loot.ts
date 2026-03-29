@@ -79,8 +79,8 @@ export function generateLoot(
   const candidates = getItemsForDepth(depth);
   if (candidates.length === 0) return null;
 
-  // Boss guaranteed unique drop (F30+ or NG+)
-  if (isBoss && (ngPlus >= 1 || depth >= 30)) {
+  // Boss guaranteed unique drop
+  if (isBoss) {
     const uniqueCandidates = candidates.filter(t => t.unique);
     if (uniqueCandidates.length > 0) {
       const template = uniqueCandidates[Math.floor(Math.random() * uniqueCandidates.length)];
@@ -193,9 +193,11 @@ export function createItemFromTemplate(
     }
   }
 
-  // Roll affixes — uniques get guaranteed minimum
-  let specials: string[];
-  if (isUnique) {
+  // Roll affixes — only for equippable items
+  let specials: string[] = [];
+  if (!template.equipSlot) {
+    // Non-equippable items (scrolls, spellbooks, wands, potions, misc) never get affixes
+  } else if (isUnique) {
     // Always roll affixes for uniques, min count scales with NG+
     const minAffixes = ngPlus >= 3 ? 5 : ngPlus === 2 ? 4 : ngPlus === 1 ? 3 : 2;
     specials = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor, cursed);

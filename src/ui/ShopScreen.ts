@@ -33,7 +33,7 @@ function closeShopDrawer(): void {
   if (shopDrawerEl) { shopDrawerEl.remove(); shopDrawerEl = null; }
 }
 
-function openShopDrawer(item: Item, price: number, actionLabel: string, onAction: () => void): void {
+function openShopDrawer(item: Item, price: number, actionLabel: string, onAction: () => void, disabled = false): void {
   closeShopDrawer();
   shopDrawerEl = el("div", {
     position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
@@ -47,7 +47,8 @@ function openShopDrawer(item: Item, price: number, actionLabel: string, onAction
   const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap" });
   const actionBtn = createButton(actionLabel);
   actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-  actionBtn.addEventListener("click", (e) => { e.stopPropagation(); onAction(); });
+  greyBtn(actionBtn, disabled);
+  if (!disabled) actionBtn.addEventListener("click", (e) => { e.stopPropagation(); onAction(); });
   btnRow.appendChild(actionBtn);
   const closeBtn = createButton("Close");
   closeBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
@@ -159,9 +160,9 @@ function itemRow(
   row.appendChild(btn);
   if (!IS_MOBILE_SHOP) attachItemTooltip(row, item);
 
-  // Click row opens drawer
+  // Click row opens drawer (always, even if can't afford — button greyed out)
   row.addEventListener("click", () => {
-    if (!btnDisabled) openShopDrawer(item, priceNum ?? 0, btnText, onClick);
+    openShopDrawer(item, priceNum ?? 0, btnText, onClick, btnDisabled);
   });
 
   return row;

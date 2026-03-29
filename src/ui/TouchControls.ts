@@ -365,8 +365,8 @@ export class TouchControls {
         this.closeMenu();
       }],
       ["Debug", () => {
-        this.menuHandler?.('debug');
         this.closeMenu();
+        this.openDebugMenu();
       }],
       ["Close", () => {
         this.closeMenu();
@@ -424,6 +424,64 @@ export class TouchControls {
   private closeMenu(): void {
     this.menuOpen = false;
     this.menuPanel.style.display = "none";
+  }
+
+  private debugPanel: HTMLElement = document.createElement("div");
+
+  private openDebugMenu(): void {
+    this.debugPanel.replaceChildren();
+    this.debugPanel.style.cssText = `
+      position:fixed;inset:0;z-index:1001;
+      background:rgba(0,0,0,0.85);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:8px;padding:20px;
+    `;
+
+    const title = document.createElement("div");
+    title.textContent = "Debug Tools";
+    title.style.cssText = "color:#c9a84c;font-size:18px;font-weight:bold;font-family:sans-serif;margin-bottom:8px;text-shadow:0 1px 3px rgba(0,0,0,0.8);";
+    this.debugPanel.appendChild(title);
+
+    const btnStyle = `
+      padding:10px 20px;min-width:200px;color:#c9a84c;font-size:14px;font-weight:bold;font-family:sans-serif;
+      text-shadow:0 1px 2px rgba(0,0,0,0.8);text-align:center;
+      background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
+      border:2px solid #555;border-bottom:3px solid #333;border-radius:6px;
+      cursor:pointer;user-select:none;touch-action:none;
+    `;
+
+    const items: [string, string][] = [
+      ["Spell Test Arena", "debug-f9"],
+      ["Jump to Floor", "debug-f10"],
+      ["Teleport to Town", "debug-f11"],
+      ["Reset (Die)", "reset"],
+    ];
+
+    for (const [label, action] of items) {
+      const row = document.createElement("div");
+      row.textContent = label;
+      row.style.cssText = btnStyle;
+      row.addEventListener("touchstart", (e) => {
+        e.preventDefault(); haptic();
+        this.debugPanel.style.display = "none";
+        this.menuHandler?.(action);
+      });
+      row.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        this.debugPanel.style.display = "none";
+        this.menuHandler?.(action);
+      });
+      this.debugPanel.appendChild(row);
+    }
+
+    const closeRow = document.createElement("div");
+    closeRow.textContent = "Close";
+    closeRow.style.cssText = btnStyle;
+    closeRow.addEventListener("touchstart", (e) => { e.preventDefault(); this.debugPanel.style.display = "none"; });
+    closeRow.addEventListener("mousedown", (e) => { e.preventDefault(); this.debugPanel.style.display = "none"; });
+    this.debugPanel.appendChild(closeRow);
+
+    document.body.appendChild(this.debugPanel);
   }
 
   private openLayoutEditor(): void {

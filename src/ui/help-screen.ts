@@ -32,6 +32,7 @@ const KEYS: [string, string][] = [
   // System
   ["F3", "Save game"],
   ["F4", "Toggle sound on/off"],
+  ["F12", "Reset (die and respawn in town)"],
   ["---", ""],
   ["F9", "Debug: Spell test arena"],
   ["F10", "Debug: Jump to any floor"],

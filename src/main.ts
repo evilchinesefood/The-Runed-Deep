@@ -259,6 +259,16 @@ function exploreNext(): void {
 
   const path = findPath(floor, hero, bestTarget);
   if (path.length === 0) {
+    // Stairs exist but unreachable — emergency spawn at hero's feet
+    if (bestTarget && floor.tiles[bestTarget.y]?.[bestTarget.x]?.type === 'stairs-down') {
+      const tile = floor.tiles[hero.y][hero.x];
+      if (tile.walkable) {
+        floor.tiles[hero.y][hero.x] = { ...tile, type: 'stairs-down', sprite: 'stairs-down' };
+        aeMsg("The ground crumbles, revealing a stairway down!");
+        autoExploring = false;
+        return;
+      }
+    }
     aeMsg("Auto-explore stopped — can't find a path.");
     autoExploring = false;
     return;
@@ -531,7 +541,17 @@ touchControls.setSpellCastHandler((spellId) => {
 
 touchControls.setMenuHandler((action) => {
   if (action === 'toggle-sound') Sound.toggle();
-  if (action === 'debug') {
+  if (action === 'reset') {
+    const state = gameLoop.getState();
+    if (state.screen !== 'game') return;
+    gameLoop.setState({ ...state, hero: { ...state.hero, hp: 0 }, screen: 'death' });
+  }
+  if (action === 'debug-f11') {
+    const state = gameLoop.getState();
+    if (state.screen !== 'game') return;
+    gameLoop.setState(teleportToTown(state));
+  }
+  if (action === 'debug-f10') {
     const input = prompt("Floor (1-40, 0=town):");
     if (!input) return;
     const num = parseInt(input);
@@ -558,6 +578,10 @@ touchControls.setMenuHandler((action) => {
       }
       gameLoop.setState({ ...state, currentFloor: targetFloor, currentDungeon: targetDungeon, floors, hero: { ...state.hero, position: pos }, messages: [...state.messages, { text: `Jumped to floor ${num}.`, severity: "system" as const, turn: state.turn }] });
     }
+  }
+  if (action === 'debug-f9') {
+    // Trigger F9 test arena via synthetic event
+    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'F9' }));
   }
 });
 
@@ -735,6 +759,14 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     e.preventDefault();
     const state = gameLoop.getState();
     gameLoop.setState(teleportToTown(state));
+  }
+
+  // F12: Reset — kill player, trigger death respawn flow
+  if (e.code === "F12") {
+    e.preventDefault();
+    const state = gameLoop.getState();
+    if (state.screen !== "game") return;
+    gameLoop.setState({ ...state, hero: { ...state.hero, hp: 0 }, screen: "death" });
   }
 });
 
@@ -1201,24 +1233,23 @@ function switchScreen(state: GameState): void {
       input.setEnabled(false);
       touchControls.hide();
       createDeathScreen(root, gameLoop.getState(), () => {
-        // Respawn in town — keep hero, regenerate death floor, refresh shops
+        // Respawn in town — keep hero, regenerate death/return floor, refresh shops
         const s = gameLoop.getState();
-        const deathFloor = s.currentFloor;
-        const deathDungeon = s.currentDungeon;
-        const deathKey = `${deathDungeon}-${deathFloor}`;
+        // If died in town, regenerate the returnFloor (the dungeon floor to retry)
+        const regenFloor = s.currentDungeon === 'town' ? s.returnFloor : s.currentFloor;
+        const regenDungeon = getDungeonForFloor(regenFloor);
+        const regenKey = `${regenDungeon}-${regenFloor}`;
 
-        // Regenerate town + death floor (skip if died in town somehow)
         const { floor: townFloor } = generateTownMap();
         const floors = { ...s.floors, 'town-0': townFloor };
-        if (deathDungeon !== 'town') {
-          const { floor: newDungeonFloor } = generateFloor(
-            deathDungeon, deathFloor, Date.now(), true, true, s.difficulty,
-          );
-          floors[deathKey] = newDungeonFloor;
-        }
+        // Always regenerate the dungeon floor
+        const { floor: newDungeonFloor } = generateFloor(
+          regenDungeon, regenFloor, Date.now(), true, true, s.difficulty,
+        );
+        floors[regenKey] = newDungeonFloor;
 
         // Refresh shop inventories
-        const deepest = Math.max(s.town.deepestFloor, deathFloor + 1);
+        const deepest = Math.max(s.town.deepestFloor, regenFloor + 1);
         const shopInventories: Record<string, any> = {};
         for (const sid of ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store']) {
           shopInventories[sid] = initShopInventory(sid, deepest);
@@ -1229,7 +1260,7 @@ function switchScreen(state: GameState): void {
           screen: 'game',
           currentDungeon: 'town',
           currentFloor: 0,
-          returnFloor: deathFloor,
+          returnFloor: regenFloor,
           floors,
           hero: {
             ...s.hero,
