@@ -713,11 +713,15 @@ export class TouchControls {
         font-family:sans-serif;text-shadow:0 1px 2px rgba(0,0,0,0.8);
         background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
         border:2px solid ${canCast ? '#555' : '#333'};border-bottom:3px solid #333;border-radius:6px;
-        cursor:${canCast ? 'pointer' : 'default'};user-select:none;touch-action:none;flex-shrink:0;
+        cursor:${canCast ? 'pointer' : 'default'};user-select:none;flex-shrink:0;
       `;
       if (canCast) {
         const cast = () => { this.closeSpellPicker(); this.spellCastHandler?.(id); };
-        row.addEventListener("touchstart", (e) => { e.preventDefault(); haptic(); cast(); });
+        let touchStartY = 0;
+        row.addEventListener("touchstart", (e) => { touchStartY = e.touches[0].clientY; });
+        row.addEventListener("touchend", (e) => {
+          if (Math.abs(e.changedTouches[0].clientY - touchStartY) < 10) { haptic(); cast(); }
+        });
         row.addEventListener("mousedown", (e) => { e.preventDefault(); cast(); });
       }
       list.appendChild(row);

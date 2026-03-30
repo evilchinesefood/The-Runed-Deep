@@ -140,13 +140,38 @@ export function createInventoryScreen(
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
 
-  // ── Title bar with items-only toggle ────────────────────────
-  let itemsOnlyMode = initialItemsOnly;
-  const titleBar = createTitleBar("Equipment", () => { cleanup(); onClose(); });
-  const toggleViewBtn = createButton("Items");
-  toggleViewBtn.style.cssText += "margin-left:auto;margin-right:8px;";
-  titleBar.insertBefore(toggleViewBtn, titleBar.lastChild);
+  // ── Title bar ────────────────────────────────────────────────
+  let activeTab: 'equipment' | 'inventory' = initialItemsOnly ? 'inventory' : 'equipment';
+  const titleBar = createTitleBar("Inventory", () => { cleanup(); onClose(); });
   screen.appendChild(titleBar);
+
+  // ── Tab bar ──────────────────────────────────────────────────
+  const tabBar = el("div", {
+    display: "flex", borderBottom: "2px solid #333", marginBottom: "8px", gap: "0",
+  });
+  const makeTab = (label: string): HTMLElement => el("div", {
+    padding: "8px 20px", fontSize: "13px", fontWeight: "bold",
+    cursor: "pointer", userSelect: "none", transition: "color 0.15s",
+  }, label);
+  const tabEquip = makeTab("Equipment");
+  const tabInv = makeTab("Inventory");
+  tabBar.appendChild(tabEquip);
+  tabBar.appendChild(tabInv);
+  screen.appendChild(tabBar);
+
+  function updateTabs(): void {
+    const eq = activeTab === 'equipment';
+    tabEquip.style.color = eq ? "#c9a84c" : "#555";
+    tabEquip.style.borderBottom = eq ? "2px solid #c9a84c" : "2px solid transparent";
+    tabEquip.style.marginBottom = eq ? "-2px" : "";
+    tabInv.style.color = !eq ? "#c9a84c" : "#555";
+    tabInv.style.borderBottom = !eq ? "2px solid #c9a84c" : "2px solid transparent";
+    tabInv.style.marginBottom = !eq ? "-2px" : "";
+    equipPanel.style.display = eq ? "flex" : "none";
+    invPanel.style.display = !eq ? "block" : "none";
+  }
+  tabEquip.addEventListener("click", () => { activeTab = 'equipment'; updateTabs(); });
+  tabInv.addEventListener("click", () => { activeTab = 'inventory'; updateTabs(); });
 
   // ── Equipment panel: paperdoll (desktop only) + slot list ────
   const isMobile = window.innerWidth <= 480;
@@ -222,8 +247,6 @@ export function createInventoryScreen(
   // ── Inventory panel ────────────────────────────────────────
   const invPanel = createPanel("Inventory");
   invPanel.setAttribute('data-inv-panel', '1');
-  invPanel.style.maxHeight = "clamp(200px, 40vh, 300px)";
-  invPanel.style.overflowY = "auto";
 
   // Sort controls
   type SortMode = "newest" | "oldest" | "type";
@@ -325,28 +348,35 @@ export function createInventoryScreen(
     drawerEl = el("div", {
       position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
       background: "#1a1a1a", borderTop: "2px solid #555",
-      padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-      maxHeight: "60vh", overflowY: "auto",
+      maxHeight: "70vh", display: "flex", flexDirection: "column",
       boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
     });
 
+    // Scrollable content area
+    const scrollArea = el("div", {
+      overflowY: "auto", padding: "12px 16px 8px",
+    });
+
     // Item tooltip content
-    drawerEl.appendChild(buildTooltipContent(item));
+    scrollArea.appendChild(buildTooltipContent(item));
 
     // Compare section
     if (equippedInSlot && tpl?.equipSlot) {
       const divider = el("div", { height: "1px", background: "#444", margin: "8px 0" });
-      drawerEl.appendChild(divider);
+      scrollArea.appendChild(divider);
       const compareLabel = el("div", {
         color: "#886", fontSize: "11px", fontWeight: "bold", marginBottom: "4px",
       }, "CURRENTLY EQUIPPED");
-      drawerEl.appendChild(compareLabel);
-      drawerEl.appendChild(buildTooltipContent(equippedInSlot));
+      scrollArea.appendChild(compareLabel);
+      scrollArea.appendChild(buildTooltipContent(equippedInSlot));
     }
+    drawerEl.appendChild(scrollArea);
 
-    // Action buttons
+    // Action buttons — pinned at bottom, never scrolled away
     const btnRow = el("div", {
-      display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
+      display: "flex", gap: "8px", padding: "8px 16px", paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
+      borderTop: "1px solid #333", background: "#1a1a1a",
     });
     const drawerBtn = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
@@ -387,13 +417,16 @@ export function createInventoryScreen(
     drawerEl = el("div", {
       position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
       background: "#1a1a1a", borderTop: "2px solid #555",
-      padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-      maxHeight: "60vh", overflowY: "auto",
+      maxHeight: "70vh", display: "flex", flexDirection: "column",
       boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
     });
-    drawerEl.appendChild(buildTooltipContent(item));
+    const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+    scrollArea.appendChild(buildTooltipContent(item));
+    drawerEl.appendChild(scrollArea);
     const btnRow = el("div", {
-      display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap",
+      display: "flex", gap: "8px", padding: "8px 16px", paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
+      borderTop: "1px solid #333", background: "#1a1a1a",
     });
     const drawerBtn2 = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
@@ -595,20 +628,8 @@ export function createInventoryScreen(
 
   screen.appendChild(footer);
 
-  // ── Items-only toggle ──────────────────────────────────────
-  toggleViewBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    itemsOnlyMode = !itemsOnlyMode;
-    applyViewMode();
-  });
-
-  function applyViewMode(): void {
-    toggleViewBtn.textContent = itemsOnlyMode ? "Equip" : "Items";
-    equipPanel.style.display = itemsOnlyMode ? "none" : "flex";
-    footer.style.display = itemsOnlyMode ? "none" : "";
-    invPanel.style.maxHeight = itemsOnlyMode ? "none" : "clamp(200px, 40vh, 300px)";
-  }
-  if (initialItemsOnly) applyViewMode();
+  // ── Apply initial tab state ────────────────────────────────
+  updateTabs();
 
   // ── Keyboard handler ───────────────────────────────────────
   const keyHandler = (e: KeyboardEvent) => {
@@ -695,6 +716,6 @@ export function createInventoryScreen(
   result.cleanup = cleanup;
   result.getSelectedIdx = () => selectedIdx;
   result.getScrollTop = () => invPanel.scrollTop;
-  result.getItemsOnlyMode = () => itemsOnlyMode;
+  result.getItemsOnlyMode = () => activeTab === 'inventory';
   return result;
 }
