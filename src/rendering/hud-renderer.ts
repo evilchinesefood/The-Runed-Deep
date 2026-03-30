@@ -77,7 +77,7 @@ export class HudRenderer {
 
       this.messagesEl = el("div", {
         position: "fixed",
-        bottom: "120px",
+        bottom: "100px",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: "50",
