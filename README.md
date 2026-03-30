@@ -4,140 +4,98 @@ A web-based reimagining of the classic 1989 tile-based RPG by Rick Saada. Built 
 
 **Play now:** [dev.jdayers.com/rd](https://dev.jdayers.com/rd/)
 
+---
+
 ## About
 
 The Runed Deep is a turn-based dungeon crawler set in Norse mythology. You descend 40 floors through an abandoned mine, ancient fortress halls, and a castle of old kings to defeat the fire lord Surtur and avenge your destroyed village.
 
-This project is a full rewrite — not a port. The original game ran on Windows 3.1. This version uses DOM-based rendering with DCSS tileset sprites (CC0), runs entirely in the browser, and works on phones.
+This project is a full rewrite — not a port. The original game ran on Windows 3.1. This version runs entirely in the browser and works on phones.
+
+---
 
 ## Features
 
 ### Dungeon
 - **40-floor dungeon** with 3 tilesets (Mine, Fortress, Castle) and 7 hand-designed boss floors
 - **Procedural generation** — 5 room shapes, locked/secret doors, decorative objects
-- **10 trap types** — physical (pit, arrow, dart), elemental with resistance checks (fire, acid, lightning, wind, rune), special (portal, cobweb)
-- **Dungeon decor** — pillars, altars, statues, coffins, fountains, water pools (all walkable, visual only)
-- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored, emergency stairway spawn if map has no exit
-- **Revealed trap indicators** — red tint behind revealed trap sprites for visibility on dark floors
+- **10 trap types** — physical (pit, arrow, dart), elemental (fire, acid, lightning, wind, rune), special (portal, cobweb)
+- **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored
 
 ### Combat & Monsters
 - **68 monster types** across 5 AI behaviors (melee, ranged, caster, thief, summoner)
-- **Elemental melee attacks** — 15+ monsters deal cold, fire, acid, or drain damage on hit (reduced by resistances)
-- **Drain resistance** — Soul Ward amulet and drain resist reduce drain-stat, drain-level, and drain-hp chances
-- **Giants throw projectiles** — Hill Giants, Frost Giants, Fire Giants, and their bosses use ranged boulder/ice attacks (stand and fire, no kiting)
-- **Boss guaranteed drops** — bosses always drop loot, guaranteed unique on floor 30+ or NG+
-- **Unique item drop gating** — ~3% chance from random loot (was uncapped), scales with NG+
-- **Flee-once mechanic** — monsters flee at low HP once, then fight to the death
-- **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, melee touches, and traps
-- **Evasion system** — dodge chance from gear affixes
+- **Elemental attacks** — monsters deal cold, fire, acid, or drain damage reduced by your resistances
+- **Giants throw projectiles** — boulder and ice attacks at range
+- **Flee mechanic** — monsters flee at low HP once, then fight to the death
+- **Elemental resistances** — cold, fire, lightning, acid, drain — checked on spells, monster abilities, and traps
+- **Evasion** — dodge chance from gear affixes
 
 ### Magic
 - **30 spells** split into two learning paths:
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks, clairvoyance
-  - **14 spellbook-only** (found as dungeon loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
-  - **Time Stop** (NG+ only spellbook): freeze all monsters for 10 turns, costs 50 MP
-- **Spell hotkeys** — up to 5 spells bound to number keys for quick-cast
-- **Resist spells** — add +50 elemental resistance via active effects, properly computed and expired
+  - **14 spellbook-only** (found as loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
+  - **Time Stop** (NG+ only): freeze all monsters for 10 turns
+- **Spell hotkeys** — up to 5 spells bound to number keys
+- **Resist spells** — temporarily add +50 elemental resistance
 
 ### Items & Equipment
 - **100+ item templates** — weapons, armor, potions, scrolls, spellbooks, wands, containers
-- **3 material tiers** — regular, elven (green sprites), meteoric steel (dark sprites) with scaling enchantment ranges
+- **3 material tiers** — regular, elven, and meteoric steel with progressively better stats and enchantment ranges
+- **Color-coded rarity** — white (normal), blue (enchanted), purple (blessed), orange (unique), red (cursed)
+- **No identification system** — all items show full stats immediately
 
 #### Affix System
-- **25 scaled affixes** — each has a base value that scales with the item's +N enchantment level
-- **Offensive:** Sharpness (+dmg, weapons only), Might (+STR), Vampiric (% heal), Spell Power, Thorns, Fire/Frost/Storm Touched
-- **Defensive:** Hardened (+AC, armor only), Fortitude (+CON), Magic Resistance, Evasion, Vitality (+HP), Regeneration
-- **Utility:** Grace (+DEX), Brilliance (+INT), Swiftness (% extra actions), Arcane Well (+MP), Arcane Mastery (-MP cost + MP regen), Fortune (+gold/XP/drops)
-- **Cursed-only:** Blood Price (+dmg, lose HP), Soul Drain (+all stats, -max HP), Dark Pact (+spell dmg, +MP cost), Berserk Fury (+melee dmg, +dmg taken), Leech (heal %, -XP)
-- **Weighted drops** — Sharpness and Hardened have 3x drop weight on their respective item types
-- **Weapon/armor context** — weapon-only and armor-only affixes filtered during generation
+- **25 scaled affixes** — each has a base value that scales with the item's enchantment level
+- **Offensive:** Sharpness, Might, Vampiric, Spell Power, Thorns, Fire/Frost/Storm Touched
+- **Defensive:** Hardened, Fortitude, Magic Resistance, Evasion, Vitality, Regeneration
+- **Utility:** Grace, Brilliance, Swiftness, Arcane Well, Arcane Mastery, Fortune
+- **Cursed-only:** Blood Price, Soul Drain, Dark Pact, Berserk Fury, Leech — powerful drawbacks that persist when blessed
 - **Named items** — items with affixes get suffixes: "of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"
-- **Color-coded rarity** — white (normal), blue (enchanted), purple (blessed), orange (legendary/unique), red (cursed)
 
-#### 18 Unique Items
-| Item | Slot | Ability |
-|------|------|---------|
-| Amulet of Fire/Frost/Storm/Soul Ward | Amulet | +75% element resist (10% chance: 99%) |
-| Helm of True Sight | Helmet | Reveals monsters on explored tiles |
-| Helm of Storms | Helmet | +75 lightning resist, +50% lightning damage |
-| Boots of Levitation | Boots | Immune to pit/portal traps |
-| Elemental Keystone | Amulet | +50% all resists, trap + poison immune |
-| Crown of the Ancients | Amulet | +10 all stats, +2 HP/MP regen/turn |
-| Ring of Fortune | Ring | Double gold, +25% item drops |
-| Cloak of Shadows | Cloak | Monsters detect 3 tiles later |
-| Belt of the Titan | Belt | +30 CON, carry capacity doubled |
-| Blooddrinker | Weapon | Heals 30% of all damage dealt |
-| Ring of the Archmage | Ring | +30 INT, spells cost 25% less MP |
-| Aegis of the Fallen | Shield | +10 AC, reflect 30% melee damage |
-| Gauntlets of the Forge | Gauntlets | +20 STR, fire attacks +50% |
-| Demonhide Armor | Body | +15 AC, +50 fire/cold resist, 25% thorns |
-| Worldsplitter | Weapon (2H) | Highest base damage, hits all adjacent enemies |
+#### Unique Items
+- **18 unique items** — named legendaries with special abilities not found on normal gear
+- Includes resist amulets, detection helms, levitation boots, damage-reflection shields, and late-game world-altering items
+- Boss kills guarantee a unique drop
 
-- All uniques always roll +5 minimum enchantment and 2+ random affixes
-- Boss kills guarantee a unique drop (always in NG+, F30+ otherwise)
-- **Enchantment glow system** — blue glow for enchanted, red for cursed, purple for blessed, orange for legendary/unique
-- **Blessed items** — cursed items converted at the Temple (25g): negative enchant flips to positive, +1 affix scaling bonus
-- **Cursed items** generate with negative enchantments, can get cursed-only affixes, freely unequipped
-- **No identification system** — all items show their full stats immediately
-- **Mark for sale** — tag items in inventory, bulk sell at matching shops (Junk Store sells all marked)
-- **Blacksmith** — add or reroll affixes, pick from 3 weighted options, cost scales with affix count
-- **Tab-compare tooltips** — hold Tab while hovering an equippable item to see it side-by-side with your equipped item
-- **Area pickup** — items collected from 3x3 area around player
-- **Pack enchantment** affects carry capacity (+5kg per level)
-- **Stat potions** — permanent +1 to STR/INT/CON/DEX, boosted drop rate from floor 5+
+#### Blessed & Cursed Items
+- **Cursed items** — negative enchantments, freely unequipped, can roll powerful cursed-only affixes
+- **Blessed items** — remove curse at the Temple (25g): enchantment flips positive, cursed-only affixes persist as a bonus
+- **Blacksmith** — add or reroll affixes, pick from weighted options
 
 ### New Game Plus
-- Affix cap scales: 5 / 7 / 9 / unlimited (+2 per NG cycle)
-- Critical affix chance: 0% / 20% / 30% / 40% (doubled effect)
-- Meteoric enchantment range: +8 / +15 / +20 / +25
-- Unique items scale: min enchant +5/+7/+9/+10, min affixes 2/3/4/5
-- Boss guaranteed unique drops in all NG+ cycles
-- Unique drop gate: 3% / 4.5% / 6% / 8% pass-through chance per NG level
+- Completing the game unlocks a harder NG+ cycle with tougher enemies and better loot
+- Affix counts, enchantment ceilings, unique drop rates, and critical affix chances all scale up with each cycle
+- The item stash at The Resting Stag carries over between cycles
 
 ### Cloud Saves
 - **Cross-device sync** — enable cloud saves per slot with a 5-character code
-- **Auto-sync** — every save pushes to server, splash screen auto-pulls latest on load
+- **Auto-sync** — every save pushes to server; splash screen auto-pulls latest on load
 - **Load by code** — enter a code on any device to download a save
-- **Shared dev/prod** — local Vite dev and live server use the same cloud storage
-- **Save pruning** — only current + previous floor saved, town regenerated on entry (~400KB vs ~2.8MB)
-- PHP backend with CORS, IP-based rate limiting, save validation, flat-file storage
 
 ### Town
-- **9 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Blacksmith (add/reroll affixes)
-- **Inn — Personal Item Stash** — store up to 50 items at The Resting Stag; persists through New Game Plus; free to use, no cost
-- **Decorative buildings** — Keep, Silo, Wall Pieces, Huts
-- **Water feature**, sign posts at building entrances
-- **Town layout** built with visual map builder tool, exported as exact tile data
+- **9 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Sage (Enchanter), Magic Shop, Junk Store, Temple, Blacksmith
+- **Personal Item Stash** — store items at The Resting Stag; free, unlimited in/out, persists through NG+
+- **Shops restock** on floor clear and on death
+- **Mark for sale** — tag items in inventory, bulk sell at matching shops
 
 ### UI & Polish
-- **Stone Slab button style** — dark stone gradient, gold text, 3D pressed border
-- **Color-coded messages** — combat (orange), important (green), system (grey), normal (light grey)
-- **Bold white numbers** in all chat messages for readability
 - **Rich item tooltips** — effective damage/accuracy/AC with enchantment breakdown, scaled affix values, unique abilities
-- **Auto-explore feedback** — messages explain every stop reason (monster spotted, low HP, item found, door, trap, fully explored)
-- **Character creation** — name, gender, 4 attributes with hold-to-repeat buttons, difficulty, starting spell
+- **Tab-compare tooltips** — hold Tab while hovering an equippable to compare with your equipped item
+- **Character creation** — name, gender, 4 attributes, difficulty, starting spell
 - **4 difficulty levels** — Easy, Intermediate, Hard, Impossible
 - **18 achievements**
 - **18 synthesized sound effects** via Web Audio API
-- **Responsive layout** — scales to phone, tablet, and desktop
-- **Touch controls** — SVG icon buttons, repositionable D-pad + action bar, resize S/M/L, portrait 2-wide grid
-- **Adjust Controls** — move, resize, show/hide D-pad and action buttons from Commands menu
-- **Landscape mode** — full-screen map with overlay HUD (stats top, messages bottom), compact controls
-- **Orientation change** — full screen rebuild on portrait/landscape switch (debounced resize listener)
-- **Mobile spell picker** — alphabetized spell list, "Hotkeys" button top-right, scrollable
-- **Spell info drawer** — tap spell in Manage Hotkeys for details + description instead of casting
-- **D-pad spell targeting** — D-pad switches to targeting mode for directional spells (gold tint, center = cancel)
-- **Auto-target** — direction spells auto-fire at the nearest monster when only one is visible
-- **Mobile detail drawer** — tap inventory/shop items for tooltip + actions; actions keep drawer open
-- **Shop items view** — toggle between full shop and items-only inventory while shopping
-- **Inventory tabs** — Equipment and Inventory tabs replace the previous toggle button
-- **Commands menu** — access Character, Help, Achievements, Save, Sound, Adjust Controls, Debug from touch
-- **Action button attacks** adjacent monsters on mobile
-- **Portrait viewport** shrinks 25% to prevent overlap with touch controls
-- **Click-to-move** with A* pathfinding
-- **Death respawn** — no game over; die → death summary → Continue → respawn in town, floor regenerated
-- **Shop refresh** — town shops restock on floor clear and on death
+- **Death respawn** — no game over; die → death summary → Continue → respawn in town
+- **Click-to-move** with pathfinding
+- **Touch controls** — SVG icon buttons, repositionable D-pad + action bar, resize S/M/L
+- **Adjust Controls** — move, resize, show/hide D-pad and action buttons from the Commands menu
+- **Landscape mode** — full-screen map with overlay HUD, compact controls
+- **Mobile spell picker** — alphabetized list, hotkey management, D-pad targeting for directional spells
+- **Auto-target** — directional spells auto-fire when only one visible monster is in range
+- **Inventory tabs** — Equipment and Inventory tabs, item drawer with actions on mobile and desktop
 - **Save/load** — 3 slots + auto-save on stairs/death + cloud sync
+
+---
 
 ## Controls
 
@@ -151,8 +109,8 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 | C | Character info |
 | Z | Spell hotkey management |
 | M | Minimap |
-| 1-5 | Quick-cast spell |
-| Tab | Auto-explore (navigates to stairs when done) |
+| 1–5 | Quick-cast spell |
+| Tab | Auto-explore |
 | Tab (hold) | Compare hovered item with equipped |
 | F1 | Help |
 | F2 | Achievements |
@@ -160,19 +118,20 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 | F4 | Toggle sound |
 | Esc | Close screen |
 
+---
+
 ## Tech Stack
 
 - **TypeScript** + **Vite**
-- DOM-based rendering with CSS sprite sheets (no canvas for the game map)
-- 3-layer tile system: floor → ground (items/doors/traps/decor) → entity (hero/monsters)
-- Building sprites rendered as positioned overlays above tiles, below entities
+- DOM-based rendering with CSS sprite sheets (no canvas)
+- 3-layer tile system: floor → ground → entity
 - DCSS tileset (CC0 licensed) with custom recolors for material tiers
 - Single global `GameState` with pure functional reducers
-- Turn-based game loop: player acts → level-ups → tick effects → monsters act → render
 - Web Audio API for sound synthesis
-- localStorage for saves, leaderboard, and achievements
-- PHP cloud save backend with rate limiting
+- localStorage for saves; PHP cloud save backend
 - No frameworks, no runtime dependencies
+
+---
 
 ## Development
 
@@ -182,27 +141,7 @@ npm run dev       # Start dev server
 npm run build     # Build for production (outputs to dist/)
 ```
 
-### Dev Tools
-
-The project includes several browser-based dev tools (gitignored, not deployed):
-
-| Tool | Purpose |
-|------|---------|
-| `items.html` | Item browser — sprite preview, notes, unused sprite detection (checks code refs) |
-| `tiles.html` | Tile browser — original vs DCSS sprite comparison with notes |
-| `buildings.html` | Building sprite browser — auto-detects regions, click to add notes |
-| `monsters.html` | Monster sprite preview |
-| `mapbuilder.html` | Visual town map builder — place tiles/buildings, set entrances, export T,y,x,sprite format |
-
-## Deployment
-
-Build and copy `dist/` to any static web server. The cloud save PHP endpoint needs a PHP-capable server.
-
-```bash
-npx vite build --base /rd/    # For subdirectory deploy
-```
-
-Currently deployed via SFTP to `dev.jdayers.com/rd/`.
+---
 
 ## Project Structure
 
@@ -211,16 +150,16 @@ src/
   core/           Game state, actions, game loop, save/load, cloud sync
   data/           Item templates, monster data, spells, affixes, traps
   systems/
-    combat/       Melee combat, armor, damage, vampiric heal, thorns, evasion
-    character/    Derived stats (AC, resistances, affix bonuses, uniques), leveling
-    dungeon/      Procedural generation, tilesets, boss floors, decorative objects
-    inventory/    Equip, pickup, drop, use items, display names, item glow
-    items/        Loot generation — affixes, scaling, unique items, tier weighting
-    monsters/     AI (5 types), spawning, flee-once mechanic
-    spells/       All 30 spell implementations including resist buffs
-    town/         Town map (exact tile data), shops, services (temple, sage, bank, inn)
+    combat/       Melee combat, damage, vampiric, thorns, evasion
+    character/    Derived stats, leveling
+    dungeon/      Procedural generation, tilesets, boss floors
+    inventory/    Equip, pickup, drop, use items
+    items/        Loot generation — affixes, scaling, unique items
+    monsters/     AI (5 types), spawning
+    spells/       All 30 spell implementations
+    town/         Town map, shops, services
   ui/             All screens — splash, creation, inventory, shop, spells, services, etc.
-  rendering/      Map renderer (3-layer + building overlays + decor), HUD, spell animations
+  rendering/      Map renderer, HUD, spell animations
   input/          Keyboard + touch input, auto-explore, spell targeting
   utils/          FOV, pathfinding, affix helpers
 public/
@@ -228,6 +167,8 @@ public/
   assets/         Sprite sheets (PNG) — tiles, items, monsters, buildings, spells
   css/sprites/    CSS classes for all sprites
 ```
+
+---
 
 ## Credits
 

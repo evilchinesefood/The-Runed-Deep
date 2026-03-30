@@ -376,6 +376,22 @@ export function createSplashScreen(
     }
   }
 
+  // GitHub link
+  const ghLink = document.createElement("a");
+  ghLink.href = "https://github.com/evilchinesefood/The-Runed-Deep";
+  ghLink.target = "_blank";
+  ghLink.rel = "noopener noreferrer";
+  ghLink.textContent = "View on GitHub";
+  ghLink.style.cssText = "display:inline-block;margin-top:32px;padding:8px 18px;border:1px solid #555;color:#aaa;font-size:13px;text-decoration:none;border-radius:3px;transition:border-color 0.2s,color 0.2s;";
+  ghLink.addEventListener("mouseenter", () => { ghLink.style.borderColor = "#888"; ghLink.style.color = "#fff"; });
+  ghLink.addEventListener("mouseleave", () => { ghLink.style.borderColor = "#555"; ghLink.style.color = "#aaa"; });
+  splash.appendChild(ghLink);
+
+  // Copyright
+  const copy = el("div", { fontSize: "12px", color: "#555", marginTop: "12px", marginBottom: "16px", textAlign: "center" },
+    "Copyright \u00A9 2026 John David Ayers \u2022 john.d.ayers@gmail.com \u2022 All rights reserved.");
+  splash.appendChild(copy);
+
   container.appendChild(splash);
   return splash;
 }
