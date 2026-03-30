@@ -388,8 +388,14 @@ export function createSplashScreen(
   splash.appendChild(ghLink);
 
   // Copyright
-  const copy = el("div", { fontSize: "12px", color: "#555", marginTop: "12px", marginBottom: "16px", textAlign: "center" },
-    "Copyright \u00A9 2026 John David Ayers \u2022 john.d.ayers@gmail.com \u2022 All rights reserved.");
+  const copy = el("div", { fontSize: "12px", color: "#555", marginTop: "12px", marginBottom: "16px", textAlign: "center" });
+  const emailLink = document.createElement("a");
+  emailLink.href = "mailto:john.d.ayers@gmail.com";
+  emailLink.textContent = "john.d.ayers@gmail.com";
+  emailLink.style.cssText = "color:#555;text-decoration:none;";
+  emailLink.addEventListener("mouseenter", () => { emailLink.style.color = "#888"; });
+  emailLink.addEventListener("mouseleave", () => { emailLink.style.color = "#555"; });
+  copy.append("Copyright \u00A9 2026 John David Ayers ( ", emailLink, " ). All rights reserved.");
   splash.appendChild(copy);
 
   container.appendChild(splash);

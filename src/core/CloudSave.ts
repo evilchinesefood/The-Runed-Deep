@@ -5,7 +5,7 @@
 
 const API_BASE = location.hostname === 'dev.jdayers.com'
   ? '/rd/api/save.php'
-  : 'https://dev.jdayers.com/rd/api/save.php';
+  : null;
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
 
 async function compress(str: string): Promise<string> {
@@ -48,6 +48,7 @@ export function clearCloudCode(slot: number): void {
 }
 
 export async function pushSave(code: string, saveJson: string): Promise<boolean> {
+  if (!API_BASE) return false;
   try {
     const compressed = await compress(saveJson);
     console.log(`[CLOUD] Compressed ${saveJson.length} -> ${compressed.length} bytes`);
@@ -69,6 +70,7 @@ export async function pushSave(code: string, saveJson: string): Promise<boolean>
 }
 
 export async function pullSave(code: string): Promise<string | null> {
+  if (!API_BASE) return null;
   try {
     const res = await fetch(`${API_BASE}?code=${encodeURIComponent(code)}`);
     if (!res.ok) {
