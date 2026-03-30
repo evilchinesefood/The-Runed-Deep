@@ -100,7 +100,7 @@ export function castSpell(
   )
     Sound.spellHeal();
   else if (
-    ["shield", "resist-cold", "resist-fire", "resist-lightning"].includes(
+    ["shield", "resist-cold", "resist-fire", "resist-lightning", "time-stop"].includes(
       spell.id,
     )
   )
@@ -230,6 +230,17 @@ function resolveSpellEffect(
       const msgs: Message[] = [];
       const hero = removeCurseFromFirst(state.hero, msgs, state.turn);
       return { ...state, hero, messages: [...state.messages, ...msgs] };
+    }
+    case "time-stop": {
+      const newEffects = [
+        ...state.hero.activeEffects.filter(e => e.id !== "time-stop"),
+        { id: "time-stop", name: "Time Stop", turnsRemaining: 10 },
+      ];
+      queueAnimation(buildBuffAnimation(state.hero.position, "#88f"));
+      return {
+        ...addMsg(state, `Time freezes! Monsters cannot act for 10 turns.`, "important"),
+        hero: { ...state.hero, activeEffects: newEffects },
+      };
     }
 
     default:

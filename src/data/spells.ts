@@ -322,6 +322,18 @@ export const SPELLS: SpellDef[] = [
     description: 'Reveals a 10x10 area of the map including traps and secret doors.',
   },
 
+  // ── Control (continued) ─────────────────────────────────
+  {
+    id: 'time-stop',
+    name: 'Time Stop',
+    category: 'control',
+    level: 5,
+    manaCost: 50,
+    targeting: 'none',
+    aoe: false,
+    description: 'Freezes time for 10 turns. All monsters are unable to act. NG+ only.',
+  },
+
   // ── Misc ────────────────────────────────────────────────
   {
     id: 'light',

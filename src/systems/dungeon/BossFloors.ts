@@ -106,7 +106,7 @@ function placeLoot(
   count: number,
   ngPlus: number = 0,
 ): void {
-  const candidates = getItemsForDepth(depth);
+  const candidates = getItemsForDepth(depth, ngPlus);
   if (candidates.length === 0) return;
 
   // Boss guaranteed unique drop (always in NG+, else for bosses F30+)

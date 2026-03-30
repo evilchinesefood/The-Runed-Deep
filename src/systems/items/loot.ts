@@ -76,7 +76,7 @@ export function generateLoot(
     }
   }
 
-  const candidates = getItemsForDepth(depth);
+  const candidates = getItemsForDepth(depth, ngPlus);
   if (candidates.length === 0) return null;
 
   // Boss guaranteed unique drop

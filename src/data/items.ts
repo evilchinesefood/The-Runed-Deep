@@ -35,6 +35,8 @@ export interface ItemTemplate {
   // Unique items
   unique?: boolean;
   uniqueAbility?: string;  // special ability ID
+  // NG+ gating
+  ngMin?: number;          // minimum NG+ cycle required for this item to appear
 }
 
 // ── Weapons ───────────────────────────────────────────────
@@ -251,6 +253,8 @@ const SPELLBOOKS: ItemTemplate[] = [
     weight: 500, value: 500, depthMin: 20, depthMax: 99, spellId: 'fire-ball' },
   { id: 'book-transmogrify', name: 'Spellbook of Transmogrify', category: 'spellbook', sprite: 'spell-book',
     weight: 500, value: 600, depthMin: 25, depthMax: 99, spellId: 'transmogrify-monster' },
+  { id: 'book-time-stop', name: 'Spellbook of Time Stop', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 1500, depthMin: 15, depthMax: 99, spellId: 'time-stop', ngMin: 1 },
 ];
 
 // ── Wands ─────────────────────────────────────────────────
@@ -405,9 +409,10 @@ export const ITEM_BY_ID: Record<string, ItemTemplate> = Object.fromEntries(
  * Get item templates that can appear at the given depth.
  * Tier items are weighted higher on deeper floors.
  */
-export function getItemsForDepth(depth: number): ItemTemplate[] {
+export function getItemsForDepth(depth: number, ngPlus: number = 0): ItemTemplate[] {
   const available = ALL_ITEM_TEMPLATES.filter(
     t => depth >= t.depthMin && depth <= t.depthMax && t.category !== 'currency'
+       && (t.ngMin === undefined || ngPlus >= t.ngMin)
   );
 
   // On deeper floors, duplicate tier items in the pool to increase their chance

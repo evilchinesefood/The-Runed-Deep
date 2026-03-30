@@ -49,9 +49,11 @@ export class GameLoop {
     }
 
     // 4. Process monster turns
-    // Swiftness: chance-based extra action (skip monster turn)
-    const swiftPct = equipAffixTotal(newState.hero.equipment, "swiftness");
-    const skipMonsters = swiftPct > 0 && Math.random() * 100 < swiftPct;
+    // Time Stop: freeze all monsters unconditionally
+    const timeStopped = newState.hero.activeEffects.some(e => e.id === "time-stop" && e.turnsRemaining > 0);
+    // Swiftness: chance-based extra action (skip monster turn) — capped at 75% total
+    const swiftPct = Math.min(75, equipAffixTotal(newState.hero.equipment, "swiftness"));
+    const skipMonsters = timeStopped || (swiftPct > 0 && Math.random() * 100 < swiftPct);
     if (
       newState.screen === "game" &&
       newState.turn > this.state.turn &&
