@@ -11,6 +11,12 @@ import { recomputeDerivedStats } from "../systems/character/derived-stats";
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
 
+const MAX_MESSAGES = 200;
+function pruneMessages(state: GameState): GameState {
+  if (state.messages.length <= MAX_MESSAGES) return state;
+  return { ...state, messages: state.messages.slice(-MAX_MESSAGES) };
+}
+
 export class GameLoop {
   private state: GameState;
   private onRender: RenderCallback;
@@ -26,9 +32,9 @@ export class GameLoop {
   }
 
   setState(state: GameState): void {
-    this.state = state;
-    this.onStateChange?.(state);
-    this.onRender(state);
+    this.state = pruneMessages(state);
+    this.onStateChange?.(this.state);
+    this.onRender(this.state);
   }
 
   setOnStateChange(callback: StateChangeCallback): void {
@@ -71,9 +77,9 @@ export class GameLoop {
     }
 
     // 6. Update state and render
-    this.state = newState;
-    this.onStateChange?.(newState);
-    this.onRender(newState);
+    this.state = pruneMessages(newState);
+    this.onStateChange?.(this.state);
+    this.onRender(this.state);
   }
 
   private tickActiveEffects(state: GameState): GameState {

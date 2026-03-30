@@ -48,7 +48,7 @@ function getTooltip(): HTMLElement {
 
 function nameColor(item: Item): string {
   const tpl = ITEM_BY_ID[item.templateId];
-  if (tpl?.unique || item.specialEnchantments?.length) return '#f90';
+  if (tpl?.unique) return '#f90';
   if (item.cursed) return '#f44';
   if (item.blessed) return '#c8f';
   if (item.enchantment > 0) return '#4af';
