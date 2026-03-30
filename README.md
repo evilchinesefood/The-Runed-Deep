@@ -32,9 +32,10 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Evasion system** — dodge chance from gear affixes
 
 ### Magic
-- **29 spells** split into two learning paths:
-  - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks
+- **30 spells** split into two learning paths:
+  - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks, clairvoyance
   - **14 spellbook-only** (found as dungeon loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
+  - **Time Stop** (NG+ only spellbook): freeze all monsters for 10 turns, costs 50 MP
 - **Spell hotkeys** — up to 5 spells bound to number keys for quick-cast
 - **Resist spells** — add +50 elemental resistance via active effects, properly computed and expired
 
@@ -102,7 +103,8 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - PHP backend with CORS, IP-based rate limiting, save validation, flat-file storage
 
 ### Town
-- **9 service buildings** — Inn, Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Blacksmith (add/reroll affixes)
+- **9 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Sage (Enchanter, +2 cap per NG cycle), Magic Shop, Junk Store, Temple (Heal/Bless), Blacksmith (add/reroll affixes)
+- **Inn — Personal Item Stash** — store up to 50 items at The Resting Stag; persists through New Game Plus; free to use, no cost
 - **Decorative buildings** — Keep, Silo, Wall Pieces, Huts
 - **Water feature**, sign posts at building entrances
 - **Town layout** built with visual map builder tool, exported as exact tile data
@@ -128,6 +130,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Auto-target** — direction spells auto-fire at the nearest monster when only one is visible
 - **Mobile detail drawer** — tap inventory/shop items for tooltip + actions; actions keep drawer open
 - **Shop items view** — toggle between full shop and items-only inventory while shopping
+- **Inventory tabs** — Equipment and Inventory tabs replace the previous toggle button
 - **Commands menu** — access Character, Help, Achievements, Save, Sound, Adjust Controls, Debug from touch
 - **Action button attacks** adjacent monsters on mobile
 - **Portrait viewport** shrinks 25% to prevent overlap with touch controls
@@ -190,7 +193,6 @@ The project includes several browser-based dev tools (gitignored, not deployed):
 | `buildings.html` | Building sprite browser — auto-detects regions, click to add notes |
 | `monsters.html` | Monster sprite preview |
 | `mapbuilder.html` | Visual town map builder — place tiles/buildings, set entrances, export T,y,x,sprite format |
-| `styleguide.html` | Button style guide — 5 theme options with variants |
 
 ## Deployment
 
