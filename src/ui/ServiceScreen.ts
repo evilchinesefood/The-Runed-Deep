@@ -1,19 +1,18 @@
 // ============================================================
-// Service screen — temple, sage, bank, inn
+// Service screen — temple, sage, bank, inn stash
 // ============================================================
 
-import type { GameState } from '../core/types';
+import type { GameState, Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
 import { createScreen, createTitleBar, createPanel, createButton, el } from './Theme';
 import {
   templeHealHP, templeHealMP, templeCurePoison, templeRemoveCurse,
   sageEnchantItem, getEnchanterCap,
   getBlacksmithCost, getBlacksmithCap, rollBlacksmithOptions, blacksmithApplyAffix, blacksmithCharge,
-  innRest,
 } from '../systems/town/Services';
 import { AFFIX_BY_ID, formatAffixDesc } from '../data/Enchantments';
 import { getDisplaySprite, getItemGlow, itemNameColor, getDisplayName } from '../systems/inventory/display-name';
-import { buildTooltipContent } from './item-tooltip';
+import { buildTooltipContent, attachItemTooltip, hideItemTooltip } from './item-tooltip';
 
 const SLOT_LABELS: Record<string, string> = {
   weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body',
@@ -26,7 +25,7 @@ const BUILDING_NAMES: Record<string, string> = {
   temple: 'Temple of Odin',
   sage: 'The Sage',
   bank: 'The Blacksmith',
-  inn: 'The Resting Stag Inn',
+  inn: 'The Resting Stag — Your Stash',
 };
 
 function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
@@ -422,19 +421,122 @@ function showAffixPicker(
   document.body.appendChild(overlay);
 }
 
-function buildInn(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
-  const panel = createPanel('Rest');
+const STASH_LIMIT = 50;
+const isMobileStash = () => window.innerWidth <= 768;
 
-  const alreadyFull = state.hero.hp >= state.hero.maxHp && state.hero.mp >= state.hero.maxMp;
+let stashDrawerEl: HTMLElement | null = null;
+function closeStashDrawer(): void {
+  if (stashDrawerEl) { stashDrawerEl.remove(); stashDrawerEl = null; }
+}
 
-  const btn = createButton('Rest for the Night (free)', 'primary');
-  Object.assign(btn.style, { display: 'block', width: '100%', marginTop: '4px' });
-  greyBtn(btn, alreadyFull);
-  btn.addEventListener('click', () => onUpdate(innRest(state)));
-  panel.appendChild(btn);
+function openStashDrawer(item: Item, actionLabel: string, onAction: () => void, disabled = false): void {
+  closeStashDrawer();
+  stashDrawerEl = el('div', {
+    position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '2000',
+    background: '#1a1a1a', borderTop: '2px solid #555',
+    padding: '12px 16px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+    maxHeight: '60vh', overflowY: 'auto',
+    boxShadow: '0 -4px 16px rgba(0,0,0,0.8)',
+  });
+  stashDrawerEl.appendChild(buildTooltipContent(item));
+  const btnRow = el('div', { display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' });
+  const actionBtn = createButton(actionLabel, 'primary');
+  actionBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
+  if (disabled) {
+    greyBtn(actionBtn, true);
+  } else {
+    actionBtn.addEventListener('click', () => { closeStashDrawer(); onAction(); });
+  }
+  const closeBtn = createButton('Close');
+  closeBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
+  closeBtn.addEventListener('click', closeStashDrawer);
+  btnRow.appendChild(actionBtn);
+  btnRow.appendChild(closeBtn);
+  stashDrawerEl.appendChild(btnRow);
+  document.body.appendChild(stashDrawerEl);
+}
 
-  if (alreadyFull) {
-    panel.appendChild(el('div', { color: '#555', fontSize: '12px', marginTop: '6px', fontStyle: 'italic' }, 'You are already fully rested.'));
+function buildStashRow(
+  item: Item, actionLabel: string, disabled: boolean,
+  onAction: () => void, mobile: boolean,
+): HTMLElement {
+  const row = el('div', {
+    display: 'flex', alignItems: 'center', gap: '6px',
+    padding: '4px 6px', borderBottom: '1px solid #222',
+    cursor: mobile ? 'pointer' : 'default', minHeight: '36px',
+  });
+
+  const glow = getItemGlow(item);
+  const sprClass = getDisplaySprite(item);
+  if (sprClass) {
+    const img = el('div', { width: '32px', height: '32px', flexShrink: '0', position: 'relative' });
+    const spr = document.createElement('div');
+    spr.style.cssText = 'width:32px;height:32px;position:absolute;top:0;left:0;';
+    spr.className = sprClass;
+    if (glow) spr.style.filter = glow;
+    img.appendChild(spr);
+    row.appendChild(img);
+  }
+
+  const nameEl = el('span', {
+    flex: '1', color: itemNameColor(item), fontSize: '13px',
+    ...(glow ? { textShadow: `0 0 6px ${glow}` } : {}),
+  }, getDisplayName(item));
+  row.appendChild(nameEl);
+
+  if (mobile) {
+    row.addEventListener('click', () => openStashDrawer(item, actionLabel, onAction, disabled));
+  } else {
+    const btn = createButton(actionLabel, 'sm');
+    greyBtn(btn, disabled);
+    if (!disabled) btn.addEventListener('click', () => { hideItemTooltip(); onAction(); });
+    attachItemTooltip(row, item);
+    row.appendChild(btn);
+  }
+
+  return row;
+}
+
+function buildStash(state: GameState, onUpdate: (s: GameState) => void): HTMLElement {
+  const panel = createPanel('');
+  const mobile = isMobileStash();
+  const stash = state.stash ?? [];
+  const stashFull = stash.length >= STASH_LIMIT;
+
+  panel.appendChild(el('div', {
+    color: '#c9a84c', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px',
+  }, `Stash — ${stash.length} / ${STASH_LIMIT} items stored`));
+
+  // Stored items
+  panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }, 'Stored'));
+  if (stash.length === 0) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic', marginBottom: '8px' }, 'Nothing stored here yet.'));
+  } else {
+    for (const item of stash) {
+      panel.appendChild(buildStashRow(item, 'Retrieve', false, () => {
+        const newStash = stash.filter(i => i.id !== item.id);
+        onUpdate({ ...state, stash: newStash, hero: { ...state.hero, inventory: [...state.hero.inventory, item] } });
+      }, mobile));
+    }
+  }
+
+  panel.appendChild(el('div', { borderTop: '1px solid #333', margin: '10px 0' }));
+
+  // Inventory
+  panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }, 'Inventory'));
+  if (state.hero.inventory.length === 0) {
+    panel.appendChild(el('div', { color: '#555', fontSize: '12px', fontStyle: 'italic' }, 'Your inventory is empty.'));
+  } else {
+    for (const item of state.hero.inventory) {
+      panel.appendChild(buildStashRow(item, 'Store', stashFull, () => {
+        const newInv = state.hero.inventory.filter(i => i.id !== item.id);
+        onUpdate({ ...state, stash: [...stash, item], hero: { ...state.hero, inventory: newInv } });
+      }, mobile));
+    }
+  }
+
+  if (stashFull) {
+    panel.appendChild(el('div', { color: '#f84', fontSize: '11px', marginTop: '6px', fontStyle: 'italic' }, `Stash is full (${STASH_LIMIT} items max).`));
   }
 
   return panel;
@@ -457,9 +559,11 @@ export function createServiceScreen(
     const bar = createTitleBar(title, onClose);
     screen.appendChild(bar);
 
-    const copper = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
-    copper.textContent = `Gold: ${state.hero.copper}`;
-    screen.appendChild(copper);
+    if (buildingId !== 'inn') {
+      const copper = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
+      copper.textContent = `Gold: ${state.hero.copper}`;
+      screen.appendChild(copper);
+    }
 
     function handleUpdate(next: GameState): void {
       state = next;
@@ -472,7 +576,7 @@ export function createServiceScreen(
       case 'temple':  content = buildTemple(state, handleUpdate); break;
       case 'sage':    content = buildSage(state, handleUpdate); break;
       case 'bank':    content = buildBlacksmith(state, handleUpdate); break;
-      case 'inn':     content = buildInn(state, handleUpdate); break;
+      case 'inn':     content = buildStash(state, handleUpdate); break;
       default:
         content = createPanel('Unknown Service');
         content.appendChild(el('div', { color: '#888' }, 'No services available here.'));
@@ -487,7 +591,7 @@ export function createServiceScreen(
   const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
   document.addEventListener('keydown', onKey);
 
-  screen.cleanup = () => { document.removeEventListener('keydown', onKey); closeSageDrawer(); closeBsDrawer(); };
+  screen.cleanup = () => { document.removeEventListener('keydown', onKey); closeSageDrawer(); closeBsDrawer(); closeStashDrawer(); };
 
   return screen;
 }

@@ -685,6 +685,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       returnFloor: 0,
       activeBuildingId: "",
       ngPlusCount: 0,
+      stash: [],
     };
     gameLoop.setState(testState);
   }

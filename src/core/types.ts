@@ -275,6 +275,7 @@ export interface GameState {
   returnFloor: number;
   activeBuildingId: string;
   ngPlusCount: number;
+  stash: Item[];
 }
 
 // ============================================================

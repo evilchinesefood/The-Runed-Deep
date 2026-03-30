@@ -329,20 +329,3 @@ function applyItemUpdate(state: GameState, itemId: string, updated: Item): GameS
   return state;
 }
 
-// ── Inn (free) ──────────────────────────────────────────
-
-export function innRest(state: GameState): GameState {
-  if (state.hero.hp >= state.hero.maxHp && state.hero.mp >= state.hero.maxMp) {
-    return addMsg(state, "You are already fully rested.", "system");
-  }
-
-  const rested = recomputeDerivedStats({
-    ...state.hero,
-    hp: state.hero.maxHp,
-    mp: state.hero.maxMp,
-  });
-  return addMsg(
-    { ...state, hero: rested },
-    "You sleep soundly and wake fully restored.",
-  );
-}

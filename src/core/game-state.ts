@@ -98,5 +98,6 @@ export function createInitialGameState(difficulty: Difficulty = 'easy'): GameSta
     returnFloor: 0,
     activeBuildingId: '',
     ngPlusCount: 0,
+    stash: [],
   };
 }

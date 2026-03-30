@@ -125,6 +125,7 @@ export function loadGame(slot: number = 1): GameState | null {
     if (!state.hero.spellHotkeys) state.hero.spellHotkeys = [];
     state.town.deepestFloor ??= 0;
     state.ngPlusCount ??= 0;
+    state.stash ??= [];
     // Add decals array and monster armor to any floors missing them
     for (const key of Object.keys(state.floors)) {
       if (!state.floors[key].decals) state.floors[key].decals = [];
