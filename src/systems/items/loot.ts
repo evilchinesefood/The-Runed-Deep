@@ -90,7 +90,8 @@ export function generateLoot(
 
   // Unique drop gate: if a unique is selected, 97% chance to re-roll as non-unique
   // NG+ increases unique chance: 3% / 4.5% / 6% / 8%
-  const uniqueChance = 0.03 + ngPlus * 0.015;
+  // NG+ increases unique chance: 1.5% / 2.5% / 3.5% / 5%
+  const uniqueChance = 0.015 + ngPlus * 0.01;
   let template = candidates[Math.floor(Math.random() * candidates.length)];
   if (template.unique && Math.random() > uniqueChance) {
     const nonUnique = candidates.filter(t => !t.unique);
@@ -133,8 +134,8 @@ export function createItemFromTemplate(
         cursed = true;
       } else if (enchantRoll < 0.15 + depth * 0.015) {
         const meteoricMax = [8, 15, 20, 25][Math.min(ngPlus, 3)] ?? 25;
-        const baseMax = tier === "meteoric" ? meteoricMax : tier === "elven" ? (4 + ngPlus * 2) : 3;
-        const depthBonus = Math.floor(depth / 15);
+        const baseMax = tier === "meteoric" ? meteoricMax : tier === "elven" ? (5 + ngPlus * 2) : (4 + ngPlus * 2);
+        const depthBonus = Math.floor(depth / 8);
         const maxEnchant = baseMax + depthBonus;
         enchantment = Math.floor(Math.random() * maxEnchant) + 1;
       }
@@ -199,7 +200,7 @@ export function createItemFromTemplate(
     // Non-equippable items (scrolls, spellbooks, wands, potions, misc) never get affixes
   } else if (isUnique) {
     // Always roll affixes for uniques, min count scales with NG+
-    const minAffixes = ngPlus >= 3 ? 5 : ngPlus === 2 ? 4 : ngPlus === 1 ? 3 : 2;
+    const minAffixes = ngPlus >= 3 ? 4 : ngPlus === 2 ? 3 : ngPlus === 1 ? 2 : 1;
     specials = rollSpecialEnchantments(depth, true, ngPlus, isWeapon, isArmor, cursed);
     // Ensure minimum count — capped at 20 attempts to prevent infinite loop
     let attempts = 0;
@@ -215,7 +216,7 @@ export function createItemFromTemplate(
       }
     }
   } else {
-    specials = rollSpecialEnchantments(depth, isTier, ngPlus, isWeapon, isArmor, cursed);
+    specials = rollSpecialEnchantments(depth, isTier, ngPlus, isWeapon, isArmor, cursed, enchantment);
   }
 
   if (specials.length > 0) {

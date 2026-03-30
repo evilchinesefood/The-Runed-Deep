@@ -180,20 +180,27 @@ export function getEquipAffixTotal2(equipment: Record<string, any>, affixId: str
 export function rollSpecialEnchantments(
   depth: number, isTierItem: boolean, ngPlus: number = 0,
   isWeapon: boolean = false, isArmor: boolean = false,
-  isCursed: boolean = false,
+  isCursed: boolean = false, enchantment: number = 0,
 ): string[] {
   const ngBonus = ngPlus * 0.15;
   let chance: number;
+  let baseCount: number;
   if (isTierItem) {
-    chance = Math.min(0.60, 0.15 + Math.max(0, depth - 15) * 0.01 + ngBonus);
+    // Tier items (elven/meteoric): high affix chance, multiple affixes
+    chance = Math.min(0.70, 0.25 + Math.max(0, depth - 10) * 0.01 + ngBonus);
+    baseCount = 2;
+  } else if (enchantment > 0) {
+    // Enchanted regular items: almost always get 1 affix
+    chance = Math.min(0.85, 0.65 + depth * 0.005 + ngBonus);
+    baseCount = 1;
   } else {
-    chance = depth >= 15 ? Math.min(0.35, 0.02 + (depth - 15) * 0.005 + ngBonus) : ngBonus > 0 ? Math.min(0.20, ngBonus) : 0;
+    // Unenchanted regular items: rare affix at deep floors only
+    chance = depth >= 25 ? Math.min(0.20, 0.02 + (depth - 25) * 0.01 + ngBonus) : ngBonus > 0 ? Math.min(0.10, ngBonus) : 0;
+    baseCount = 1;
   }
   if (Math.random() > chance) return [];
 
-  // Count: base 2, +1 per 10 floors, +1 per NG+
-  // Cap: 5 + ngPlus * 2 (no max in NG+)
-  const baseCount = 2;
+  // Count: scales with depth and NG+, capped at 5 + ngPlus*2
   const bonusCount = Math.floor(depth / 10);
   const maxCount = 5 + ngPlus * 2;
   const count = Math.min(maxCount, baseCount + bonusCount + ngPlus);
