@@ -297,7 +297,7 @@ function buildFloor20(dungeonId: string, depth: number, difficulty: Difficulty):
 
   // Right side room 5x6 at (23, 9)
   carveRect(tiles, 23, 9, 5, 6);
-  carveH(tiles, 20, 23, 12);
+  carveH(tiles, 19, 23, 12);
 
   // Entry -> arena corridor
   carveV(tiles, 4, 8, 15);

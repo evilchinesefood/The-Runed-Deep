@@ -26,7 +26,7 @@ import {
 import { attachItemTooltip, hideItemTooltip, buildTooltipContent, setTooltipKnownSpells } from "./item-tooltip";
 import { ITEM_BY_ID } from "../data/items";
 
-const IS_MOBILE_SHOP = window.innerWidth <= 768;
+const isMobileShop = () => window.innerWidth <= 768;
 let shopDrawerEl: HTMLElement | null = null;
 
 function closeShopDrawer(): void {
@@ -158,7 +158,7 @@ function itemRow(
     btn.addEventListener("click", (e) => { e.stopPropagation(); hideItemTooltip(); onClick(); });
   }
   row.appendChild(btn);
-  if (!IS_MOBILE_SHOP) attachItemTooltip(row, item);
+  if (!isMobileShop()) attachItemTooltip(row, item);
 
   // Click row opens drawer (always, even if can't afford — button greyed out)
   row.addEventListener("click", () => {

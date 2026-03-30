@@ -150,6 +150,8 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     const result = teleportHero(state, hero, messages);
     hero = result.hero;
     state = result.state;
+    hero = removeFromInventory(hero, idx);
+    return { ...state, hero, messages: [...state.messages, ...messages], turn: state.turn + 1 };
   } else if (item.templateId === "scroll-rune-of-return") {
     if (state.currentDungeon === "town") {
       hero = removeFromInventory(hero, idx);

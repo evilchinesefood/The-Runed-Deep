@@ -575,7 +575,7 @@ export function monsterAttacksPlayer(
   }
 
   // Process on-hit abilities (poison, drain, steal, elemental touch) — skip if monster died to Thorns
-  if (!monsterKilledByThorns && monster.abilities.length > 0 && newHp > 0) {
+  if (!monsterKilledByThorns && monster.abilities.length > 0 && result.hero.hp > 0) {
     result = processMonsterAbility(result, monster);
   }
 

@@ -104,7 +104,7 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 12:
   'heal-medium-wounds',
   // Level 13:
-  'detect-objects',
+  'clairvoyance',
   // Level 14:
   'rune-of-return',
   // Level 15:
@@ -112,7 +112,7 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 16:
   'healing',
   // Spellbook-only (NOT auto-learned):
-  // levitation, clairvoyance, lightning-bolt, resist-fire, resist-cold,
+  // levitation, lightning-bolt, resist-fire, resist-cold,
   // resist-lightning, fire-bolt, sleep-monster, cold-ball, slow-monster,
   // teleport, remove-curse, ball-lightning, fire-ball, transmogrify-monster
 ];
@@ -162,7 +162,7 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     hero.mp = Math.min(hero.mp + mpGain, newMaxMp);
 
     // Recompute all derived stats (AC, resistances, etc.) using full stat system
-    hero = { ...recomputeDerivedStats(hero), maxHp: hero.maxHp, maxMp: hero.maxMp, hp: hero.hp, mp: hero.mp };
+    hero = { ...recomputeDerivedStats(hero), hp: hero.hp, mp: hero.mp };
 
     Sound.levelUp();
     trackLevelUp(hero.level);

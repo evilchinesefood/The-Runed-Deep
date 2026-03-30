@@ -119,6 +119,7 @@ export function processAction(state: GameState, action: GameAction): GameState {
         return addMessage(
           { ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv, mp: state.hero.mp - MP_COST }) },
           `The curse is lifted! ${blessed.name} is now blessed.`,
+          "important",
         );
       }
       // Search equipment
@@ -132,6 +133,7 @@ export function processAction(state: GameState, action: GameAction): GameState {
         return addMessage(
           { ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed }, mp: state.hero.mp - MP_COST }) },
           `The curse is lifted! ${blessed.name} is now blessed.`,
+          "important",
         );
       }
       return addMessage(state, "Item not found.", "system");
