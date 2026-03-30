@@ -6,6 +6,7 @@ import type {
   Direction,
 } from "../../core/types";
 import { recomputeDerivedStats } from "../character/derived-stats";
+import { getDifficultyConfig } from "../../data/difficulty";
 import { ITEM_BY_ID } from "../../data/items";
 import { castSpell } from "../spells/casting";
 import { teleportToTown } from "../../core/actions";
@@ -55,7 +56,8 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
   if (tid.startsWith("potion-heal")) {
     const pct = item.properties["healPct"] ?? 0;
     const flat = item.properties["healAmount"] ?? 0;
-    const heal = Math.max(flat, Math.floor(hero.maxHp * pct));
+    const mult = getDifficultyConfig(state.difficulty).healingMult;
+    const heal = Math.max(Math.round(flat * mult), Math.floor(hero.maxHp * pct * mult));
     const oldHp = hero.hp;
     hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
     const healed = hero.hp - oldHp;

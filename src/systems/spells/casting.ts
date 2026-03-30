@@ -7,6 +7,7 @@ import type {
   Direction,
 } from "../../core/types";
 import { SPELL_BY_ID, type SpellDef } from "../../data/spells";
+import { getDifficultyConfig } from "../../data/difficulty";
 import { Sound } from "../Sound";
 import { getDirectionVector, teleportToTown } from "../../core/actions";
 import {
@@ -588,7 +589,8 @@ function resolveHeal(
   minHeal: number,
 ): GameState {
   const hero = state.hero;
-  const healAmount = Math.max(minHeal, Math.floor(hero.maxHp * pct));
+  const mult = getDifficultyConfig(state.difficulty).healingMult;
+  const healAmount = Math.max(Math.round(minHeal * mult), Math.floor(hero.maxHp * pct * mult));
   const newHp = Math.min(hero.hp + healAmount, hero.maxHp);
   const healed = newHp - hero.hp;
 

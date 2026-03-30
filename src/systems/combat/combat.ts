@@ -13,6 +13,7 @@ import { Sound } from "../Sound";
 import { trackMonsterKill, trackFloorDamage } from "../Achievements";
 import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
+import { getDifficultyConfig } from "../../data/difficulty";
 import { MONSTER_BY_ID } from "../../data/monsters";
 import { getDisplayName } from "../inventory/display-name";
 
@@ -231,7 +232,8 @@ export function playerAttacksMonster(
   // Vampiric — scaled heal % from affix
   if (hasEnchant(state.hero.equipment, "vampiric") && damage > 0) {
     const pct = equipAffixTotal(state.hero.equipment, "vampiric") / 100;
-    const heal = Math.max(1, Math.floor(damage * pct));
+    const healMult = getDifficultyConfig(state.difficulty).healingMult;
+    const heal = Math.max(1, Math.floor(damage * pct * healMult));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
     state = { ...state, hero: { ...state.hero, hp: healedHp } };
     messages.push({

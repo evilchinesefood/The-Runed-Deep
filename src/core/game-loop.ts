@@ -4,6 +4,7 @@ import { processAllMonsterTurns } from "../systems/monsters/ai";
 import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
 import { hasEnchant, equipAffixTotal, equipAffixTotal2 } from "../utils/Enchants";
+import { getDifficultyConfig } from "../data/difficulty";
 import { ITEM_BY_ID } from "../data/items";
 import { recomputeDerivedStats } from "../systems/character/derived-stats";
 
@@ -82,7 +83,8 @@ export class GameLoop {
     // ── Regeneration affix (scaled) ─────────────────────────
     const regenHp = equipAffixTotal(hero.equipment, "regeneration");
     if (regenHp > 0 && state.turn % 2 === 0 && hero.hp < hero.maxHp) {
-      const heal = Math.max(1, Math.round(regenHp));
+      const healMult = getDifficultyConfig(state.difficulty).healingMult;
+      const heal = Math.max(1, Math.round(regenHp * healMult));
       hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
     }
 
