@@ -238,7 +238,8 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   // Bump into closed door → open it
   if (tile.type === "door-closed") {
-    const newTiles = floor.tiles.map((row) => [...row]);
+    const newTiles = [...floor.tiles];
+    newTiles[newPos.y] = [...newTiles[newPos.y]];
     newTiles[newPos.y][newPos.x] = {
       type: "door-open",
       sprite: "door-open",
@@ -265,7 +266,8 @@ function processMove(state: GameState, direction: Direction): GameState {
   if (tile.type === "door-locked") {
     const strCheck = Math.random() * 100 < state.hero.attributes.strength;
     if (strCheck) {
-      const newTiles = floor.tiles.map((row) => [...row]);
+      const newTiles = [...floor.tiles];
+      newTiles[newPos.y] = [...newTiles[newPos.y]];
       newTiles[newPos.y][newPos.x] = {
         type: "door-open",
         sprite: "door-open",
@@ -727,7 +729,8 @@ function triggerTrap(
   Sound.trap();
 
   // Reveal the trap
-  const newTiles = floor.tiles.map((row) => [...row]);
+  const newTiles = [...floor.tiles];
+  newTiles[pos.y] = [...newTiles[pos.y]];
   newTiles[pos.y][pos.x] = {
     ...newTiles[pos.y][pos.x],
     trapRevealed: true,
@@ -934,7 +937,8 @@ function processSearch(state: GameState): GameState {
   let found = 0;
 
   // Check all 8 adjacent tiles + current tile for secret doors and hidden traps
-  const newTiles = floor.tiles.map((row) => [...row]);
+  const newTiles = [...floor.tiles];
+  const clonedRows = new Set<number>();
   for (let dy = -1; dy <= 1; dy++) {
     for (let dx = -1; dx <= 1; dx++) {
       const x = pos.x + dx;
@@ -945,6 +949,7 @@ function processSearch(state: GameState): GameState {
 
       // Reveal secret doors
       if (tile.type === "door-secret") {
+        if (!clonedRows.has(y)) { newTiles[y] = [...newTiles[y]]; clonedRows.add(y); }
         newTiles[y][x] = {
           type: "door-closed",
           sprite: "door-closed",
@@ -974,6 +979,7 @@ function processSearch(state: GameState): GameState {
           rune: "rune-trap",
           cobweb: "cobweb-trap",
         };
+        if (!clonedRows.has(y)) { newTiles[y] = [...newTiles[y]]; clonedRows.add(y); }
         newTiles[y][x] = {
           ...tile,
           trapRevealed: true,

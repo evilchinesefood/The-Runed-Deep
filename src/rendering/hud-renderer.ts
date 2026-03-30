@@ -36,6 +36,9 @@ export class HudRenderer {
   private spellBarEl: HTMLElement;
   private onSpellClick: SpellClickHandler | null = null;
   private landscape: boolean;
+  private _prevStats = '';
+  private _prevMsgCount = 0;
+  private _prevSpellKey = '';
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -91,6 +94,9 @@ export class HudRenderer {
         fontSize: "10px",
         pointerEvents: "none",
       });
+      this.messagesEl.setAttribute('role', 'log');
+      this.messagesEl.setAttribute('aria-live', 'polite');
+      this.messagesEl.setAttribute('aria-label', 'Game messages');
 
       document.body.appendChild(this.statsEl);
       document.body.appendChild(this.messagesEl);
@@ -116,6 +122,9 @@ export class HudRenderer {
         border: "1px solid #333",
         padding: "4px 6px",
       });
+      this.messagesEl.setAttribute('role', 'log');
+      this.messagesEl.setAttribute('aria-live', 'polite');
+      this.messagesEl.setAttribute('aria-label', 'Game messages');
 
       this.statsEl = el("div", {
         width: "clamp(140px, 30%, 220px)",
@@ -159,6 +168,10 @@ export class HudRenderer {
     const mpPct = h.maxMp > 0 ? Math.round((h.mp / h.maxMp) * 100) : 0;
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
 
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${state.currentFloor}|${state.turn}|${h.activeEffects.map(e => e.id + e.turnsRemaining).join(',')}`;
+    if (key === this._prevStats) return;
+    this._prevStats = key;
+
     this.statsEl.replaceChildren();
 
     // All in one row: Name Lv | HP bar | MP bar | Floor | Turn
@@ -198,6 +211,10 @@ export class HudRenderer {
     const mpPct = h.maxMp > 0 ? Math.round((h.mp / h.maxMp) * 100) : 0;
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
     const mpColor = "#48f";
+
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${h.xp}|${h.armorValue}|${state.currentFloor}|${state.currentDungeon}|${state.turn}|${state.difficulty}|${h.activeEffects.map(e => e.id + e.turnsRemaining).join(',')}`;
+    if (key === this._prevStats) return;
+    this._prevStats = key;
 
     this.statsEl.replaceChildren();
 
@@ -260,9 +277,13 @@ export class HudRenderer {
   }
 
   private renderSpellBar(state: GameState): void {
-    this.spellBarEl.replaceChildren();
     const hotkeys = state.hero.spellHotkeys;
     const mp = state.hero.mp;
+    const spellKey = `${hotkeys.join(',')}|${mp}`;
+    if (spellKey === this._prevSpellKey) return;
+    this._prevSpellKey = spellKey;
+
+    this.spellBarEl.replaceChildren();
 
     if (hotkeys.length === 0) {
       this.spellBarEl.appendChild(el("div", { color: "#555", padding: "2px 4px" }, "Press Z to manage spells"));
@@ -294,12 +315,26 @@ export class HudRenderer {
   }
 
   private renderMessages(messages: Message[]): void {
-    const recent = this.landscape ? messages.slice(-3) : messages.slice(-50);
-    this.messagesEl.replaceChildren();
+    if (messages.length === this._prevMsgCount) return;
+
+    const limit = this.landscape ? 3 : 50;
     const colors: Record<string, string> = {
       combat: '#fa0', important: '#4f4', system: '#888', normal: '#ccc',
     };
-    for (const m of recent) {
+
+    // If messages were cleared or shrunk, full rebuild
+    if (messages.length < this._prevMsgCount) {
+      this.messagesEl.replaceChildren();
+      this._prevMsgCount = 0;
+    }
+
+    // Append only new messages
+    const startIdx = Math.max(0, messages.length - limit);
+    const prevStart = Math.max(0, this._prevMsgCount);
+    const newStart = Math.max(startIdx, prevStart);
+
+    for (let i = newStart; i < messages.length; i++) {
+      const m = messages[i];
       const baseColor = colors[m.severity] ?? '#ccc';
       const line = document.createElement('div');
       line.style.margin = '1px 0';
@@ -332,6 +367,13 @@ export class HudRenderer {
       }
       this.messagesEl.appendChild(line);
     }
+
+    // Trim excess from top
+    while (this.messagesEl.childElementCount > limit) {
+      this.messagesEl.removeChild(this.messagesEl.firstChild!);
+    }
+
+    this._prevMsgCount = messages.length;
     if (!this.landscape) this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   }
 }

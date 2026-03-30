@@ -129,6 +129,7 @@ input.setPathClickCallback((target) => {
 
 // Auto-explore: find nearest unexplored tile and walk toward it
 let autoExploring = false;
+let _lastExpTurn = -1;
 
 /** Items worth stopping auto-explore for (ignore junk/broken/blank with value <= 5) */
 function isWorthStoppingFor(item: import("./core/types").Item): boolean {
@@ -827,15 +828,22 @@ function render(state: GameState): void {
             state.hero.position.y,
             fovRadius,
           );
-          trackFloorExplored(
-            floor.explored,
-            floor.width,
-            floor.height,
-            floor.tiles,
-          );
+          if (_lastExpTurn !== state.turn) {
+            trackFloorExplored(
+              floor.explored,
+              floor.width,
+              floor.height,
+              floor.tiles,
+            );
+            _lastExpTurn = state.turn;
+          }
         } else {
-          for (let y = 0; y < floor.height; y++)
-            for (let x = 0; x < floor.width; x++) floor.visible[y][x] = true;
+          // Town: all tiles visible — only set once per floor load
+          if (!(floor as any)._allVisSet) {
+            for (let y = 0; y < floor.height; y++)
+              for (let x = 0; x < floor.width; x++) floor.visible[y][x] = true;
+            (floor as any)._allVisSet = true;
+          }
         }
       }
 
@@ -1000,6 +1008,7 @@ function switchScreen(state: GameState): void {
 
       // Map click/tap → direction for spell targeting or click-to-move
       const mapEl = mapRenderer.getMapContainer();
+      mapEl.style.touchAction = 'none';
       const handleMapTap = (x: number, y: number) => {
         const state = gameLoop.getState();
         const worldPos = mapRenderer!.screenToWorld(x, y, state.hero.position);

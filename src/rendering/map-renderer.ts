@@ -50,8 +50,9 @@ function calcViewportTiles(): { x: number; y: number } {
   return { x: tilesX, y: tilesY };
 }
 
-let VIEWPORT_TILES_X = calcViewportTiles().x;
-let VIEWPORT_TILES_Y = calcViewportTiles().y;
+const _initVp = calcViewportTiles();
+let VIEWPORT_TILES_X = _initVp.x;
+let VIEWPORT_TILES_Y = _initVp.y;
 
 interface TileCell {
   floor: HTMLElement; // Bottom layer: terrain tile
@@ -66,6 +67,11 @@ export class MapRenderer {
   private mapWrapper: HTMLElement;
   private lastState: GameState | null = null;
   private scale = 1;
+  private _prevCamX = -1;
+  private _prevCamY = -1;
+  private _prevFloorKey = '';
+  private _lastTipX = -1;
+  private _lastTipY = -1;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -95,8 +101,14 @@ export class MapRenderer {
       transform-origin: top left;
       transform: scale(${this.scale});
     `;
+    this.mapContainer.style.contain = 'strict';
     this.mapWrapper.appendChild(this.mapContainer);
     this.container.appendChild(this.mapWrapper);
+
+    // Trap reveal CSS class (avoids inline boxShadow in render loop)
+    const trapStyle = document.createElement('style');
+    trapStyle.textContent = '.trap-revealed{box-shadow:inset 0 0 0 20px rgba(180,40,40,0.3)}';
+    document.head.appendChild(trapStyle);
 
     this.initTileGrid();
     this.setupTooltipEvents();
@@ -140,39 +152,25 @@ export class MapRenderer {
       const state = this.lastState;
       const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
       const floor = state.floors[floorKey];
-      if (!floor) {
-        hideItemTooltip();
-        return;
-      }
+      if (!floor) { hideItemTooltip(); return; }
 
-      const worldPos = this.screenToWorld(
-        e.clientX,
-        e.clientY,
-        state.hero.position,
-      );
-      if (!worldPos) {
-        hideItemTooltip();
-        return;
-      }
+      const worldPos = this.screenToWorld(e.clientX, e.clientY, state.hero.position);
+      if (!worldPos) { hideItemTooltip(); return; }
 
-      // Only show tooltip for visible tiles
-      const tileVisible =
-        floor.visible[worldPos.y]?.[worldPos.x] ||
-        floor.lit[worldPos.y]?.[worldPos.x];
-      if (!tileVisible) {
-        hideItemTooltip();
-        return;
-      }
+      // Skip if same tile as last check
+      if (worldPos.x === this._lastTipX && worldPos.y === this._lastTipY) return;
+      this._lastTipX = worldPos.x;
+      this._lastTipY = worldPos.y;
 
-      const groundItems = floor.items.filter(
-        (i) => i.position.x === worldPos.x && i.position.y === worldPos.y,
-      );
+      const tileVisible = floor.visible[worldPos.y]?.[worldPos.x] || floor.lit[worldPos.y]?.[worldPos.x];
+      if (!tileVisible) { hideItemTooltip(); return; }
+
+      const groundItems: typeof floor.items = [];
+      for (const i of floor.items) {
+        if (i.position.x === worldPos.x && i.position.y === worldPos.y) groundItems.push(i);
+      }
       if (groundItems.length > 1) {
-        showPileTooltip(
-          groundItems.map((g) => g.item),
-          e.clientX,
-          e.clientY,
-        );
+        showPileTooltip(groundItems.map((g) => g.item), e.clientX, e.clientY);
       } else if (groundItems.length === 1) {
         showItemTooltip(groundItems[0].item, e.clientX, e.clientY);
       } else {
@@ -208,175 +206,134 @@ export class MapRenderer {
         ? getTileset(getDungeonForFloor(state.currentFloor))
         : null;
 
+    // Build spatial lookup maps (O(1) per tile instead of O(n))
+    const tk = (x: number, y: number) => `${x},${y}`;
+    const monsterAt = new Map<string, typeof floor.monsters[0]>();
+    for (const m of floor.monsters) monsterAt.set(tk(m.position.x, m.position.y), m);
+
+    const itemsAt = new Map<string, typeof floor.items>();
+    for (const i of floor.items) {
+      const k = tk(i.position.x, i.position.y);
+      const arr = itemsAt.get(k);
+      if (arr) arr.push(i); else itemsAt.set(k, [i]);
+    }
+
+    const decalSet = new Set<string>();
+    if (floor.decals) for (const d of floor.decals) decalSet.add(tk(d.x, d.y));
+
+    const inTown = state.currentDungeon === "town";
+    const heroX = state.hero.position.x;
+    const heroY = state.hero.position.y;
+    const heroSprite = state.hero.gender === "male" ? "male-hero" : "female-hero";
+
     for (let vy = 0; vy < VIEWPORT_TILES_Y; vy++) {
       for (let vx = 0; vx < VIEWPORT_TILES_X; vx++) {
         const worldX = cameraX + vx;
         const worldY = cameraY + vy;
         const cell = this.cells[vy][vx];
 
-        // Reset all layers
-        cell.floor.className = "";
-        cell.floor.style.background = "";
-        cell.floor.style.opacity = "";
-        cell.floor.style.transform = "";
-        cell.floor.style.filter = "";
-        cell.floor.style.backgroundColor = "";
-        cell.floor.style.backgroundBlendMode = "";
-        cell.ground.className = "";
-        cell.ground.style.display = "none";
-        cell.ground.style.opacity = "";
-        cell.ground.style.transform = "";
-        cell.ground.style.filter = "";
-        cell.ground.style.boxShadow = "";
-        cell.entity.className = "";
-        cell.entity.style.display = "none";
+        // Compute all final values, then dirty-check write
+        let fc = '', fb = '', fo = '', ft = '', ff = '', fbc = '', fbm = '';
+        let gc = '', gd = 'none', go = '', gtr = '', gf = '', gtrap = false;
+        let ec = '', ed = 'none', eo = '';
 
-        // Out of bounds — solid black
-        if (
-          worldX < 0 ||
-          worldX >= floor.width ||
-          worldY < 0 ||
-          worldY >= floor.height
-        ) {
-          cell.floor.style.background = "#000";
-          cell.floor.style.opacity = "1";
-          continue;
-        }
+        // Out of bounds
+        if (worldX < 0 || worldX >= floor.width || worldY < 0 || worldY >= floor.height) {
+          fb = '#000'; fo = '1';
+        } else {
+          const explored = floor.explored[worldY][worldX];
+          const visible = floor.visible[worldY][worldX];
+          const isLit = floor.lit[worldY][worldX];
 
-        const explored = floor.explored[worldY][worldX];
-        const visible = floor.visible[worldY][worldX];
-        const isLit = floor.lit[worldY][worldX];
+          if (!explored) {
+            fb = '#000'; fo = '1';
+          } else {
+            const tile = floor.tiles[worldY][worldX];
+            const isWall = tile.type === 'wall';
+            const isFloorLike = tile.type === 'floor' || tile.type === 'trap';
+            const opacity = isWall ? (visible ? '1' : '0.5') : (visible || isLit ? '1' : '0.5');
+            const key = tk(worldX, worldY);
+            const hasBlood = decalSet.has(key);
+            const floorSprite = isLit && isFloorLike ? 'lit-dgn' : tile.sprite;
 
-        if (!explored) {
-          cell.floor.style.background = "#000";
-          cell.floor.style.opacity = "1";
-          continue;
-        }
+            const isOverlayTile = tile.type === 'stairs-up' || tile.type === 'stairs-down' ||
+              tile.type === 'door-closed' || tile.type === 'door-open' || tile.type === 'door-locked' ||
+              tile.type === 'building' || tile.type === 'decor' || tile.sprite === 'sign' ||
+              (tile.type === 'trap' && tile.trapRevealed);
 
-        const tile = floor.tiles[worldY][worldX];
-        const isWall = tile.type === "wall";
-        const isFloorLike = tile.type === "floor" || tile.type === "trap";
+            if (isOverlayTile) {
+              fc = tile.type === 'building' || inTown ? 'grass' : isLit ? 'lit-dgn' : 'dark-dgn';
+              fo = opacity;
+              if (tile.type !== 'building' || tile.walkable) {
+                gc = tile.sprite; gd = 'block'; go = opacity;
+                if (tile.type === 'trap' && tile.trapRevealed) gtrap = true;
+              }
+            } else if (tile.sprite === 'town-wall') {
+              fc = 'grass'; fo = opacity;
+              gc = tile.sprite; gd = 'block'; go = opacity;
+              gtr = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
+            } else {
+              fc = floorSprite; fo = opacity;
+              ft = tile.rotate ? `rotate(${tile.rotate}deg)` : '';
+              if (isWall && tileset?.wallTint) { fbc = tileset.wallTint; fbm = 'multiply'; }
+            }
 
-        // Walls only brighten when directly visible, never from permanent lighting
-        // Floor/trap tiles brighten from visibility OR permanent Light spell
-        const opacity = isWall
-          ? visible
-            ? "1"
-            : "0.5"
-          : visible || isLit
-            ? "1"
-            : "0.5";
+            if (visible || isLit) {
+              const itemsHere = itemsAt.get(key);
+              if (itemsHere && itemsHere.length > 1) {
+                gc = 'treasure-pile'; gd = 'block'; go = '1';
+              } else if (itemsHere && itemsHere.length === 1) {
+                gc = getDisplaySprite(itemsHere[0].item); gd = 'block'; go = '1';
+                const glow = getItemGlow(itemsHere[0].item);
+                if (glow) gf = glow;
+              } else if (hasBlood) {
+                gc = 'blood-trap'; gd = 'block'; go = '0.7';
+              }
 
-        const hasBlood =
-          floor.decals?.some((d) => d.x === worldX && d.y === worldY) ?? false;
-        // Use lit (blue) floor sprite for floor-like tiles with permanent light
-        const floorSprite = isLit && isFloorLike ? "lit-dgn" : tile.sprite;
-
-        // Overlay tiles (stairs, doors, revealed traps, buildings) render on ground layer
-        // so they stay visible under hero/monsters
-        const isOverlayTile =
-          tile.type === "stairs-up" ||
-          tile.type === "stairs-down" ||
-          tile.type === "door-closed" ||
-          tile.type === "door-open" ||
-          tile.type === "door-locked" ||
-          tile.type === "building" ||
-          tile.type === "decor" ||
-          tile.sprite === "sign" ||
-          (tile.type === "trap" && tile.trapRevealed);
-
-        if (isOverlayTile) {
-          const inTown = state.currentDungeon === "town";
-          const underlaySprite =
-            tile.type === "building" || inTown ? "grass" : isLit ? "lit-dgn" : "dark-dgn";
-          cell.floor.className = underlaySprite;
-          cell.floor.style.opacity = opacity;
-          // Buildings render via overlay system, not tile grid
-          if (tile.type !== "building" || tile.walkable) {
-            cell.ground.className = tile.sprite;
-            cell.ground.style.display = "block";
-            cell.ground.style.opacity = opacity;
-            // Revealed traps get a red tint so faint sprites are visible
-            if (tile.type === "trap" && tile.trapRevealed) {
-              cell.ground.style.boxShadow = "inset 0 0 0 20px rgba(180, 40, 40, 0.3)";
+              if (worldX === heroX && worldY === heroY) {
+                ec = heroSprite; ed = 'block'; eo = '1';
+              } else {
+                const monster = monsterAt.get(key);
+                if (monster) { ec = monster.sprite; ed = 'block'; eo = '1'; }
+              }
+            } else if (hasTrueSight && explored) {
+              const monster = monsterAt.get(key);
+              if (monster) { ec = monster.sprite; ed = 'block'; eo = '0.5'; }
             }
           }
-        } else if (tile.sprite === "town-wall") {
-          // Town fence: grass underneath, fence sprite on ground layer
-          cell.floor.className = "grass";
-          cell.floor.style.opacity = opacity;
-          cell.ground.className = tile.sprite;
-          cell.ground.style.display = "block";
-          cell.ground.style.opacity = opacity;
-          cell.ground.style.transform = tile.rotate
-            ? `rotate(${tile.rotate}deg)`
-            : "";
-        } else {
-          cell.floor.className = floorSprite;
-          cell.floor.style.opacity = opacity;
-          cell.floor.style.transform = tile.rotate
-            ? `rotate(${tile.rotate}deg)`
-            : "";
-          // Tint walls based on dungeon tier using color overlay
-          if (isWall && tileset?.wallTint) {
-            cell.floor.style.backgroundColor = tileset.wallTint;
-            cell.floor.style.backgroundBlendMode = "multiply";
-          }
         }
 
-        // If visible or permanently lit, show ground objects and entities
-        if (visible || isLit) {
-          // Ground layer: blood decals, items on floor
-          const itemsHere = floor.items.filter(
-            (i) => i.position.x === worldX && i.position.y === worldY,
-          );
-          if (itemsHere.length > 1) {
-            cell.ground.className = "treasure-pile";
-            cell.ground.style.display = "block";
-            cell.ground.style.opacity = "1";
-          } else if (itemsHere.length === 1) {
-            cell.ground.className = getDisplaySprite(itemsHere[0].item);
-            cell.ground.style.display = "block";
-            cell.ground.style.opacity = "1";
-            const glow = getItemGlow(itemsHere[0].item);
-            if (glow) cell.ground.style.filter = glow;
-          } else if (hasBlood) {
-            cell.ground.className = "blood-trap";
-            cell.ground.style.display = "block";
-            cell.ground.style.opacity = "0.7";
+        // Dirty-checked DOM writes
+        const p = (cell as any)._prev;
+        if (!p) {
+          (cell as any)._prev = { fc, fb, fo, ft, ff, fbc, fbm, gc, gd, go, gtr, gf, gtrap, ec, ed, eo };
+          cell.floor.className = fc; cell.floor.style.background = fb; cell.floor.style.opacity = fo;
+          cell.floor.style.transform = ft; cell.floor.style.filter = ff;
+          cell.floor.style.backgroundColor = fbc; cell.floor.style.backgroundBlendMode = fbm;
+          cell.ground.className = gc; cell.ground.style.display = gd; cell.ground.style.opacity = go;
+          cell.ground.style.transform = gtr; cell.ground.style.filter = gf;
+          if (gtrap) cell.ground.classList.add('trap-revealed'); else cell.ground.classList.remove('trap-revealed');
+          cell.entity.className = ec; cell.entity.style.display = ed; cell.entity.style.opacity = eo;
+        } else {
+          if (p.fc !== fc) { cell.floor.className = fc; p.fc = fc; }
+          if (p.fb !== fb) { cell.floor.style.background = fb; p.fb = fb; }
+          if (p.fo !== fo) { cell.floor.style.opacity = fo; p.fo = fo; }
+          if (p.ft !== ft) { cell.floor.style.transform = ft; p.ft = ft; }
+          if (p.ff !== ff) { cell.floor.style.filter = ff; p.ff = ff; }
+          if (p.fbc !== fbc) { cell.floor.style.backgroundColor = fbc; p.fbc = fbc; }
+          if (p.fbm !== fbm) { cell.floor.style.backgroundBlendMode = fbm; p.fbm = fbm; }
+          if (p.gc !== gc) { cell.ground.className = gc; p.gc = gc; }
+          if (p.gd !== gd) { cell.ground.style.display = gd; p.gd = gd; }
+          if (p.go !== go) { cell.ground.style.opacity = go; p.go = go; }
+          if (p.gtr !== gtr) { cell.ground.style.transform = gtr; p.gtr = gtr; }
+          if (p.gf !== gf) { cell.ground.style.filter = gf; p.gf = gf; }
+          if (p.gtrap !== gtrap) {
+            if (gtrap) cell.ground.classList.add('trap-revealed'); else cell.ground.classList.remove('trap-revealed');
+            p.gtrap = gtrap;
           }
-
-          // Entity layer: hero > monster (items already on ground layer)
-          if (
-            worldX === state.hero.position.x &&
-            worldY === state.hero.position.y
-          ) {
-            cell.entity.className =
-              state.hero.gender === "male" ? "male-hero" : "female-hero";
-            cell.entity.style.display = "block";
-            cell.entity.style.opacity = "1";
-            continue;
-          }
-
-          const monster = floor.monsters.find(
-            (m) => m.position.x === worldX && m.position.y === worldY,
-          );
-          if (monster) {
-            cell.entity.className = monster.sprite;
-            cell.entity.style.display = "block";
-            cell.entity.style.opacity = "1";
-            continue;
-          }
-        } else if (hasTrueSight && explored) {
-          // True Sight: show monsters on explored but not visible tiles (dimmed)
-          const monster = floor.monsters.find(
-            (m) => m.position.x === worldX && m.position.y === worldY,
-          );
-          if (monster) {
-            cell.entity.className = monster.sprite;
-            cell.entity.style.display = "block";
-            cell.entity.style.opacity = "0.5";
-          }
+          if (p.ec !== ec) { cell.entity.className = ec; p.ec = ec; }
+          if (p.ed !== ed) { cell.entity.style.display = ed; p.ed = ed; }
+          if (p.eo !== eo) { cell.entity.style.opacity = eo; p.eo = eo; }
         }
       }
     }
@@ -412,13 +369,26 @@ export class MapRenderer {
     cameraX: number,
     cameraY: number,
   ): void {
-    // Remove old overlays
+    if (state.currentDungeon !== "town") {
+      if (this.buildingOverlays.length > 0) {
+        for (const el of this.buildingOverlays) el.remove();
+        this.buildingOverlays = [];
+      }
+      this._prevCamX = -1; this._prevCamY = -1;
+      return;
+    }
+
+    // Skip rebuild if camera and floor haven't changed
+    const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+    if (this._prevCamX === cameraX && this._prevCamY === cameraY &&
+        this._prevFloorKey === floorKey && this.buildingOverlays.length > 0) return;
+    this._prevCamX = cameraX;
+    this._prevCamY = cameraY;
+    this._prevFloorKey = floorKey;
+
     for (const el of this.buildingOverlays) el.remove();
     this.buildingOverlays = [];
 
-    if (state.currentDungeon !== "town") return;
-
-    const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
     const floor = state.floors[floorKey];
     if (!floor) return;
 

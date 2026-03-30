@@ -1,26 +1,23 @@
 import type { Floor } from '../core/types';
 
-/**
- * Simple raycasting field-of-view.
- * Casts rays from the player outward in all directions,
- * marking tiles as visible until hitting a non-transparent tile.
- */
+let prevVisible: [number, number][] = [];
+
 export function computeFov(floor: Floor, px: number, py: number, radius?: number): void {
   const VIEW_RADIUS = radius ?? 4;
-  // Reset visibility
-  for (let y = 0; y < floor.height; y++) {
-    for (let x = 0; x < floor.width; x++) {
-      floor.visible[y][x] = false;
-    }
+
+  // Only clear previously-visible tiles (instead of entire grid)
+  for (const [y, x] of prevVisible) {
+    if (y < floor.height && x < floor.width) floor.visible[y][x] = false;
   }
+  prevVisible = [];
 
   // Player's tile is always visible
   if (py >= 0 && py < floor.height && px >= 0 && px < floor.width) {
     floor.visible[py][px] = true;
     floor.explored[py][px] = true;
+    prevVisible.push([py, px]);
   }
 
-  // Cast rays in 360 degrees
   const RAYS = 360;
   for (let i = 0; i < RAYS; i++) {
     const angle = (i / RAYS) * Math.PI * 2;
@@ -38,7 +35,10 @@ export function computeFov(floor: Floor, px: number, py: number, radius?: number
 
       if (tx < 0 || tx >= floor.width || ty < 0 || ty >= floor.height) break;
 
-      floor.visible[ty][tx] = true;
+      if (!floor.visible[ty][tx]) {
+        floor.visible[ty][tx] = true;
+        prevVisible.push([ty, tx]);
+      }
       floor.explored[ty][tx] = true;
 
       if (!floor.tiles[ty][tx].transparent) break;

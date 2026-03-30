@@ -155,11 +155,11 @@ export class InputManager {
 
   private setupKeyboard(): void {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Handle Tab before anything else (browser intercepts it)
+      // Handle Tab — only capture during active gameplay
       if (e.key === 'Tab' || e.code === 'Tab') {
-        e.preventDefault();
-        e.stopPropagation();
         if (this.enabled && this.onAutoExplore) {
+          e.preventDefault();
+          e.stopPropagation();
           this.onAutoExplore();
         }
         return;

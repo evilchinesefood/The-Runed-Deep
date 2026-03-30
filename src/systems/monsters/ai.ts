@@ -68,16 +68,29 @@ function canMoveTo(
   return floor.tiles[y][x].walkable;
 }
 
-/** True if no other monster occupies (x,y) (excluding monsterIndex). */
+/** True if no other monster occupies (x,y). Uses Set if provided, falls back to linear scan. */
 function noMonster(
   floor: Floor,
   x: number,
   y: number,
   excludeIdx: number,
+  occupied?: Set<string>,
 ): boolean {
+  if (occupied) {
+    const k = `${x},${y}`;
+    const own = floor.monsters[excludeIdx];
+    if (own && own.position.x === x && own.position.y === y) return true;
+    return !occupied.has(k);
+  }
   return !floor.monsters.some(
     (m, i) => i !== excludeIdx && m.position.x === x && m.position.y === y,
   );
+}
+
+function buildOccupied(floor: Floor): Set<string> {
+  const s = new Set<string>();
+  for (const m of floor.monsters) s.add(`${m.position.x},${m.position.y}`);
+  return s;
 }
 
 /**
@@ -165,6 +178,7 @@ function moveToward(
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
+  const occ = buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = Infinity;
@@ -173,8 +187,8 @@ function moveToward(
     const nx = x + d.x,
       ny = y + d.y;
     if (!canMoveTo(floor, nx, ny, phasing)) continue;
-    if (!noMonster(floor, nx, ny, idx)) continue;
-    if (nx === target.x && ny === target.y) continue; // don't walk onto hero
+    if (!noMonster(floor, nx, ny, idx, occ)) continue;
+    if (nx === target.x && ny === target.y) continue;
 
     const dist = manhattan({ x: nx, y: ny }, target);
     if (dist < bestDist) {
@@ -199,6 +213,7 @@ function moveAwayFrom(
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
+  const occ = buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = -Infinity;
@@ -207,7 +222,7 @@ function moveAwayFrom(
     const nx = x + d.x,
       ny = y + d.y;
     if (!canMoveTo(floor, nx, ny, phasing)) continue;
-    if (!noMonster(floor, nx, ny, idx)) continue;
+    if (!noMonster(floor, nx, ny, idx, occ)) continue;
 
     const dist = manhattan({ x: nx, y: ny }, threat);
     if (dist > bestDist) {

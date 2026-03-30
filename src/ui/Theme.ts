@@ -25,7 +25,7 @@ export function injectTheme(): void {
       --border-focus: #666;
       --text: #ccc;
       --text-dim: #888;
-      --text-muted: #555;
+      --text-muted: #888;
       --accent: #c90;
       --accent-dim: #a70;
       --hp-good: #4f4;
@@ -155,7 +155,7 @@ export function injectTheme(): void {
       cursor: pointer;
       user-select: none;
       letter-spacing: 0.5px;
-      transition: all 0.15s;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
       min-height: 32px;
     }
     .btn:hover {
@@ -310,6 +310,14 @@ export function injectTheme(): void {
     /* iOS standalone (Add to Home Screen) */
     @media (display-mode: standalone) {
       body { padding-top: env(safe-area-inset-top, 0px); }
+    }
+
+    /* Respect reduced motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   `;
   document.head.appendChild(style);

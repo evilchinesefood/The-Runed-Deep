@@ -1,5 +1,38 @@
 import type { Floor, Vector2 } from '../core/types';
 
+class MinHeap<T> {
+  private h: T[] = [];
+  constructor(private less: (a: T, b: T) => boolean) {}
+  get size() { return this.h.length; }
+  push(v: T) {
+    this.h.push(v);
+    let i = this.h.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (!this.less(this.h[i], this.h[p])) break;
+      [this.h[i], this.h[p]] = [this.h[p], this.h[i]];
+      i = p;
+    }
+  }
+  pop(): T {
+    const top = this.h[0];
+    const last = this.h.pop()!;
+    if (this.h.length > 0) {
+      this.h[0] = last;
+      let i = 0;
+      while (true) {
+        let s = i, l = 2 * i + 1, r = 2 * i + 2;
+        if (l < this.h.length && this.less(this.h[l], this.h[s])) s = l;
+        if (r < this.h.length && this.less(this.h[r], this.h[s])) s = r;
+        if (s === i) break;
+        [this.h[i], this.h[s]] = [this.h[s], this.h[i]];
+        i = s;
+      }
+    }
+    return top;
+  }
+}
+
 interface Node {
   x: number;
   y: number;
@@ -10,7 +43,6 @@ interface Node {
 }
 
 function heuristic(a: Vector2, b: Vector2): number {
-  // Chebyshev distance (allows diagonal movement)
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
@@ -19,18 +51,19 @@ const DIRS = [
   { x: 0, y: 1 }, { x: -1, y: 1 }, { x: -1, y: 0 }, { x: -1, y: -1 },
 ];
 
-/**
- * A* pathfinding. Returns array of positions from start to goal (excluding start).
- * Returns empty array if no path found. Avoids monsters.
- * Max search distance to prevent lag on large maps.
- */
 export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps = 30): Vector2[] {
   if (start.x === goal.x && start.y === goal.y) return [];
 
-  const key = (x: number, y: number) => `${x},${y}`;
-  const open: Node[] = [];
-  const closed = new Set<string>();
+  const w = floor.width, fh = floor.height;
+  const closed = new Uint8Array(w * fh);
+  const gScore = Array.from({ length: fh }, () => new Float64Array(w).fill(Infinity));
+  gScore[start.y][start.x] = 0;
 
+  // Pre-build monster occupancy grid
+  const monsterOcc = new Uint8Array(w * fh);
+  for (const m of floor.monsters) monsterOcc[m.position.y * w + m.position.x] = 1;
+
+  const open = new MinHeap<Node>((a, b) => a.f < b.f);
   const startNode: Node = {
     x: start.x, y: start.y,
     g: 0, h: heuristic(start, goal), f: 0, parent: null,
@@ -41,19 +74,13 @@ export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps =
   let iterations = 0;
   const maxIterations = maxSteps * maxSteps;
 
-  while (open.length > 0 && iterations < maxIterations) {
+  while (open.size > 0 && iterations < maxIterations) {
     iterations++;
 
-    // Find lowest f
-    let bestIdx = 0;
-    for (let i = 1; i < open.length; i++) {
-      if (open[i].f < open[bestIdx].f) bestIdx = i;
-    }
-    const current = open.splice(bestIdx, 1)[0];
-    const ck = key(current.x, current.y);
+    const current = open.pop()!;
+    const ci = current.y * w + current.x;
 
     if (current.x === goal.x && current.y === goal.y) {
-      // Reconstruct path
       const path: Vector2[] = [];
       let node: Node | null = current;
       while (node && !(node.x === start.x && node.y === start.y)) {
@@ -63,44 +90,33 @@ export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps =
       return path;
     }
 
-    closed.add(ck);
+    if (closed[ci]) continue;
+    closed[ci] = 1;
 
     for (const dir of DIRS) {
       const nx = current.x + dir.x;
       const ny = current.y + dir.y;
-      const nk = key(nx, ny);
 
-      if (closed.has(nk)) continue;
-      if (nx < 0 || nx >= floor.width || ny < 0 || ny >= floor.height) continue;
+      if (nx < 0 || nx >= w || ny < 0 || ny >= fh) continue;
+      if (closed[ny * w + nx]) continue;
 
       const tile = floor.tiles[ny][nx];
-      // Treat closed doors as passable (move action opens them)
       if (!tile.walkable && tile.type !== "door-closed") continue;
 
-      // Allow moving to goal even if monster is there (to attack it)
       if (!(nx === goal.x && ny === goal.y)) {
-        if (floor.monsters.some(m => m.position.x === nx && m.position.y === ny)) continue;
+        if (monsterOcc[ny * w + nx]) continue;
       }
 
-      // Only path through explored tiles (don't path through fog)
       if (!floor.explored[ny][nx]) continue;
 
-      const g = current.g + 1;
-      const existing = open.find(n => n.x === nx && n.y === ny);
-      if (existing && g >= existing.g) continue;
+      const tentativeG = current.g + 1;
+      if (tentativeG >= gScore[ny][nx]) continue;
+      gScore[ny][nx] = tentativeG;
 
-      const h = heuristic({ x: nx, y: ny }, goal);
-      const node: Node = { x: nx, y: ny, g, h, f: g + h, parent: current };
-
-      if (existing) {
-        existing.g = g;
-        existing.f = g + h;
-        existing.parent = current;
-      } else {
-        open.push(node);
-      }
+      const h2 = heuristic({ x: nx, y: ny }, goal);
+      open.push({ x: nx, y: ny, g: tentativeG, h: h2, f: tentativeG + h2, parent: current });
     }
   }
 
-  return []; // No path found
+  return [];
 }

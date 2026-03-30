@@ -65,18 +65,16 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
   const saveState = pruneSaveState({ ...state, screen: "game" });
   const saveJson = JSON.stringify(saveState);
 
-  // Push to ALL cloud-enabled slots — awaited to ensure completion
-  for (let s = 1; s <= MAX_SLOTS; s++) {
-    const code = getCloudCode(s);
-    if (code) {
-      pushSave(code, saveJson).then(ok => {
-        if (!ok) console.warn(`[SAVE] Cloud push failed for code ${code}`);
-      });
-    }
+  // Push only to the active slot's cloud code (not all slots)
+  const code = getCloudCode(slot);
+  if (code) {
+    pushSave(code, saveJson).then(ok => {
+      if (!ok) console.warn(`[SAVE] Cloud push failed for code ${code}`);
+    });
   }
 
   try {
-    const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
+    const json = `{"version":1,"timestamp":${Date.now()},"state":${saveJson}}`;
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
     return true;
   } catch (e: any) {

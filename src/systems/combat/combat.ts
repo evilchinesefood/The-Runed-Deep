@@ -31,8 +31,13 @@ function fortuneXp(baseXp: number, equipment: any): number {
 }
 
 // ============================================================
-// Blood splatters
+// Blood splatters (capped to prevent unbounded growth)
 // ============================================================
+const MAX_DECALS = 80;
+function cappedDecals(decals: { x: number; y: number }[], add: { x: number; y: number }): { x: number; y: number }[] {
+  const next = [...decals, add];
+  return next.length > MAX_DECALS ? next.slice(next.length - MAX_DECALS) : next;
+}
 
 /** Check if a tile can receive blood or dropped items */
 function canPlaceOnTile(floor: Floor, x: number, y: number): boolean {
@@ -57,7 +62,7 @@ function maybeAddMonsterBlood(
   return {
     ...floor,
     monsters,
-    decals: [...floor.decals, { x: monster.position.x, y: monster.position.y }],
+    decals: cappedDecals(floor.decals, { x: monster.position.x, y: monster.position.y }),
   };
 }
 
@@ -72,7 +77,7 @@ function maybeAddPlayerBlood(
   if (Math.random() > 0.75) return floor;
   if (!canPlaceOnTile(floor, pos.x, pos.y)) return floor;
   if (floor.decals.some((d) => d.x === pos.x && d.y === pos.y)) return floor;
-  return { ...floor, decals: [...floor.decals, { x: pos.x, y: pos.y }] };
+  return { ...floor, decals: cappedDecals(floor.decals, { x: pos.x, y: pos.y }) };
 }
 
 // ============================================================
@@ -292,10 +297,7 @@ export function playerAttacksMonster(
     if (Math.random() < 0.75 && canPlaceOnTile(newFloor, monster.position.x, monster.position.y)) {
       newFloor = {
         ...newFloor,
-        decals: [
-          ...newFloor.decals,
-          { x: monster.position.x, y: monster.position.y },
-        ],
+        decals: cappedDecals(newFloor.decals, { x: monster.position.x, y: monster.position.y }),
       };
     }
 
@@ -539,10 +541,7 @@ export function monsterAttacksPlayer(
           if (Math.random() < 0.75 && canPlaceOnTile(newFloor2, m.position.x, m.position.y)) {
             newFloor2 = {
               ...newFloor2,
-              decals: [
-                ...newFloor2.decals,
-                { x: m.position.x, y: m.position.y },
-              ],
+              decals: cappedDecals(newFloor2.decals, { x: m.position.x, y: m.position.y }),
             };
           }
           result = {

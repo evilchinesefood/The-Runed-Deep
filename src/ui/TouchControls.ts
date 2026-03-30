@@ -225,9 +225,9 @@ export class TouchControls {
     this.layout = loadLayout();
     const s = this.layout.scale;
     const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
-    const dpadSize = Math.round((isLandscape ? 36 : 48) * s);
+    const dpadSize = Math.max(44, Math.round((isLandscape ? 36 : 48) * s));
     const dpadGap = isLandscape ? 2 : 3;
-    const actionSize = Math.round((isLandscape ? 34 : 44) * s);
+    const actionSize = Math.max(44, Math.round((isLandscape ? 34 : 44) * s));
 
     // D-pad — consistent SVG arrows in a 3x3 grid
     this.dpad = document.createElement("div");

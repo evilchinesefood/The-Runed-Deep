@@ -51,7 +51,7 @@ export async function pushSave(code: string, saveJson: string): Promise<boolean>
   if (!API_BASE) return false;
   try {
     const compressed = await compress(saveJson);
-    console.log(`[CLOUD] Compressed ${saveJson.length} -> ${compressed.length} bytes`);
+    // Debug logging removed for production
     const res = await fetch(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
