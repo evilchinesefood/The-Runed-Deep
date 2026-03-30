@@ -8,7 +8,6 @@ import type {
 import {
   getMonstersForDepth,
   getNewestUnlockFloor,
-  getBossForFloor,
   type MonsterTemplate,
 } from "../../data/monsters";
 import { getDifficultyConfig } from "../../data/difficulty";
@@ -183,14 +182,6 @@ export function spawnMonsters(
 
   const monsters: Monster[] = [];
   const usedPositions = new Set<string>();
-
-  // Check for boss on this floor
-  const boss = getBossForFloor(depth);
-  if (boss && positions.length > 0) {
-    const pos = positions.shift()!;
-    usedPositions.add(`${pos.x},${pos.y}`);
-    monsters.push(createMonster(boss, pos, depth, rand, difficulty));
-  }
 
   // Spawn regular monsters
   for (let i = 0; i < count && i < positions.length; i++) {
