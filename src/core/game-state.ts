@@ -62,7 +62,7 @@ export function createHero(
     level: 1,
     equipment: createEmptyEquipment(),
     inventory: [],
-    copper: config.startingCopper,
+    gold: config.startingGold,
     knownSpells: startingSpell ? [startingSpell] : [],
     spellHotkeys: startingSpell ? [startingSpell] : [],
     activeEffects: [],

@@ -20,8 +20,8 @@ export interface DifficultyConfig {
   xpPerLevelBonus: number;
   /** Monster spawn density multiplier (1.0 = normal) */
   spawnDensityMult: number;
-  /** Player starting copper */
-  startingCopper: number;
+  /** Player starting gold */
+  startingGold: number;
   /** Healing effectiveness multiplier (1.0 = normal) */
   healingMult: number;
 }
@@ -34,7 +34,7 @@ export const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
     monsterSpeedMult: 0.9,
     xpPerLevelBonus: 0,
     spawnDensityMult: 0.8,
-    startingCopper: 150,
+    startingGold: 150,
     healingMult: 1.2,
   },
   intermediate: {
@@ -44,7 +44,7 @@ export const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
     monsterSpeedMult: 1.0,
     xpPerLevelBonus: 20,
     spawnDensityMult: 1.0,
-    startingCopper: 100,
+    startingGold: 100,
     healingMult: 1.0,
   },
   hard: {
@@ -54,7 +54,7 @@ export const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
     monsterSpeedMult: 1.1,
     xpPerLevelBonus: 40,
     spawnDensityMult: 1.2,
-    startingCopper: 75,
+    startingGold: 75,
     healingMult: 0.9,
   },
   impossible: {
@@ -64,7 +64,7 @@ export const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
     monsterSpeedMult: 1.2,
     xpPerLevelBonus: 80,
     spawnDensityMult: 1.5,
-    startingCopper: 50,
+    startingGold: 50,
     healingMult: 0.75,
   },
 };

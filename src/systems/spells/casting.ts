@@ -35,6 +35,8 @@ function fortuneXp(baseXp: number, equipment: any): number {
   for (const eq of Object.values(equipment)) {
     if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') { xp *= 2; break; }
   }
+  const leechPenalty = equipAffixTotal2(equipment, "leech");
+  if (leechPenalty > 0) xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
   return xp;
 }
 

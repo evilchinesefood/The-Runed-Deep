@@ -321,7 +321,7 @@ export function createShopScreen(
 
     screen.replaceChildren();
 
-    const copper = state.hero.copper;
+    const gold = state.hero.gold;
     const shopInv = state.town.shopInventories[shopId] ?? [];
 
     const titleBar = createTitleBar(`${shopName}`, onClose);
@@ -332,7 +332,7 @@ export function createShopScreen(
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
 
-    const copperLine = el("div", { color: "#c90", fontSize: "13px", marginBottom: "8px" }, `Gold: ${copper}`);
+    const copperLine = el("div", { color: "#c90", fontSize: "13px", marginBottom: "8px" }, `Gold: ${gold}`);
     screen.appendChild(copperLine);
 
     const row = el("div", {
@@ -348,7 +348,7 @@ export function createShopScreen(
         shopInv,
         (i) => getBuyPrice(i, shopId),
         () => "Buy",
-        (i) => copper >= getBuyPrice(i, shopId),
+        (i) => gold >= getBuyPrice(i, shopId),
         (id) => {
           const next = buyItem(state, shopId, id);
           state = next;

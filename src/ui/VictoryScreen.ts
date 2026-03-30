@@ -15,7 +15,7 @@ export function createVictoryScreen(
     state.currentFloor + 1,
     hero.xp,
     state.turn,
-    hero.copper,
+    hero.gold,
     state.difficulty,
   );
 
@@ -146,7 +146,7 @@ The The Runed Deep grows silent. You have avenged Bjarnarhaven. Your name will b
   parchment.appendChild(statRow("Name", hero.name));
   parchment.appendChild(statRow("Level", String(hero.level)));
   parchment.appendChild(statRow("Turns Survived", state.turn.toLocaleString()));
-  parchment.appendChild(statRow("Gold", hero.copper.toLocaleString()));
+  parchment.appendChild(statRow("Gold", hero.gold.toLocaleString()));
   parchment.appendChild(
     statRow("Difficulty", diffLabels[state.difficulty] ?? state.difficulty),
   );

@@ -602,7 +602,7 @@ export function createInventoryScreen(
   footer.appendChild(
     el("span", undefined, `Weight: ${totalWeight.toFixed(1)} kg`),
   );
-  footer.appendChild(el("span", undefined, `Gold: ${h.copper}`));
+  footer.appendChild(el("span", undefined, `Gold: ${h.gold}`));
   footer.appendChild(el("span", undefined, `Items: ${h.inventory.length}`));
 
   // Show carry capacity (base 10kg + pack bonus + enchantment)

@@ -13,7 +13,7 @@ export function processPickupItem(state: GameState): GameState {
   const pos = state.hero.position;
   // Pick up items within 1 tile of the player (3x3 area)
   const itemsHere = floor.items.filter(
-    (i) => Math.abs(i.position.x - pos.x) <= 1 && Math.abs(i.position.y - pos.y) <= 1,
+    (i) => i.position.x === pos.x && i.position.y === pos.y,
   );
 
   if (itemsHere.length === 0) {
@@ -34,7 +34,7 @@ export function processPickupItem(state: GameState): GameState {
   const messages: Message[] = [];
   let hero = { ...state.hero };
   let inventory = [...hero.inventory];
-  let copper = hero.copper;
+  let gold = hero.gold;
 
   // Base carry capacity 10kg (10000g), pack adds to it
   // Enchantment modifies capacity: +5kg per level, -5kg per cursed level
@@ -56,7 +56,7 @@ export function processPickupItem(state: GameState): GameState {
   for (const placed of itemsHere) {
     if (placed.item.category === "currency") {
       const amount = placed.item.properties["amount"] ?? placed.item.value;
-      copper += amount;
+      gold += amount;
       pickedIds.add(placed.item.id);
       messages.push({
         text: `Picked up ${placed.item.name}.`,
@@ -89,7 +89,7 @@ export function processPickupItem(state: GameState): GameState {
     }
   }
 
-  hero = { ...hero, inventory, copper };
+  hero = { ...hero, inventory, gold };
 
   // Remove all picked-up items by ID (covers 3x3 area)
   const remaining = floor.items.filter((i) => !pickedIds.has(i.item.id));

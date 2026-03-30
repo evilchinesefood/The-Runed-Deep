@@ -100,7 +100,7 @@ export interface Hero {
   level: number;
   equipment: Equipment;
   inventory: Item[];
-  copper: number;
+  gold: number;
   knownSpells: string[];
   spellHotkeys: string[]; // up to 5 spell IDs for quick-cast slots 1-5
   activeEffects: StatusEffect[];

@@ -163,7 +163,7 @@ export function createCharacterInfoScreen(
       ? `${h.xp} (MAX LEVEL)`
       : `${h.xp} / ${nextLevelXp} (${toNext} to next)`;
   panel.appendChild(statLine("Experience", xpStr));
-  panel.appendChild(statLine("Gold", h.copper));
+  panel.appendChild(statLine("Gold", h.gold));
   panel.appendChild(statLine("Turn", state.turn));
 
   // ── Attributes ──────────────────────────────────────────

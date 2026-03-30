@@ -87,7 +87,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
   const item = shopInv[idx];
   const price = getBuyPrice(item, shopId);
 
-  if (state.hero.copper < price) {
+  if (state.hero.gold < price) {
     return addMsg(state, `You cannot afford that. (${price} gold needed)`, 'system');
   }
 
@@ -97,7 +97,7 @@ export function buyItem(state: GameState, shopId: string, itemId: string): GameS
     ...state,
     hero: {
       ...state.hero,
-      copper: state.hero.copper - price,
+      gold: state.hero.gold - price,
       inventory: [...state.hero.inventory, item],
     },
     town: {
@@ -119,7 +119,7 @@ export function sellItem(state: GameState, shopId: string, itemId: string): Game
     ...state,
     hero: {
       ...state.hero,
-      copper: state.hero.copper + price,
+      gold: state.hero.gold + price,
       inventory: state.hero.inventory.filter((_, i) => i !== idx),
     },
     town: {

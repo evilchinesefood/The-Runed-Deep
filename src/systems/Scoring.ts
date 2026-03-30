@@ -3,10 +3,10 @@ export function calculateScore(
   floor: number,
   xp: number,
   turns: number,
-  copper: number,
+  gold: number,
   difficulty: string,
 ): number {
-  let score = xp + floor * 100 + level * 50 + copper;
+  let score = xp + floor * 100 + level * 50 + gold;
   const diffMult: Record<string, number> = {
     easy: 1, intermediate: 1.5, hard: 2.5, impossible: 5,
   };

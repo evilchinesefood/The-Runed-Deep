@@ -354,7 +354,7 @@ function processMove(state: GameState, direction: Direction): GameState {
     for (const g of goldItems) {
       goldTotal += g.item.properties["amount"] ?? g.item.value;
     }
-    hero = { ...hero, copper: hero.copper + goldTotal };
+    hero = { ...hero, gold: hero.gold + goldTotal };
     currentFloor = {
       ...currentFloor,
       items: currentFloor.items.filter(
@@ -558,6 +558,7 @@ function returnToDungeon(state: GameState): GameState {
         true,
         true,
         state.difficulty,
+        state.ngPlusCount ?? 0,
       );
       state = { ...state, floors: { ...state.floors, [floorKey]: newFloor } };
       return returnToDungeon(state);
@@ -611,6 +612,7 @@ function goToFloor(
       true, // has stairs up
       true, // has stairs down
       state.difficulty,
+      state.ngPlusCount ?? 0,
     );
     floors = { ...floors, [targetKey]: newFloor };
   }

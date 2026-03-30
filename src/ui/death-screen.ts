@@ -17,7 +17,7 @@ export function createDeathScreen(
     : "unknown causes";
 
   const score = calculateScore(
-    hero.level, state.currentFloor + 1, hero.xp, state.turn, hero.copper, state.difficulty,
+    hero.level, state.currentFloor + 1, hero.xp, state.turn, hero.gold, state.difficulty,
   );
 
   const screen = createScreen();
@@ -37,7 +37,7 @@ export function createDeathScreen(
   tombstone.appendChild(el("hr", { border: "none", borderTop: "1px solid #333", margin: "12px 0" }));
   tombstone.appendChild(el("div", { fontSize: "13px", color: "#f44", marginBottom: "6px" }, `Slain by: ${causeOfDeath}`));
   tombstone.appendChild(el("div", { fontSize: "13px", color: "#777", marginBottom: "6px" }, `Difficulty: ${state.difficulty}`));
-  tombstone.appendChild(el("div", { fontSize: "13px", color: "#777", marginBottom: "6px" }, `XP: ${hero.xp} · Gold: ${hero.copper}`));
+  tombstone.appendChild(el("div", { fontSize: "13px", color: "#777", marginBottom: "6px" }, `XP: ${hero.xp} · Gold: ${hero.gold}`));
   tombstone.appendChild(el("div", { fontSize: "13px", color: "#777", marginBottom: "6px" }, `Turns survived: ${state.turn}`));
   if (state.ngPlusCount > 0) {
     tombstone.appendChild(el("div", { fontSize: "13px", color: "#c90", marginBottom: "6px" }, `New Game Plus ${state.ngPlusCount}`));

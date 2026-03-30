@@ -67,7 +67,7 @@ function buildTemple(state: GameState, onUpdate: (s: GameState) => void): HTMLEl
   if (cursedItems.length > 0) {
     panel.appendChild(el('div', { color: '#c90', fontSize: '13px', fontWeight: 'bold', margin: '12px 0 6px', borderTop: '1px solid #444', paddingTop: '8px' }, 'Remove Curse (25g)'));
     for (const ci of cursedItems) {
-      const canAfford = state.hero.copper >= 25;
+      const canAfford = state.hero.gold >= 25;
       const btn = createButton(`Bless: ${ci.name}`);
       Object.assign(btn.style, { display: 'block', width: '100%', marginBottom: '4px', textAlign: 'left', fontSize: '12px' });
       greyBtn(btn, !canAfford);
@@ -99,7 +99,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
     const item = state.hero.equipment[slotKey];
     const ups = item ? (item.properties['enchanterUps'] ?? 0) : 0;
     const atCap = item ? ups >= cap : true;
-    const canAfford = item && !item.cursed && state.hero.copper >= 100 && !atCap;
+    const canAfford = item && !item.cursed && state.hero.gold >= 100 && !atCap;
 
     const row = el('div', {
       display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px',
@@ -155,8 +155,8 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
         if (!atCap) {
           const drawerEnchBtn = createButton('Enchant +1');
           drawerEnchBtn.style.cssText += 'min-width:80px;padding:8px 16px;font-size:14px;';
-          greyBtn(drawerEnchBtn, state.hero.copper < 100);
-          if (state.hero.copper >= 100) {
+          greyBtn(drawerEnchBtn, state.hero.gold < 100);
+          if (state.hero.gold >= 100) {
             drawerEnchBtn.addEventListener('click', (e) => { e.stopPropagation(); closeSageDrawer(); onUpdate(sageEnchantItem(state, item.id)); });
           }
           btnRow.appendChild(drawerEnchBtn);
@@ -227,7 +227,7 @@ function buildBlacksmith(state: GameState, onUpdate: (s: GameState) => void): HT
       const cost = getBlacksmithCost(item);
       const affixCount = item.specialEnchantments?.length ?? 0;
       const atCap = affixCount >= cap;
-      const canAfford = state.hero.copper >= cost;
+      const canAfford = state.hero.gold >= cost;
 
       // Name + info
       const info = el('div', { flex: '1', minWidth: '0' });
@@ -271,7 +271,7 @@ function openBsDrawer(
   closeBsDrawer();
   const cost = getBlacksmithCost(item);
   const affixCount = item.specialEnchantments?.length ?? 0;
-  const canAfford = state.hero.copper >= cost;
+  const canAfford = state.hero.gold >= cost;
 
   bsDrawer = el('div', {
     position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '2000',
@@ -560,9 +560,9 @@ export function createServiceScreen(
     screen.appendChild(bar);
 
     if (buildingId !== 'inn') {
-      const copper = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
-      copper.textContent = `Gold: ${state.hero.copper}`;
-      screen.appendChild(copper);
+      const goldEl = el('div', { color: '#c90', fontSize: '13px', marginBottom: '8px' });
+      goldEl.textContent = `Gold: ${state.hero.gold}`;
+      screen.appendChild(goldEl);
     }
 
     function handleUpdate(next: GameState): void {

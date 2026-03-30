@@ -7,7 +7,7 @@ import type {
 } from "../../core/types";
 import { spawnMonsters } from "../monsters/spawning";
 import { getItemsForDepth } from "../../data/items";
-import { createItemFromTemplate, createCopperDrop } from "../items/loot";
+import { createItemFromTemplate, createGoldDrop } from "../items/loot";
 import { generateBossFloor } from "./BossFloors";
 import { TRAP_TYPES as SHARED_TRAP_TYPES } from "../../data/Traps";
 
@@ -128,6 +128,7 @@ export function generateFloor(
   hasStairsUp: boolean = true,
   hasStairsDown: boolean = true,
   difficulty: Difficulty = "intermediate",
+  ngPlus: number = 0,
 ): { floor: Floor; playerStart: Vector2 } {
   const bossFloor = generateBossFloor(
     dungeonId,
@@ -146,6 +147,8 @@ export function generateFloor(
       hasStairsUp,
       hasStairsDown,
       difficulty,
+      false,
+      ngPlus,
     );
     if (result) return result;
   }
@@ -158,6 +161,7 @@ export function generateFloor(
     hasStairsDown,
     difficulty,
     true,
+    ngPlus,
   )!;
 }
 
@@ -169,6 +173,7 @@ function generateFloorAttempt(
   hasStairsDown: boolean,
   difficulty: Difficulty,
   skipValidation = false,
+  ngPlus: number = 0,
 ): { floor: Floor; playerStart: Vector2 } | null {
   activeTileset = getTileset(getDungeonForFloor(floorNum));
 
@@ -315,6 +320,7 @@ function generateFloorAttempt(
     effectiveDepth,
     playerStart,
     rand,
+    ngPlus,
   );
 
   // Place traps in corridors and rooms (not on stairs or player start)
@@ -603,9 +609,10 @@ function placeGroundItems(
   depth: number,
   playerStart: Vector2,
   rand: () => number,
+  ngPlus: number = 0,
 ): PlacedItem[] {
   const items: PlacedItem[] = [];
-  const candidates = getItemsForDepth(depth);
+  const candidates = getItemsForDepth(depth, ngPlus);
   if (candidates.length === 0) return items;
 
   // Each room has a chance to contain 0-2 items
@@ -651,7 +658,7 @@ function placeGroundItems(
         ) {
           // 25% chance copper, 75% chance item
           if (rand() < 0.25) {
-            items.push({ item: createCopperDrop(depth), position: { x, y } });
+            items.push({ item: createGoldDrop(depth), position: { x, y } });
           } else {
             const tpl = candidates[Math.floor(rand() * candidates.length)];
             const item = createItemFromTemplate(tpl, depth);

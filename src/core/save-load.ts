@@ -119,6 +119,21 @@ export function loadGame(slot: number = 1): GameState | null {
       screen: "game",
     };
 
+    // Migration: rename copper → gold
+    if ((state.hero as any).copper !== undefined && (state.hero as any).gold === undefined) {
+      state.hero.gold = (state.hero as any).copper;
+      delete (state.hero as any).copper;
+    }
+    // Migration: rename copper-coins templateId → gold-coins
+    const renameCopperCoins = (item: any) => {
+      if (item?.templateId === 'copper-coins') item.templateId = 'gold-coins';
+    };
+    for (const item of state.hero.inventory) renameCopperCoins(item);
+    for (const key of Object.keys(state.floors)) {
+      for (const placed of state.floors[key].items ?? []) renameCopperCoins(placed?.item);
+    }
+    for (const item of state.stash ?? []) renameCopperCoins(item);
+
     // Migration: add defaults for fields added after initial release
     state.returnFloor ??= 0;
     state.activeBuildingId ??= "";
@@ -176,7 +191,7 @@ export function loadGame(slot: number = 1): GameState | null {
         state.floors['town-0'] = townFloor;
       } else {
         const { floor: newFloor } = generateFloor(
-          state.currentDungeon, state.currentFloor, state.rngSeed, true, true, state.difficulty,
+          state.currentDungeon, state.currentFloor, state.rngSeed, true, true, state.difficulty, state.ngPlusCount ?? 0,
         );
         state.floors[currentKey] = newFloor;
       }

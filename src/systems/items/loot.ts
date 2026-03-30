@@ -36,6 +36,8 @@ export function syncItemIdCounter(state: import('../../core/types').GameState): 
       if (item?.id) extract(item.id);
     }
   }
+  // Scan stash
+  for (const item of state.stash) extract(item.id);
   if (maxId >= nextItemId) {
     nextItemId = maxId + 1;
   }
@@ -70,9 +72,9 @@ export function generateLoot(
     const dropChance = 0.18 + depth * 0.003 + fortuneDropBonus;
     if (Math.random() > dropChance) return null;
 
-    // 20% chance of copper instead of an item
+    // 20% chance of gold instead of an item
     if (Math.random() < 0.2) {
-      return createCopperDrop(depth, equipment);
+      return createGoldDrop(depth, equipment);
     }
   }
 
@@ -128,7 +130,7 @@ export function createItemFromTemplate(
       enchantment = minEnch + Math.floor(Math.random() * (maxEnch - minEnch + 1));
     } else {
       const enchantRoll = Math.random();
-      if (enchantRoll < 0.05 + depth * 0.01) {
+      if (enchantRoll < 0.10) {
         // Cursed item
         enchantment = -(Math.floor(Math.random() * 3) + 1);
         cursed = true;
@@ -239,7 +241,7 @@ export function createItemFromTemplate(
   return base;
 }
 
-export function createCopperDrop(depth: number, equipment?: Record<string, any>): Item {
+export function createGoldDrop(depth: number, equipment?: Record<string, any>): Item {
   let amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
   // Fortune affix: bonus gold %
   if (equipment) {
@@ -255,7 +257,7 @@ export function createCopperDrop(depth: number, equipment?: Record<string, any>)
   }
   return {
     id: `item-${nextItemId++}`,
-    templateId: "copper-coins",
+    templateId: "gold-coins",
     name: `${amount} Gold`,
     category: "currency",
     sprite: "coins-gold",

@@ -14,7 +14,7 @@ export interface ItemTemplate {
   sprite: string;
   equipSlot?: EquipSlot;
   weight: number;          // grams
-  value: number;           // copper pieces
+  value: number;           // gold pieces
   depthMin: number;        // earliest floor this appears
   depthMax: number;        // latest floor (99 = forever)
   // Combat properties
@@ -37,6 +37,7 @@ export interface ItemTemplate {
   uniqueAbility?: string;  // special ability ID
   // NG+ gating
   ngMin?: number;          // minimum NG+ cycle required for this item to appear
+  junk?: boolean;          // worthless flavor item — excluded from NG+ loot pools
 }
 
 // ── Weapons ───────────────────────────────────────────────
@@ -83,7 +84,7 @@ const ELVEN_ARMOR: ItemTemplate[] = [
   { id: 'elven-chain-mail', name: 'Elven Chain Mail', category: 'armor', sprite: 'elven-chain-mail', equipSlot: 'body',
     weight: 6000, value: 300, depthMin: 16, depthMax: 99, ac: 8, materialTier: 'elven' },
   { id: 'elven-shield', name: 'Elven Shield', category: 'shield', sprite: 'metal-shield-enchanted', equipSlot: 'shield',
-    weight: 2500, value: 180, depthMin: 14, depthMax: 99, ac: 4, materialTier: 'elven' },
+    weight: 2500, value: 180, depthMin: 14, depthMax: 99, ac: 8, materialTier: 'elven' },
   { id: 'elven-helmet', name: 'Elven Helmet', category: 'helmet', sprite: 'metal-helmet-enchanted', equipSlot: 'helmet',
     weight: 1000, value: 120, depthMin: 14, depthMax: 99, ac: 3, materialTier: 'elven' },
   { id: 'elven-gloves', name: 'Elven Gloves', category: 'gauntlets', sprite: 'gloves-elven', equipSlot: 'gauntlets',
@@ -119,7 +120,7 @@ const METEORIC_ARMOR: ItemTemplate[] = [
   { id: 'meteoric-plate-mail', name: 'Meteoric Plate Mail', category: 'armor', sprite: 'metal-armour-cursed', equipSlot: 'body',
     weight: 12000, value: 800, depthMin: 28, depthMax: 99, ac: 15, materialTier: 'meteoric' },
   { id: 'meteoric-shield', name: 'Meteoric Steel Shield', category: 'shield', sprite: 'metal-shield-cursed', equipSlot: 'shield',
-    weight: 4000, value: 350, depthMin: 26, depthMax: 99, ac: 7, materialTier: 'meteoric' },
+    weight: 4000, value: 350, depthMin: 26, depthMax: 99, ac: 14, materialTier: 'meteoric' },
   { id: 'meteoric-helm', name: 'Meteoric Helm', category: 'helmet', sprite: 'metal-helmet-cursed', equipSlot: 'helmet',
     weight: 2500, value: 400, depthMin: 26, depthMax: 99, ac: 5, materialTier: 'meteoric' },
   { id: 'meteoric-gloves', name: 'Meteoric Gloves', category: 'gauntlets', sprite: 'gloves-meteoric', equipSlot: 'gauntlets',
@@ -153,9 +154,9 @@ const ARMOR: ItemTemplate[] = [
 
 const SHIELDS: ItemTemplate[] = [
   { id: 'small-wood-shield', name: 'Wooden Shield', category: 'shield', sprite: 'wood-shield', equipSlot: 'shield',
-    weight: 2000, value: 10, depthMin: 1, depthMax: 16, ac: 1 },
+    weight: 2000, value: 10, depthMin: 1, depthMax: 16, ac: 2 },
   { id: 'small-iron-shield', name: 'Iron Shield', category: 'shield', sprite: 'metal-shield', equipSlot: 'shield',
-    weight: 3000, value: 30, depthMin: 5, depthMax: 99, ac: 3 },
+    weight: 3000, value: 30, depthMin: 5, depthMax: 99, ac: 6 },
 ];
 
 // ── Helmets ───────────────────────────────────────────────
@@ -277,7 +278,7 @@ const WANDS: ItemTemplate[] = [
 // ── Currency ──────────────────────────────────────────────
 
 const CURRENCY: ItemTemplate[] = [
-  { id: 'copper-coins', name: 'Gold Coins', category: 'currency', sprite: 'coins-gold',
+  { id: 'gold-coins', name: 'Gold Coins', category: 'currency', sprite: 'coins-gold',
     weight: 50, value: 0, depthMin: 1, depthMax: 99 },
 ];
 
@@ -289,7 +290,7 @@ const CONTAINERS: ItemTemplate[] = [
   { id: 'large-pack', name: 'Large Pack', category: 'container', sprite: 'backpack-large', equipSlot: 'pack',
     weight: 800, value: 50, depthMin: 5, depthMax: 99, weightCapacity: 60000, bulkCapacity: 12000 },
   { id: 'pack-of-holding', name: 'Pack of Holding', category: 'container', sprite: 'backpack-enchanted', equipSlot: 'pack',
-    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 400000, bulkCapacity: 160000 },
+    weight: 400, value: 500, depthMin: 18, depthMax: 99, weightCapacity: 400000, bulkCapacity: 160000, unique: true },
   { id: 'leather-belt', name: 'Fine Belt', category: 'belt', sprite: 'belt-leather-enchanted', equipSlot: 'belt',
     weight: 300, value: 10, depthMin: 1, depthMax: 99, ac: 2 },
   { id: 'purse', name: 'Purse', category: 'container', sprite: 'purse-leather', equipSlot: 'purse',
@@ -310,25 +311,25 @@ const CONTAINERS: ItemTemplate[] = [
 
 const WORTHLESS: ItemTemplate[] = [
   { id: 'blank-scroll', name: 'Blank Scroll', category: 'scroll', sprite: 'scroll',
-    weight: 50, value: 2, depthMin: 1, depthMax: 99 },
+    weight: 50, value: 2, depthMin: 1, depthMax: 99, junk: true },
   { id: 'broken-sword', name: 'Broken Sword', category: 'misc', sprite: 'broken-sword',
-    weight: 1000, value: 3, depthMin: 1, depthMax: 99 },
+    weight: 1000, value: 3, depthMin: 1, depthMax: 99, junk: true },
   { id: 'broken-shield', name: 'Broken Shield', category: 'misc', sprite: 'broken-shield',
-    weight: 1500, value: 3, depthMin: 1, depthMax: 99 },
+    weight: 1500, value: 3, depthMin: 1, depthMax: 99, junk: true },
   { id: 'broken-helmet', name: 'Broken Helmet', category: 'misc', sprite: 'broken-helmet',
-    weight: 800, value: 2, depthMin: 1, depthMax: 99 },
+    weight: 800, value: 2, depthMin: 1, depthMax: 99, junk: true },
   { id: 'tattered-cloak', name: 'Tattered Cloak', category: 'misc', sprite: 'broken-cloak',
-    weight: 400, value: 2, depthMin: 1, depthMax: 99 },
+    weight: 400, value: 2, depthMin: 1, depthMax: 99, junk: true },
   { id: 'old-boots', name: 'Old Boots', category: 'misc', sprite: 'broken-boot',
-    weight: 600, value: 2, depthMin: 1, depthMax: 99 },
+    weight: 600, value: 2, depthMin: 1, depthMax: 99, junk: true },
   { id: 'dented-armor', name: 'Dented Armor', category: 'misc', sprite: 'broken-armour',
-    weight: 2000, value: 3, depthMin: 1, depthMax: 99 },
+    weight: 2000, value: 3, depthMin: 1, depthMax: 99, junk: true },
   { id: 'worn-belt', name: 'Worn Belt', category: 'misc', sprite: 'broken-belt',
-    weight: 200, value: 1, depthMin: 1, depthMax: 99 },
+    weight: 200, value: 1, depthMin: 1, depthMax: 99, junk: true },
   { id: 'torn-pack', name: 'Torn Pack', category: 'misc', sprite: 'backpack-broken',
-    weight: 500, value: 2, depthMin: 1, depthMax: 99 },
+    weight: 500, value: 2, depthMin: 1, depthMax: 99, junk: true },
   { id: 'parchment', name: 'Worn Parchment', category: 'misc', sprite: 'parchment',
-    weight: 30, value: 1, depthMin: 1, depthMax: 99 },
+    weight: 30, value: 1, depthMin: 1, depthMax: 99, junk: true },
 ];
 
 // ── Unique / Named Items ─────────────────────────────────
@@ -413,6 +414,7 @@ export function getItemsForDepth(depth: number, ngPlus: number = 0): ItemTemplat
   const available = ALL_ITEM_TEMPLATES.filter(
     t => depth >= t.depthMin && depth <= t.depthMax && t.category !== 'currency'
        && (t.ngMin === undefined || ngPlus >= t.ngMin)
+       && !(t.junk && ngPlus > 0)
   );
 
   // On deeper floors, duplicate tier items in the pool to increase their chance

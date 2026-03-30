@@ -20,15 +20,15 @@ function addMsg(
   };
 }
 
-function spendCopper(state: GameState, amount: number): GameState {
+function spendGold(state: GameState, amount: number): GameState {
   return {
     ...state,
-    hero: { ...state.hero, copper: state.hero.copper - amount },
+    hero: { ...state.hero, gold: state.hero.gold - amount },
   };
 }
 
-function checkCopper(state: GameState, cost: number): GameState | null {
-  if (state.hero.copper < cost) {
+function checkGold(state: GameState, cost: number): GameState | null {
+  if (state.hero.gold < cost) {
     return addMsg(state, `You need ${cost} gold for that.`, "system");
   }
   return null;
@@ -75,7 +75,7 @@ export function templeCurePoison(state: GameState): GameState {
 
 export function templeRemoveCurse(state: GameState, itemId: string): GameState {
   const cost = 25;
-  const err = checkCopper(state, cost);
+  const err = checkGold(state, cost);
   if (err) return err;
 
   // Search inventory
@@ -86,7 +86,7 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
     const blessed = blessItem(item);
     const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? blessed : i);
     return addMsg(
-      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
       `The curse is lifted! ${blessed.name} is now blessed.`,
     );
   }
@@ -100,7 +100,7 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
     if (!item.cursed) return addMsg(state, "That item is not cursed.", "system");
     const blessed = blessItem(item);
     return addMsg(
-      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed } }) }, cost),
+      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed } }) }, cost),
       `The curse is lifted! ${blessed.name} is now blessed.`,
     );
   }
@@ -142,7 +142,7 @@ export function getEnchanterCap(ngPlus: number): number {
 
 export function sageEnchantItem(state: GameState, itemId: string): GameState {
   const cost = 100;
-  const err = checkCopper(state, cost);
+  const err = checkGold(state, cost);
   if (err) return err;
 
   const cap = getEnchanterCap(state.ngPlusCount ?? 0);
@@ -157,7 +157,7 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
     const enhanced = enchantItem(item);
     const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? enhanced : i);
     return addMsg(
-      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
       `The sage enchants your ${enhanced.name}!`,
     );
   }
@@ -173,7 +173,7 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
     }
     const enhanced = enchantItem(item);
     return addMsg(
-      spendCopper({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: enhanced } }) }, cost),
+      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: enhanced } }) }, cost),
       `The sage enchants your ${enhanced.name}!`,
     );
   }
@@ -265,8 +265,8 @@ export function blacksmithCharge(state: GameState, itemId: string): GameState | 
   const item = findItem(state, itemId);
   if (!item) return null;
   const cost = getBlacksmithCost(item);
-  if (state.hero.copper < cost) return null;
-  return spendCopper(state, cost);
+  if (state.hero.gold < cost) return null;
+  return spendGold(state, cost);
 }
 
 /** Apply a chosen affix to an item (add or replace) — gold already charged */

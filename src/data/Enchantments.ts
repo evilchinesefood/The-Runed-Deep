@@ -189,10 +189,10 @@ export function rollSpecialEnchantments(
     // Tier items (elven/meteoric): high affix chance, multiple affixes
     chance = Math.min(0.70, 0.25 + Math.max(0, depth - 10) * 0.01 + ngBonus);
     baseCount = 2;
-  } else if (enchantment > 0) {
-    // Enchanted regular items: almost always get 1 affix
+  } else if (enchantment > 0 || isCursed) {
+    // Enchanted or cursed items: almost always get an affix; NG+ guarantees 3+
     chance = Math.min(0.85, 0.65 + depth * 0.005 + ngBonus);
-    baseCount = 1;
+    baseCount = ngPlus > 0 ? 3 : 1;
   } else {
     // Unenchanted regular items: rare affix at deep floors only
     chance = depth >= 25 ? Math.min(0.20, 0.02 + (depth - 25) * 0.01 + ngBonus) : ngBonus > 0 ? Math.min(0.10, ngBonus) : 0;
@@ -200,9 +200,10 @@ export function rollSpecialEnchantments(
   }
   if (Math.random() > chance) return [];
 
-  // Count: scales with depth and NG+, capped at 5 + ngPlus*2
+  // Count: scales with depth and NG+
+  // Non-tier blues: cap at 3 in NG0, uncapped by depth in NG+
   const bonusCount = Math.floor(depth / 10);
-  const maxCount = 5 + ngPlus * 2;
+  const maxCount = (!isTierItem && (enchantment > 0 || isCursed) && ngPlus === 0) ? 3 : 5 + ngPlus * 2;
   const count = Math.min(maxCount, baseCount + bonusCount + ngPlus);
 
   // Build weighted pool filtered by weapon/armor

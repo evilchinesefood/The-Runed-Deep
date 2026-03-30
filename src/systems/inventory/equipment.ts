@@ -36,16 +36,6 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
     else slot = 'ringLeft';
   }
 
-  // Two-handed weapon: unequip shield if needed
-  if (slot === 'weapon' && item.properties['twoHanded']) {
-    const shield = equipment.shield;
-    if (shield) {
-      inventory = [...inventory, shield];
-      equipment = { ...equipment, shield: null };
-      messages.push(msg(`Unequipped ${shield.name}.`, state.turn));
-    }
-  }
-
   // If slot is occupied, swap to inventory
   const existing = equipment[slot];
   if (existing) {

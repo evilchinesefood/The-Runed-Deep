@@ -611,9 +611,9 @@ export function processMonsterAbility(
       }
 
       case "steal-gold": {
-        if (Math.random() < 0.5 && s.hero.copper > 0) {
-          const stolen = Math.min(s.hero.copper, rollRange(10, 50));
-          s = { ...s, hero: { ...s.hero, copper: s.hero.copper - stolen } };
+        if (Math.random() < 0.5 && s.hero.gold > 0) {
+          const stolen = Math.min(s.hero.gold, rollRange(10, 50));
+          s = { ...s, hero: { ...s.hero, gold: s.hero.gold - stolen } };
           s = addMsg(s, `${monster.name} steals ${stolen} gold!`, "important");
         }
         break;
@@ -906,7 +906,7 @@ function processThief(
     let s = monsterAttacksPlayer(state, monster);
     // After stealing (handled by processMonsterAbility 'steal-gold'), flee
     const curFloor = s.floors[floorKey];
-    if (curFloor && s.hero.copper < state.hero.copper) {
+    if (curFloor && s.hero.gold < state.hero.gold) {
       // Gold was stolen — trigger flee
       const mi = curFloor.monsters.findIndex((m) => m.id === monster.id);
       if (mi >= 0 && !curFloor.monsters[mi].hasFled) {

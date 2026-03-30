@@ -565,7 +565,7 @@ touchControls.setMenuHandler((action) => {
       const floorKey = `${targetDungeon}-${targetFloor}`;
       let floors = { ...state.floors };
       if (!floors[floorKey]) {
-        const { floor: newFloor } = generateFloor(targetDungeon, targetFloor, state.rngSeed, true, true, state.difficulty);
+        const { floor: newFloor } = generateFloor(targetDungeon, targetFloor, state.rngSeed, true, true, state.difficulty, state.ngPlusCount ?? 0);
         floors = { ...floors, [floorKey]: newFloor };
       }
       const fl = floors[floorKey];
@@ -637,7 +637,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         level: 10,
         equipment: createEmptyEquipment(),
         inventory: [],
-        copper: 1000,
+        gold: 1000,
         knownSpells: getAllSpellIds(),
         spellHotkeys: getAllSpellIds().slice(0, 5),
         activeEffects: [],
@@ -721,6 +721,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         true,
         true,
         state.difficulty,
+        state.ngPlusCount ?? 0,
       );
       floors = { ...floors, [floorKey]: newFloor };
     }
@@ -1245,7 +1246,7 @@ function switchScreen(state: GameState): void {
         const floors = { ...s.floors, 'town-0': townFloor };
         // Always regenerate the dungeon floor
         const { floor: newDungeonFloor } = generateFloor(
-          regenDungeon, regenFloor, Date.now(), true, true, s.difficulty,
+          regenDungeon, regenFloor, Date.now(), true, true, s.difficulty, s.ngPlusCount ?? 0,
         );
         floors[regenKey] = newDungeonFloor;
 
