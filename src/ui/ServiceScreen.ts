@@ -283,14 +283,17 @@ function buildSage(
           zIndex: "2000",
           background: "#1a1a1a",
           borderTop: "2px solid #555",
-          padding: "12px 16px",
-          paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-          maxHeight: "60vh",
-          overflowY: "auto",
+          maxHeight: "70vh",
+          display: "flex",
+          flexDirection: "column",
           boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
         });
-        sageDrawer.appendChild(buildTooltipContent(item));
-        sageDrawer.appendChild(
+        const sageScroll = el("div", {
+          overflowY: "auto",
+          padding: "12px 16px 8px",
+        });
+        sageScroll.appendChild(buildTooltipContent(item));
+        sageScroll.appendChild(
           el(
             "div",
             {
@@ -303,13 +306,18 @@ function buildSage(
             `Enchanted +${ups}/${cap} \u00B7 Cost: 100g`,
           ),
         );
+        sageDrawer.appendChild(sageScroll);
 
         const btnRow = el("div", {
           display: "flex",
           gap: "8px",
-          marginTop: "10px",
+          padding: "8px 16px",
+          paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
           justifyContent: "center",
           flexWrap: "wrap",
+          flexShrink: "0",
+          borderTop: "1px solid #333",
+          background: "#1a1a1a",
         });
         if (!atCap) {
           const drawerEnchBtn = createButton("Enchant +1");
@@ -555,15 +563,15 @@ function openBsDrawer(
     zIndex: "2000",
     background: "#1a1a1a",
     borderTop: "2px solid #555",
-    padding: "12px 16px",
-    paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-    maxHeight: "60vh",
-    overflowY: "auto",
+    maxHeight: "70vh",
+    display: "flex",
+    flexDirection: "column",
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
-  bsDrawer.appendChild(buildTooltipContent(item));
-  bsDrawer.appendChild(
+  const bsScroll = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  bsScroll.appendChild(buildTooltipContent(item));
+  bsScroll.appendChild(
     el(
       "div",
       {
@@ -576,13 +584,18 @@ function openBsDrawer(
       `Affixes: ${affixCount}/${cap} \u00B7 Cost: ${cost}g`,
     ),
   );
+  bsDrawer.appendChild(bsScroll);
 
   const btnRow = el("div", {
     display: "flex",
     gap: "8px",
-    marginTop: "10px",
+    padding: "8px 16px",
+    paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
     justifyContent: "center",
     flexWrap: "wrap",
+    flexShrink: "0",
+    borderTop: "1px solid #333",
+    background: "#1a1a1a",
   });
 
   if (mode === "add" && affixCount < cap) {
@@ -823,19 +836,27 @@ function openStashDrawer(
     zIndex: "2000",
     background: "#1a1a1a",
     borderTop: "2px solid #555",
-    padding: "12px 16px",
-    paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-    maxHeight: "60vh",
-    overflowY: "auto",
+    maxHeight: "70vh",
+    display: "flex",
+    flexDirection: "column",
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
-  stashDrawerEl.appendChild(buildTooltipContent(item));
+  const stashScroll = el("div", {
+    overflowY: "auto",
+    padding: "12px 16px 8px",
+  });
+  stashScroll.appendChild(buildTooltipContent(item));
+  stashDrawerEl.appendChild(stashScroll);
   const btnRow = el("div", {
     display: "flex",
     gap: "8px",
-    marginTop: "10px",
+    padding: "8px 16px",
+    paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
     justifyContent: "center",
     flexWrap: "wrap",
+    flexShrink: "0",
+    borderTop: "1px solid #333",
+    background: "#1a1a1a",
   });
   const actionBtn = createButton(actionLabel, "primary");
   actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";

@@ -23,36 +23,87 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip, buildTooltipContent, setTooltipKnownSpells } from "./item-tooltip";
+import {
+  attachItemTooltip,
+  hideItemTooltip,
+  buildTooltipContent,
+  setTooltipKnownSpells,
+} from "./item-tooltip";
 import { ITEM_BY_ID } from "../data/items";
 
 const isMobileShop = () => window.innerWidth <= 768;
 let shopDrawerEl: HTMLElement | null = null;
 
 function closeShopDrawer(): void {
-  if (shopDrawerEl) { shopDrawerEl.remove(); shopDrawerEl = null; }
+  if (shopDrawerEl) {
+    shopDrawerEl.remove();
+    shopDrawerEl = null;
+  }
 }
 
-function openShopDrawer(item: Item, price: number, actionLabel: string, onAction: () => void, disabled = false): void {
+function openShopDrawer(
+  item: Item,
+  price: number,
+  actionLabel: string,
+  onAction: () => void,
+  disabled = false,
+): void {
   closeShopDrawer();
   shopDrawerEl = el("div", {
-    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
-    background: "#1a1a1a", borderTop: "2px solid #555",
-    padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-    maxHeight: "60vh", overflowY: "auto",
+    position: "fixed",
+    bottom: "0",
+    left: "0",
+    right: "0",
+    zIndex: "2000",
+    background: "#1a1a1a",
+    borderTop: "2px solid #555",
+    maxHeight: "70vh",
+    display: "flex",
+    flexDirection: "column",
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
-  shopDrawerEl.appendChild(buildTooltipContent(item));
-  shopDrawerEl.appendChild(el("div", { color: "#c9a84c", fontSize: "14px", marginTop: "6px", textAlign: "center", fontWeight: "bold" }, `Price: ${price} gold`));
-  const btnRow = el("div", { display: "flex", gap: "8px", marginTop: "10px", justifyContent: "center", flexWrap: "wrap" });
+  const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  scrollArea.appendChild(buildTooltipContent(item));
+  scrollArea.appendChild(
+    el(
+      "div",
+      {
+        color: "#c9a84c",
+        fontSize: "14px",
+        marginTop: "6px",
+        textAlign: "center",
+        fontWeight: "bold",
+      },
+      `Price: ${price} gold`,
+    ),
+  );
+  shopDrawerEl.appendChild(scrollArea);
+  const btnRow = el("div", {
+    display: "flex",
+    gap: "8px",
+    padding: "8px 16px",
+    paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    flexShrink: "0",
+    borderTop: "1px solid #333",
+    background: "#1a1a1a",
+  });
   const actionBtn = createButton(actionLabel);
   actionBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
   greyBtn(actionBtn, disabled);
-  if (!disabled) actionBtn.addEventListener("click", (e) => { e.stopPropagation(); onAction(); });
+  if (!disabled)
+    actionBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      onAction();
+    });
   btnRow.appendChild(actionBtn);
   const closeBtn = createButton("Close");
   closeBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-  closeBtn.addEventListener("click", (e) => { e.stopPropagation(); closeShopDrawer(); });
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeShopDrawer();
+  });
   btnRow.appendChild(closeBtn);
   shopDrawerEl.appendChild(btnRow);
   document.body.appendChild(shopDrawerEl);
@@ -63,7 +114,16 @@ interface ItemStack {
   count: number;
 }
 
-const NO_STACK_SLOTS = new Set(['weapon', 'shield', 'helmet', 'body', 'cloak', 'gauntlets', 'belt', 'boots']);
+const NO_STACK_SLOTS = new Set([
+  "weapon",
+  "shield",
+  "helmet",
+  "body",
+  "cloak",
+  "gauntlets",
+  "belt",
+  "boots",
+]);
 function stackItems(items: Item[]): ItemStack[] {
   const stacks: ItemStack[] = [];
   const map = new Map<string, ItemStack>();
@@ -94,7 +154,11 @@ function spriteEl(sprite: string): HTMLElement {
 }
 
 function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  if (disabled) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
+  if (disabled) {
+    btn.disabled = true;
+    btn.style.opacity = "0.4";
+    btn.style.cursor = "not-allowed";
+  }
 }
 
 function itemRow(
@@ -115,8 +179,12 @@ function itemRow(
     borderRadius: "4px",
     cursor: "pointer",
   });
-  row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
-  row.addEventListener("mouseleave", () => { row.style.background = ""; });
+  row.addEventListener("mouseenter", () => {
+    row.style.background = "#1a1a1a";
+  });
+  row.addEventListener("mouseleave", () => {
+    row.style.background = "";
+  });
 
   // Sprite with count badge
   const spriteWrap = el("div", {
@@ -133,29 +201,56 @@ function itemRow(
   if (glow) sp.style.filter = glow;
   spriteWrap.appendChild(sp);
   if (count > 1) {
-    const badge = el("span", {
-      position: "absolute", bottom: "-2px", right: "-2px",
-      background: "#c90", color: "#000", fontSize: "10px",
-      fontWeight: "bold", padding: "0 3px", borderRadius: "3px", lineHeight: "14px",
-    }, `${count}`);
+    const badge = el(
+      "span",
+      {
+        position: "absolute",
+        bottom: "-2px",
+        right: "-2px",
+        background: "#c90",
+        color: "#000",
+        fontSize: "10px",
+        fontWeight: "bold",
+        padding: "0 3px",
+        borderRadius: "3px",
+        lineHeight: "14px",
+      },
+      `${count}`,
+    );
     spriteWrap.appendChild(badge);
   }
   row.appendChild(spriteWrap);
 
   const displayName =
     count > 1 ? `${getDisplayName(item)} (x${count})` : getDisplayName(item);
-  row.appendChild(el("div", {
-    flex: "1", fontSize: "13px", color: nameColor ?? "#ccc",
-    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-  }, displayName));
+  row.appendChild(
+    el(
+      "div",
+      {
+        flex: "1",
+        fontSize: "13px",
+        color: nameColor ?? "#ccc",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+      displayName,
+    ),
+  );
 
-  row.appendChild(el("div", { fontSize: "12px", color: "#a70", flexShrink: "0" }, priceLabel));
+  row.appendChild(
+    el("div", { fontSize: "12px", color: "#a70", flexShrink: "0" }, priceLabel),
+  );
 
   // Inline button + always-on drawer
   const btn = createButton(btnText, "sm");
   greyBtn(btn, btnDisabled);
   if (!btnDisabled) {
-    btn.addEventListener("click", (e) => { e.stopPropagation(); hideItemTooltip(); onClick(); });
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideItemTooltip();
+      onClick();
+    });
   }
   row.appendChild(btn);
   if (!isMobileShop()) attachItemTooltip(row, item);
@@ -183,7 +278,11 @@ function sortItems(
     sorted.sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b)));
   } else if (mode === "type") {
     sorted.sort((a, b) => a.category.localeCompare(b.category));
-  } else if (mode === "preferred" && preferredCats && preferredCats.length > 0) {
+  } else if (
+    mode === "preferred" &&
+    preferredCats &&
+    preferredCats.length > 0
+  ) {
     sorted.sort((a, b) => {
       const aP = preferredCats.includes(a.category) ? 0 : 1;
       const bP = preferredCats.includes(b.category) ? 0 : 1;
@@ -269,7 +368,9 @@ function buildPanel(
       ),
     );
   } else {
-    const stacks = noStack ? sorted.map(i => ({ item: i, count: 1 })) : stackItems(sorted);
+    const stacks = noStack
+      ? sorted.map((i) => ({ item: i, count: 1 }))
+      : stackItems(sorted);
     for (const { item, count } of stacks) {
       const price = getPrice(item);
       const disabled = !canAfford(item);
@@ -328,11 +429,19 @@ export function createShopScreen(
     // Items toggle button
     const itemsBtn = createButton(itemsOnlyMode ? "Shop" : "Items");
     itemsBtn.style.cssText += "margin-left:auto;margin-right:8px;";
-    itemsBtn.addEventListener("click", (e) => { e.stopPropagation(); itemsOnlyMode = !itemsOnlyMode; render(); });
+    itemsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      itemsOnlyMode = !itemsOnlyMode;
+      render();
+    });
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
 
-    const copperLine = el("div", { color: "#c90", fontSize: "13px", marginBottom: "8px" }, `Gold: ${gold}`);
+    const copperLine = el(
+      "div",
+      { color: "#c90", fontSize: "13px", marginBottom: "8px" },
+      `Gold: ${gold}`,
+    );
     screen.appendChild(copperLine);
 
     const row = el("div", {
@@ -356,7 +465,10 @@ export function createShopScreen(
           render();
         },
         shopSort,
-        (mode) => { shopSort = mode; render(); },
+        (mode) => {
+          shopSort = mode;
+          render();
+        },
         soldKeys,
       );
       row.appendChild(forSale);
@@ -364,16 +476,22 @@ export function createShopScreen(
 
     // Sell Marked button — between shop inventory and player inventory
     const shop = SHOP_DEFS[shopId];
-    const isJunk = shopId === 'junk-store';
-    const markedItems = state.hero.inventory.filter(i => {
+    const isJunk = shopId === "junk-store";
+    const markedItems = state.hero.inventory.filter((i) => {
       if (!i.markedForSale) return false;
       if (isJunk) return true;
       return shop?.categories.includes(i.category);
     });
     if (markedItems.length > 0) {
-      const totalGold = markedItems.reduce((s, i) => s + getSellPrice(i, shopId), 0);
-      const sellMarkedBtn = createButton(`Sell Marked (${markedItems.length}) \u2014 ${totalGold}g`);
-      sellMarkedBtn.style.cssText += "display:block;width:100%;padding:10px;font-size:14px;";
+      const totalGold = markedItems.reduce(
+        (s, i) => s + getSellPrice(i, shopId),
+        0,
+      );
+      const sellMarkedBtn = createButton(
+        `Sell Marked (${markedItems.length}) \u2014 ${totalGold}g`,
+      );
+      sellMarkedBtn.style.cssText +=
+        "display:block;width:100%;padding:10px;font-size:14px;";
       sellMarkedBtn.addEventListener("click", () => {
         for (const item of markedItems) {
           soldKeys.add(`${item.templateId}|${item.enchantment}`);
@@ -393,14 +511,18 @@ export function createShopScreen(
       () => true,
       (id) => {
         const sellTarget = state.hero.inventory.find((i) => i.id === id);
-        if (sellTarget) soldKeys.add(`${sellTarget.templateId}|${sellTarget.enchantment}`);
+        if (sellTarget)
+          soldKeys.add(`${sellTarget.templateId}|${sellTarget.enchantment}`);
         const next = sellItem(state, shopId, id);
         state = next;
         onTransaction(next);
         render();
       },
       invSort,
-      (mode) => { invSort = mode; render(); },
+      (mode) => {
+        invSort = mode;
+        render();
+      },
       undefined,
       true,
       shop?.categories,
@@ -430,7 +552,10 @@ export function createShopScreen(
   };
   document.addEventListener("keydown", onKey);
 
-  screen.cleanup = () => { document.removeEventListener("keydown", onKey); closeShopDrawer(); };
+  screen.cleanup = () => {
+    document.removeEventListener("keydown", onKey);
+    closeShopDrawer();
+  };
 
   return screen;
 }

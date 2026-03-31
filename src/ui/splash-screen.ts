@@ -1,7 +1,14 @@
 import type { GameAction, GameState } from "../core/types";
 import { getSaveSlots, deleteSave } from "../core/save-load";
 import { createScreen, createPanel, createButton, el } from "./Theme";
-import { getCloudCode, setCloudCode, clearCloudCode, generateCode, pushSave, pullSave } from "../core/CloudSave";
+import {
+  getCloudCode,
+  setCloudCode,
+  clearCloudCode,
+  generateCode,
+  pushSave,
+  pullSave,
+} from "../core/CloudSave";
 
 export function createSplashScreen(
   container: HTMLElement,
@@ -183,7 +190,12 @@ export function createSplashScreen(
         details.appendChild(
           el(
             "div",
-            { fontSize: "11px", color: "#f90", fontFamily: "monospace", letterSpacing: "1px" },
+            {
+              fontSize: "11px",
+              color: "#f90",
+              fontFamily: "monospace",
+              letterSpacing: "1px",
+            },
             `Cloud: ${code}`,
           ),
         );
@@ -197,7 +209,8 @@ export function createSplashScreen(
         alignItems: "center",
       });
 
-      const slotBtnStyle = "height:34px;padding:0 10px;font-size:13px;display:flex;align-items:center;justify-content:center;";
+      const slotBtnStyle =
+        "height:34px;padding:0 10px;font-size:13px;display:flex;align-items:center;justify-content:center;";
 
       // Cloud toggle button
       const cloudBtn = createButton(code ? "\u2713" : "\u2601", "sm");
@@ -260,7 +273,9 @@ export function createSplashScreen(
               if (state.hero?.name) {
                 // Only overwrite local if cloud is newer (higher turn count)
                 const localJson = localStorage.getItem(`rd-save-${info.slot}`);
-                const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+                const localTurn = localJson
+                  ? (JSON.parse(localJson).state?.turn ?? 0)
+                  : 0;
                 if (state.turn >= localTurn) {
                   const saveData = { version: 1, timestamp: Date.now(), state };
                   const saveStr = JSON.stringify(saveData);
@@ -270,11 +285,17 @@ export function createSplashScreen(
                   } catch {
                     localStorage.clear();
                     setCloudCode(info.slot, cloudCode);
-                    try { localStorage.setItem(`rd-save-${info.slot}`, saveStr); } catch { /* give up */ }
+                    try {
+                      localStorage.setItem(`rd-save-${info.slot}`, saveStr);
+                    } catch {
+                      /* give up */
+                    }
                   }
                 }
               }
-            } catch { /* use local */ }
+            } catch {
+              /* use local */
+            }
           }
           loadBtn.disabled = false;
         }
@@ -350,7 +371,9 @@ export function createSplashScreen(
           if (!state.hero?.name) return;
           // Only overwrite local if cloud has higher turn count
           const localJson = localStorage.getItem(`rd-save-${slotNum}`);
-          const localTurn = localJson ? (JSON.parse(localJson).state?.turn ?? 0) : 0;
+          const localTurn = localJson
+            ? (JSON.parse(localJson).state?.turn ?? 0)
+            : 0;
           if (state.turn < localTurn) return;
           const saveData = { version: 1, timestamp: Date.now(), state };
           const saveStr = JSON.stringify(saveData);
@@ -359,7 +382,11 @@ export function createSplashScreen(
             localStorage.setItem(`rd-save-${slotNum}`, saveStr);
           } catch {
             localStorage.clear();
-            try { localStorage.setItem(`rd-save-${slotNum}`, saveStr); } catch { return; }
+            try {
+              localStorage.setItem(`rd-save-${slotNum}`, saveStr);
+            } catch {
+              return;
+            }
           }
           // Restore cloud code if cleared
           setCloudCode(slotNum, code);
@@ -369,9 +396,12 @@ export function createSplashScreen(
           if (!details) return;
           const children = details.children;
           if (children[0]) children[0].textContent = state.hero.name;
-          if (children[1]) children[1].textContent = `Level ${state.hero.level} | Floor ${(state.currentFloor ?? 0) + 1} | Turn ${state.turn}`;
+          if (children[1])
+            children[1].textContent = `Level ${state.hero.level} | Floor ${(state.currentFloor ?? 0) + 1} | Turn ${state.turn}`;
           if (children[2]) children[2].textContent = `\u2601 Synced from cloud`;
-        } catch { /* ignore sync errors */ }
+        } catch {
+          /* ignore sync errors */
+        }
       })();
     }
   }
@@ -382,20 +412,41 @@ export function createSplashScreen(
   ghLink.target = "_blank";
   ghLink.rel = "noopener noreferrer";
   ghLink.textContent = "View on GitHub";
-  ghLink.style.cssText = "display:inline-block;margin-top:32px;padding:8px 18px;border:1px solid #555;color:#aaa;font-size:13px;text-decoration:none;border-radius:3px;transition:border-color 0.2s,color 0.2s;";
-  ghLink.addEventListener("mouseenter", () => { ghLink.style.borderColor = "#888"; ghLink.style.color = "#fff"; });
-  ghLink.addEventListener("mouseleave", () => { ghLink.style.borderColor = "#555"; ghLink.style.color = "#aaa"; });
+  ghLink.style.cssText =
+    "display:inline-block;margin-top:24px;padding:4px 10px;border:1px solid #444;color:#666;font-size:11px;text-decoration:none;border-radius:3px;transition:border-color 0.2s,color 0.2s;";
+  ghLink.addEventListener("mouseenter", () => {
+    ghLink.style.borderColor = "#666";
+    ghLink.style.color = "#aaa";
+  });
+  ghLink.addEventListener("mouseleave", () => {
+    ghLink.style.borderColor = "#444";
+    ghLink.style.color = "#666";
+  });
   splash.appendChild(ghLink);
 
   // Copyright
-  const copy = el("div", { fontSize: "12px", color: "#555", marginTop: "12px", marginBottom: "16px", textAlign: "center" });
+  const copy = el("div", {
+    fontSize: "12px",
+    color: "#555",
+    marginTop: "12px",
+    marginBottom: "16px",
+    textAlign: "center",
+  });
   const emailLink = document.createElement("a");
   emailLink.href = "mailto:john.d.ayers@gmail.com";
   emailLink.textContent = "john.d.ayers@gmail.com";
   emailLink.style.cssText = "color:#555;text-decoration:none;";
-  emailLink.addEventListener("mouseenter", () => { emailLink.style.color = "#888"; });
-  emailLink.addEventListener("mouseleave", () => { emailLink.style.color = "#555"; });
-  copy.append("Copyright \u00A9 2026 John David Ayers ( ", emailLink, " ). All rights reserved.");
+  emailLink.addEventListener("mouseenter", () => {
+    emailLink.style.color = "#888";
+  });
+  emailLink.addEventListener("mouseleave", () => {
+    emailLink.style.color = "#555";
+  });
+  copy.append(
+    "Copyright \u00A9 2026 John David Ayers ( ",
+    emailLink,
+    " ). All rights reserved.",
+  );
   splash.appendChild(copy);
 
   container.appendChild(splash);
