@@ -94,6 +94,7 @@ function buildSage(state: GameState, onUpdate: (s: GameState) => void): HTMLElem
   panel.appendChild(el('div', { color: '#888', fontSize: '11px', marginBottom: '6px' }, `Enhance equipment by +1. (Limit: +${cap} per item)`));
 
   const list = el('div', { maxHeight: 'clamp(200px, 50vh, 400px)', overflowY: 'auto' });
+  list.setAttribute('data-service-list', '1');
 
   for (const slotKey of sageSlots) {
     const item = state.hero.equipment[slotKey];
@@ -198,6 +199,7 @@ function buildBlacksmith(state: GameState, onUpdate: (s: GameState) => void): HT
   ];
 
   const list = el('div', { maxHeight: 'clamp(200px, 50vh, 400px)', overflowY: 'auto' });
+  list.setAttribute('data-service-list', '1');
 
   for (const slotKey of slotOrder) {
     const item = state.hero.equipment[slotKey];
@@ -549,11 +551,14 @@ export function createServiceScreen(
   onClose: () => void,
 ): HTMLElement & { cleanup: () => void } {
   let state = initialState;
+  let scrollTop = 0;
   const title = BUILDING_NAMES[buildingId] ?? buildingId;
 
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
 
   function render(): void {
+    const listEl = screen.querySelector<HTMLElement>('[data-service-list]');
+    if (listEl) scrollTop = listEl.scrollTop;
     screen.replaceChildren();
 
     const bar = createTitleBar(title, onClose);
@@ -584,6 +589,8 @@ export function createServiceScreen(
 
     screen.appendChild(content);
     screen.appendChild(el('div', { color: '#555', fontSize: '11px', marginTop: '4px' }, 'Press Esc to close'));
+    const newListEl = screen.querySelector<HTMLElement>('[data-service-list]');
+    if (newListEl) newListEl.scrollTop = scrollTop;
   }
 
   render();
