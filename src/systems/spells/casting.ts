@@ -10,9 +10,7 @@ import { SPELL_BY_ID, type SpellDef } from "../../data/spells";
 import { getDifficultyConfig } from "../../data/difficulty";
 import { Sound } from "../Sound";
 import { getDirectionVector, teleportToTown } from "../../core/actions";
-import {
-  removeCurseFromFirst,
-} from "../inventory/use-item";
+import { removeCurseFromFirst } from "../inventory/use-item";
 import { getMonstersForDepth } from "../../data/monsters";
 import { createMonster } from "../monsters/spawning";
 import { queueAnimation } from "../../rendering/animation-queue";
@@ -33,10 +31,17 @@ function fortuneXp(baseXp: number, equipment: any): number {
   const pct = equipAffixTotal2(equipment, "fortune");
   if (pct > 0) xp = Math.round(xp * (1 + pct / 100));
   for (const eq of Object.values(equipment)) {
-    if (eq && ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === 'fortune-power') { xp *= 2; break; }
+    if (
+      eq &&
+      ITEM_BY_ID[(eq as any).templateId]?.uniqueAbility === "fortune-power"
+    ) {
+      xp *= 2;
+      break;
+    }
   }
   const leechPenalty = equipAffixTotal2(equipment, "leech");
-  if (leechPenalty > 0) xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
+  if (leechPenalty > 0)
+    xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
   return xp;
 }
 
@@ -64,11 +69,13 @@ export function castSpell(
   // Arcane Mastery: reduce MP cost + Ring of the Archmage unique
   let costReduction = equipAffixTotal(state.hero.equipment, "arcane-mastery");
   for (const eq of Object.values(state.hero.equipment)) {
-    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'archmage-power') costReduction += 25;
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "archmage-power")
+      costReduction += 25;
   }
   // Dark Pact: increase MP cost (secondary value = % increase)
   const darkPactPenalty = equipAffixTotal2(state.hero.equipment, "dark-pact");
-  const costMult = (1 - Math.min(costReduction, 75) / 100) * (1 + darkPactPenalty / 100);
+  const costMult =
+    (1 - Math.min(costReduction, 75) / 100) * (1 + darkPactPenalty / 100);
   const cost = Math.max(1, Math.round(spell.manaCost * costMult));
   if (state.hero.mp < cost) {
     return addMsg(
@@ -103,9 +110,13 @@ export function castSpell(
   )
     Sound.spellHeal();
   else if (
-    ["shield", "resist-cold", "resist-fire", "resist-lightning", "time-stop"].includes(
-      spell.id,
-    )
+    [
+      "shield",
+      "resist-cold",
+      "resist-fire",
+      "resist-lightning",
+      "time-stop",
+    ].includes(spell.id)
   )
     Sound.spellBuff();
 
@@ -236,12 +247,16 @@ function resolveSpellEffect(
     }
     case "time-stop": {
       const newEffects = [
-        ...state.hero.activeEffects.filter(e => e.id !== "time-stop"),
+        ...state.hero.activeEffects.filter((e) => e.id !== "time-stop"),
         { id: "time-stop", name: "Time Stop", turnsRemaining: 10 },
       ];
       queueAnimation(buildBuffAnimation(state.hero.position, "#88f"));
       return {
-        ...addMsg(state, `Time freezes! Monsters cannot act for 10 turns.`, "important"),
+        ...addMsg(
+          state,
+          `Time freezes! Monsters cannot act for 10 turns.`,
+          "important",
+        ),
         hero: { ...state.hero, activeEffects: newEffects },
       };
     }
@@ -422,14 +437,17 @@ function resolveBall(
         ax === currentState.hero.position.x &&
         ay === currentState.hero.position.y
       ) {
-        let selfDmg = rollRange(
-          Math.floor(minDmg / 2),
-          Math.floor(maxDmg / 2),
-        );
+        let selfDmg = rollRange(Math.floor(minDmg / 2), Math.floor(maxDmg / 2));
         // Apply hero's elemental resistance to self-damage
-        const heroResist = currentState.hero.resistances[element as keyof typeof currentState.hero.resistances] ?? 0;
-        if (heroResist >= 100) { selfDmg = 0; }
-        else if (heroResist > 0) { selfDmg = Math.round(selfDmg * (1 - heroResist / 100)); }
+        const heroResist =
+          currentState.hero.resistances[
+            element as keyof typeof currentState.hero.resistances
+          ] ?? 0;
+        if (heroResist >= 100) {
+          selfDmg = 0;
+        } else if (heroResist > 0) {
+          selfDmg = Math.round(selfDmg * (1 - heroResist / 100));
+        }
         if (selfDmg > 0) {
           currentState = {
             ...currentState,
@@ -469,15 +487,15 @@ function applySpellDamageToMonster(
 
   // INT scaling — effective INT includes equipment bonuses
   const eq = state.hero.equipment;
-  const soulDrainAll = Math.round(equipAffixTotal(eq, 'soul-drain'));
-  const bonusInt = Math.round(equipAffixTotal(eq, 'brilliance')) + soulDrainAll;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain"));
+  const bonusInt = Math.round(equipAffixTotal(eq, "brilliance")) + soulDrainAll;
   let uInt = 0;
   for (const slot of Object.values(eq)) {
     if (!slot) continue;
     const tpl = ITEM_BY_ID[slot.templateId];
     if (!tpl?.uniqueAbility) continue;
-    if (tpl.uniqueAbility === 'crown-power') uInt += 10;
-    else if (tpl.uniqueAbility === 'archmage-power') uInt += 30;
+    if (tpl.uniqueAbility === "crown-power") uInt += 10;
+    else if (tpl.uniqueAbility === "archmage-power") uInt += 30;
   }
   const effInt = state.hero.attributes.intelligence + bonusInt + uInt;
   damage = Math.round(damage * (1 + effInt / 100));
@@ -505,7 +523,10 @@ function applySpellDamageToMonster(
   // Helm of Storms: +50% lightning damage
   if (element === "lightning") {
     for (const eq of Object.values(state.hero.equipment)) {
-      if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "lightning-boost") {
+      if (
+        eq &&
+        ITEM_BY_ID[eq.templateId]?.uniqueAbility === "lightning-boost"
+      ) {
         damage = Math.round(damage * 1.5);
         break;
       }
@@ -610,15 +631,15 @@ function resolveHeal(
 
   // INT scaling for healing
   const eq = hero.equipment;
-  const soulDrainAll = Math.round(equipAffixTotal(eq, 'soul-drain'));
-  const bonusInt = Math.round(equipAffixTotal(eq, 'brilliance')) + soulDrainAll;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain"));
+  const bonusInt = Math.round(equipAffixTotal(eq, "brilliance")) + soulDrainAll;
   let uInt = 0;
   for (const slot of Object.values(eq)) {
     if (!slot) continue;
     const tpl = ITEM_BY_ID[slot.templateId];
     if (!tpl?.uniqueAbility) continue;
-    if (tpl.uniqueAbility === 'crown-power') uInt += 10;
-    else if (tpl.uniqueAbility === 'archmage-power') uInt += 30;
+    if (tpl.uniqueAbility === "crown-power") uInt += 10;
+    else if (tpl.uniqueAbility === "archmage-power") uInt += 30;
   }
   const effInt = hero.attributes.intelligence + bonusInt + uInt;
   const intMult = 1 + effInt / 100;
@@ -1034,7 +1055,12 @@ function resolveLight(state: GameState): GameState {
   const py = state.hero.position.y;
 
   // Light player tile (floor and trap tiles — not walls)
-  const canLight = (t: string) => t === "floor" || t === "trap" || t === "decor" || t === "stairs-up" || t === "stairs-down";
+  const canLight = (t: string) =>
+    t === "floor" ||
+    t === "trap" ||
+    t === "decor" ||
+    t === "stairs-up" ||
+    t === "stairs-down";
   if (newFloor.tiles[py]?.[px] && canLight(newFloor.tiles[py][px].type)) {
     newFloor.lit[py][px] = true;
   }
