@@ -287,8 +287,12 @@ export function createCharacterInfoScreen(
     const wMin = weapon.properties["damageMin"] ?? 0;
     const wMax = weapon.properties["damageMax"] ?? 0;
     const dmgBonus = h.equipDamageBonus ?? 0;
+    const strBonus = Math.floor(h.attributes.strength / 10);
     panel.appendChild(
-      statLine("Melee Damage", `${wMin + dmgBonus}-${wMax + dmgBonus}`),
+      statLine(
+        "Melee Damage",
+        `${wMin + dmgBonus + strBonus}-${wMax + dmgBonus + strBonus}`,
+      ),
     );
   }
 
@@ -327,10 +331,16 @@ export function createCharacterInfoScreen(
   }
   const darkPactCost = Math.round(equipAffixTotal2(h.equipment, "dark-pact"));
   if (mpReduction > 0 || darkPactCost > 0) {
-    const net = Math.min(75, mpReduction) - darkPactCost;
-    const color = net > 0 ? "#a6f" : net < 0 ? "#f44" : "#888";
+    const costMult =
+      (1 - Math.min(mpReduction, 75) / 100) * (1 + darkPactCost / 100);
+    const pctChange = Math.round((1 - costMult) * 100);
+    const color = pctChange > 0 ? "#a6f" : pctChange < 0 ? "#f44" : "#888";
     panel.appendChild(
-      statLine("MP Cost", `${net > 0 ? "-" : "+"}${Math.abs(net)}%`, color),
+      statLine(
+        "MP Cost",
+        `${pctChange > 0 ? "-" : "+"}${Math.abs(pctChange)}%`,
+        color,
+      ),
     );
   }
 
