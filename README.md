@@ -35,6 +35,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks, clairvoyance
   - **14 spellbook-only** (found as loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
   - **Time Stop** (NG+ only): freeze all monsters for 10 turns
+- **INT-based scaling** — spell damage and healing scale with effective Intelligence (base + gear bonuses)
 - **Spell hotkeys** — up to 5 spells bound to number keys
 - **Resist spells** — temporarily add +50 elemental resistance
 
@@ -81,6 +82,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ### UI & Polish
 - **Rich item tooltips** — effective damage/accuracy/AC with enchantment breakdown, scaled affix values, unique abilities
 - **Tab-compare tooltips** — hold Tab while hovering an equippable to compare with your equipped item
+- **Character sheet** — attributes with equipment bonus breakdown, all active affix totals, combat stats (melee damage, spell power, dodge, swiftness, MP cost, regen, gold/XP bonus, life steal, thorns)
 - **Character creation** — name, gender, 4 attributes, difficulty, starting spell
 - **4 difficulty levels** — Easy, Intermediate, Hard, Impossible
 - **18 achievements**
