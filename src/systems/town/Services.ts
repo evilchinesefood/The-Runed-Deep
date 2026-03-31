@@ -5,9 +5,13 @@
 import type { GameState, Item } from "../../core/types";
 import { recomputeDerivedStats } from "../character/derived-stats";
 import { ITEM_BY_ID } from "../../data/items";
-import { AFFIXES, type Affix } from "../../data/Enchantments";
+import { AFFIXES, AFFIX_BY_ID, type Affix } from "../../data/Enchantments";
 
-const AFFIX_SUFFIXES = ["of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"];
+/** Extract affix suffix like "of Vampiric" from item name */
+function extractAffixSuffix(name: string): string {
+  const match = name.match(/\s+(of\s+.+)$/);
+  return match ? match[1] : "";
+}
 
 function addMsg(
   state: GameState,
@@ -79,14 +83,23 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
   if (err) return err;
 
   // Search inventory
-  const invIdx = state.hero.inventory.findIndex(i => i.id === itemId);
+  const invIdx = state.hero.inventory.findIndex((i) => i.id === itemId);
   if (invIdx !== -1) {
     const item = state.hero.inventory[invIdx];
-    if (!item.cursed) return addMsg(state, "That item is not cursed.", "system");
+    if (!item.cursed)
+      return addMsg(state, "That item is not cursed.", "system");
     const blessed = blessItem(item);
-    const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? blessed : i);
+    const inv = state.hero.inventory.map((i, idx) =>
+      idx === invIdx ? blessed : i,
+    );
     return addMsg(
-      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      spendGold(
+        {
+          ...state,
+          hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+        },
+        cost,
+      ),
       `The curse is lifted! ${blessed.name} is now blessed.`,
     );
   }
@@ -94,13 +107,23 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
   // Search equipment
   const eq = state.hero.equipment;
   const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const slot = slots.find(s => eq[s]?.id === itemId);
+  const slot = slots.find((s) => eq[s]?.id === itemId);
   if (slot) {
     const item = eq[slot]!;
-    if (!item.cursed) return addMsg(state, "That item is not cursed.", "system");
+    if (!item.cursed)
+      return addMsg(state, "That item is not cursed.", "system");
     const blessed = blessItem(item);
     return addMsg(
-      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed } }) }, cost),
+      spendGold(
+        {
+          ...state,
+          hero: recomputeDerivedStats({
+            ...state.hero,
+            equipment: { ...eq, [slot]: blessed },
+          }),
+        },
+        cost,
+      ),
       `The curse is lifted! ${blessed.name} is now blessed.`,
     );
   }
@@ -109,25 +132,25 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
 }
 
 /** Convert a cursed item into a blessed one: flip negative enchant to positive */
-export function blessItem(item: import("../../core/types").Item): import("../../core/types").Item {
+export function blessItem(
+  item: import("../../core/types").Item,
+): import("../../core/types").Item {
   const newEnch = Math.abs(item.enchantment);
   const tpl = ITEM_BY_ID[item.templateId];
-  const baseName = tpl?.name ?? item.name.replace(/\s*[+-]\d+.*$/, '');
+  const baseName = tpl?.name ?? item.name.replace(/\s*[+-]\d+.*$/, "");
   const baseValue = tpl?.value ?? 50;
 
   // Preserve affix suffix
-  let suffix = '';
-  for (const s of AFFIX_SUFFIXES) {
-    if (item.name.includes(s)) { suffix = ` ${s}`; break; }
-  }
+  const suffix = extractAffixSuffix(item.name);
+  const suffixStr = suffix ? ` ${suffix}` : "";
 
-  const enchStr = newEnch > 0 ? ` +${newEnch}` : '';
+  const enchStr = newEnch > 0 ? ` +${newEnch}` : "";
   return {
     ...item,
     cursed: false,
     blessed: true,
     enchantment: newEnch,
-    name: `${baseName}${enchStr}${suffix}`,
+    name: `${baseName}${enchStr}${suffixStr}`,
     identified: true,
     value: Math.max(1, baseValue + newEnch * 20),
   };
@@ -148,16 +171,28 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
   const cap = getEnchanterCap(state.ngPlusCount ?? 0);
 
   // Search inventory
-  const invIdx = state.hero.inventory.findIndex(i => i.id === itemId);
+  const invIdx = state.hero.inventory.findIndex((i) => i.id === itemId);
   if (invIdx !== -1) {
     const item = state.hero.inventory[invIdx];
-    if ((item.properties['enchanterUps'] ?? 0) >= cap) {
-      return addMsg(state, `This item has reached the enchanter limit (+${cap}).`, "system");
+    if ((item.properties["enchanterUps"] ?? 0) >= cap) {
+      return addMsg(
+        state,
+        `This item has reached the enchanter limit (+${cap}).`,
+        "system",
+      );
     }
     const enhanced = enchantItem(item);
-    const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? enhanced : i);
+    const inv = state.hero.inventory.map((i, idx) =>
+      idx === invIdx ? enhanced : i,
+    );
     return addMsg(
-      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) }, cost),
+      spendGold(
+        {
+          ...state,
+          hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+        },
+        cost,
+      ),
       `The sage enchants your ${enhanced.name}!`,
     );
   }
@@ -165,15 +200,28 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
   // Search equipment
   const eq = state.hero.equipment;
   const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const slot = slots.find(s => eq[s]?.id === itemId);
+  const slot = slots.find((s) => eq[s]?.id === itemId);
   if (slot) {
     const item = eq[slot]!;
-    if ((item.properties['enchanterUps'] ?? 0) >= cap) {
-      return addMsg(state, `This item has reached the enchanter limit (+${cap}).`, "system");
+    if ((item.properties["enchanterUps"] ?? 0) >= cap) {
+      return addMsg(
+        state,
+        `This item has reached the enchanter limit (+${cap}).`,
+        "system",
+      );
     }
     const enhanced = enchantItem(item);
     return addMsg(
-      spendGold({ ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: enhanced } }) }, cost),
+      spendGold(
+        {
+          ...state,
+          hero: recomputeDerivedStats({
+            ...state.hero,
+            equipment: { ...eq, [slot]: enhanced },
+          }),
+        },
+        cost,
+      ),
       `The sage enchants your ${enhanced.name}!`,
     );
   }
@@ -182,24 +230,28 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
 }
 
 /** Add +1 enchantment to an item, rebuild name correctly */
-function enchantItem(item: import("../../core/types").Item): import("../../core/types").Item {
+function enchantItem(
+  item: import("../../core/types").Item,
+): import("../../core/types").Item {
   const newEnch = item.enchantment + 1;
   const tpl = ITEM_BY_ID[item.templateId];
-  const baseName = tpl?.name ?? item.name.replace(/\s*[+-]\d+.*$/, '');
+  const baseName = tpl?.name ?? item.name.replace(/\s*[+-]\d+.*$/, "");
 
-  // Detect affix suffix (e.g. "of Valor") from the current name
-  let suffix = '';
-  for (const s of AFFIX_SUFFIXES) {
-    if (item.name.includes(s)) { suffix = ` ${s}`; break; }
-  }
+  // Detect affix suffix (e.g. "of Vampiric") from the current name
+  const suffix = extractAffixSuffix(item.name);
+  const suffixStr = suffix ? ` ${suffix}` : "";
 
-  const enchStr = newEnch > 0 ? ` +${newEnch}` : newEnch < 0 ? ` ${newEnch}` : '';
+  const enchStr =
+    newEnch > 0 ? ` +${newEnch}` : newEnch < 0 ? ` ${newEnch}` : "";
   return {
     ...item,
     enchantment: newEnch,
-    name: `${baseName}${enchStr}${suffix}`,
+    name: `${baseName}${enchStr}${suffixStr}`,
     value: Math.max(1, (tpl?.value ?? 50) + newEnch * 20),
-    properties: { ...item.properties, enchanterUps: (item.properties['enchanterUps'] ?? 0) + 1 },
+    properties: {
+      ...item.properties,
+      enchanterUps: (item.properties["enchanterUps"] ?? 0) + 1,
+    },
   };
 }
 
@@ -218,17 +270,27 @@ export function getBlacksmithCap(ngPlus: number): number {
 
 /** Generate 3 random affix options for an item, excluding existing ones and cursed-only */
 export function rollBlacksmithOptions(
-  item: Item, ngPlus: number, excludeIds: string[] = [],
+  item: Item,
+  ngPlus: number,
+  excludeIds: string[] = [],
 ): { id: string; critical: boolean }[] {
   const tpl = ITEM_BY_ID[item.templateId];
-  const isWeapon = item.category === 'weapon';
-  const isArmor = ['armor', 'shield', 'helmet', 'cloak', 'gauntlets', 'boots', 'belt'].includes(item.category);
+  const isWeapon = item.category === "weapon";
+  const isArmor = [
+    "armor",
+    "shield",
+    "helmet",
+    "cloak",
+    "gauntlets",
+    "boots",
+    "belt",
+  ].includes(item.category);
   const existing = new Set([
     ...excludeIds,
-    ...(item.specialEnchantments ?? []).map(e => e.replace(':critical', '')),
+    ...(item.specialEnchantments ?? []).map((e) => e.replace(":critical", "")),
   ]);
 
-  const pool = AFFIXES.filter(a => {
+  const pool = AFFIXES.filter((a) => {
     if (a.cursedOnly) return false;
     if (a.weaponOnly && !isWeapon) return false;
     if (a.armorOnly && !isArmor) return false;
@@ -242,17 +304,24 @@ export function rollBlacksmithOptions(
   const totalW = pool.reduce((s, a) => s + (a.weight ?? 1), 0);
   const pick = (): Affix => {
     let roll = Math.random() * totalW;
-    for (const a of pool) { roll -= (a.weight ?? 1); if (roll <= 0) return a; }
+    for (const a of pool) {
+      roll -= a.weight ?? 1;
+      if (roll <= 0) return a;
+    }
     return pool[pool.length - 1];
   };
 
-  const critChance = ngPlus <= 0 ? 0.05 : ngPlus === 1 ? 0.15 : ngPlus === 2 ? 0.25 : 0.35;
+  const critChance =
+    ngPlus <= 0 ? 0.05 : ngPlus === 1 ? 0.15 : ngPlus === 2 ? 0.25 : 0.35;
   const results: { id: string; critical: boolean }[] = [];
   const used = new Set<string>();
   for (let i = 0; i < 5 && used.size < pool.length; i++) {
     let a: Affix;
     let tries = 0;
-    do { a = pick(); tries++; } while (used.has(a.id) && tries < 50);
+    do {
+      a = pick();
+      tries++;
+    } while (used.has(a.id) && tries < 50);
     if (used.has(a.id)) continue;
     used.add(a.id);
     results.push({ id: a.id, critical: Math.random() < critChance });
@@ -261,7 +330,10 @@ export function rollBlacksmithOptions(
 }
 
 /** Charge gold upfront for blacksmith work */
-export function blacksmithCharge(state: GameState, itemId: string): GameState | null {
+export function blacksmithCharge(
+  state: GameState,
+  itemId: string,
+): GameState | null {
   const item = findItem(state, itemId);
   if (!item) return null;
   const cost = getBlacksmithCost(item);
@@ -271,7 +343,11 @@ export function blacksmithCharge(state: GameState, itemId: string): GameState | 
 
 /** Apply a chosen affix to an item (add or replace) — gold already charged */
 export function blacksmithApplyAffix(
-  state: GameState, itemId: string, affixId: string, critical: boolean, replaceIdx?: number,
+  state: GameState,
+  itemId: string,
+  affixId: string,
+  critical: boolean,
+  replaceIdx?: number,
 ): GameState {
   const item = findItem(state, itemId);
   if (!item) return addMsg(state, "Item not found.", "system");
@@ -279,7 +355,11 @@ export function blacksmithApplyAffix(
   const affixStr = critical ? `${affixId}:critical` : affixId;
   let enchants = [...(item.specialEnchantments ?? [])];
 
-  if (replaceIdx !== undefined && replaceIdx >= 0 && replaceIdx < enchants.length) {
+  if (
+    replaceIdx !== undefined &&
+    replaceIdx >= 0 &&
+    replaceIdx < enchants.length
+  ) {
     enchants[replaceIdx] = affixStr;
   } else {
     enchants.push(affixStr);
@@ -287,18 +367,36 @@ export function blacksmithApplyAffix(
 
   // Add suffix if item doesn't have one yet
   let name = item.name;
-  const hasSuffix = AFFIX_SUFFIXES.some(s => name.includes(s));
+  const hasSuffix = /\s+of\s+/.test(name);
   if (!hasSuffix && enchants.length > 0) {
-    const suffix = AFFIX_SUFFIXES[Math.floor(Math.random() * AFFIX_SUFFIXES.length)];
-    name = `${name} ${suffix}`;
+    let bestId = enchants[0].replace(":critical", "");
+    let bestWeight = Infinity;
+    for (const raw of enchants) {
+      const id = raw.replace(":critical", "");
+      const a = AFFIX_BY_ID[id];
+      if (a && a.weight < bestWeight) {
+        bestWeight = a.weight;
+        bestId = id;
+      }
+    }
+    const a = AFFIX_BY_ID[bestId];
+    if (a) name = `${name} of ${a.name}`;
   }
 
   // Recalculate value: base + enchantment bonus + affix bonus
   const tpl = ITEM_BY_ID[item.templateId];
   const baseValue = tpl?.value ?? 50;
-  const newValue = Math.max(1, baseValue + item.enchantment * 20 + enchants.length * 50);
+  const newValue = Math.max(
+    1,
+    baseValue + item.enchantment * 20 + enchants.length * 50,
+  );
 
-  const updated = { ...item, specialEnchantments: enchants, name, value: newValue };
+  const updated = {
+    ...item,
+    specialEnchantments: enchants,
+    name,
+    value: newValue,
+  };
   return addMsg(
     applyItemUpdate(state, itemId, updated),
     `The blacksmith forges a new enchantment onto your ${item.name}!`,
@@ -306,7 +404,7 @@ export function blacksmithApplyAffix(
 }
 
 function findItem(state: GameState, id: string): Item | null {
-  const inv = state.hero.inventory.find(i => i.id === id);
+  const inv = state.hero.inventory.find((i) => i.id === id);
   if (inv) return inv;
   for (const eq of Object.values(state.hero.equipment)) {
     if (eq?.id === id) return eq;
@@ -314,18 +412,32 @@ function findItem(state: GameState, id: string): Item | null {
   return null;
 }
 
-function applyItemUpdate(state: GameState, itemId: string, updated: Item): GameState {
-  const invIdx = state.hero.inventory.findIndex(i => i.id === itemId);
+function applyItemUpdate(
+  state: GameState,
+  itemId: string,
+  updated: Item,
+): GameState {
+  const invIdx = state.hero.inventory.findIndex((i) => i.id === itemId);
   if (invIdx !== -1) {
-    const inv = state.hero.inventory.map((i, idx) => idx === invIdx ? updated : i);
-    return { ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv }) };
+    const inv = state.hero.inventory.map((i, idx) =>
+      idx === invIdx ? updated : i,
+    );
+    return {
+      ...state,
+      hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+    };
   }
   const eq = state.hero.equipment;
   const slots = Object.keys(eq) as (keyof typeof eq)[];
-  const slot = slots.find(s => eq[s]?.id === itemId);
+  const slot = slots.find((s) => eq[s]?.id === itemId);
   if (slot) {
-    return { ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: updated } }) };
+    return {
+      ...state,
+      hero: recomputeDerivedStats({
+        ...state.hero,
+        equipment: { ...eq, [slot]: updated },
+      }),
+    };
   }
   return state;
 }
-
