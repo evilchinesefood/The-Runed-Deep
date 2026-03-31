@@ -5,57 +5,9 @@ import {
   xpRequiredForLevel,
 } from "../systems/character/leveling";
 import { createScreen, createPanel, createTitleBar, el } from "./Theme";
-
-function attrBar(
-  label: string,
-  value: number,
-  max: number,
-  color: string,
-): HTMLElement {
-  const row = el("div", {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    marginBottom: "4px",
-  });
-
-  row.appendChild(
-    el(
-      "span",
-      { width: "50px", fontSize: "12px", color: "#aaa", textAlign: "right" },
-      label,
-    ),
-  );
-  row.appendChild(
-    el(
-      "span",
-      {
-        width: "28px",
-        fontSize: "13px",
-        fontWeight: "bold",
-        textAlign: "center",
-      },
-      String(value),
-    ),
-  );
-
-  const track = el("div", {
-    flex: "1",
-    height: "10px",
-    background: "#222",
-    border: "1px solid #333",
-  });
-  const pct = Math.min(100, Math.round((value / max) * 100));
-  const fill = el("div", {
-    width: `${pct}%`,
-    height: "100%",
-    background: color,
-  });
-  track.appendChild(fill);
-  row.appendChild(track);
-
-  return row;
-}
+import { AFFIXES } from "../data/Enchantments";
+import { equipAffixTotal, equipAffixTotal2 } from "../utils/Enchants";
+import { ITEM_BY_ID } from "../data/items";
 
 function statLine(
   label: string,
@@ -169,6 +121,31 @@ export function createCharacterInfoScreen(
   // ── Attributes ──────────────────────────────────────────
   panel.appendChild(sectionHeader("Attributes"));
 
+  const soulDrainAll = Math.round(equipAffixTotal(h.equipment, "soul-drain"));
+  const attrBonuses: Record<string, number> = {
+    strength: Math.round(equipAffixTotal(h.equipment, "might")) + soulDrainAll,
+    intelligence:
+      Math.round(equipAffixTotal(h.equipment, "brilliance")) + soulDrainAll,
+    constitution:
+      Math.round(equipAffixTotal(h.equipment, "fortitude")) + soulDrainAll,
+    dexterity: Math.round(equipAffixTotal(h.equipment, "grace")) + soulDrainAll,
+  };
+
+  for (const slot of Object.values(h.equipment)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (!tpl?.uniqueAbility) continue;
+    const ua = tpl.uniqueAbility;
+    if (ua === "crown-power") {
+      attrBonuses.strength += 10;
+      attrBonuses.intelligence += 10;
+      attrBonuses.constitution += 10;
+      attrBonuses.dexterity += 10;
+    } else if (ua === "titan-power") attrBonuses.constitution += 30;
+    else if (ua === "archmage-power") attrBonuses.intelligence += 30;
+    else if (ua === "forge-power") attrBonuses.strength += 20;
+  }
+
   const attrEntries: [string, keyof Attributes, string][] = [
     ["STR", "strength", "#e44"],
     ["INT", "intelligence", "#48f"],
@@ -177,7 +154,61 @@ export function createCharacterInfoScreen(
   ];
 
   for (const [label, key, color] of attrEntries) {
-    panel.appendChild(attrBar(label, h.attributes[key], 100, color));
+    const base = h.attributes[key];
+    const bonus = attrBonuses[key] ?? 0;
+    const row = el("div", {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      marginBottom: "4px",
+    });
+    row.appendChild(
+      el(
+        "span",
+        { width: "50px", fontSize: "12px", color: "#aaa", textAlign: "right" },
+        label,
+      ),
+    );
+    if (bonus > 0) {
+      const valSpan = el("span", {
+        width: "60px",
+        fontSize: "13px",
+        textAlign: "center",
+      });
+      valSpan.appendChild(el("span", { fontWeight: "bold" }, String(base)));
+      valSpan.appendChild(
+        el("span", { color: "#4f4", fontSize: "11px" }, ` +${bonus}`),
+      );
+      row.appendChild(valSpan);
+    } else {
+      row.appendChild(
+        el(
+          "span",
+          {
+            width: "60px",
+            fontSize: "13px",
+            fontWeight: "bold",
+            textAlign: "center",
+          },
+          String(base),
+        ),
+      );
+    }
+    const track = el("div", {
+      flex: "1",
+      height: "10px",
+      background: "#222",
+      border: "1px solid #333",
+    });
+    const pct = Math.min(100, Math.round(((base + bonus) / 100) * 100));
+    const fill = el("div", {
+      width: `${pct}%`,
+      height: "100%",
+      background: color,
+    });
+    track.appendChild(fill);
+    row.appendChild(track);
+    panel.appendChild(row);
   }
 
   // ── Resistances ─────────────────────────────────────────
@@ -207,6 +238,123 @@ export function createCharacterInfoScreen(
     );
     panel.appendChild(resRow);
   }
+
+  // ── Equipment Bonuses ────────────────────────────────────
+  const bonusLines: [string, string, string][] = [];
+
+  for (const affix of AFFIXES) {
+    const v = Math.round(equipAffixTotal(h.equipment, affix.id));
+    if (v <= 0) continue;
+    const v2 = Math.round(equipAffixTotal2(h.equipment, affix.id));
+
+    let display: string;
+    if (affix.base2 !== undefined && v2 > 0) {
+      display = affix.description
+        .replace("{v}", `${v}`)
+        .replace("{v2}", `${v2}`);
+    } else {
+      display = affix.description.replace("{v}", `${v}`);
+    }
+    bonusLines.push([affix.name, display, affix.color]);
+  }
+
+  if (bonusLines.length > 0) {
+    panel.appendChild(sectionHeader("Equipment Bonuses"));
+    for (const [name, display, color] of bonusLines) {
+      const row = el("div", {
+        display: "flex",
+        gap: "8px",
+        fontSize: "12px",
+        marginBottom: "2px",
+      });
+      row.appendChild(
+        el(
+          "span",
+          { color, fontWeight: "bold", width: "120px", flexShrink: "0" },
+          name,
+        ),
+      );
+      row.appendChild(el("span", { color: "#ccc" }, display));
+      panel.appendChild(row);
+    }
+  }
+
+  // ── Combat Stats ─────────────────────────────────────────
+  panel.appendChild(sectionHeader("Combat Stats"));
+
+  const weapon = h.equipment.weapon;
+  if (weapon) {
+    const wMin = weapon.properties["damageMin"] ?? 0;
+    const wMax = weapon.properties["damageMax"] ?? 0;
+    const dmgBonus = h.equipDamageBonus ?? 0;
+    panel.appendChild(
+      statLine("Melee Damage", `${wMin + dmgBonus}-${wMax + dmgBonus}`),
+    );
+  }
+
+  const effInt = h.attributes.intelligence + (attrBonuses.intelligence ?? 0);
+  const intMult = Math.round((1 + effInt / 100) * 100);
+  const spellPower = Math.round(equipAffixTotal(h.equipment, "spell-power"));
+  const darkPact = Math.round(equipAffixTotal(h.equipment, "dark-pact"));
+  let spellMult = intMult;
+  if (spellPower > 0)
+    spellMult = Math.round(spellMult * (1 + spellPower / 100));
+  if (darkPact > 0) spellMult = Math.round(spellMult * (1 + darkPact / 100));
+  panel.appendChild(statLine("Spell Power", `${spellMult}%`, "#48f"));
+
+  const evasion = Math.round(equipAffixTotal(h.equipment, "evasion"));
+  if (evasion > 0)
+    panel.appendChild(statLine("Dodge Chance", `${evasion}%`, "#adf"));
+
+  const swiftness = Math.min(
+    75,
+    Math.round(equipAffixTotal(h.equipment, "swiftness")),
+  );
+  if (swiftness > 0)
+    panel.appendChild(statLine("Extra Action", `${swiftness}%`, "#fc4"));
+
+  const arcaneMastery = Math.round(
+    equipAffixTotal(h.equipment, "arcane-mastery"),
+  );
+  let mpReduction = arcaneMastery;
+  for (const slot of Object.values(h.equipment)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (tpl?.uniqueAbility === "archmage-power") {
+      mpReduction += 25;
+      break;
+    }
+  }
+  const darkPactCost = Math.round(equipAffixTotal2(h.equipment, "dark-pact"));
+  if (mpReduction > 0 || darkPactCost > 0) {
+    const net = Math.min(75, mpReduction) - darkPactCost;
+    const color = net > 0 ? "#a6f" : net < 0 ? "#f44" : "#888";
+    panel.appendChild(
+      statLine("MP Cost", `${net > 0 ? "-" : "+"}${Math.abs(net)}%`, color),
+    );
+  }
+
+  const regenHp = Math.round(equipAffixTotal(h.equipment, "regeneration"));
+  if (regenHp > 0)
+    panel.appendChild(statLine("HP Regen", `+${regenHp} / 2 turns`, "#4f4"));
+  const regenMp = Math.round(equipAffixTotal2(h.equipment, "arcane-mastery"));
+  if (regenMp > 0)
+    panel.appendChild(statLine("MP Regen", `+${regenMp} / 3 turns`, "#a6f"));
+
+  const goldBonus = Math.round(equipAffixTotal(h.equipment, "fortune"));
+  const xpBonus = Math.round(equipAffixTotal2(h.equipment, "fortune"));
+  if (goldBonus > 0)
+    panel.appendChild(statLine("Gold Bonus", `+${goldBonus}%`, "#fd4"));
+  if (xpBonus > 0)
+    panel.appendChild(statLine("XP Bonus", `+${xpBonus}%`, "#fd4"));
+
+  const vampiric = Math.round(equipAffixTotal(h.equipment, "vampiric"));
+  if (vampiric > 0)
+    panel.appendChild(statLine("Life Steal", `${vampiric}%`, "#f44"));
+
+  const thorns = Math.round(equipAffixTotal(h.equipment, "thorns"));
+  if (thorns > 0)
+    panel.appendChild(statLine("Thorns", `${thorns}% reflected`, "#f84"));
 
   // ── Known Spells ────────────────────────────────────────
   panel.appendChild(sectionHeader("Known Spells"));
