@@ -129,19 +129,19 @@ function resolveSpellEffect(
   switch (spell.id) {
     // ── Attack spells ───────────────────────────────────
     case "magic-arrow":
-      return resolveBolt(state, spell, direction, 1, 8, "physical");
+      return resolveBolt(state, spell, direction, 4, 8, "physical");
     case "cold-bolt":
-      return resolveBolt(state, spell, direction, 4, 16, "cold");
+      return resolveBolt(state, spell, direction, 9, 16, "cold");
     case "lightning-bolt":
-      return resolveBolt(state, spell, direction, 6, 24, "lightning");
+      return resolveBolt(state, spell, direction, 13, 24, "lightning");
     case "fire-bolt":
-      return resolveBolt(state, spell, direction, 6, 24, "fire");
+      return resolveBolt(state, spell, direction, 13, 24, "fire");
     case "cold-ball":
-      return resolveBall(state, spell, direction, target, 8, 32, "cold");
+      return resolveBall(state, spell, direction, target, 18, 32, "cold");
     case "ball-lightning":
-      return resolveBall(state, spell, direction, target, 10, 40, "lightning");
+      return resolveBall(state, spell, direction, target, 22, 40, "lightning");
     case "fire-ball":
-      return resolveBall(state, spell, direction, target, 12, 48, "fire");
+      return resolveBall(state, spell, direction, target, 27, 48, "fire");
 
     // ── Healing spells ──────────────────────────────────
     case "heal-minor-wounds":
@@ -467,6 +467,21 @@ function applySpellDamageToMonster(
   const monster = floor.monsters[monsterIdx];
   let damage = rollRange(minDmg, maxDmg);
 
+  // INT scaling — effective INT includes equipment bonuses
+  const eq = state.hero.equipment;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, 'soul-drain'));
+  const bonusInt = Math.round(equipAffixTotal(eq, 'brilliance')) + soulDrainAll;
+  let uInt = 0;
+  for (const slot of Object.values(eq)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (!tpl?.uniqueAbility) continue;
+    if (tpl.uniqueAbility === 'crown-power') uInt += 10;
+    else if (tpl.uniqueAbility === 'archmage-power') uInt += 30;
+  }
+  const effInt = state.hero.attributes.intelligence + bonusInt + uInt;
+  damage = Math.round(damage * (1 + effInt / 100));
+
   // Spell Power affix (scaled)
   const spellPower = equipAffixTotal(state.hero.equipment, "spell-power");
   if (spellPower > 0) damage = Math.round(damage * (1 + spellPower / 100));
@@ -592,7 +607,26 @@ function resolveHeal(
 ): GameState {
   const hero = state.hero;
   const mult = getDifficultyConfig(state.difficulty).healingMult;
-  const healAmount = Math.max(Math.round(minHeal * mult), Math.floor(hero.maxHp * pct * mult));
+
+  // INT scaling for healing
+  const eq = hero.equipment;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, 'soul-drain'));
+  const bonusInt = Math.round(equipAffixTotal(eq, 'brilliance')) + soulDrainAll;
+  let uInt = 0;
+  for (const slot of Object.values(eq)) {
+    if (!slot) continue;
+    const tpl = ITEM_BY_ID[slot.templateId];
+    if (!tpl?.uniqueAbility) continue;
+    if (tpl.uniqueAbility === 'crown-power') uInt += 10;
+    else if (tpl.uniqueAbility === 'archmage-power') uInt += 30;
+  }
+  const effInt = hero.attributes.intelligence + bonusInt + uInt;
+  const intMult = 1 + effInt / 100;
+
+  const healAmount = Math.max(
+    Math.round(minHeal * mult * intMult),
+    Math.floor(hero.maxHp * pct * mult * intMult),
+  );
   const newHp = Math.min(hero.hp + healAmount, hero.maxHp);
   const healed = newHp - hero.hp;
 
