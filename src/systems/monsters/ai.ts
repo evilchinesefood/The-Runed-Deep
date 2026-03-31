@@ -22,7 +22,10 @@ import { ITEM_BY_ID } from "../../data/items";
 function getDetectRange(state: GameState): number {
   let range = 20;
   for (const eq of Object.values(state.hero.equipment)) {
-    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'shadow-cloak') { range -= 3; break; }
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "shadow-cloak") {
+      range -= 3;
+      break;
+    }
   }
   return range;
 }
@@ -56,16 +59,21 @@ function walkable(floor: Floor, x: number, y: number): boolean {
   return floor.tiles[y][x].walkable;
 }
 
-/** Like walkable but ghosts with 'phase-through-walls' can pass through walls. */
+/** Like walkable but ghosts with 'phase-through-walls' can pass through walls.
+ *  Flying monsters can also cross water tiles. */
 function canMoveTo(
   floor: Floor,
   x: number,
   y: number,
   phasing: boolean,
+  flying: boolean = false,
 ): boolean {
   if (x < 0 || x >= floor.width || y < 0 || y >= floor.height) return false;
   if (phasing) return true;
-  return floor.tiles[y][x].walkable;
+  const tile = floor.tiles[y][x];
+  if (tile.walkable) return true;
+  if (flying && tile.type === "water") return true;
+  return false;
 }
 
 /** True if no other monster occupies (x,y). Uses Set if provided, falls back to linear scan. */
@@ -178,6 +186,7 @@ function moveToward(
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
+  const flying = monster.abilities.includes("flying");
   const occ = buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
@@ -186,7 +195,7 @@ function moveToward(
   for (const d of ALL_DIRS) {
     const nx = x + d.x,
       ny = y + d.y;
-    if (!canMoveTo(floor, nx, ny, phasing)) continue;
+    if (!canMoveTo(floor, nx, ny, phasing, flying)) continue;
     if (!noMonster(floor, nx, ny, idx, occ)) continue;
     if (nx === target.x && ny === target.y) continue;
 
@@ -213,6 +222,7 @@ function moveAwayFrom(
   const monster = floor.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
+  const flying = monster.abilities.includes("flying");
   const occ = buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
@@ -221,7 +231,7 @@ function moveAwayFrom(
   for (const d of ALL_DIRS) {
     const nx = x + d.x,
       ny = y + d.y;
-    if (!canMoveTo(floor, nx, ny, phasing)) continue;
+    if (!canMoveTo(floor, nx, ny, phasing, flying)) continue;
     if (!noMonster(floor, nx, ny, idx, occ)) continue;
 
     const dist = manhattan({ x: nx, y: ny }, threat);
@@ -511,7 +521,9 @@ export function monsterRangedAttack(
   );
   if (summonMatch) {
     const freshFloor = state.floors[floorKey];
-    const floorIdx = freshFloor ? freshFloor.monsters.findIndex(m => m.id === monster.id) : -1;
+    const floorIdx = freshFloor
+      ? freshFloor.monsters.findIndex((m) => m.id === monster.id)
+      : -1;
     if (floorIdx < 0) return state;
     return spawnNearSummoner(state, floorKey, floorIdx, ability);
   }
@@ -535,7 +547,9 @@ export function processMonsterAbility(
     switch (ability) {
       case "poison": {
         const isPoisonImmune = Object.values(s.hero.equipment).some(
-          eq => eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'elemental-immunity'
+          (eq) =>
+            eq &&
+            ITEM_BY_ID[eq.templateId]?.uniqueAbility === "elemental-immunity",
         );
         if (!isPoisonImmune && Math.random() < 0.3) {
           const alreadyPoisoned = s.hero.activeEffects.some(
@@ -762,7 +776,8 @@ function processMelee(
     // Check flee trigger at low HP (only once per monster)
     // Re-find by ID since thorns kills may have shifted indices
     const updatedFloor = s.floors[floorKey];
-    const newIdx = updatedFloor?.monsters.findIndex(m => m.id === monster.id) ?? -1;
+    const newIdx =
+      updatedFloor?.monsters.findIndex((m) => m.id === monster.id) ?? -1;
     if (updatedFloor && newIdx >= 0) {
       const updatedMonster = updatedFloor.monsters[newIdx];
       if (
@@ -784,7 +799,11 @@ function processMelee(
 
   if (manhattan(monster.position, hero.position) <= getDetectRange(state)) {
     // Low HP flee check before moving (only once per monster)
-    if (!monster.hasFled && monster.hp / monster.maxHp <= 0.25 && Math.random() < 0.4) {
+    if (
+      !monster.hasFled &&
+      monster.hp / monster.maxHp <= 0.25 &&
+      Math.random() < 0.4
+    ) {
       const fleeTurns = rollRange(5, 10);
       let s = updateMonster(state, floorKey, idx, {
         ...monster,

@@ -15,7 +15,11 @@ import { createShopScreen } from "./ui/ShopScreen";
 import { createServiceScreen } from "./ui/ServiceScreen";
 import { createIntroScreen } from "./ui/IntroScreen";
 import { createVictoryScreen } from "./ui/VictoryScreen";
-import { generateTownMap, TOWN_START_INITIAL, TOWN_START_RETURN } from "./systems/town/TownMap";
+import {
+  generateTownMap,
+  TOWN_START_INITIAL,
+  TOWN_START_RETURN,
+} from "./systems/town/TownMap";
 import { initShopInventory } from "./systems/town/Shops";
 import { findPath } from "./utils/Pathfinding";
 import { generateFloor, getDungeonForFloor } from "./systems/dungeon/generator";
@@ -32,6 +36,7 @@ import {
 } from "./core/game-state";
 import { TouchControls } from "./ui/TouchControls";
 import { teleportToTown } from "./core/actions";
+import { ITEM_BY_ID } from "./data/items";
 import { injectTheme } from "./ui/Theme";
 import { Sound } from "./systems/Sound";
 import {
@@ -46,11 +51,19 @@ injectTheme();
 setOnUnlockCallback(showAchievementToast);
 
 // Prevent iOS Safari rubber-band bounce and double-tap zoom
-document.addEventListener('touchmove', (e) => {
-  if (!(e.target as HTMLElement)?.closest?.('.screen-scrollable, .panel, [data-shop-list]')) {
-    e.preventDefault();
-  }
-}, { passive: false });
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    if (
+      !(e.target as HTMLElement)?.closest?.(
+        ".screen-scrollable, .panel, [data-shop-list]",
+      )
+    ) {
+      e.preventDefault();
+    }
+  },
+  { passive: false },
+);
 
 const root = document.getElementById("game-root")!;
 
@@ -89,26 +102,43 @@ input.setAutoTargetCallback(() => {
   const floor = state.floors[floorKey];
   if (!floor) return null;
   const hero = state.hero.position;
-  const visible = floor.monsters.filter(m => {
+  const visible = floor.monsters.filter((m) => {
     if (m.hp <= 0) return false;
     const { x, y } = m.position;
-    return y >= 0 && y < floor.height && x >= 0 && x < floor.width && floor.visible[y][x];
+    return (
+      y >= 0 &&
+      y < floor.height &&
+      x >= 0 &&
+      x < floor.width &&
+      floor.visible[y][x]
+    );
   });
   if (visible.length !== 1) return null;
   const m = visible[0];
   const dx = m.position.x - hero.x;
   const dy = m.position.y - hero.y;
   if (dx === 0 && dy === 0) return null;
-  const a = ((Math.atan2(dy, dx) * 180 / Math.PI) % 360 + 360) % 360;
-  if (a >= 337.5 || a < 22.5) return 'E' as const;
-  if (a < 67.5) return 'SE' as const;
-  if (a < 112.5) return 'S' as const;
-  if (a < 157.5) return 'SW' as const;
-  if (a < 202.5) return 'W' as const;
-  if (a < 247.5) return 'NW' as const;
-  if (a < 292.5) return 'N' as const;
-  return 'NE' as const;
+  const a = ((((Math.atan2(dy, dx) * 180) / Math.PI) % 360) + 360) % 360;
+  if (a >= 337.5 || a < 22.5) return "E" as const;
+  if (a < 67.5) return "SE" as const;
+  if (a < 112.5) return "S" as const;
+  if (a < 157.5) return "SW" as const;
+  if (a < 202.5) return "W" as const;
+  if (a < 247.5) return "NW" as const;
+  if (a < 292.5) return "N" as const;
+  return "NE" as const;
 });
+
+/** Check if hero is currently levitating (spell effect or Boots of Levitation). */
+function heroCanLevitate(state: import("./core/types").GameState): boolean {
+  if (state.hero.activeEffects.some((e) => e.id === "levitation")) return true;
+  for (const item of Object.values(state.hero.equipment)) {
+    if (!item?.templateId) continue;
+    const tpl = ITEM_BY_ID[item.templateId];
+    if (tpl?.uniqueAbility === "levitation") return true;
+  }
+  return false;
+}
 
 // Click-to-move: pathfind and auto-walk
 let autoPath: { x: number; y: number }[] = [];
@@ -120,7 +150,13 @@ input.setPathClickCallback((target) => {
   const floor = state.floors[floorKey];
   if (!floor) return;
 
-  const path = findPath(floor, state.hero.position, target);
+  const path = findPath(
+    floor,
+    state.hero.position,
+    target,
+    30,
+    heroCanLevitate(state),
+  );
   if (path.length === 0) return;
 
   autoPath = path;
@@ -140,7 +176,10 @@ function aeMsg(text: string): void {
   const state = gameLoop.getState();
   gameLoop.setState({
     ...state,
-    messages: [...state.messages, { text, severity: 'system' as const, turn: state.turn }],
+    messages: [
+      ...state.messages,
+      { text, severity: "system" as const, turn: state.turn },
+    ],
   });
 }
 
@@ -188,7 +227,9 @@ function exploreNext(): void {
 
   // Stop if HP below 50%
   if (state.hero.hp < state.hero.maxHp * 0.5) {
-    aeMsg(`Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`);
+    aeMsg(
+      `Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`,
+    );
     autoExploring = false;
     return;
   }
@@ -212,7 +253,10 @@ function exploreNext(): void {
             ny = y + dy;
           if (nx >= 0 && nx < floor.width && ny >= 0 && ny < floor.height) {
             const nt = floor.tiles[ny][nx];
-            if (!floor.explored[ny][nx] && (nt.walkable || nt.type === "door-closed")) {
+            if (
+              !floor.explored[ny][nx] &&
+              (nt.walkable || nt.type === "door-closed")
+            ) {
               hasFrontier = true;
             }
           }
@@ -231,7 +275,7 @@ function exploreNext(): void {
     // Floor fully explored — navigate to stairs down
     for (let y = 0; y < floor.height && !bestTarget; y++) {
       for (let x = 0; x < floor.width && !bestTarget; x++) {
-        if (floor.tiles[y][x].type === 'stairs-down') {
+        if (floor.tiles[y][x].type === "stairs-down") {
           if (x === hero.x && y === hero.y) {
             aeMsg("Auto-explore stopped — standing on stairs.");
             autoExploring = false;
@@ -247,7 +291,11 @@ function exploreNext(): void {
       // No stairs-down on the map at all — emergency spawn at hero's feet
       const tile = floor.tiles[hero.y][hero.x];
       if (tile.walkable) {
-        floor.tiles[hero.y][hero.x] = { ...tile, type: 'stairs-down', sprite: 'stairs-down' };
+        floor.tiles[hero.y][hero.x] = {
+          ...tile,
+          type: "stairs-down",
+          sprite: "stairs-down",
+        };
         aeMsg("The ground crumbles, revealing a stairway down!");
         autoExploring = false;
         return;
@@ -258,13 +306,20 @@ function exploreNext(): void {
     }
   }
 
-  const path = findPath(floor, hero, bestTarget);
+  const path = findPath(floor, hero, bestTarget, 30, heroCanLevitate(state));
   if (path.length === 0) {
     // Stairs exist but unreachable — emergency spawn at hero's feet
-    if (bestTarget && floor.tiles[bestTarget.y]?.[bestTarget.x]?.type === 'stairs-down') {
+    if (
+      bestTarget &&
+      floor.tiles[bestTarget.y]?.[bestTarget.x]?.type === "stairs-down"
+    ) {
       const tile = floor.tiles[hero.y][hero.x];
       if (tile.walkable) {
-        floor.tiles[hero.y][hero.x] = { ...tile, type: 'stairs-down', sprite: 'stairs-down' };
+        floor.tiles[hero.y][hero.x] = {
+          ...tile,
+          type: "stairs-down",
+          sprite: "stairs-down",
+        };
         aeMsg("The ground crumbles, revealing a stairway down!");
         autoExploring = false;
         return;
@@ -316,7 +371,9 @@ function stepAutoPathExplore(): void {
     return;
   }
   if (state.hero.hp < state.hero.maxHp * 0.5) {
-    aeMsg(`Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`);
+    aeMsg(
+      `Auto-explore stopped — HP too low (${state.hero.hp}/${state.hero.maxHp}).`,
+    );
     autoExploring = false;
     autoPath = [];
     return;
@@ -358,7 +415,10 @@ function stepAutoPathExplore(): void {
 
   // Stop if next tile has valuable items on the ground (ignore junk)
   const nextHasValuable = floor.items.some(
-    (i) => i.position.x === next.x && i.position.y === next.y && isWorthStoppingFor(i.item),
+    (i) =>
+      i.position.x === next.x &&
+      i.position.y === next.y &&
+      isWorthStoppingFor(i.item),
   );
   if (nextHasValuable) {
     autoExploring = false;
@@ -377,8 +437,9 @@ function stepAutoPathExplore(): void {
     const postFloorKey = `${postState.currentDungeon}-${postState.currentFloor}`;
     const postFloor = postState.floors[postFloorKey];
     if (postFloor) {
-      const heroTile = postFloor.tiles[postState.hero.position.y]?.[postState.hero.position.x];
-      if (heroTile?.type === 'trap' && heroTile.trapRevealed) {
+      const heroTile =
+        postFloor.tiles[postState.hero.position.y]?.[postState.hero.position.x];
+      if (heroTile?.type === "trap" && heroTile.trapRevealed) {
         aeMsg("Auto-explore stopped — trap triggered!");
         autoExploring = false;
         autoPath = [];
@@ -393,8 +454,9 @@ function stepAutoPathExplore(): void {
       const postState2 = gameLoop.getState();
       const pk2 = `${postState2.currentDungeon}-${postState2.currentFloor}`;
       const pf2 = postState2.floors[pk2];
-      const heroTile2 = pf2?.tiles[postState2.hero.position.y]?.[postState2.hero.position.x];
-      if (heroTile2?.type === 'stairs-down') {
+      const heroTile2 =
+        pf2?.tiles[postState2.hero.position.y]?.[postState2.hero.position.x];
+      if (heroTile2?.type === "stairs-down") {
         aeMsg("Auto-explore stopped — stairs found.");
         autoExploring = false;
         autoPath = [];
@@ -449,7 +511,10 @@ function stepAutoPath(): void {
 
     // Stop at valuable items on the ground (ignore junk)
     const nextHasValuable = floor.items.some(
-      (i) => i.position.x === next.x && i.position.y === next.y && isWorthStoppingFor(i.item),
+      (i) =>
+        i.position.x === next.x &&
+        i.position.y === next.y &&
+        isWorthStoppingFor(i.item),
     );
     if (nextHasValuable) {
       autoPath = [];
@@ -503,7 +568,10 @@ function cancelAutoMove(): void {
   if (autoPath.length > 0 || autoExploring) {
     autoPath = [];
     autoExploring = false;
-    if (autoWalkTimer) { clearTimeout(autoWalkTimer); autoWalkTimer = null; }
+    if (autoWalkTimer) {
+      clearTimeout(autoWalkTimer);
+      autoWalkTimer = null;
+    }
   }
 }
 
@@ -541,18 +609,22 @@ touchControls.setSpellCastHandler((spellId) => {
 });
 
 touchControls.setMenuHandler((action) => {
-  if (action === 'toggle-sound') Sound.toggle();
-  if (action === 'reset') {
+  if (action === "toggle-sound") Sound.toggle();
+  if (action === "reset") {
     const state = gameLoop.getState();
-    if (state.screen !== 'game') return;
-    gameLoop.setState({ ...state, hero: { ...state.hero, hp: 0 }, screen: 'death' });
+    if (state.screen !== "game") return;
+    gameLoop.setState({
+      ...state,
+      hero: { ...state.hero, hp: 0 },
+      screen: "death",
+    });
   }
-  if (action === 'debug-f11') {
+  if (action === "debug-f11") {
     const state = gameLoop.getState();
-    if (state.screen !== 'game') return;
+    if (state.screen !== "game") return;
     gameLoop.setState(teleportToTown(state));
   }
-  if (action === 'debug-f10') {
+  if (action === "debug-f10") {
     const input = prompt("Floor (1-40, 0=town):");
     if (!input) return;
     const num = parseInt(input);
@@ -566,23 +638,48 @@ touchControls.setMenuHandler((action) => {
       const floorKey = `${targetDungeon}-${targetFloor}`;
       let floors = { ...state.floors };
       if (!floors[floorKey]) {
-        const { floor: newFloor } = generateFloor(targetDungeon, targetFloor, state.rngSeed, true, true, state.difficulty, state.ngPlusCount ?? 0);
+        const { floor: newFloor } = generateFloor(
+          targetDungeon,
+          targetFloor,
+          state.rngSeed,
+          true,
+          true,
+          state.difficulty,
+          state.ngPlusCount ?? 0,
+        );
         floors = { ...floors, [floorKey]: newFloor };
       }
       const fl = floors[floorKey];
       let pos = { x: 1, y: 1 };
       for (let y = 0; y < fl.height; y++) {
         for (let x = 0; x < fl.width; x++) {
-          if (fl.tiles[y][x].type === "stairs-up") { pos = { x, y }; break; }
+          if (fl.tiles[y][x].type === "stairs-up") {
+            pos = { x, y };
+            break;
+          }
         }
         if (pos.x !== 1 || pos.y !== 1) break;
       }
-      gameLoop.setState({ ...state, currentFloor: targetFloor, currentDungeon: targetDungeon, floors, hero: { ...state.hero, position: pos }, messages: [...state.messages, { text: `Jumped to floor ${num}.`, severity: "system" as const, turn: state.turn }] });
+      gameLoop.setState({
+        ...state,
+        currentFloor: targetFloor,
+        currentDungeon: targetDungeon,
+        floors,
+        hero: { ...state.hero, position: pos },
+        messages: [
+          ...state.messages,
+          {
+            text: `Jumped to floor ${num}.`,
+            severity: "system" as const,
+            turn: state.turn,
+          },
+        ],
+      });
     }
   }
-  if (action === 'debug-f9') {
+  if (action === "debug-f9") {
     // Trigger F9 test arena via synthetic event
-    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'F9' }));
+    document.dispatchEvent(new KeyboardEvent("keydown", { code: "F9" }));
   }
 });
 
@@ -769,7 +866,11 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     e.preventDefault();
     const state = gameLoop.getState();
     if (state.screen !== "game") return;
-    gameLoop.setState({ ...state, hero: { ...state.hero, hp: 0 }, screen: "death" });
+    gameLoop.setState({
+      ...state,
+      hero: { ...state.hero, hp: 0 },
+      screen: "death",
+    });
   }
 });
 
@@ -789,9 +890,11 @@ let lastH = window.innerHeight;
 window.addEventListener("resize", () => {
   if (resizeTimer) clearTimeout(resizeTimer);
   resizeTimer = window.setTimeout(() => {
-    const w = window.innerWidth, h = window.innerHeight;
+    const w = window.innerWidth,
+      h = window.innerHeight;
     if (w === lastW && h === lastH) return;
-    lastW = w; lastH = h;
+    lastW = w;
+    lastH = h;
     // Force full screen rebuild
     const state = gameLoop.getState();
     root.dataset.screen = "";
@@ -1008,7 +1111,7 @@ function switchScreen(state: GameState): void {
 
       // Map click/tap → direction for spell targeting or click-to-move
       const mapEl = mapRenderer.getMapContainer();
-      mapEl.style.touchAction = 'none';
+      mapEl.style.touchAction = "none";
       const handleMapTap = (x: number, y: number) => {
         const state = gameLoop.getState();
         const worldPos = mapRenderer!.screenToWorld(x, y, state.hero.position);
@@ -1024,15 +1127,22 @@ function switchScreen(state: GameState): void {
       };
       // Touch: use touchend for faster response with correct coordinates
       let mapTouchHandled = false;
-      mapEl.addEventListener("touchend", (e: TouchEvent) => {
-        if (e.changedTouches.length === 0) return;
-        const t = e.changedTouches[0];
-        mapTouchHandled = true;
-        handleMapTap(t.clientX, t.clientY);
-      }, { passive: true });
+      mapEl.addEventListener(
+        "touchend",
+        (e: TouchEvent) => {
+          if (e.changedTouches.length === 0) return;
+          const t = e.changedTouches[0];
+          mapTouchHandled = true;
+          handleMapTap(t.clientX, t.clientY);
+        },
+        { passive: true },
+      );
       // Mouse: fallback click for desktop
       mapEl.addEventListener("click", (e: MouseEvent) => {
-        if (mapTouchHandled) { mapTouchHandled = false; return; } // skip if touch handled
+        if (mapTouchHandled) {
+          mapTouchHandled = false;
+          return;
+        } // skip if touch handled
         handleMapTap(e.clientX, e.clientY);
       });
 
@@ -1056,7 +1166,8 @@ function switchScreen(state: GameState): void {
       let invScrollTop = 0;
       let invDrawerItemId: string | undefined;
       let invItemsOnly = false;
-      let currentInvScreen: ReturnType<typeof createInventoryScreen> | null = null;
+      let currentInvScreen: ReturnType<typeof createInventoryScreen> | null =
+        null;
 
       const saveInvPosition = () => {
         if (currentInvScreen) {
@@ -1076,7 +1187,11 @@ function switchScreen(state: GameState): void {
             const actionId = (action as any).itemId;
             gameLoop.handleAction(action);
             if (gameLoop.getState().screen !== "inventory") return;
-            invDrawerItemId = actionId && gameLoop.getState().hero.inventory.some(i => i.id === actionId) ? actionId : undefined;
+            invDrawerItemId =
+              actionId &&
+              gameLoop.getState().hero.inventory.some((i) => i.id === actionId)
+                ? actionId
+                : undefined;
             root.replaceChildren();
             renderInventory();
           },
@@ -1092,7 +1207,9 @@ function switchScreen(state: GameState): void {
         });
         root.replaceChildren(invScreen);
         requestAnimationFrame(() => {
-          const panel = invScreen.querySelector('[data-inv-panel]') as HTMLElement;
+          const panel = invScreen.querySelector(
+            "[data-inv-panel]",
+          ) as HTMLElement;
           if (panel && invScrollTop > 0) panel.scrollTop = invScrollTop;
         });
       };
@@ -1247,29 +1364,42 @@ function switchScreen(state: GameState): void {
         // Respawn in town — keep hero, regenerate death/return floor, refresh shops
         const s = gameLoop.getState();
         // If died in town, regenerate the returnFloor (the dungeon floor to retry)
-        const regenFloor = s.currentDungeon === 'town' ? s.returnFloor : s.currentFloor;
+        const regenFloor =
+          s.currentDungeon === "town" ? s.returnFloor : s.currentFloor;
         const regenDungeon = getDungeonForFloor(regenFloor);
         const regenKey = `${regenDungeon}-${regenFloor}`;
 
         const { floor: townFloor } = generateTownMap();
-        const floors = { ...s.floors, 'town-0': townFloor };
+        const floors = { ...s.floors, "town-0": townFloor };
         // Always regenerate the dungeon floor
         const { floor: newDungeonFloor } = generateFloor(
-          regenDungeon, regenFloor, Date.now(), true, true, s.difficulty, s.ngPlusCount ?? 0,
+          regenDungeon,
+          regenFloor,
+          Date.now(),
+          true,
+          true,
+          s.difficulty,
+          s.ngPlusCount ?? 0,
         );
         floors[regenKey] = newDungeonFloor;
 
         // Refresh shop inventories
         const deepest = Math.max(s.town.deepestFloor, regenFloor + 1);
         const shopInventories: Record<string, any> = {};
-        for (const sid of ['weapon-shop', 'armor-shop', 'general-store', 'magic-shop', 'junk-store']) {
+        for (const sid of [
+          "weapon-shop",
+          "armor-shop",
+          "general-store",
+          "magic-shop",
+          "junk-store",
+        ]) {
           shopInventories[sid] = initShopInventory(sid, deepest);
         }
 
         const respawned: GameState = {
           ...s,
-          screen: 'game',
-          currentDungeon: 'town',
+          screen: "game",
+          currentDungeon: "town",
           currentFloor: 0,
           returnFloor: regenFloor,
           floors,
@@ -1284,12 +1414,12 @@ function switchScreen(state: GameState): void {
           messages: [
             {
               text: `${s.hero.name} awakens in town, battered but alive.`,
-              severity: 'important' as const,
+              severity: "important" as const,
               turn: s.turn,
             },
             {
-              text: 'The dungeon floor has shifted. You must try again.',
-              severity: 'system' as const,
+              text: "The dungeon floor has shifted. You must try again.",
+              severity: "system" as const,
               turn: s.turn,
             },
           ],

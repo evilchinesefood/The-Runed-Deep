@@ -101,23 +101,36 @@ export function processAction(state: GameState, action: GameAction): GameState {
     case "useItem":
       return processUseItem(state, action.itemId);
     case "toggleMarkForSale": {
-      const inv = state.hero.inventory.map(i =>
+      const inv = state.hero.inventory.map((i) =>
         i.id === action.itemId ? { ...i, markedForSale: !i.markedForSale } : i,
       );
       return { ...state, hero: { ...state.hero, inventory: inv } };
     }
     case "removeCurseItem": {
       const MP_COST = 3;
-      if (state.hero.mp < MP_COST) return addMessage(state, "Not enough MP.", "system");
+      if (state.hero.mp < MP_COST)
+        return addMessage(state, "Not enough MP.", "system");
       // Search inventory
-      const invIdx = state.hero.inventory.findIndex(i => i.id === action.itemId);
+      const invIdx = state.hero.inventory.findIndex(
+        (i) => i.id === action.itemId,
+      );
       if (invIdx !== -1) {
         const item = state.hero.inventory[invIdx];
-        if (!item.cursed) return addMessage(state, "That item is not cursed.", "system");
+        if (!item.cursed)
+          return addMessage(state, "That item is not cursed.", "system");
         const blessed = blessItemFn(item);
-        const inv = state.hero.inventory.map((i, j) => j === invIdx ? blessed : i);
+        const inv = state.hero.inventory.map((i, j) =>
+          j === invIdx ? blessed : i,
+        );
         return addMessage(
-          { ...state, hero: recomputeDerivedStats({ ...state.hero, inventory: inv, mp: state.hero.mp - MP_COST }) },
+          {
+            ...state,
+            hero: recomputeDerivedStats({
+              ...state.hero,
+              inventory: inv,
+              mp: state.hero.mp - MP_COST,
+            }),
+          },
           `The curse is lifted! ${blessed.name} is now blessed.`,
           "important",
         );
@@ -125,13 +138,21 @@ export function processAction(state: GameState, action: GameAction): GameState {
       // Search equipment
       const eq = state.hero.equipment;
       const slots = Object.keys(eq) as (keyof typeof eq)[];
-      const slot = slots.find(s => eq[s]?.id === action.itemId);
+      const slot = slots.find((s) => eq[s]?.id === action.itemId);
       if (slot) {
         const item = eq[slot]!;
-        if (!item.cursed) return addMessage(state, "That item is not cursed.", "system");
+        if (!item.cursed)
+          return addMessage(state, "That item is not cursed.", "system");
         const blessed = blessItemFn(item);
         return addMessage(
-          { ...state, hero: recomputeDerivedStats({ ...state.hero, equipment: { ...eq, [slot]: blessed }, mp: state.hero.mp - MP_COST }) },
+          {
+            ...state,
+            hero: recomputeDerivedStats({
+              ...state.hero,
+              equipment: { ...eq, [slot]: blessed },
+              mp: state.hero.mp - MP_COST,
+            }),
+          },
           `The curse is lifted! ${blessed.name} is now blessed.`,
           "important",
         );
@@ -201,8 +222,14 @@ function processContextAction(state: GameState): GameState {
     const dy = m.position.y - pos.y;
     if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && !(dx === 0 && dy === 0)) {
       const dirMap: Record<string, Direction> = {
-        "0,-1": "N", "1,-1": "NE", "1,0": "E", "1,1": "SE",
-        "0,1": "S", "-1,1": "SW", "-1,0": "W", "-1,-1": "NW",
+        "0,-1": "N",
+        "1,-1": "NE",
+        "1,0": "E",
+        "1,1": "SE",
+        "0,1": "S",
+        "-1,1": "SW",
+        "-1,0": "W",
+        "-1,-1": "NW",
       };
       const dir = dirMap[`${dx},${dy}`];
       if (dir) return processMove(state, dir);
@@ -303,7 +330,16 @@ function processMove(state: GameState, direction: Direction): GameState {
     };
   }
 
-  if (!tile.walkable) return state;
+  if (!tile.walkable) {
+    if (tile.type === "water") {
+      const isLevitating =
+        state.hero.activeEffects.some((e) => e.id === "levitation") ||
+        hasUniqueAbility(state.hero.equipment, "levitation");
+      if (!isLevitating) return state;
+    } else {
+      return state;
+    }
+  }
 
   // Check for monster at target position — attack it
   const monsterAtTarget = floor.monsters.find(
@@ -322,11 +358,12 @@ function processMove(state: GameState, direction: Direction): GameState {
   // Check for trap at new position
   const tileAtNew = floor.tiles[newPos.y][newPos.x];
   if (tileAtNew.type === "trap" && tileAtNew.trapType) {
-    const isLevitating = state.hero.activeEffects.some(
-      (e) => e.id === "levitation",
-    ) || hasUniqueAbility(state.hero.equipment, 'levitation');
-    const isTrapImmune = hasUniqueAbility(state.hero.equipment, 'elemental-immunity')
-      || hasUniqueAbility(state.hero.equipment, 'levitation');
+    const isLevitating =
+      state.hero.activeEffects.some((e) => e.id === "levitation") ||
+      hasUniqueAbility(state.hero.equipment, "levitation");
+    const isTrapImmune =
+      hasUniqueAbility(state.hero.equipment, "elemental-immunity") ||
+      hasUniqueAbility(state.hero.equipment, "levitation");
     if (!isLevitating && !isTrapImmune) {
       const result = triggerTrap(
         tileAtNew,
@@ -652,9 +689,14 @@ function goToFloor(
     const deepest = Math.max(state.town.deepestFloor, targetFloor + 1);
     const shopInvs = { ...state.town.shopInventories };
     for (const sid of SHOP_IDS) {
-      shopInvs[sid] = shopInvs[sid]?.length ? restockShop(shopInvs[sid], sid, deepest) : initShopInventory(sid, deepest);
+      shopInvs[sid] = shopInvs[sid]?.length
+        ? restockShop(shopInvs[sid], sid, deepest)
+        : initShopInventory(sid, deepest);
     }
-    state = { ...state, town: { ...state.town, shopInventories: shopInvs, deepestFloor: deepest } };
+    state = {
+      ...state,
+      town: { ...state.town, shopInventories: shopInvs, deepestFloor: deepest },
+    };
   }
 
   trackFloorReached(targetFloor);
@@ -808,7 +850,10 @@ function triggerTrap(
 }
 
 /** Check if any equipped item has a specific unique ability */
-function hasUniqueAbility(equipment: Record<string, any>, ability: string): boolean {
+function hasUniqueAbility(
+  equipment: Record<string, any>,
+  ability: string,
+): boolean {
   for (const item of Object.values(equipment)) {
     if (!item?.templateId) continue;
     const tpl = ITEM_BY_ID[item.templateId];
@@ -949,7 +994,10 @@ function processSearch(state: GameState): GameState {
 
       // Reveal secret doors
       if (tile.type === "door-secret") {
-        if (!clonedRows.has(y)) { newTiles[y] = [...newTiles[y]]; clonedRows.add(y); }
+        if (!clonedRows.has(y)) {
+          newTiles[y] = [...newTiles[y]];
+          clonedRows.add(y);
+        }
         newTiles[y][x] = {
           type: "door-closed",
           sprite: "door-closed",
@@ -979,7 +1027,10 @@ function processSearch(state: GameState): GameState {
           rune: "rune-trap",
           cobweb: "cobweb-trap",
         };
-        if (!clonedRows.has(y)) { newTiles[y] = [...newTiles[y]]; clonedRows.add(y); }
+        if (!clonedRows.has(y)) {
+          newTiles[y] = [...newTiles[y]];
+          clonedRows.add(y);
+        }
         newTiles[y][x] = {
           ...tile,
           trapRevealed: true,

@@ -1,9 +1,11 @@
-import type { Floor, Vector2 } from '../core/types';
+import type { Floor, Vector2 } from "../core/types";
 
 class MinHeap<T> {
   private h: T[] = [];
   constructor(private less: (a: T, b: T) => boolean) {}
-  get size() { return this.h.length; }
+  get size() {
+    return this.h.length;
+  }
   push(v: T) {
     this.h.push(v);
     let i = this.h.length - 1;
@@ -21,7 +23,9 @@ class MinHeap<T> {
       this.h[0] = last;
       let i = 0;
       while (true) {
-        let s = i, l = 2 * i + 1, r = 2 * i + 2;
+        let s = i,
+          l = 2 * i + 1,
+          r = 2 * i + 2;
         if (l < this.h.length && this.less(this.h[l], this.h[s])) s = l;
         if (r < this.h.length && this.less(this.h[r], this.h[s])) s = r;
         if (s === i) break;
@@ -47,26 +51,46 @@ function heuristic(a: Vector2, b: Vector2): number {
 }
 
 const DIRS = [
-  { x: 0, y: -1 }, { x: 1, y: -1 }, { x: 1, y: 0 }, { x: 1, y: 1 },
-  { x: 0, y: 1 }, { x: -1, y: 1 }, { x: -1, y: 0 }, { x: -1, y: -1 },
+  { x: 0, y: -1 },
+  { x: 1, y: -1 },
+  { x: 1, y: 0 },
+  { x: 1, y: 1 },
+  { x: 0, y: 1 },
+  { x: -1, y: 1 },
+  { x: -1, y: 0 },
+  { x: -1, y: -1 },
 ];
 
-export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps = 30): Vector2[] {
+export function findPath(
+  floor: Floor,
+  start: Vector2,
+  goal: Vector2,
+  maxSteps = 30,
+  canLevitate = false,
+): Vector2[] {
   if (start.x === goal.x && start.y === goal.y) return [];
 
-  const w = floor.width, fh = floor.height;
+  const w = floor.width,
+    fh = floor.height;
   const closed = new Uint8Array(w * fh);
-  const gScore = Array.from({ length: fh }, () => new Float64Array(w).fill(Infinity));
+  const gScore = Array.from({ length: fh }, () =>
+    new Float64Array(w).fill(Infinity),
+  );
   gScore[start.y][start.x] = 0;
 
   // Pre-build monster occupancy grid
   const monsterOcc = new Uint8Array(w * fh);
-  for (const m of floor.monsters) monsterOcc[m.position.y * w + m.position.x] = 1;
+  for (const m of floor.monsters)
+    monsterOcc[m.position.y * w + m.position.x] = 1;
 
   const open = new MinHeap<Node>((a, b) => a.f < b.f);
   const startNode: Node = {
-    x: start.x, y: start.y,
-    g: 0, h: heuristic(start, goal), f: 0, parent: null,
+    x: start.x,
+    y: start.y,
+    g: 0,
+    h: heuristic(start, goal),
+    f: 0,
+    parent: null,
   };
   startNode.f = startNode.h;
   open.push(startNode);
@@ -101,7 +125,11 @@ export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps =
       if (closed[ny * w + nx]) continue;
 
       const tile = floor.tiles[ny][nx];
-      if (!tile.walkable && tile.type !== "door-closed") continue;
+      if (!tile.walkable && tile.type !== "door-closed") {
+        if (tile.type === "water" && canLevitate) {
+          /* allow */
+        } else continue;
+      }
 
       if (!(nx === goal.x && ny === goal.y)) {
         if (monsterOcc[ny * w + nx]) continue;
@@ -114,7 +142,14 @@ export function findPath(floor: Floor, start: Vector2, goal: Vector2, maxSteps =
       gScore[ny][nx] = tentativeG;
 
       const h2 = heuristic({ x: nx, y: ny }, goal);
-      open.push({ x: nx, y: ny, g: tentativeG, h: h2, f: tentativeG + h2, parent: current });
+      open.push({
+        x: nx,
+        y: ny,
+        g: tentativeG,
+        h: h2,
+        f: tentativeG + h2,
+        parent: current,
+      });
     }
   }
 
