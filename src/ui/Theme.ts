@@ -79,6 +79,8 @@ export function injectTheme(): void {
       min-height: 100dvh;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
+      touch-action: manipulation;
+      overscroll-behavior: none;
     }
 
     #game-root {
@@ -88,6 +90,8 @@ export function injectTheme(): void {
       height: 100vh;
       height: 100dvh;
       overflow-y: auto;
+      touch-action: manipulation;
+      overscroll-behavior: none;
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
@@ -108,6 +112,7 @@ export function injectTheme(): void {
       max-width: var(--game-width);
       padding: var(--sp-lg);
       margin: 0 auto;
+      touch-action: manipulation;
     }
 
     /* Scrollable screen — hides scrollbar but allows scroll */
@@ -117,6 +122,8 @@ export function injectTheme(): void {
       padding-bottom: 40px;
       -ms-overflow-style: none;
       scrollbar-width: none;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
     .screen-scrollable::-webkit-scrollbar { display: none; }
 

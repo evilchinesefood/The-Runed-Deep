@@ -56,7 +56,7 @@ document.addEventListener(
   (e) => {
     if (
       !(e.target as HTMLElement)?.closest?.(
-        ".screen-scrollable, .panel, [data-shop-list]",
+        ".screen-scrollable, .panel, [data-shop-list], [data-service-list]",
       )
     ) {
       e.preventDefault();
@@ -64,6 +64,9 @@ document.addEventListener(
   },
   { passive: false },
 );
+// Prevent iOS Safari pinch-zoom gesture
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+document.addEventListener("gesturechange", (e) => e.preventDefault());
 
 const root = document.getElementById("game-root")!;
 
