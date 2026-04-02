@@ -170,6 +170,22 @@ input.setPathClickCallback((target) => {
 let autoExploring = false;
 let _lastExpTurn = -1;
 
+/** Check if hero is immune to all traps (levitation or elemental-immunity unique) */
+function heroIsTrapImmune(): boolean {
+  const { hero } = gameLoop.getState();
+  const eq = hero.equipment;
+  for (const item of Object.values(eq)) {
+    if (!(item as any)?.templateId) continue;
+    const tpl = ITEM_BY_ID[(item as any).templateId];
+    if (
+      tpl?.uniqueAbility === "levitation" ||
+      tpl?.uniqueAbility === "elemental-immunity"
+    )
+      return true;
+  }
+  return hero.activeEffects.some((e) => e.id === "levitation");
+}
+
 /** Items worth stopping auto-explore for (ignore junk/broken/blank with value <= 5) */
 function isWorthStoppingFor(item: import("./core/types").Item): boolean {
   return item.value > 5;
@@ -409,7 +425,11 @@ function stepAutoPathExplore(): void {
     autoPath = [];
     return;
   }
-  if (nextTile?.type === "trap" && !nextTile.trapRevealed) {
+  if (
+    nextTile?.type === "trap" &&
+    !nextTile.trapRevealed &&
+    !heroIsTrapImmune()
+  ) {
     aeMsg("Auto-explore stopped — trap detected!");
     autoExploring = false;
     autoPath = [];
@@ -442,7 +462,11 @@ function stepAutoPathExplore(): void {
     if (postFloor) {
       const heroTile =
         postFloor.tiles[postState.hero.position.y]?.[postState.hero.position.x];
-      if (heroTile?.type === "trap" && heroTile.trapRevealed) {
+      if (
+        heroTile?.type === "trap" &&
+        heroTile.trapRevealed &&
+        !heroIsTrapImmune()
+      ) {
         aeMsg("Auto-explore stopped — trap triggered!");
         autoExploring = false;
         autoPath = [];
