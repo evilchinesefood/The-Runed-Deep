@@ -13,7 +13,9 @@ export function processPickupItem(state: GameState): GameState {
   const pos = state.hero.position;
   // Pick up items within 1 tile of the player (3x3 area)
   const itemsHere = floor.items.filter(
-    (i) => i.position.x === pos.x && i.position.y === pos.y,
+    (i) =>
+      Math.abs(i.position.x - pos.x) <= 1 &&
+      Math.abs(i.position.y - pos.y) <= 1,
   );
 
   if (itemsHere.length === 0) {

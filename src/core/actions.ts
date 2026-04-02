@@ -190,9 +190,11 @@ function processContextAction(state: GameState): GameState {
     return processUseStairs(state);
   }
 
-  // Items on ground → pick up
+  // Items on ground → pick up (3x3 area)
   const itemsHere = floor.items.filter(
-    (i) => i.position.x === pos.x && i.position.y === pos.y,
+    (i) =>
+      Math.abs(i.position.x - pos.x) <= 1 &&
+      Math.abs(i.position.y - pos.y) <= 1,
   );
   if (itemsHere.length > 0) {
     return processPickupItem(state);
@@ -379,10 +381,12 @@ function processMove(state: GameState, direction: Direction): GameState {
     }
   }
 
-  // Auto-pickup gold, notify for other items
+  // Auto-pickup gold, notify for other items (3x3 area)
   let currentFloor = floors[floorKey] ?? floor;
   const itemsAtPos = currentFloor.items.filter(
-    (i) => i.position.x === newPos.x && i.position.y === newPos.y,
+    (i) =>
+      Math.abs(i.position.x - newPos.x) <= 1 &&
+      Math.abs(i.position.y - newPos.y) <= 1,
   );
   const goldItems = itemsAtPos.filter((i) => i.item.category === "currency");
   const nonGoldItems = itemsAtPos.filter((i) => i.item.category !== "currency");
