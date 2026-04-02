@@ -6,8 +6,19 @@ import {
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
-import { attachItemTooltip, hideItemTooltip, buildTooltipContent, setTooltipKnownSpells } from "./item-tooltip";
-import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
+import {
+  attachItemTooltip,
+  hideItemTooltip,
+  buildTooltipContent,
+  setTooltipKnownSpells,
+} from "./item-tooltip";
+import {
+  createScreen,
+  createPanel,
+  createTitleBar,
+  createButton,
+  el,
+} from "./Theme";
 
 function sectionHeader(text: string): HTMLElement {
   return el(
@@ -23,7 +34,6 @@ function sectionHeader(text: string): HTMLElement {
     text,
   );
 }
-
 
 function itemDisplayLabel(item: Item): string {
   return getDisplayName(item);
@@ -131,28 +141,53 @@ export function createInventoryScreen(
   initialSelectedIdx: number = 0,
   openDrawerForId?: string,
   initialItemsOnly: boolean = false,
-): HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number; getItemsOnlyMode: () => boolean } {
+): HTMLElement & {
+  cleanup: () => void;
+  getSelectedIdx: () => number;
+  getScrollTop: () => number;
+  getItemsOnlyMode: () => boolean;
+} {
   const h = state.hero;
   setTooltipKnownSpells(h.knownSpells);
   const isMobileView = window.innerWidth <= 768;
-  let selectedIdx = Math.min(initialSelectedIdx, Math.max(0, h.inventory.length - 1));
+  let selectedIdx = Math.min(
+    initialSelectedIdx,
+    Math.max(0, h.inventory.length - 1),
+  );
 
   const screen = createScreen();
   screen.classList.add("screen-scrollable");
 
   // ── Title bar ────────────────────────────────────────────────
-  let activeTab: 'equipment' | 'inventory' = initialItemsOnly ? 'inventory' : 'equipment';
-  const titleBar = createTitleBar("Inventory", () => { cleanup(); onClose(); });
+  let activeTab: "equipment" | "inventory" = initialItemsOnly
+    ? "inventory"
+    : "equipment";
+  const titleBar = createTitleBar("Inventory", () => {
+    cleanup();
+    onClose();
+  });
   screen.appendChild(titleBar);
 
   // ── Tab bar ──────────────────────────────────────────────────
   const tabBar = el("div", {
-    display: "flex", borderBottom: "2px solid #333", marginBottom: "8px", gap: "0",
+    display: "flex",
+    borderBottom: "2px solid #333",
+    marginBottom: "8px",
+    gap: "0",
   });
-  const makeTab = (label: string): HTMLElement => el("div", {
-    padding: "8px 20px", fontSize: "13px", fontWeight: "bold",
-    cursor: "pointer", userSelect: "none", transition: "color 0.15s",
-  }, label);
+  const makeTab = (label: string): HTMLElement =>
+    el(
+      "div",
+      {
+        padding: "8px 20px",
+        fontSize: "13px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        userSelect: "none",
+        transition: "color 0.15s",
+      },
+      label,
+    );
   const tabEquip = makeTab("Equipment");
   const tabInv = makeTab("Inventory");
   tabBar.appendChild(tabEquip);
@@ -160,18 +195,28 @@ export function createInventoryScreen(
   screen.appendChild(tabBar);
 
   function updateTabs(): void {
-    const eq = activeTab === 'equipment';
+    const eq = activeTab === "equipment";
     tabEquip.style.color = eq ? "#c9a84c" : "#555";
-    tabEquip.style.borderBottom = eq ? "2px solid #c9a84c" : "2px solid transparent";
+    tabEquip.style.borderBottom = eq
+      ? "2px solid #c9a84c"
+      : "2px solid transparent";
     tabEquip.style.marginBottom = eq ? "-2px" : "";
     tabInv.style.color = !eq ? "#c9a84c" : "#555";
-    tabInv.style.borderBottom = !eq ? "2px solid #c9a84c" : "2px solid transparent";
+    tabInv.style.borderBottom = !eq
+      ? "2px solid #c9a84c"
+      : "2px solid transparent";
     tabInv.style.marginBottom = !eq ? "-2px" : "";
     equipPanel.style.display = eq ? "flex" : "none";
     invPanel.style.display = !eq ? "block" : "none";
   }
-  tabEquip.addEventListener("click", () => { activeTab = 'equipment'; updateTabs(); });
-  tabInv.addEventListener("click", () => { activeTab = 'inventory'; updateTabs(); });
+  tabEquip.addEventListener("click", () => {
+    activeTab = "equipment";
+    updateTabs();
+  });
+  tabInv.addEventListener("click", () => {
+    activeTab = "inventory";
+    updateTabs();
+  });
 
   // ── Equipment panel: paperdoll (desktop only) + slot list ────
   const isMobile = window.innerWidth <= 480;
@@ -181,19 +226,37 @@ export function createInventoryScreen(
   equipPanel.style.padding = "8px";
 
   const slotKeys: EquipSlot[] = [
-    "helmet", "amulet", "cloak", "body", "weapon", "shield",
-    "gauntlets", "belt", "ringLeft", "ringRight", "boots", "pack", "purse",
+    "helmet",
+    "amulet",
+    "cloak",
+    "body",
+    "weapon",
+    "shield",
+    "gauntlets",
+    "belt",
+    "ringLeft",
+    "ringRight",
+    "boots",
+    "pack",
+    "purse",
   ];
 
   // Paperdoll — desktop only, no slot icons
   if (!isMobile) {
     const dollWrapper = el("div", {
-      position: "relative", width: "240px", height: "480px",
-      flexShrink: "0", overflow: "hidden", background: "#fff",
+      position: "relative",
+      width: "240px",
+      height: "480px",
+      flexShrink: "0",
+      overflow: "hidden",
+      background: "#fff",
     });
     const dollBg = el("div", {
-      width: "100%", height: "100%",
-      backgroundSize: "contain", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+      width: "100%",
+      height: "100%",
+      backgroundSize: "contain",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
     });
     dollBg.className = "equipment-dude";
     dollWrapper.appendChild(dollBg);
@@ -207,15 +270,30 @@ export function createInventoryScreen(
   for (const slotKey of slotKeys) {
     const item = h.equipment[slotKey];
     const row = el("div", {
-      display: "flex", alignItems: "center", gap: "6px",
-      marginBottom: "3px", padding: "2px 4px",
-      fontSize: "13px", cursor: item ? "pointer" : "default", borderRadius: "2px",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      marginBottom: "3px",
+      padding: "2px 4px",
+      fontSize: "13px",
+      cursor: item ? "pointer" : "default",
+      borderRadius: "2px",
     });
 
     // Sprite icon — 32px sprite scaled to 24px
-    const spriteWrap = el("div", { width: "24px", height: "24px", flexShrink: "0", overflow: "hidden" });
+    const spriteWrap = el("div", {
+      width: "24px",
+      height: "24px",
+      flexShrink: "0",
+      overflow: "hidden",
+    });
     if (item) {
-      const sprite = el("div", { width: "32px", height: "32px", transform: "scale(0.75)", transformOrigin: "top left" });
+      const sprite = el("div", {
+        width: "32px",
+        height: "32px",
+        transform: "scale(0.75)",
+        transformOrigin: "top left",
+      });
       sprite.className = getDisplaySprite(item);
       const glow = getItemGlow(item);
       if (glow) sprite.style.filter = glow;
@@ -224,18 +302,36 @@ export function createInventoryScreen(
     row.appendChild(spriteWrap);
 
     const label = SLOT_LABELS[slotKey] || slotKey;
-    row.appendChild(el("span", { color: "#666", width: "55px", flexShrink: "0", fontSize: "11px" }, label));
+    row.appendChild(
+      el(
+        "span",
+        { color: "#666", width: "55px", flexShrink: "0", fontSize: "11px" },
+        label,
+      ),
+    );
 
     if (item) {
-      row.appendChild(el("span", { color: itemNameColor(item), flex: "1" }, itemDisplayLabel(item)));
+      row.appendChild(
+        el(
+          "span",
+          { color: itemNameColor(item), flex: "1" },
+          itemDisplayLabel(item),
+        ),
+      );
       row.addEventListener("click", () => openEquippedDrawer(item, slotKey));
       if (!isMobileView) {
-        row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
-        row.addEventListener("mouseleave", () => { row.style.background = ""; });
+        row.addEventListener("mouseenter", () => {
+          row.style.background = "#1a1a1a";
+        });
+        row.addEventListener("mouseleave", () => {
+          row.style.background = "";
+        });
         attachItemTooltip(row, item);
       }
     } else {
-      row.appendChild(el("span", { color: "#333", fontStyle: "italic" }, "\u2014"));
+      row.appendChild(
+        el("span", { color: "#333", fontStyle: "italic" }, "\u2014"),
+      );
     }
 
     legend.appendChild(row);
@@ -246,11 +342,12 @@ export function createInventoryScreen(
 
   // ── Inventory panel ────────────────────────────────────────
   const invPanel = createPanel("Inventory");
-  invPanel.setAttribute('data-inv-panel', '1');
+  invPanel.setAttribute("data-inv-panel", "1");
 
   // Sort controls
   type SortMode = "newest" | "oldest" | "type";
-  let sortMode: SortMode = (localStorage.getItem("rd-inv-sort") as SortMode) || "newest";
+  let sortMode: SortMode =
+    (localStorage.getItem("rd-inv-sort") as SortMode) || "newest";
 
   const sortBar = el("div", {
     display: "flex",
@@ -294,9 +391,21 @@ export function createInventoryScreen(
   updateSortButtons();
   invPanel.appendChild(sortBar);
 
-  interface ItemStack { item: Item; count: number; }
+  interface ItemStack {
+    item: Item;
+    count: number;
+  }
 
-  const NO_STACK_SLOTS = new Set(['weapon', 'shield', 'helmet', 'body', 'cloak', 'gauntlets', 'belt', 'boots']);
+  const NO_STACK_SLOTS = new Set([
+    "weapon",
+    "shield",
+    "helmet",
+    "body",
+    "cloak",
+    "gauntlets",
+    "belt",
+    "boots",
+  ]);
   function stackItems(items: Item[]): ItemStack[] {
     const stacks: ItemStack[] = [];
     const map = new Map<string, ItemStack>();
@@ -340,21 +449,32 @@ export function createInventoryScreen(
   let drawerEl: HTMLElement | null = null;
 
   const closeDrawer = () => {
-    if (drawerEl) { drawerEl.remove(); drawerEl = null; }
+    if (drawerEl) {
+      drawerEl.remove();
+      drawerEl = null;
+    }
   };
 
   const openDrawer = (item: Item, tpl: any, equippedInSlot: Item | null) => {
     closeDrawer();
     drawerEl = el("div", {
-      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
-      background: "#1a1a1a", borderTop: "2px solid #555",
-      maxHeight: "70vh", display: "flex", flexDirection: "column",
+      position: "fixed",
+      bottom: "0",
+      left: "0",
+      right: "0",
+      zIndex: "2000",
+      background: "#1a1a1a",
+      borderTop: "2px solid #555",
+      maxHeight: "70vh",
+      display: "flex",
+      flexDirection: "column",
       boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
     });
 
     // Scrollable content area
     const scrollArea = el("div", {
-      overflowY: "auto", padding: "12px 16px 8px",
+      overflowY: "auto",
+      padding: "12px 16px 8px",
     });
 
     // Item tooltip content
@@ -362,11 +482,22 @@ export function createInventoryScreen(
 
     // Compare section
     if (equippedInSlot && tpl?.equipSlot) {
-      const divider = el("div", { height: "1px", background: "#444", margin: "8px 0" });
+      const divider = el("div", {
+        height: "1px",
+        background: "#444",
+        margin: "8px 0",
+      });
       scrollArea.appendChild(divider);
-      const compareLabel = el("div", {
-        color: "#886", fontSize: "11px", fontWeight: "bold", marginBottom: "4px",
-      }, "CURRENTLY EQUIPPED");
+      const compareLabel = el(
+        "div",
+        {
+          color: "#886",
+          fontSize: "11px",
+          fontWeight: "bold",
+          marginBottom: "4px",
+        },
+        "CURRENTLY EQUIPPED",
+      );
       scrollArea.appendChild(compareLabel);
       scrollArea.appendChild(buildTooltipContent(equippedInSlot));
     }
@@ -374,32 +505,57 @@ export function createInventoryScreen(
 
     // Action buttons — pinned at bottom, never scrolled away
     const btnRow = el("div", {
-      display: "flex", gap: "8px", padding: "8px 16px", paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-      justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
-      borderTop: "1px solid #333", background: "#1a1a1a",
+      display: "flex",
+      gap: "8px",
+      padding: "8px 16px",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      flexShrink: "0",
+      borderTop: "1px solid #333",
+      background: "#1a1a1a",
     });
     const drawerBtn = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
       b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-      b.addEventListener("click", (e) => { e.stopPropagation(); if (close) closeDrawer(); onClick(); });
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (close) closeDrawer();
+        onClick();
+      });
       return b;
     };
     if (tpl?.equipSlot) {
-      btnRow.appendChild(drawerBtn("Equip", () => onAction({ type: "equipItem", itemId: item.id })));
+      btnRow.appendChild(
+        drawerBtn("Equip", () =>
+          onAction({ type: "equipItem", itemId: item.id }),
+        ),
+      );
     }
     if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
-      btnRow.appendChild(drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })));
+      btnRow.appendChild(
+        drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })),
+      );
     }
-    btnRow.appendChild(drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })));
+    btnRow.appendChild(
+      drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })),
+    );
     // Remove Curse — if item is cursed and player knows the spell
-    if (item.cursed && h.knownSpells.includes('remove-curse') && h.mp >= 3) {
-      btnRow.appendChild(drawerBtn("Uncurse", () => onAction({ type: "removeCurseItem", itemId: item.id })));
+    if (item.cursed && h.knownSpells.includes("remove-curse") && h.mp >= 3) {
+      btnRow.appendChild(
+        drawerBtn("Uncurse", () =>
+          onAction({ type: "removeCurseItem", itemId: item.id }),
+        ),
+      );
     }
     // Mark/Unmark for sale — dispatched through game loop
     const markLabel = item.markedForSale ? "Unmark" : "Mark";
     const markBtn = createButton(markLabel);
     markBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-    if (item.markedForSale) { markBtn.style.color = "#f90"; markBtn.style.borderColor = "#a60"; }
+    if (item.markedForSale) {
+      markBtn.style.color = "#f90";
+      markBtn.style.borderColor = "#a60";
+    }
     markBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       closeDrawer();
@@ -415,28 +571,56 @@ export function createInventoryScreen(
   const openEquippedDrawer = (item: Item, slotKey: EquipSlot) => {
     closeDrawer();
     drawerEl = el("div", {
-      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
-      background: "#1a1a1a", borderTop: "2px solid #555",
-      maxHeight: "70vh", display: "flex", flexDirection: "column",
+      position: "fixed",
+      bottom: "0",
+      left: "0",
+      right: "0",
+      zIndex: "2000",
+      background: "#1a1a1a",
+      borderTop: "2px solid #555",
+      maxHeight: "70vh",
+      display: "flex",
+      flexDirection: "column",
       boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
     });
-    const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+    const scrollArea = el("div", {
+      overflowY: "auto",
+      padding: "12px 16px 8px",
+    });
     scrollArea.appendChild(buildTooltipContent(item));
     drawerEl.appendChild(scrollArea);
     const btnRow = el("div", {
-      display: "flex", gap: "8px", padding: "8px 16px", paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-      justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
-      borderTop: "1px solid #333", background: "#1a1a1a",
+      display: "flex",
+      gap: "8px",
+      padding: "8px 16px",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      flexShrink: "0",
+      borderTop: "1px solid #333",
+      background: "#1a1a1a",
     });
     const drawerBtn2 = (label: string, onClick: () => void, close = false) => {
       const b = createButton(label);
       b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
-      b.addEventListener("click", (e) => { e.stopPropagation(); if (close) closeDrawer(); onClick(); });
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (close) closeDrawer();
+        onClick();
+      });
       return b;
     };
-    btnRow.appendChild(drawerBtn2("Unequip", () => onAction({ type: "unequipItem", slot: slotKey })));
-    if (item.cursed && h.knownSpells.includes('remove-curse') && h.mp >= 3) {
-      btnRow.appendChild(drawerBtn2("Uncurse", () => onAction({ type: "removeCurseItem", itemId: item.id })));
+    btnRow.appendChild(
+      drawerBtn2("Unequip", () =>
+        onAction({ type: "unequipItem", slot: slotKey }),
+      ),
+    );
+    if (item.cursed && h.knownSpells.includes("remove-curse") && h.mp >= 3) {
+      btnRow.appendChild(
+        drawerBtn2("Uncurse", () =>
+          onAction({ type: "removeCurseItem", itemId: item.id }),
+        ),
+      );
     }
     btnRow.appendChild(drawerBtn2("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
@@ -498,33 +682,46 @@ export function createInventoryScreen(
       if (invGlow) spriteDiv.style.filter = invGlow;
       spriteWrap.appendChild(spriteDiv);
       if (count > 1) {
-        const badge = el("span", {
-          position: "absolute",
-          bottom: "-2px",
-          right: "-2px",
-          background: "#c90",
-          color: "#000",
-          fontSize: "10px",
-          fontWeight: "bold",
-          padding: "0 3px",
-          borderRadius: "3px",
-          lineHeight: "14px",
-        }, `${count}`);
+        const badge = el(
+          "span",
+          {
+            position: "absolute",
+            bottom: "-2px",
+            right: "-2px",
+            background: "#c90",
+            color: "#000",
+            fontSize: "10px",
+            fontWeight: "bold",
+            padding: "0 3px",
+            borderRadius: "3px",
+            lineHeight: "14px",
+          },
+          `${count}`,
+        );
         spriteWrap.appendChild(badge);
       }
       if (item.markedForSale) {
-        spriteWrap.appendChild(el("span", {
-          position: "absolute",
-          top: "-2px",
-          left: "-2px",
-          fontSize: "12px",
-          lineHeight: "12px",
-        }, "\uD83D\uDCB0"));
+        spriteWrap.appendChild(
+          el(
+            "span",
+            {
+              position: "absolute",
+              top: "-2px",
+              left: "-2px",
+              fontSize: "12px",
+              lineHeight: "12px",
+            },
+            "\uD83D\uDCB0",
+          ),
+        );
       }
       row.appendChild(spriteWrap);
 
       // Name
-      const label = count > 1 ? `${itemDisplayLabel(item)} (x${count})` : itemDisplayLabel(item);
+      const label =
+        count > 1
+          ? `${itemDisplayLabel(item)} (x${count})`
+          : itemDisplayLabel(item);
       row.appendChild(
         el(
           "span",
@@ -554,18 +751,29 @@ export function createInventoryScreen(
       // Equipped item in same slot for compare
       const equipSlot = tpl?.equipSlot;
       let equippedInSlot = equipSlot ? h.equipment[equipSlot] : null;
-      if (equipSlot === 'ringLeft' && !equippedInSlot) equippedInSlot = h.equipment.ringRight;
+      if (equipSlot === "ringLeft" && !equippedInSlot)
+        equippedInSlot = h.equipment.ringRight;
 
       if (!isMobileView) {
         // Desktop: inline action buttons + tooltip
-        const actions = el("div", { display: "flex", gap: "4px", marginLeft: "8px" });
+        const actions = el("div", {
+          display: "flex",
+          gap: "4px",
+          marginLeft: "8px",
+        });
         if (tpl?.equipSlot) {
-          actions.appendChild(btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })));
+          actions.appendChild(
+            btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })),
+          );
         }
         if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
-          actions.appendChild(btn("[U]", () => onAction({ type: "useItem", itemId: item.id })));
+          actions.appendChild(
+            btn("[U]", () => onAction({ type: "useItem", itemId: item.id })),
+          );
         }
-        actions.appendChild(btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })));
+        actions.appendChild(
+          btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })),
+        );
         row.appendChild(actions);
         attachItemTooltip(row, item, equippedInSlot);
       }
@@ -613,7 +821,10 @@ export function createInventoryScreen(
   const packEnchBonus = pack ? pack.enchantment * 5000 : 0;
   let totalCap = BASE_CARRY + Math.max(0, basePackWeight + packEnchBonus);
   for (const eq of Object.values(h.equipment)) {
-    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === 'titan-power') { totalCap *= 2; break; }
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "titan-power") {
+      totalCap *= 2;
+      break;
+    }
   }
   const invWeight = h.inventory.reduce((s, i) => s + i.weight, 0);
   const pct = Math.round((invWeight / totalCap) * 100);
@@ -703,7 +914,8 @@ export function createInventoryScreen(
         const tpl = ITEM_BY_ID[item.templateId];
         const equipSlot = tpl?.equipSlot;
         let equippedInSlot = equipSlot ? h.equipment[equipSlot] : null;
-        if (equipSlot === 'ringLeft' && !equippedInSlot) equippedInSlot = h.equipment.ringRight;
+        if (equipSlot === "ringLeft" && !equippedInSlot)
+          equippedInSlot = h.equipment.ringRight;
         selectedIdx = i;
         refreshSelection();
         openDrawer(item, tpl, equippedInSlot);
@@ -712,10 +924,15 @@ export function createInventoryScreen(
     }
   }
 
-  const result = screen as HTMLElement & { cleanup: () => void; getSelectedIdx: () => number; getScrollTop: () => number; getItemsOnlyMode: () => boolean };
+  const result = screen as HTMLElement & {
+    cleanup: () => void;
+    getSelectedIdx: () => number;
+    getScrollTop: () => number;
+    getItemsOnlyMode: () => boolean;
+  };
   result.cleanup = cleanup;
   result.getSelectedIdx = () => selectedIdx;
-  result.getScrollTop = () => invPanel.scrollTop;
-  result.getItemsOnlyMode = () => activeTab === 'inventory';
+  result.getScrollTop = () => screen.scrollTop;
+  result.getItemsOnlyMode = () => activeTab === "inventory";
   return result;
 }

@@ -1210,10 +1210,9 @@ function switchScreen(state: GameState): void {
         });
         root.replaceChildren(invScreen);
         requestAnimationFrame(() => {
-          const panel = invScreen.querySelector(
-            "[data-inv-panel]",
-          ) as HTMLElement;
-          if (panel && invScrollTop > 0) panel.scrollTop = invScrollTop;
+          const panel = invScreen as HTMLElement;
+
+          if (invScrollTop > 0) panel.scrollTop = invScrollTop;
         });
       };
       renderInventory();
