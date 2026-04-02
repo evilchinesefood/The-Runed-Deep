@@ -173,6 +173,11 @@ export function loadGame(slot: number = 1): GameState | null {
       for (const item of items as any[]) migrateEnchants(item);
     }
 
+    // Migration: rename difficulty "easy" → "normal"
+    if ((state as any).difficulty === 'easy') {
+      (state as any).difficulty = 'normal';
+    }
+
     // Ensure visible arrays exist (stripped from saves to reduce size)
     for (const key of Object.keys(state.floors)) {
       const f = state.floors[key];

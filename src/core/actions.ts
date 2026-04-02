@@ -100,6 +100,16 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processUnequipItem(state, action.slot);
     case "useItem":
       return processUseItem(state, action.itemId);
+    case "useAllItems": {
+      let s = state;
+      const ids = s.hero.inventory
+        .filter((i) => i.templateId === action.templateId)
+        .map((i) => i.id);
+      for (const id of ids) {
+        s = processUseItem(s, id);
+      }
+      return s;
+    }
     case "toggleMarkForSale": {
       const inv = state.hero.inventory.map((i) =>
         i.id === action.itemId ? { ...i, markedForSale: !i.markedForSale } : i,

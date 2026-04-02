@@ -158,9 +158,9 @@ export function blessItem(
 
 // ── Sage (Enchanter) ────────────────────────────────────
 
-/** Max enchanter upgrades: +2 base, +2 per NG+ cycle */
+/** Max enchanter upgrades: +2 base, +3 per NG+ cycle */
 export function getEnchanterCap(ngPlus: number): number {
-  return 2 + ngPlus * 2;
+  return 2 + ngPlus * 3;
 }
 
 export function sageEnchantItem(state: GameState, itemId: string): GameState {

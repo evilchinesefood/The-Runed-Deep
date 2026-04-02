@@ -73,10 +73,11 @@ export function createCharacterInfoScreen(
     el("div", { fontSize: "18px", fontWeight: "bold" }, h.name),
   );
   const diffColors: Record<string, string> = {
-    easy: "#4c4",
+    normal: "#4c4",
     intermediate: "#fc4",
     hard: "#f84",
-    impossible: "#f44",
+    nightmare: "#f44",
+    impossible: "#f22",
   };
   const diffColor = diffColors[state.difficulty] ?? "#888";
   const ngLabel = state.ngPlusCount > 0 ? ` +${state.ngPlusCount}` : "";

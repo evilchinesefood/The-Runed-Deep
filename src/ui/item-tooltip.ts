@@ -1,7 +1,7 @@
 import type { Item } from '../core/types';
 import { ITEM_BY_ID } from '../data/items';
 import { ENCHANTMENT_BY_ID, formatAffixDesc } from '../data/Enchantments';
-import { getDisplayName } from '../systems/inventory/display-name';
+import { getDisplayName, itemNameColor } from '../systems/inventory/display-name';
 
 let tooltipEl: HTMLElement | null = null;
 let compareEl: HTMLElement | null = null;
@@ -47,12 +47,7 @@ function getTooltip(): HTMLElement {
 }
 
 function nameColor(item: Item): string {
-  const tpl = ITEM_BY_ID[item.templateId];
-  if (tpl?.unique) return '#f90';
-  if (item.cursed) return '#f44';
-  if (item.blessed) return '#c8f';
-  if (item.enchantment > 0) return '#4af';
-  return '#ddd';
+  return itemNameColor(item);
 }
 
 

@@ -82,7 +82,7 @@ export function createDefaultTown(): TownState {
   };
 }
 
-export function createInitialGameState(difficulty: Difficulty = 'easy'): GameState {
+export function createInitialGameState(difficulty: Difficulty = 'normal'): GameState {
   return {
     screen: 'splash',
     hero: createHero('Hero', 'male', createDefaultAttributes()),

@@ -137,9 +137,10 @@ The The Runed Deep grows silent. You have avenged Bjarnarhaven. Your name will b
   }
 
   const diffLabels: Record<string, string> = {
-    easy: "Easy",
+    normal: "Normal",
     intermediate: "Intermediate",
     hard: "Hard",
+    nightmare: "Nightmare",
     impossible: "Impossible",
   };
 

@@ -396,23 +396,13 @@ export function createInventoryScreen(
     count: number;
   }
 
-  const NO_STACK_SLOTS = new Set([
-    "weapon",
-    "shield",
-    "helmet",
-    "body",
-    "cloak",
-    "gauntlets",
-    "belt",
-    "boots",
-  ]);
   function stackItems(items: Item[]): ItemStack[] {
     const stacks: ItemStack[] = [];
     const map = new Map<string, ItemStack>();
     for (const item of items) {
-      // Weapons and armor never stack (unique affixes make each different)
+      // Equippable items never stack (unique affixes make each different)
       const tplS = ITEM_BY_ID[item.templateId];
-      if (tplS?.equipSlot && NO_STACK_SLOTS.has(tplS.equipSlot)) {
+      if (tplS?.equipSlot) {
         stacks.push({ item, count: 1 });
         continue;
       }
@@ -455,7 +445,7 @@ export function createInventoryScreen(
     }
   };
 
-  const openDrawer = (item: Item, tpl: any, equippedInSlot: Item | null) => {
+  const openDrawer = (item: Item, tpl: any, equippedInSlot: Item | null, stackCount: number = 1) => {
     closeDrawer();
     drawerEl = el("div", {
       position: "fixed",
@@ -536,6 +526,13 @@ export function createInventoryScreen(
       btnRow.appendChild(
         drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })),
       );
+      if (stackCount > 1 && item.category === "potion") {
+        btnRow.appendChild(
+          drawerBtn(`Use All (x${stackCount})`, () =>
+            onAction({ type: "useAllItems", templateId: item.templateId }),
+          ),
+        );
+      }
     }
     btnRow.appendChild(
       drawerBtn("Drop", () => onAction({ type: "dropItem", itemId: item.id })),
@@ -770,6 +767,13 @@ export function createInventoryScreen(
           actions.appendChild(
             btn("[U]", () => onAction({ type: "useItem", itemId: item.id })),
           );
+          if (count > 1 && item.category === "potion") {
+            actions.appendChild(
+              btn(`[U×${count}]`, () =>
+                onAction({ type: "useAllItems", templateId: item.templateId }),
+              ),
+            );
+          }
         }
         actions.appendChild(
           btn("[D]", () => onAction({ type: "dropItem", itemId: item.id })),
@@ -781,7 +785,7 @@ export function createInventoryScreen(
       row.addEventListener("click", () => {
         selectedIdx = i;
         refreshSelection();
-        openDrawer(item, tpl, equippedInSlot);
+        openDrawer(item, tpl, equippedInSlot, count);
       });
 
       invPanel.appendChild(row);
@@ -909,7 +913,7 @@ export function createInventoryScreen(
     const sorted = getSortedInventory();
     const stacks = stackItems(sorted);
     for (let i = 0; i < stacks.length; i++) {
-      const { item } = stacks[i];
+      const { item, count } = stacks[i];
       if (item.id === openDrawerForId) {
         const tpl = ITEM_BY_ID[item.templateId];
         const equipSlot = tpl?.equipSlot;
@@ -918,7 +922,7 @@ export function createInventoryScreen(
           equippedInSlot = h.equipment.ringRight;
         selectedIdx = i;
         refreshSelection();
-        openDrawer(item, tpl, equippedInSlot);
+        openDrawer(item, tpl, equippedInSlot, count);
         break;
       }
     }

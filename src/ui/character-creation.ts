@@ -27,7 +27,7 @@ export function createCharacterCreationScreen(
       constitution: 50,
       dexterity: 50,
     } as Attributes,
-    difficulty: "easy" as Difficulty,
+    difficulty: "normal" as Difficulty,
     startingSpell: STARTER_SPELLS[0].id,
   };
 
@@ -334,16 +334,18 @@ export function createCharacterCreationScreen(
   diffPanel.style.flexWrap = "wrap";
 
   const difficulties: Difficulty[] = [
-    "easy",
+    "normal",
     "intermediate",
     "hard",
+    "nightmare",
     "impossible",
   ];
   const diffColors: Record<Difficulty, string> = {
-    easy: "#4c4",
+    normal: "#4c4",
     intermediate: "#fc4",
     hard: "#f84",
-    impossible: "#f44",
+    nightmare: "#f44",
+    impossible: "#f22",
   };
 
   for (const d of difficulties) {

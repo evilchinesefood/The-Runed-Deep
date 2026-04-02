@@ -540,9 +540,10 @@ function stepAutoPath(): void {
 
 function getNextDifficulty(current: string): import("./core/types").Difficulty {
   const order: import("./core/types").Difficulty[] = [
-    "easy",
+    "normal",
     "intermediate",
     "hard",
+    "nightmare",
     "impossible",
   ];
   const idx = order.indexOf(current as import("./core/types").Difficulty);
@@ -781,7 +782,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       ],
       turn: 0,
       gameTime: 0,
-      difficulty: "easy",
+      difficulty: "normal",
       rngSeed: Date.now(),
       returnFloor: 0,
       activeBuildingId: "",

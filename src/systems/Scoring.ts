@@ -8,7 +8,7 @@ export function calculateScore(
 ): number {
   let score = xp + floor * 100 + level * 50 + gold;
   const diffMult: Record<string, number> = {
-    easy: 1, intermediate: 1.5, hard: 2.5, impossible: 5,
+    normal: 1, intermediate: 1.5, hard: 2.5, nightmare: 4, impossible: 5,
   };
   score = Math.floor(score * (diffMult[difficulty] ?? 1));
   const efficiency = Math.max(0.5, 1 - turns / 10000);

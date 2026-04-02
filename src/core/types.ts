@@ -25,7 +25,7 @@ export type Screen =
   | "death"
   | "achievements";
 
-export type Difficulty = "easy" | "intermediate" | "hard" | "impossible";
+export type Difficulty = "normal" | "intermediate" | "hard" | "nightmare" | "impossible";
 
 export type Gender = "male" | "female";
 
@@ -296,6 +296,7 @@ export type GameAction =
   | { type: "rest" }
   | { type: "search" }
   | { type: "useItem"; itemId: string }
+  | { type: "useAllItems"; templateId: string }
   | { type: "equipItem"; itemId: string }
   | { type: "unequipItem"; slot: EquipSlot }
   | { type: "dropItem"; itemId: string }
