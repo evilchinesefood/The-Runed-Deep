@@ -213,9 +213,82 @@ async function buildSheet(category, outputName) {
     cssLines.push(`}`);
   }
 
+  // Build file path → sprite index lookup for legacy mapping
+  const fileToIdx = new Map();
+  for (let i = 0; i < sprites.length; i++) {
+    // Map by relative path from dcss-tiles category dir
+    const rel = path.relative(path.join(SRC_DIR, category), sprites[i].file).replace(/\\/g, '/');
+    fileToIdx.set(rel, i);
+    // Also map by just filename for fuzzy matching
+    fileToIdx.set(sprites[i].name, i);
+  }
+
+  // Load legacy mappings and create aliases
+  const LEGACY_MAP_FILES = {
+    monsters: ['MappingMonsters.json'],
+    item: ['MappingItems.json'],
+    dungeon: ['MappingTiles.json'],
+  };
+  const mapFiles = LEGACY_MAP_FILES[category] || [];
+  let legacyCount = 0;
+  const legacyAliases = new Set();
+
+  for (const mf of mapFiles) {
+    const mfPath = path.join(__dirname, mf);
+    if (!fs.existsSync(mfPath)) continue;
+    const mapping = JSON.parse(fs.readFileSync(mfPath, 'utf8'));
+
+    cssLines.push(`/* --- Legacy aliases --- */`);
+    for (const [legacyCls, dcssPath] of Object.entries(mapping)) {
+      if (legacyCls.startsWith('_')) continue;
+      if (legacyAliases.has(legacyCls)) continue;
+
+      // Try to find the DCSS file in our sprite list
+      // dcssPath is like "mon/animals/quokka.png" — remap to new folder structure
+      let searchPath = dcssPath
+        .replace(/^mon\//, '')
+        .replace(/^player\//, '../player/')
+        .replace(/^item\//, '')
+        .replace(/^dngn\//, '');
+
+      // Try exact match first
+      let idx = fileToIdx.get(searchPath.replace('.png', ''));
+
+      // Try just the filename without subfolder
+      if (idx === undefined) {
+        const fname = path.basename(dcssPath, '.png');
+        idx = fileToIdx.get(fname);
+      }
+
+      // Try with underscores replaced by hyphens and vice versa
+      if (idx === undefined) {
+        const fname = path.basename(dcssPath, '.png');
+        idx = fileToIdx.get(fname.replace(/-/g, '_'));
+      }
+      if (idx === undefined) {
+        const fname = path.basename(dcssPath, '.png');
+        idx = fileToIdx.get(fname.replace(/_/g, '-'));
+      }
+
+      if (idx !== undefined) {
+        const x = (idx % COLS) * TILE_SIZE;
+        const y = Math.floor(idx / COLS) * TILE_SIZE;
+        cssLines.push(`.${legacyCls} {`);
+        cssLines.push(`    background: url('${assetRef}') -${x}px -${y}px;`);
+        cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+        cssLines.push(`}`);
+        legacyCount++;
+        legacyAliases.add(legacyCls);
+      }
+    }
+  }
+  if (legacyCount > 0) {
+    console.log(`  Added ${legacyCount} legacy aliases`);
+  }
+
   const cssPath = path.join(CSS_DIR, `${outputName}.css`);
   fs.writeFileSync(cssPath, cssLines.join('\n') + '\n');
-  console.log(`  Wrote ${cssPath} (${sprites.length} classes)`);
+  console.log(`  Wrote ${cssPath} (${sprites.length} sprites + ${legacyCount} aliases)`);
 
   return {
     name: outputName,

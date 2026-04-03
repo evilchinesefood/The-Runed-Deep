@@ -19607,13 +19607,1241 @@
       "source": "monsters.css"
     },
     {
+      "cls": "giant-rat",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "large-snake",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "giant-bat",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wild-dog",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "skeleton",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "viper",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "goblin",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "giant-scorpion",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "huge-lizard",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "green-slime",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hobgoblin",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "huge-ogre",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "gray-wolf",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "bandit",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "smirking-sneak-thief",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "white-wolf",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "barrow-wight",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "brown-bear",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "animated-wooden-statue",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "cave-bear",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "gelatinous-glob",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "animated-bronze-statue",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "evil-warrior",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "dark-wraith",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "gruesome-troll",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "manticore",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wizard",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "animated-iron-statue",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "necromancer",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "eerie-ghost",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spectre",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "vampire",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "animated-marble-statue",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "rat-man",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hill-giant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ice-devil",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wind-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "dust-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "two-headed-giant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "fire-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "water-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "frost-giant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spiked-devil",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "earth-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "magma-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "stone-giant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "horned-devil",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "fire-giant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "white-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "blue-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "green-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "abyss-fiend",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "red-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wolf-man",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "bear-man",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hill-giant-king",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "frost-giant-king",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "stone-giant-king",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "fire-giant-king",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "surtur",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "lich-lord",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "bone-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "death-knight",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "vampire-lord",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "vampire-mage",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "revenant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "eidolon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "flayed-ghost",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "profane-servitor",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "balrug",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "executioner",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "tormentor",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "reaper",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "soul-eater",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hell-sentinel",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "brimstone-fiend",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "green-death",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "blizzard-demon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "sun-demon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "efreet",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "smoke-demon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "orange-demon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "rust-devil",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "chaos-spawn",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "crimson-imp",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "shadow-imp",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "golden-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "shadow-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "quicksilver-dragon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wyvern",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hydra",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "iron-golem",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "flesh-golem",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "electric-golem",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "iron-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ball-lightning",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "emperor-scorpion",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "death-yak",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "anaconda",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hell-hound",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "fire-crab",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "basilisk",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "killer-bee",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ghost-moth",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "brain-worm",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "jumping-spider",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "wolf-spider",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "elephant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "dire-elephant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "angel",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "daeva",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "seraph",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "cherub",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ophan",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "eye-of-devastation",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "great-orb-of-eyes",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "shining-eye",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "treant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "thorn-hunter",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "tentacled-starspawn",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "lurking-horror",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "starcursed-mass",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "kraken",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "lava-snake",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "electric-eel",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spriggan-berserker",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spriggan-defender",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spriggan-druid",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "pandemonium-lord",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "asmodeus",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "dispater",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ereshkigal",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "gloorx-vloq",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "geryon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "jormungandr",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "mnoleg",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "lom-lobon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "enchantress",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "royal-jelly",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "mennas",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "agnes",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "frederick",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "warmonger",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "blood-saint",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "corrupter",
+      "source": "monsters.css"
+    },
+    {
       "cls": "item",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-water",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-heal-minor",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-heal-medium",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-heal-major",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-gain-attribute",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-lose-attribute",
+      "source": "items.css"
+    },
+    {
+      "cls": "potion-divination",
+      "source": "items.css"
+    },
+    {
+      "cls": "scroll",
+      "source": "items.css"
+    },
+    {
+      "cls": "spell-book",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-fire",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-smoke",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-minor",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-medium",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-major",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-green",
+      "source": "items.css"
+    },
+    {
+      "cls": "staff-light",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-lightning-ball",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-light",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-divination",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-nothing",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-fire-bolt",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-lightning",
+      "source": "items.css"
+    },
+    {
+      "cls": "axe",
+      "source": "items.css"
+    },
+    {
+      "cls": "axe-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "axe-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "sword",
+      "source": "items.css"
+    },
+    {
+      "cls": "sword-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "sword-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "mace",
+      "source": "items.css"
+    },
+    {
+      "cls": "mace-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "mace-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-armour",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-armour-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-armour-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-armour",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-armour-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-armour-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "wood-shield",
+      "source": "items.css"
+    },
+    {
+      "cls": "wood-shield-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "wood-shield-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-helmet",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-helmet-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-helmet-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-helmet-of-detect-monsters",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-helmet",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-helmet-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "leather-helmet-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "bracers",
+      "source": "items.css"
+    },
+    {
+      "cls": "bracers-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "bracers-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "gauntlet",
+      "source": "items.css"
+    },
+    {
+      "cls": "gauntlet-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "gauntlet-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "gauntlet-of-slaying",
+      "source": "items.css"
+    },
+    {
+      "cls": "cloak",
+      "source": "items.css"
+    },
+    {
+      "cls": "cloak-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "cloak-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "ring",
+      "source": "items.css"
+    },
+    {
+      "cls": "ring-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "ring-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "pack",
+      "source": "items.css"
+    },
+    {
+      "cls": "pack-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "pack-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "coins-copper",
+      "source": "items.css"
+    },
+    {
+      "cls": "coins-silver",
+      "source": "items.css"
+    },
+    {
+      "cls": "coins-gold",
+      "source": "items.css"
+    },
+    {
+      "cls": "coins-platinum",
+      "source": "items.css"
+    },
+    {
+      "cls": "treasure-pile",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-wand-quiver",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-wand-quiver-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-wand-quiver-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-utility",
+      "source": "items.css"
+    },
+    {
+      "cls": "parchment",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-helmet-of-storms",
+      "source": "items.css"
+    },
+    {
+      "cls": "apple",
+      "source": "items.css"
+    },
+    {
+      "cls": "flail",
+      "source": "items.css"
+    },
+    {
+      "cls": "flail-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "flail-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "hammer",
+      "source": "items.css"
+    },
+    {
+      "cls": "hammer-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "hammer-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-sword",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-armour",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-shield",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-helmet",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-belt",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-gauntlet",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-bracer",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-cloak",
+      "source": "items.css"
+    },
+    {
+      "cls": "broken-pack",
+      "source": "items.css"
+    },
+    {
+      "cls": "morning-star",
+      "source": "items.css"
+    },
+    {
+      "cls": "morning-star-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "morning-star-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "spear",
+      "source": "items.css"
+    },
+    {
+      "cls": "spear-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "spear-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "club",
+      "source": "items.css"
+    },
+    {
+      "cls": "club-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "club-enchanted",
       "source": "items.css"
     },
     {
       "cls": "tile",
       "source": "tiles.css"
+    },
+    {
+      "cls": "rock",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "path-rock",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "mine-entrance",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "portcullis-closed",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "portcullis-open",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "sign",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "favicon",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "grass",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "path-grass",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "destoyed-vege-patch",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "well",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "wagon",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "dark-dgn",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "wall-dark-dgn",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "castle-corner-parapet",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "castle-wall",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "castle-parapet",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "ashes",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "water",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "water-grass",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "blue-square",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "fountain",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "status",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "throne",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "path",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "water-path",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "stairs-up",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "stairs-down",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "town-wall-corner",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "town-wall-stop",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "town-wall",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "lit-dgn",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "wall-lit-dgn",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "door-closed",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "door-open",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "door-broken",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "cobweb",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "pillar",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "grass10-cave90",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "hex",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "bed",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "table",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "white50-cave50",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "white90-cave10",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "dead-body",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "stone-coffin",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "stone-coffin-broke",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "trap-door",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "pit-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "portal-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "water-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "shell-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "fire-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "target-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "debri-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "blood-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "rune-trap",
+      "source": "tiles.css"
     }
   ],
-  "timestamp": "2026-04-03T20:05:48.815Z"
+  "timestamp": "2026-04-03T20:12:12.187Z"
 }
