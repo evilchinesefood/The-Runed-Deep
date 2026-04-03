@@ -362,6 +362,8 @@ export class MapRenderer {
     "hut-2": [57, 55],
     "sage": [110, 109],
     "temple": [132, 127],
+    "pillar-stone": [32, 32],
+    "statue": [32, 32],
   };
 
   private renderBuildingOverlays(
