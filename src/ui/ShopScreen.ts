@@ -74,7 +74,7 @@ function openShopDrawer(
         textAlign: "center",
         fontWeight: "bold",
       },
-      `Price: ${price} gold`,
+      `Price: \u0024${price}`,
     ),
   );
   shopDrawerEl.appendChild(scrollArea);
@@ -440,7 +440,7 @@ export function createShopScreen(
     const copperLine = el(
       "div",
       { color: "#c90", fontSize: "13px", marginBottom: "8px" },
-      `Gold: ${gold}`,
+      `\u0024${gold}`,
     );
     screen.appendChild(copperLine);
 
@@ -486,7 +486,7 @@ export function createShopScreen(
         0,
       );
       const sellMarkedBtn = createButton(
-        `Sell Marked (${markedItems.length}) \u2014 ${totalGold}g`,
+        `Sell Marked (${markedItems.length}) \u2014 \u0024${totalGold}`,
       );
       sellMarkedBtn.style.cssText +=
         "display:block;width:100%;padding:10px;font-size:14px;";

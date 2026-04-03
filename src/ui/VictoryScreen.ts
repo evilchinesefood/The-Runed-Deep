@@ -147,7 +147,7 @@ The The Runed Deep grows silent. You have avenged Bjarnarhaven. Your name will b
   parchment.appendChild(statRow("Name", hero.name));
   parchment.appendChild(statRow("Level", String(hero.level)));
   parchment.appendChild(statRow("Turns Survived", state.turn.toLocaleString()));
-  parchment.appendChild(statRow("Gold", hero.gold.toLocaleString()));
+  parchment.appendChild(statRow("Gold", `\u0024${hero.gold.toLocaleString()}`));
   parchment.appendChild(
     statRow("Difficulty", diffLabels[state.difficulty] ?? state.difficulty),
   );

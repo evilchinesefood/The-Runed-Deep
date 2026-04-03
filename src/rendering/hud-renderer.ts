@@ -183,7 +183,7 @@ export class HudRenderer {
     const mpPct = h.maxMp > 0 ? Math.round((h.mp / h.maxMp) * 100) : 0;
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
 
-    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${state.currentFloor}|${state.turn}|${h.runeShards}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${state.currentFloor}|${state.turn}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
     if (key === this._prevStats) return;
     this._prevStats = key;
 
@@ -218,7 +218,6 @@ export class HudRenderer {
     const floorLabel =
       state.currentDungeon !== "town" ? `F${state.currentFloor}` : "Town";
     add(`${floorLabel} T:${state.turn}`, "#888");
-    if (h.runeShards > 0) add(`\u25C6${h.runeShards}`, "#a6f");
 
     // Status effects
     if (h.activeEffects.length > 0) {
@@ -246,7 +245,7 @@ export class HudRenderer {
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
     const mpColor = "#48f";
 
-    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${h.xp}|${h.armorValue}|${state.currentFloor}|${state.currentDungeon}|${state.turn}|${state.difficulty}|${h.runeShards}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${h.xp}|${h.armorValue}|${state.currentFloor}|${state.currentDungeon}|${state.turn}|${state.difficulty}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
     if (key === this._prevStats) return;
     this._prevStats = key;
 
@@ -339,11 +338,6 @@ export class HudRenderer {
         `${floorLabel} | Turn: ${state.turn}`,
       ),
     );
-    if (h.runeShards > 0) {
-      this.statsEl.appendChild(
-        el("div", { fontSize: "11px", marginTop: "2px", color: "#a6f" }, `\u25C6 ${h.runeShards} Rune Shards`),
-      );
-    }
   }
 
   private renderSpellBar(state: GameState): void {

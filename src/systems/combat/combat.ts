@@ -346,7 +346,7 @@ export function playerAttacksMonster(
       };
     }
 
-    const shardReward = isBoss ? 2 : 0;
+    const shardReward = isBoss ? 5 : 0;
     if (shardReward > 0) {
       messages.push({
         text: `You found ${shardReward} Rune Shards!`,

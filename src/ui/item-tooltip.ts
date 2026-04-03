@@ -241,7 +241,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
   const weight = (item.weight / 1000).toFixed(1);
   container.appendChild(d('div', {
     color: '#666', marginTop: '2px', fontSize: TT_SIZE,
-  }, `${weight} kg \u00B7 ${item.value} gold`));
+  }, `${weight} kg \u00B7 \u0024${item.value}`));
 
   return container;
 }
