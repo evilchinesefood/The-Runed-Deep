@@ -8952,14 +8952,6 @@
     background: url('../../assets/tiles.png') -192px -800px;
     background-size: 1024px 2272px;
 }
-.portcullis-closed {
-    background: url('../../assets/tiles.png') -864px -96px;
-    background-size: 1024px 2272px;
-}
-.portcullis-open {
-    background: url('../../assets/tiles.png') -128px -128px;
-    background-size: 1024px 2272px;
-}
 .sign {
     background: url('../../assets/tiles.png') -832px -896px;
     background-size: 1024px 2272px;
@@ -9022,10 +9014,6 @@
 }
 .fire-trap {
     background: url('../../assets/tiles.png') -96px -1024px;
-    background-size: 1024px 2272px;
-}
-.target-trap {
-    background: url('../../assets/tiles.png') -992px -960px;
     background-size: 1024px 2272px;
 }
 .blood-trap {

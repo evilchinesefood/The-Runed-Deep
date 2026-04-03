@@ -103,7 +103,7 @@
 
       /* Left panel */
       #left {
-        width: 30%;
+        width: 22%;
         border-right: 1px solid #333;
         overflow-y: auto;
         background: #161616;
@@ -338,7 +338,7 @@
 
       /* Right panel */
       #right {
-        width: 25%;
+        width: 33%;
         border-left: 1px solid #333;
         display: flex;
         flex-direction: column;
@@ -405,15 +405,20 @@
         border-color: #c9a84c;
         font-weight: 600;
       }
-      #browse-search {
+      #browse-search-row {
+        display: flex;
+        gap: 4px;
         margin: 6px 8px;
+        flex-shrink: 0;
+      }
+      #browse-search {
+        flex: 1;
         background: #222;
         border: 1px solid #444;
         color: #ccc;
         padding: 4px 8px;
         border-radius: 3px;
         font-size: 12px;
-        flex-shrink: 0;
       }
       #browse-search:focus {
         outline: none;
@@ -424,12 +429,12 @@
         overflow-y: auto;
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 6px;
         padding: 8px;
         align-content: flex-start;
       }
       .browse-card {
-        width: 42px;
+        width: 74px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -447,6 +452,10 @@
         height: 32px;
         display: block;
         image-rendering: pixelated;
+        transform: scale(2);
+        transform-origin: top left;
+        margin-right: 32px;
+        margin-bottom: 32px;
       }
       .browse-card .browse-lbl {
         font-size: 7px;
@@ -507,6 +516,13 @@
         <div id="center-hdr">
           <h2 id="slot-title">Select a slot</h2>
           <span class="slot-count" id="slot-count"></span>
+          <button
+            class="btn btn-danger"
+            id="btn-clear-all"
+            style="margin-left: auto; display: none"
+          >
+            Clear All
+          </button>
         </div>
         <div id="pool-grid">
           <div id="pool-empty" class="no-slot-msg">
@@ -528,7 +544,14 @@
           <button class="btn btn-dim" id="btn-layer-done">Done</button>
         </div>
         <div class="browse-tabs" id="browse-tabs"></div>
-        <input id="browse-search" type="text" placeholder="Search sprites..." />
+        <div id="browse-search-row">
+          <input
+            id="browse-search"
+            type="text"
+            placeholder="Search sprites..."
+          />
+          <button class="btn btn-gold" id="btn-add-all">Add All</button>
+        </div>
         <div id="browse-grid"></div>
       </div>
     </div>
@@ -759,9 +782,11 @@
           $grid.appendChild(em);
         }
 
+        let $clearAll = document.getElementById("btn-clear-all");
         if (!activeSlot) {
           $title.textContent = "Select a slot";
           $count.textContent = "";
+          if ($clearAll) $clearAll.style.display = "none";
           showEmpty("Select a slot from the left panel to begin.");
           document.getElementById("center-footer").style.display = "none";
           return;
@@ -770,9 +795,13 @@
         $title.textContent = activeSlot;
         let pool = getPool(activeSlot);
         $count.textContent = pool.length + " sprite(s)";
+        if ($clearAll)
+          $clearAll.style.display = pool.length > 0 ? "inline-block" : "none";
 
         if (pool.length === 0) {
-          showEmpty("No sprites assigned. Use the browser on the right to add sprites.");
+          showEmpty(
+            "No sprites assigned. Use the browser on the right to add sprites.",
+          );
           return;
         }
 
@@ -1007,6 +1036,43 @@
           exitLayerMode();
           document.getElementById("browse-search").focus();
         });
+
+      // Add All visible/filtered sprites
+      document.getElementById("btn-add-all").addEventListener("click", () => {
+        if (!activeSlot) {
+          toast("Select a slot first");
+          return;
+        }
+        let sheet = manifest[browseSheet];
+        if (!sheet) return;
+        let sprites = sheet.sprites;
+        if (browseSearch) {
+          sprites = sprites.filter((s) =>
+            s.className.toLowerCase().includes(browseSearch),
+          );
+        }
+        if (sprites.length === 0) {
+          toast("No sprites to add");
+          return;
+        }
+        let pool = getPool(activeSlot);
+        for (let sp of sprites) {
+          pool.push({ layers: [sp.className], uniqueOnly: false });
+        }
+        setPool(activeSlot, pool);
+        renderNav();
+        renderPool();
+        toast("Added " + sprites.length + " sprites");
+      });
+
+      // Clear All sprites from current slot
+      document.getElementById("btn-clear-all").addEventListener("click", () => {
+        if (!activeSlot) return;
+        setPool(activeSlot, []);
+        renderNav();
+        renderPool();
+        toast("Pool cleared");
+      });
 
       /* ========== SAVE / LOAD ========== */
       document.getElementById("btn-download").addEventListener("click", () => {
