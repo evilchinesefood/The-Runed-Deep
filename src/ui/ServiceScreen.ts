@@ -50,7 +50,6 @@ const SLOT_LABELS: Record<string, string> = {
   ringRight: "Ring R",
   amulet: "Amulet",
   pack: "Pack",
-  purse: "Purse",
 };
 
 const BUILDING_NAMES: Record<string, string> = {
@@ -177,7 +176,6 @@ function buildSage(
     "ringRight",
     "boots",
     "pack",
-    "purse",
   ];
 
   panel.appendChild(
@@ -407,7 +405,6 @@ function buildBlacksmith(
     "ringRight",
     "boots",
     "pack",
-    "purse",
   ];
 
   const list = el("div", {
@@ -1105,12 +1102,21 @@ export function createServiceScreen(
     screen.appendChild(bar);
 
     if (buildingId !== "inn") {
-      const currencyEl = el("div", { fontSize: "13px", marginBottom: "8px", display: "flex", gap: "12px" });
+      const currencyEl = el("div", {
+        fontSize: "13px",
+        marginBottom: "8px",
+        display: "flex",
+        gap: "12px",
+      });
       const gLabel = el("span", { color: "#fff" }, "Gold: ");
-      gLabel.appendChild(el("span", { color: "#fc4" }, `\u0024${state.hero.gold}`));
+      gLabel.appendChild(
+        el("span", { color: "#fc4" }, `\u0024${state.hero.gold}`),
+      );
       currencyEl.appendChild(gLabel);
       const sLabel = el("span", { color: "#fff" }, "Runes: ");
-      sLabel.appendChild(el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`));
+      sLabel.appendChild(
+        el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`),
+      );
       currencyEl.appendChild(sLabel);
       screen.appendChild(currencyEl);
     }
@@ -1150,7 +1156,11 @@ export function createServiceScreen(
         content = createPanel("Services");
         if (!state.riftStoneUnlocked) {
           content.appendChild(
-            el("div", { color: "#555", padding: "20px", textAlign: "center" }, "The Rift Stone is dormant. Clear Floor 15 to awaken it."),
+            el(
+              "div",
+              { color: "#555", padding: "20px", textAlign: "center" },
+              "The Rift Stone is dormant. Clear Floor 15 to awaken it.",
+            ),
           );
         } else {
           content.appendChild(

@@ -1,26 +1,37 @@
-import type { GameState, EquipSlot, Message } from '../../core/types';
-import { ITEM_BY_ID } from '../../data/items';
-import { recomputeDerivedStats } from '../character/derived-stats';
-import { Sound } from '../Sound';
-import { trackEquipmentCheck } from '../Achievements';
-import { getDisplayName } from './display-name';
-import { showGameToast } from '../../ui/GameToast';
+import type { GameState, EquipSlot, Message } from "../../core/types";
+import { ITEM_BY_ID } from "../../data/items";
+import { recomputeDerivedStats } from "../character/derived-stats";
+import { Sound } from "../Sound";
+import { trackEquipmentCheck } from "../Achievements";
+import { getDisplayName } from "./display-name";
+import { showGameToast } from "../../ui/GameToast";
 
-function msg(text: string, turn: number, severity: Message['severity'] = 'normal'): Message {
+function msg(
+  text: string,
+  turn: number,
+  severity: Message["severity"] = "normal",
+): Message {
   return { text, severity, turn };
 }
 
 export function processEquipItem(state: GameState, itemId: string): GameState {
   const hero = { ...state.hero };
-  const item = hero.inventory.find(i => i.id === itemId);
+  const item = hero.inventory.find((i) => i.id === itemId);
   if (!item) return state;
 
   const template = ITEM_BY_ID[item.templateId];
   if (!template || !template.equipSlot) {
-    showGameToast(`${getDisplayName(item)} cannot be equipped.`, 'warning');
+    showGameToast(`${getDisplayName(item)} cannot be equipped.`, "warning");
     return {
       ...state,
-      messages: [...state.messages, msg(`${getDisplayName(item)} cannot be equipped.`, state.turn, 'system')],
+      messages: [
+        ...state.messages,
+        msg(
+          `${getDisplayName(item)} cannot be equipped.`,
+          state.turn,
+          "system",
+        ),
+      ],
     };
   }
 
@@ -30,10 +41,10 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   let inventory = [...hero.inventory];
 
   // Ring slot resolution
-  if (slot === 'ringLeft') {
-    if (!equipment.ringLeft) slot = 'ringLeft';
-    else if (!equipment.ringRight) slot = 'ringRight';
-    else slot = 'ringLeft';
+  if (slot === "ringLeft") {
+    if (!equipment.ringLeft) slot = "ringLeft";
+    else if (!equipment.ringRight) slot = "ringRight";
+    else slot = "ringLeft";
   }
 
   // If slot is occupied, swap to inventory
@@ -45,17 +56,35 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
 
   // Remove new item from inventory and place in slot
   const equippedItem = item;
-  inventory = inventory.filter(i => i.id !== itemId);
+  inventory = inventory.filter((i) => i.id !== itemId);
   equipment = { ...equipment, [slot]: equippedItem };
   messages.push(msg(`Equipped ${equippedItem.name}.`, state.turn));
 
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
 
-  trackEquipmentCheck(updatedHero.equipment as unknown as Record<string, unknown>);
+  trackEquipmentCheck(
+    updatedHero.equipment as unknown as Record<string, unknown>,
+  );
 
   Sound.equip();
-  const slotNames: Record<string, string> = { weapon: 'Weapon', shield: 'Shield', helmet: 'Head', body: 'Body', cloak: 'Cloak', gauntlets: 'Gloves', belt: 'Belt', boots: 'Feet', ringLeft: 'Ring L', ringRight: 'Ring R', amulet: 'Neck', pack: 'Pack', purse: 'Purse' };
-  showGameToast(`Equipped ${equippedItem.name} → ${slotNames[slot] ?? slot}`, 'success');
+  const slotNames: Record<string, string> = {
+    weapon: "Weapon",
+    shield: "Shield",
+    helmet: "Head",
+    body: "Body",
+    cloak: "Cloak",
+    gauntlets: "Gloves",
+    belt: "Belt",
+    boots: "Feet",
+    ringLeft: "Ring L",
+    ringRight: "Ring R",
+    amulet: "Neck",
+    pack: "Pack",
+  };
+  showGameToast(
+    `Equipped ${equippedItem.name} → ${slotNames[slot] ?? slot}`,
+    "success",
+  );
   return {
     ...state,
     hero: updatedHero,
@@ -63,7 +92,10 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   };
 }
 
-export function processUnequipItem(state: GameState, slot: EquipSlot): GameState {
+export function processUnequipItem(
+  state: GameState,
+  slot: EquipSlot,
+): GameState {
   const hero = { ...state.hero };
   const item = hero.equipment[slot];
   if (!item) return state;
@@ -73,13 +105,10 @@ export function processUnequipItem(state: GameState, slot: EquipSlot): GameState
   const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
 
   Sound.equip();
-  showGameToast(`Unequipped ${item.name}`, 'info');
+  showGameToast(`Unequipped ${item.name}`, "info");
   return {
     ...state,
     hero: updatedHero,
-    messages: [
-      ...state.messages,
-      msg(`Unequipped ${item.name}.`, state.turn),
-    ],
+    messages: [...state.messages, msg(`Unequipped ${item.name}.`, state.turn)],
   };
 }

@@ -145,13 +145,9 @@ export function generateTestFloor(): {
   const potionTpl = ALL_ITEM_TEMPLATES.find(
     (t) => t.id === "potion-heal-minor",
   )!;
-  const scrollTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "scroll-teleport")!;
   const swordTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "long-sword")!;
   const armorTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "chain-mail")!;
   const ringTpl = ALL_ITEM_TEMPLATES.find((t) => t.id === "ring")!;
-  const returnTpl = ALL_ITEM_TEMPLATES.find(
-    (t) => t.id === "scroll-rune-of-return",
-  )!;
 
   // Normal items
   items.push({
@@ -161,14 +157,6 @@ export function generateTestFloor(): {
   items.push({
     item: createItemFromTemplate(potionTpl, 5),
     position: { x: 3, y: 13 },
-  });
-  items.push({
-    item: createItemFromTemplate(scrollTpl, 5),
-    position: { x: 3, y: 14 },
-  });
-  items.push({
-    item: createItemFromTemplate(returnTpl, 5),
-    position: { x: 3, y: 15 },
   });
 
   // Enchanted sword (+2)

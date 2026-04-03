@@ -37,7 +37,6 @@ export function createEmptyEquipment(): Equipment {
     ringRight: null,
     amulet: null,
     pack: null,
-    purse: null,
   };
 }
 

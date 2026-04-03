@@ -66,7 +66,6 @@ const SLOT_POSITIONS: Record<string, { x: number; y: number }> = {
   ringRight: { x: 172, y: 290 },
   boots: { x: 104, y: 420 },
   pack: { x: 190, y: 100 },
-  purse: { x: 190, y: 258 },
 };
 
 const SLOT_LABELS: Record<string, string> = {
@@ -82,7 +81,6 @@ const SLOT_LABELS: Record<string, string> = {
   ringRight: "Ring R",
   amulet: "Amulet",
   pack: "Pack",
-  purse: "Purse",
 };
 
 function createEquipSlot(
@@ -238,7 +236,6 @@ export function createInventoryScreen(
     "ringRight",
     "boots",
     "pack",
-    "purse",
   ];
 
   // Paperdoll — desktop only, no slot icons
@@ -445,7 +442,12 @@ export function createInventoryScreen(
     }
   };
 
-  const openDrawer = (item: Item, tpl: any, equippedInSlot: Item | null, stackCount: number = 1) => {
+  const openDrawer = (
+    item: Item,
+    tpl: any,
+    equippedInSlot: Item | null,
+    stackCount: number = 1,
+  ) => {
     closeDrawer();
     drawerEl = el("div", {
       position: "fixed",
@@ -522,7 +524,7 @@ export function createInventoryScreen(
         ),
       );
     }
-    if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
+    if (["potion", "spellbook"].includes(item.category)) {
       btnRow.appendChild(
         drawerBtn("Use", () => onAction({ type: "useItem", itemId: item.id })),
       );
@@ -763,7 +765,7 @@ export function createInventoryScreen(
             btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })),
           );
         }
-        if (["potion", "scroll", "spellbook", "wand"].includes(item.category)) {
+        if (["potion", "spellbook"].includes(item.category)) {
           actions.appendChild(
             btn("[U]", () => onAction({ type: "useItem", itemId: item.id })),
           );
@@ -885,12 +887,7 @@ export function createInventoryScreen(
       return;
     }
     if (e.code === "KeyU") {
-      if (
-        item.category === "potion" ||
-        item.category === "scroll" ||
-        item.category === "spellbook" ||
-        item.category === "wand"
-      ) {
+      if (item.category === "potion" || item.category === "spellbook") {
         e.preventDefault();
         onAction({ type: "useItem", itemId: item.id });
       }

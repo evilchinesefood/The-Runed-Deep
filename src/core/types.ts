@@ -69,8 +69,7 @@ export type EquipSlot =
   | "ringLeft"
   | "ringRight"
   | "amulet"
-  | "pack"
-  | "purse";
+  | "pack";
 
 export interface Equipment {
   weapon: Item | null;
@@ -85,7 +84,6 @@ export interface Equipment {
   ringRight: Item | null;
   amulet: Item | null;
   pack: Item | null;
-  purse: Item | null;
 }
 
 export interface StatusEffect {
@@ -134,9 +132,7 @@ export type ItemCategory =
   | "ring"
   | "amulet"
   | "potion"
-  | "scroll"
   | "spellbook"
-  | "wand"
   | "staff"
   | "container"
   | "currency"
