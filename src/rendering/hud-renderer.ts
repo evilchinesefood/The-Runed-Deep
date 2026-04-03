@@ -418,17 +418,15 @@ export class HudRenderer {
       const baseColor = colors[m.severity] ?? "#ccc";
       const line = document.createElement("div");
       line.style.margin = "1px 0";
-      const parts = m.text.split(
-        /(\S+(?:\s+\S+){0,2}\s+\+\d+|\S+(?:\s+\S+){0,2}\s+-\d+|\d+)/g,
-      );
+      const parts = m.text.split(/(\+\d+|-\d+|\d+)/g);
       for (const part of parts) {
-        if (/\s\+\d+$/.test(part)) {
+        if (/^\+\d+$/.test(part)) {
           const span = document.createElement("span");
           span.textContent = part;
           span.style.color = "#4af";
           span.style.fontWeight = "bold";
           line.appendChild(span);
-        } else if (/\s-\d+$/.test(part)) {
+        } else if (/^-\d+$/.test(part)) {
           const span = document.createElement("span");
           span.textContent = part;
           span.style.color = "#f44";
