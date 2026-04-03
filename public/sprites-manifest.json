@@ -19917,7 +19917,7 @@
         "subfolder": "root",
         "x": 736,
         "y": 704,
-        "used": true
+        "used": false
       },
       {
         "className": "spell-book",
@@ -20001,7 +20001,7 @@
         "subfolder": "wand",
         "x": 256,
         "y": 800,
-        "used": true
+        "used": false
       },
       {
         "className": "wand-of-divination",
@@ -20022,14 +20022,14 @@
         "subfolder": "wand",
         "x": 320,
         "y": 128,
-        "used": true
+        "used": false
       },
       {
         "className": "wand-of-lightning",
         "subfolder": "wand",
         "x": 384,
         "y": 800,
-        "used": true
+        "used": false
       },
       {
         "className": "axe",
@@ -20344,56 +20344,56 @@
         "subfolder": "broken",
         "x": 480,
         "y": 832,
-        "used": true
+        "used": false
       },
       {
         "className": "broken-armour",
         "subfolder": "broken",
         "x": 0,
         "y": 64,
-        "used": true
+        "used": false
       },
       {
         "className": "broken-shield",
         "subfolder": "broken",
         "x": 544,
         "y": 64,
-        "used": true
+        "used": false
       },
       {
         "className": "broken-helmet",
         "subfolder": "broken",
         "x": 480,
         "y": 96,
-        "used": true
+        "used": false
       },
       {
         "className": "broken-belt",
         "subfolder": "broken",
         "x": 864,
         "y": 64,
-        "used": true
+        "used": false
       },
       {
         "className": "broken-cloak",
         "subfolder": "broken",
         "x": 768,
         "y": 64,
-        "used": true
+        "used": false
       },
       {
         "className": "morning-star",
         "subfolder": "morning",
         "x": 192,
         "y": 960,
-        "used": true
+        "used": false
       },
       {
         "className": "morning-star-cursed",
         "subfolder": "morning",
         "x": 224,
         "y": 960,
-        "used": true
+        "used": false
       },
       {
         "className": "morning-star-enchanted",
@@ -20449,21 +20449,21 @@
         "subfolder": "wand",
         "x": 736,
         "y": 1088,
-        "used": true
+        "used": false
       },
       {
         "className": "wand-of-cold-ball",
         "subfolder": "wand",
         "x": 768,
         "y": 1088,
-        "used": true
+        "used": false
       },
       {
         "className": "wand-of-cold-bolt",
         "subfolder": "wand",
         "x": 800,
         "y": 1088,
-        "used": true
+        "used": false
       },
       {
         "className": "amulet",
@@ -20589,7 +20589,7 @@
         "subfolder": "broken",
         "x": 352,
         "y": 1120,
-        "used": true
+        "used": false
       },
       {
         "className": "dagger",
@@ -20666,21 +20666,21 @@
         "subfolder": "purse",
         "x": 704,
         "y": 1120,
-        "used": true
+        "used": false
       },
       {
         "className": "purse-leather-enchanted",
         "subfolder": "purse",
         "x": 736,
         "y": 1120,
-        "used": true
+        "used": false
       },
       {
         "className": "purse-leather-cursed",
         "subfolder": "purse",
         "x": 768,
         "y": 1120,
-        "used": true
+        "used": false
       },
       {
         "className": "backpack-broken",
@@ -20792,14 +20792,14 @@
         "subfolder": "scroll",
         "x": 256,
         "y": 1152,
-        "used": true
+        "used": false
       },
       {
         "className": "scroll-return",
         "subfolder": "scroll",
         "x": 288,
         "y": 1152,
-        "used": true
+        "used": false
       },
       {
         "className": "backpack-elven",
