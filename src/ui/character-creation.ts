@@ -16,7 +16,7 @@ export function createCharacterCreationScreen(
 ): HTMLElement {
   const TOTAL_POINTS = 230;
   const MIN_ATTR = 20;
-  const MAX_ATTR = 72;
+  const MAX_ATTR = 100;
 
   const state = {
     name: "Hero",
