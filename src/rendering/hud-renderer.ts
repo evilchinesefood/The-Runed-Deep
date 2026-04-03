@@ -418,33 +418,8 @@ export class HudRenderer {
       const baseColor = colors[m.severity] ?? "#ccc";
       const line = document.createElement("div");
       line.style.margin = "1px 0";
-      const parts = m.text.split(/(\+\d+|-\d+|\d+)/g);
-      for (const part of parts) {
-        if (/^\+\d+$/.test(part)) {
-          const span = document.createElement("span");
-          span.textContent = part;
-          span.style.color = "#4af";
-          span.style.fontWeight = "bold";
-          line.appendChild(span);
-        } else if (/^-\d+$/.test(part)) {
-          const span = document.createElement("span");
-          span.textContent = part;
-          span.style.color = "#f44";
-          span.style.fontWeight = "bold";
-          line.appendChild(span);
-        } else if (/^\d+$/.test(part)) {
-          const num = document.createElement("span");
-          num.textContent = part;
-          num.style.color = "#fff";
-          num.style.fontWeight = "bold";
-          line.appendChild(num);
-        } else {
-          const txt = document.createElement("span");
-          txt.textContent = part;
-          txt.style.color = baseColor;
-          line.appendChild(txt);
-        }
-      }
+      line.style.color = baseColor;
+      line.textContent = m.text;
       this.messagesEl.appendChild(line);
     }
 
