@@ -23,9 +23,16 @@ export type Screen =
   | "service"
   | "victory"
   | "death"
-  | "achievements";
+  | "achievements"
+  | "rift-menu"
+  | "rift-summary";
 
-export type Difficulty = "normal" | "intermediate" | "hard" | "nightmare" | "impossible";
+export type Difficulty =
+  | "normal"
+  | "intermediate"
+  | "hard"
+  | "nightmare"
+  | "impossible";
 
 export type Gender = "male" | "female";
 
@@ -108,6 +115,7 @@ export interface Hero {
   armorValue: number;
   equipDamageBonus: number;
   equipAccuracyBonus: number;
+  runeShards: number;
 }
 
 // ============================================================
@@ -177,9 +185,16 @@ export interface Monster {
   fleeing: number; // turns remaining in flee mode, 0 = not fleeing
   hasFled: boolean; // true after first flee — won't flee again
   bled: boolean; // has already left a blood splatter
+  alerted: boolean; // runtime only — pathfinds toward player even without LOS
 }
 
-export type MonsterAI = "melee" | "ranged" | "caster" | "thief" | "summoner";
+export type MonsterAI =
+  | "melee"
+  | "ranged"
+  | "caster"
+  | "thief"
+  | "summoner"
+  | "stationary";
 
 // ============================================================
 // Map / Dungeon
@@ -231,7 +246,32 @@ export interface Floor {
   height: number;
 }
 
-export type DungeonId = "mine" | "fortress" | "castle" | "town";
+export type DungeonId = "mine" | "fortress" | "castle" | "town" | "rift";
+
+// ============================================================
+// Fractured Rift
+// ============================================================
+
+export interface RiftModifier {
+  id: string;
+  name: string;
+  description: string;
+  weight: number; // difficulty weight: positive = harder, negative = easier
+}
+
+export interface RiftOffering {
+  seed: number;
+  modifiers: RiftModifier[];
+  rerollCount: number;
+}
+
+export interface RiftState {
+  seed: number;
+  modifiers: RiftModifier[];
+  currentFloor: number;
+  totalFloors: number;
+  shardsEarned: number;
+}
 
 // ============================================================
 // Town
@@ -276,6 +316,9 @@ export interface GameState {
   activeBuildingId: string;
   ngPlusCount: number;
   stash: Item[];
+  riftStoneUnlocked: boolean;
+  riftOffering: RiftOffering | null;
+  activeRift: RiftState | null;
 }
 
 // ============================================================
@@ -308,4 +351,9 @@ export type GameAction =
   | { type: "newGame" }
   | { type: "toggleMarkForSale"; itemId: string }
   | { type: "removeCurseItem"; itemId: string }
-  | { type: "setScreen"; screen: Screen };
+  | { type: "setScreen"; screen: Screen }
+  | { type: "enterRift" }
+  | { type: "exitRift" }
+  | { type: "rerollRift" }
+  | { type: "openRiftMenu" }
+  | { type: "riftComplete" };

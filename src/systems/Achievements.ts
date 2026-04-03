@@ -195,10 +195,9 @@ export function trackMonsterKill(templateId: string, isBoss: boolean): void {
 }
 
 export function trackFloorReached(floorNum: number): void {
-  const depth = floorNum + 1;
-  if (depth >= 10) unlock("into-the-depths");
-  if (depth >= 14) unlock("fortress-breaker");
-  if (depth >= 27) unlock("castle-stormer");
+  if (floorNum >= 10) unlock("into-the-depths");
+  if (floorNum >= 14) unlock("fortress-breaker");
+  if (floorNum >= 27) unlock("castle-stormer");
 }
 
 export function trackLevelUp(level: number): void {

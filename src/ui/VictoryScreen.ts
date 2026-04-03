@@ -12,7 +12,7 @@ export function createVictoryScreen(
 
   const score = calculateScore(
     hero.level,
-    state.currentFloor + 1,
+    state.currentFloor,
     hero.xp,
     state.turn,
     hero.gold,

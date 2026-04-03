@@ -11,19 +11,30 @@ export interface Tileset {
 }
 
 export const TILESETS: Record<string, Tileset> = {
-  mine:     { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '' },
-  fortress: { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '#6688bb' },
-  castle:   { floor: 'dark-dgn', wall: 'rock', litFloor: 'lit-dgn', wallTint: '#bb7755' },
+  mine: { floor: "dark-dgn", wall: "rock", litFloor: "lit-dgn", wallTint: "" },
+  fortress: {
+    floor: "dark-dgn",
+    wall: "rock",
+    litFloor: "lit-dgn",
+    wallTint: "#6688bb",
+  },
+  castle: {
+    floor: "dark-dgn",
+    wall: "rock",
+    litFloor: "lit-dgn",
+    wallTint: "#bb7755",
+  },
 };
 
-/** Get the dungeon ID for a given floor number (0-indexed) */
-export function getDungeonForFloor(floorNum: number): 'mine' | 'fortress' | 'castle' {
-  const depth = floorNum + 1;
-  if (depth <= 13) return 'mine';
-  if (depth <= 26) return 'fortress';
-  return 'castle';
+/** Get the dungeon ID for a given floor number (1-indexed, 30 floors) */
+export function getDungeonForFloor(
+  floorNum: number,
+): "mine" | "fortress" | "castle" {
+  if (floorNum <= 10) return "mine";
+  if (floorNum <= 20) return "fortress";
+  return "castle";
 }
 
 export function getTileset(dungeonId: string): Tileset {
-  return TILESETS[dungeonId] ?? TILESETS['mine'];
+  return TILESETS[dungeonId] ?? TILESETS["mine"];
 }

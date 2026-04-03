@@ -293,7 +293,7 @@ function spawnNearSummoner(
   ).length;
   if (existingSummoned >= 3) return state;
 
-  const depth = state.currentFloor + 1;
+  const depth = state.currentFloor;
   const available = getMonstersForDepth(depth).filter((t) =>
     summonedTemplateIds.includes(t.id),
   );
@@ -359,7 +359,7 @@ export function monsterRangedAttack(
 
   const hero = state.hero;
   const dir = directionTo(monster.position, hero.position);
-  const depth = state.currentFloor + 1;
+  const depth = state.currentFloor;
 
   // ── Spell bolts ──────────────────────────────────────────
   if (
@@ -727,6 +727,14 @@ function processMelee(
   const hero = state.hero;
   const dist = chebyshev(monster.position, hero.position);
 
+  // Process alert abilities (e.g. War Drummer)
+  if (
+    monster.abilities.includes("alert-radius") ||
+    monster.abilities.includes("alert-floor")
+  ) {
+    state = processAlertAbilities(state, floorKey, idx, monster);
+  }
+
   // Tick flee timer
   if (monster.fleeing > 0) {
     monster = { ...monster, fleeing: monster.fleeing - 1 };
@@ -797,7 +805,9 @@ function processMelee(
     return s;
   }
 
-  if (manhattan(monster.position, hero.position) <= getDetectRange(state)) {
+  const inRange =
+    manhattan(monster.position, hero.position) <= getDetectRange(state);
+  if (inRange || monster.alerted) {
     // Low HP flee check before moving (only once per monster)
     if (
       !monster.hasFled &&
@@ -830,13 +840,19 @@ function processRanged(
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
-  const rangedAbilities = monster.abilities.filter(
-    (a) =>
-      a.startsWith("cast-") ||
-      a.startsWith("throw-") ||
-      a.startsWith("tail-") ||
-      a.startsWith("breath-"),
-  );
+  // Silence rift modifier: suppress spell/ranged, fall back to melee approach
+  const silenced =
+    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+
+  const rangedAbilities = silenced
+    ? []
+    : monster.abilities.filter(
+        (a) =>
+          a.startsWith("cast-") ||
+          a.startsWith("throw-") ||
+          a.startsWith("tail-") ||
+          a.startsWith("breath-"),
+      );
 
   const hasRanged = rangedAbilities.length > 0;
   const los = hasLineOfSight(floor, monster.position, hero.position);
@@ -854,7 +870,7 @@ function processRanged(
   }
 
   // Close distance to get into firing range
-  if (dist <= getDetectRange(state)) {
+  if (dist <= getDetectRange(state) || monster.alerted) {
     return moveToward(state, floorKey, idx, hero.position);
   }
 
@@ -873,7 +889,13 @@ function processCaster(
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
-  const spellAbilities = monster.abilities.filter((a) => a.startsWith("cast-"));
+  // Silence rift modifier: suppress spells, fall back to melee approach
+  const silenced =
+    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+
+  const spellAbilities = silenced
+    ? []
+    : monster.abilities.filter((a) => a.startsWith("cast-"));
   const los = hasLineOfSight(floor, monster.position, hero.position);
 
   if (cDist <= 1) {
@@ -891,7 +913,7 @@ function processCaster(
     return monsterRangedAttack(state, monster, spell);
   }
 
-  if (dist <= getDetectRange(state)) {
+  if (dist <= getDetectRange(state) || monster.alerted) {
     return moveToRange(state, floorKey, idx, hero.position, 4, 8);
   }
 
@@ -955,7 +977,10 @@ function processThief(
     return s;
   }
 
-  if (manhattan(monster.position, hero.position) <= getDetectRange(state)) {
+  if (
+    manhattan(monster.position, hero.position) <= getDetectRange(state) ||
+    monster.alerted
+  ) {
     return moveToward(state, floorKey, idx, hero.position);
   }
 
@@ -975,10 +1000,14 @@ function processSummoner(
   const cDist = chebyshev(monster.position, hero.position);
   const los = hasLineOfSight(floor, monster.position, hero.position);
 
+  // Silence rift modifier: suppress summons and spells
+  const silenced =
+    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+
   // Summon every 4-5 turns
-  const summonAbilities = monster.abilities.filter((a) =>
-    a.startsWith("summon-"),
-  );
+  const summonAbilities = silenced
+    ? []
+    : monster.abilities.filter((a) => a.startsWith("summon-"));
   if (summonAbilities.length > 0 && dist <= 12 && state.turn % 5 === 0) {
     const ability =
       summonAbilities[Math.floor(Math.random() * summonAbilities.length)];
@@ -1004,12 +1033,14 @@ function processSummoner(
   }
 
   // Ranged attack if in range and LOS
-  const rangedAbilities = monster.abilities.filter(
-    (a) =>
-      a.startsWith("cast-") ||
-      a.startsWith("throw-") ||
-      a.startsWith("breath-"),
-  );
+  const rangedAbilities = silenced
+    ? []
+    : monster.abilities.filter(
+        (a) =>
+          a.startsWith("cast-") ||
+          a.startsWith("throw-") ||
+          a.startsWith("breath-"),
+      );
   if (rangedAbilities.length > 0 && los && dist <= 8) {
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
@@ -1021,11 +1052,109 @@ function processSummoner(
     return monsterAttacksPlayer(state, monster);
   }
 
-  if (dist <= getDetectRange(state)) {
+  if (dist <= getDetectRange(state) || monster.alerted) {
     return moveToRange(state, floorKey, idx, hero.position, 5, 8);
   }
 
   return state;
+}
+
+// ── Stationary AI ───────────────────────────────────────────
+
+function processStationary(
+  state: GameState,
+  floorKey: string,
+  idx: number,
+): GameState {
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+  const monster = floor.monsters[idx];
+
+  // Process alert abilities when player is in detection range
+  return processAlertAbilities(state, floorKey, idx, monster);
+}
+
+/**
+ * Alert abilities: alert-floor alerts ALL monsters on the floor,
+ * alert-radius alerts monsters within 10 Manhattan distance.
+ */
+function processAlertAbilities(
+  state: GameState,
+  floorKey: string,
+  idx: number,
+  monster: Monster,
+): GameState {
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+  const hero = state.hero;
+  const dist = manhattan(monster.position, hero.position);
+  const detectRange = getDetectRange(state);
+
+  if (dist > detectRange) return state;
+  if (!hasLineOfSight(floor, monster.position, hero.position)) return state;
+
+  // Already shrieked/drummed — don't fire again
+  if (monster.alerted) return state;
+
+  let cur = state;
+
+  if (monster.abilities.includes("alert-floor")) {
+    // Check if there are any non-alerted monsters to alert
+    const curFloor = cur.floors[floorKey];
+    if (!curFloor) return cur;
+    const hasUnalerted = curFloor.monsters.some(
+      (m, i) => i !== idx && !m.alerted && m.hp > 0,
+    );
+    if (!hasUnalerted) return cur;
+
+    // Alert ALL monsters on the floor (including self to mark as used)
+    const monsters = curFloor.monsters.map((m, i) =>
+      !m.alerted && m.hp > 0 ? { ...m, alerted: true } : m,
+    );
+    cur = {
+      ...cur,
+      floors: { ...cur.floors, [floorKey]: { ...curFloor, monsters } },
+    };
+    cur = addMsg(
+      cur,
+      "The Shrieker lets out a piercing shriek! You hear movement in the darkness...",
+      "important",
+    );
+  }
+
+  if (monster.abilities.includes("alert-radius")) {
+    const curFloor = cur.floors[floorKey];
+    if (!curFloor) return cur;
+    const hasUnalerted = curFloor.monsters.some(
+      (m, i) =>
+        i !== idx &&
+        !m.alerted &&
+        m.hp > 0 &&
+        manhattan(m.position, monster.position) <= 10,
+    );
+    if (!hasUnalerted) return cur;
+
+    // Alert monsters within 10 Manhattan distance (and self)
+    const monsters = curFloor.monsters.map((m, i) => {
+      if (i === idx) return { ...m, alerted: true };
+      if (m.alerted || m.hp <= 0) return m;
+      if (manhattan(m.position, monster.position) <= 10) {
+        return { ...m, alerted: true };
+      }
+      return m;
+    });
+    cur = {
+      ...cur,
+      floors: { ...cur.floors, [floorKey]: { ...curFloor, monsters } },
+    };
+    cur = addMsg(
+      cur,
+      "The War Drummer beats a frenzied rhythm! Something stirs nearby...",
+      "important",
+    );
+  }
+
+  return cur;
 }
 
 // ── Main entry point ─────────────────────────────────────────
@@ -1039,6 +1168,33 @@ export function processAllMonsterTurns(state: GameState): GameState {
   if (!floor) return state;
 
   let cur = state;
+
+  // Packhunter rift modifier: when any monster spots the player, alert all within 10 tiles
+  const packhunter =
+    state.activeRift?.modifiers.some((m) => m.id === "packhunter") ?? false;
+  if (packhunter) {
+    const detectRange = getDetectRange(state);
+    const spotted = floor.monsters.some(
+      (m) =>
+        m.hp > 0 &&
+        !m.sleeping &&
+        manhattan(m.position, state.hero.position) <= detectRange &&
+        hasLineOfSight(floor, m.position, state.hero.position),
+    );
+    if (spotted) {
+      const monsters = floor.monsters.map((m) => {
+        if (m.alerted || m.hp <= 0 || m.sleeping) return m;
+        if (manhattan(m.position, state.hero.position) <= 10) {
+          return { ...m, alerted: true };
+        }
+        return m;
+      });
+      cur = {
+        ...cur,
+        floors: { ...cur.floors, [floorKey]: { ...floor, monsters } },
+      };
+    }
+  }
 
   // Collect IDs before processing (array may change during iteration)
   const monsterIds = floor.monsters.map((m) => m.id);
@@ -1069,6 +1225,9 @@ export function processAllMonsterTurns(state: GameState): GameState {
         break;
       case "summoner":
         cur = processSummoner(cur, floorKey, idx);
+        break;
+      case "stationary":
+        cur = processStationary(cur, floorKey, idx);
         break;
     }
 

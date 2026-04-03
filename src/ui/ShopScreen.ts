@@ -476,10 +476,8 @@ export function createShopScreen(
 
     // Sell Marked button — between shop inventory and player inventory
     const shop = SHOP_DEFS[shopId];
-    const isJunk = shopId === "junk-store";
     const markedItems = state.hero.inventory.filter((i) => {
       if (!i.markedForSale) return false;
-      if (isJunk) return true;
       return shop?.categories.includes(i.category);
     });
     if (markedItems.length > 0) {

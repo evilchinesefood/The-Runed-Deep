@@ -58,6 +58,9 @@ const BUILDING_NAMES: Record<string, string> = {
   sage: "The Sage",
   bank: "The Blacksmith",
   inn: "The Resting Stag — Your Stash",
+  "rune-forge": "The Rune Forge",
+  "rift-stone": "Rift Stone",
+  "statue-of-fortune": "Statue of Fortune",
 };
 
 function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
@@ -1130,6 +1133,57 @@ export function createServiceScreen(
         break;
       case "inn":
         content = buildStash(state, handleUpdate);
+        break;
+      case "rune-forge":
+        // TODO: Rune Forge UI (Sub-Project C)
+        content = createPanel("Services");
+        content.appendChild(
+          el(
+            "div",
+            { color: "#888", padding: "20px", textAlign: "center" },
+            "The Rune Forge is not yet operational.",
+          ),
+        );
+        break;
+      case "rift-stone": {
+        content = createPanel("Services");
+        if (!state.riftStoneUnlocked) {
+          content.appendChild(
+            el("div", { color: "#555", padding: "20px", textAlign: "center" }, "The Rift Stone is dormant. Clear Floor 15 to awaken it."),
+          );
+        } else {
+          content.appendChild(
+            el(
+              "div",
+              {
+                color: "#a6f",
+                padding: "12px",
+                textAlign: "center",
+                fontStyle: "italic",
+              },
+              "A swirling vortex of energy pulses before you...",
+            ),
+          );
+          const riftBtn = createButton("Approach the Rift Stone");
+          riftBtn.style.cssText +=
+            "display:block;width:100%;padding:12px;font-size:14px;margin-top:12px;";
+          riftBtn.addEventListener("click", () => {
+            onUpdate({ ...state, screen: "rift-menu" as any });
+          });
+          content.appendChild(riftBtn);
+        }
+        break;
+      }
+      case "statue-of-fortune":
+        // TODO: Statue of Fortune UI (Sub-Project D)
+        content = createPanel("Services");
+        content.appendChild(
+          el(
+            "div",
+            { color: "#888", padding: "20px", textAlign: "center" },
+            "The Statue of Fortune awaits your offerings.",
+          ),
+        );
         break;
       default:
         content = createPanel("Unknown Service");

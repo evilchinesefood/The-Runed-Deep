@@ -397,7 +397,7 @@ export function createSplashScreen(
           const children = details.children;
           if (children[0]) children[0].textContent = state.hero.name;
           if (children[1])
-            children[1].textContent = `Level ${state.hero.level} | Floor ${(state.currentFloor ?? 0) + 1} | Turn ${state.turn}`;
+            children[1].textContent = `Level ${state.hero.level} | Floor ${state.currentFloor ?? 1} | Turn ${state.turn}`;
           if (children[2]) children[2].textContent = `\u2601 Synced from cloud`;
         } catch {
           /* ignore sync errors */

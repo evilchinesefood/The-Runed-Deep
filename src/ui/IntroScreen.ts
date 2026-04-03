@@ -19,7 +19,7 @@ He pressed a worn spellbook into your hands and pointed toward the mine entrance
   },
   {
     title: "Your Quest Begins",
-    text: `Armed with little more than determination and a single spell, you stand at the mouth of the mine. Forty levels of darkness, monsters, and ancient treasure lie between you and Surtur.
+    text: `Armed with little more than determination and a single spell, you stand at the mouth of the mine. Thirty levels of darkness, monsters, and ancient treasure lie between you and Surtur.
 
 But you are not without hope. A small town remains near the mine entrance — merchants, a temple of Odin, and a wise sage who can aid your journey. Venture deep, grow strong, return to town to recover, and press ever downward.
 

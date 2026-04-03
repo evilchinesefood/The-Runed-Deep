@@ -1,51 +1,55 @@
 // ============================================================
 // Monster database — The Runed Deep
 //
-// Monsters unlock progressively: 1-2 new types every few floors.
-// Once unlocked, monsters continue to appear on deeper floors
-// but newer, tougher ones are heavily favored.
+// Monsters are assigned to floor groups with hard cutoffs.
+// Each monster only appears within its minFloor–maxFloor range.
+// Dungeon is 30 floors. Bosses appear on specific floors.
 //
-// PROGRESSION TABLE:
-// Floor  1: Giant Rat, Kobold
-// Floor  2: Large Snake
-// Floor  3: Giant Red Ant, Giant Bat
-// Floor  4: Wild Dog
-// Floor  5: Skeleton, Giant Trapdoor Spider
-// Floor  6: Viper
-// Floor  7: Carrion Creeper, Goblin
-// Floor  8: Giant Scorpion
-// Floor  9: Walking Corpse, Huge Lizard
-// Floor 10: Red Slime
-// Floor 11: Hobgoblin, Shadow
-// Floor 12: Huge Ogre
-// Floor 13: Gray Wolf, Bandit
-// Floor 14: Smirking Sneak Thief
-// Floor 15: White Wolf, Barrow Wight      (BOSS: Hrungnir)
-// Floor 16: Brown Bear
-// Floor 17: Animated Wooden Statue, Cave Bear
-// Floor 18: Gelatinous Glob
-// Floor 19: Animated Bronze Statue, Evil Warrior
-// Floor 20: Dark Wraith                   (BOSS: Wolf-Man)
-// Floor 21: Gruesome Troll, Manticore
-// Floor 22: Wizard
-// Floor 23: Animated Iron Statue, Necromancer
-// Floor 24: Eerie Ghost
-// Floor 25: Spectre, Vampire              (BOSS: Bear-Man)
-// Floor 26: Animated Marble Statue
-// Floor 27: Rat-Man, Bull-Man
-// Floor 28: Hill Giant
-// Floor 29: Ice Devil, Wind Elemental
-// Floor 30: Dust Elemental                (BOSS: Frost Giant King)
-// Floor 31: Two-Headed Giant, Fire Elemental
-// Floor 32: Water Elemental
-// Floor 33: Frost Giant, Spiked Devil     (BOSS: Stone Giant King)
-// Floor 34: Ice Elemental
-// Floor 35: Earth Elemental, Magma Elemental
-// Floor 36: Stone Giant                   (BOSS: Fire Giant King)
-// Floor 37: Horned Devil, Fire Giant
-// Floor 38: White Dragon
-// Floor 39: Blue Dragon, Green Dragon
-// Floor 40: Abyss Fiend, Red Dragon       (BOSS: Surtur)
+// GROUP 1 (Floors 1-5): Early — Vermin, beasts
+//   Giant Rat (1-5), Kobold (1-5), Large Snake (2-5),
+//   Giant Red Ant (3-5), Giant Bat (3-5), Wild Dog (4-5),
+//   Skeleton (5-5), Giant Trapdoor Spider (5-5)
+//   BOSS: Queen Ant (Floor 5)
+//
+// GROUP 2 (Floors 6-10): Underground — Undead, goblins
+//   Viper (6-10), Hobgoblin (6-10), Shadow (6-10),
+//   Carrion Creeper (7-10), Goblin (7-10), Giant Scorpion (8-10),
+//   Walking Corpse (9-10), Huge Lizard (9-10), Green Slime (10-10)
+//   BOSS: Iron Golem (Floor 10)
+//
+// GROUP 3 (Floors 11-15): Deep — Trolls, ogres, wolves
+//   Huge Ogre (11-15), Gray Wolf (11-15), Bandit (11-15),
+//   Smirking Sneak Thief (12-15), White Wolf (13-15),
+//   Barrow Wight (13-15), Brown Bear (14-15),
+//   Animated Wooden Statue (14-15), Cave Bear (14-15)
+//   BOSS: Hrungnir (Floor 15)
+//
+// GROUP 4 (Floors 16-20): Fortress — Warriors, constructs
+//   Gelatinous Glob (16-20), Animated Bronze Statue (16-20),
+//   Evil Warrior (17-20), Dark Wraith (18-20),
+//   Gruesome Troll (18-20), Manticore (19-20), Wizard (19-20),
+//   Animated Iron Statue (20-20), Necromancer (20-20)
+//   BOSS: Wolf-Man (Floor 20)
+//
+// GROUP 5 (Floors 21-25): Depths — Demons, elementals
+//   Eerie Ghost (21-25), Spectre (21-25), Vampire (21-25),
+//   Animated Marble Statue (22-25), Rat-Man (22-25),
+//   Bull-Man (22-25), Hill Giant (23-25), Ice Devil (24-25),
+//   Wind Elemental (24-25), Dust Elemental (25-25)
+//   BOSS: Frost Giant King (Floor 25)
+//
+// GROUP 6 (Floors 26-30): Castle — Elite, legendary
+//   Two-Headed Giant (26-30), Fire Elemental (26-30),
+//   Water Elemental (27-30), Frost Giant (27-30),
+//   Spiked Devil (27-30), Ice Elemental (28-30),
+//   Earth Elemental (28-30), Magma Elemental (28-30),
+//   Stone Giant (29-30), Horned Devil (29-30), Fire Giant (29-30),
+//   White Dragon (29-30), Blue Dragon (30-30), Green Dragon (30-30),
+//   Abyss Fiend (30-30), Red Dragon (30-30)
+//   BOSS: Surtur (Floor 30)
+//
+// SPECIAL (cross-group):
+//   Shrieker (3-30), War Drummer (11-30)
 //
 // ============================================================
 
@@ -63,7 +67,8 @@ export interface MonsterTemplate {
   ai: MonsterAI;
   abilities: string[];
   resistances: Partial<ElementalResistances>;
-  unlockFloor: number; // floor this monster first appears on
+  minFloor: number; // first floor this monster appears
+  maxFloor: number; // last floor this monster appears
   boss: boolean;
   bossFloor?: number;
 }
@@ -77,7 +82,7 @@ function r(
 const NO_RESIST: Partial<ElementalResistances> = {};
 
 export const MONSTER_TEMPLATES: MonsterTemplate[] = [
-  // ── Floor 1 ─────────────────────────────────────────────
+  // ── Group 1 (Floors 1-5): Early — Vermin, beasts ──────────
   {
     id: "giant-rat",
     name: "Giant Rat",
@@ -90,7 +95,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 1,
+    minFloor: 1,
+    maxFloor: 5,
     boss: false,
   },
   {
@@ -105,11 +111,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 1,
+    minFloor: 1,
+    maxFloor: 5,
     boss: false,
   },
-
-  // ── Floor 2 ─────────────────────────────────────────────
   {
     id: "large-snake",
     name: "Large Snake",
@@ -122,11 +127,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["poison"],
     resistances: NO_RESIST,
-    unlockFloor: 2,
+    minFloor: 2,
+    maxFloor: 5,
     boss: false,
   },
-
-  // ── Floor 3 ─────────────────────────────────────────────
   {
     id: "giant-red-ant",
     name: "Giant Red Ant",
@@ -139,7 +143,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 3,
+    minFloor: 3,
+    maxFloor: 5,
     boss: false,
   },
   {
@@ -154,11 +159,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["flying"],
     resistances: NO_RESIST,
-    unlockFloor: 3,
+    minFloor: 3,
+    maxFloor: 5,
     boss: false,
   },
-
-  // ── Floor 4 ─────────────────────────────────────────────
   {
     id: "wild-dog",
     name: "Wild Dog",
@@ -171,11 +175,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 4,
+    minFloor: 4,
+    maxFloor: 5,
     boss: false,
   },
-
-  // ── Floor 5 ─────────────────────────────────────────────
   {
     id: "skeleton",
     name: "Skeleton",
@@ -188,7 +191,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch"],
     resistances: r({ cold: 50, drain: 100 }),
-    unlockFloor: 5,
+    minFloor: 5,
+    maxFloor: 5,
     boss: false,
   },
   {
@@ -203,11 +207,12 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["poison"],
     resistances: NO_RESIST,
-    unlockFloor: 5,
+    minFloor: 5,
+    maxFloor: 5,
     boss: false,
   },
 
-  // ── Floor 6 ─────────────────────────────────────────────
+  // ── Group 2 (Floors 6-10): Underground — Undead, goblins ──
   {
     id: "viper",
     name: "Viper",
@@ -220,109 +225,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["poison"],
     resistances: NO_RESIST,
-    unlockFloor: 6,
+    minFloor: 6,
+    maxFloor: 10,
     boss: false,
   },
-
-  // ── Floor 7 ─────────────────────────────────────────────
-  {
-    id: "carrion-creeper",
-    name: "Carrion Creeper",
-    sprite: "carrion-creeper",
-    hp: [18, 28],
-    damage: [5, 10],
-    speed: 0.8,
-    xpValue: 16,
-    armor: 2,
-    ai: "melee",
-    abilities: ["paralyze"],
-    resistances: NO_RESIST,
-    unlockFloor: 7,
-    boss: false,
-  },
-  {
-    id: "goblin",
-    name: "Goblin",
-    sprite: "goblin",
-    hp: [16, 24],
-    damage: [4, 9],
-    speed: 1,
-    xpValue: 14,
-    armor: 3,
-    ai: "melee",
-    abilities: [],
-    resistances: NO_RESIST,
-    unlockFloor: 7,
-    boss: false,
-  },
-
-  // ── Floor 8 ─────────────────────────────────────────────
-  {
-    id: "giant-scorpion",
-    name: "Giant Scorpion",
-    sprite: "giant-scorpion",
-    hp: [18, 28],
-    damage: [5, 10],
-    speed: 1,
-    xpValue: 16,
-    armor: 3,
-    ai: "melee",
-    abilities: ["poison"],
-    resistances: NO_RESIST,
-    unlockFloor: 8,
-    boss: false,
-  },
-
-  // ── Floor 9 ─────────────────────────────────────────────
-  {
-    id: "walking-corpse",
-    name: "Walking Corpse",
-    sprite: "walking-corpse",
-    hp: [20, 32],
-    damage: [5, 11],
-    speed: 0.7,
-    xpValue: 18,
-    armor: 1,
-    ai: "melee",
-    abilities: ["drain-strength"],
-    resistances: r({ cold: 50, drain: 100 }),
-    unlockFloor: 9,
-    boss: false,
-  },
-  {
-    id: "huge-lizard",
-    name: "Huge Lizard",
-    sprite: "huge-lizard",
-    hp: [22, 34],
-    damage: [6, 12],
-    speed: 0.9,
-    xpValue: 20,
-    armor: 4,
-    ai: "melee",
-    abilities: [],
-    resistances: NO_RESIST,
-    unlockFloor: 9,
-    boss: false,
-  },
-
-  // ── Floor 10 ────────────────────────────────────────────
-  {
-    id: "green-slime",
-    name: "Red Slime",
-    sprite: "green-slime",
-    hp: [22, 35],
-    damage: [4, 9],
-    speed: 0.5,
-    xpValue: 20,
-    armor: 0,
-    ai: "melee",
-    abilities: ["acid-touch"],
-    resistances: r({ acid: 100 }),
-    unlockFloor: 10,
-    boss: false,
-  },
-
-  // ── Floor 11 ────────────────────────────────────────────
   {
     id: "hobgoblin",
     name: "Hobgoblin",
@@ -335,7 +241,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 11,
+    minFloor: 6,
+    maxFloor: 10,
     boss: false,
   },
   {
@@ -350,11 +257,108 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-strength", "flying"],
     resistances: r({ cold: 50, drain: 100 }),
-    unlockFloor: 11,
+    minFloor: 6,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "carrion-creeper",
+    name: "Carrion Creeper",
+    sprite: "carrion-creeper",
+    hp: [18, 28],
+    damage: [5, 10],
+    speed: 0.8,
+    xpValue: 16,
+    armor: 2,
+    ai: "melee",
+    abilities: ["paralyze"],
+    resistances: NO_RESIST,
+    minFloor: 7,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "goblin",
+    name: "Goblin",
+    sprite: "goblin",
+    hp: [16, 24],
+    damage: [4, 9],
+    speed: 1,
+    xpValue: 14,
+    armor: 3,
+    ai: "melee",
+    abilities: [],
+    resistances: NO_RESIST,
+    minFloor: 7,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "giant-scorpion",
+    name: "Giant Scorpion",
+    sprite: "giant-scorpion",
+    hp: [18, 28],
+    damage: [5, 10],
+    speed: 1,
+    xpValue: 16,
+    armor: 3,
+    ai: "melee",
+    abilities: ["poison"],
+    resistances: NO_RESIST,
+    minFloor: 8,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "walking-corpse",
+    name: "Walking Corpse",
+    sprite: "walking-corpse",
+    hp: [20, 32],
+    damage: [5, 11],
+    speed: 0.7,
+    xpValue: 18,
+    armor: 1,
+    ai: "melee",
+    abilities: ["drain-strength"],
+    resistances: r({ cold: 50, drain: 100 }),
+    minFloor: 9,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "huge-lizard",
+    name: "Huge Lizard",
+    sprite: "huge-lizard",
+    hp: [22, 34],
+    damage: [6, 12],
+    speed: 0.9,
+    xpValue: 20,
+    armor: 4,
+    ai: "melee",
+    abilities: [],
+    resistances: NO_RESIST,
+    minFloor: 9,
+    maxFloor: 10,
+    boss: false,
+  },
+  {
+    id: "green-slime",
+    name: "Red Slime",
+    sprite: "green-slime",
+    hp: [22, 35],
+    damage: [4, 9],
+    speed: 0.5,
+    xpValue: 20,
+    armor: 0,
+    ai: "melee",
+    abilities: ["acid-touch"],
+    resistances: r({ acid: 100 }),
+    minFloor: 10,
+    maxFloor: 10,
     boss: false,
   },
 
-  // ── Floor 12 ────────────────────────────────────────────
+  // ── Group 3 (Floors 11-15): Deep — Trolls, ogres, wolves ──
   {
     id: "huge-ogre",
     name: "Huge Ogre",
@@ -367,11 +371,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 12,
+    minFloor: 11,
+    maxFloor: 15,
     boss: false,
   },
-
-  // ── Floor 13 ────────────────────────────────────────────
   {
     id: "gray-wolf",
     name: "Gray Wolf",
@@ -384,7 +387,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 13,
+    minFloor: 11,
+    maxFloor: 15,
     boss: false,
   },
   {
@@ -399,11 +403,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 13,
+    minFloor: 11,
+    maxFloor: 15,
     boss: false,
   },
-
-  // ── Floor 14 ────────────────────────────────────────────
   {
     id: "smirking-sneak-thief",
     name: "Smirking Sneak Thief",
@@ -416,11 +419,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "thief",
     abilities: ["steal-gold", "teleport"],
     resistances: NO_RESIST,
-    unlockFloor: 14,
+    minFloor: 12,
+    maxFloor: 15,
     boss: false,
   },
-
-  // ── Floor 15 ────────────────────────────────────────────
   {
     id: "white-wolf",
     name: "White Wolf",
@@ -433,7 +435,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch"],
     resistances: r({ cold: 50 }),
-    unlockFloor: 15,
+    minFloor: 13,
+    maxFloor: 15,
     boss: false,
   },
   {
@@ -448,11 +451,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-level"],
     resistances: r({ cold: 50, drain: 100 }),
-    unlockFloor: 15,
+    minFloor: 13,
+    maxFloor: 15,
     boss: false,
   },
-
-  // ── Floor 16 ────────────────────────────────────────────
   {
     id: "brown-bear",
     name: "Brown Bear",
@@ -465,11 +467,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 16,
+    minFloor: 14,
+    maxFloor: 15,
     boss: false,
   },
-
-  // ── Floor 17 ────────────────────────────────────────────
   {
     id: "animated-wooden-statue",
     name: "Animated Wooden Statue",
@@ -482,7 +483,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch"],
     resistances: r({ fire: -50, cold: 50, drain: 100 }),
-    unlockFloor: 17,
+    minFloor: 14,
+    maxFloor: 15,
     boss: false,
   },
   {
@@ -497,11 +499,12 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 17,
+    minFloor: 14,
+    maxFloor: 15,
     boss: false,
   },
 
-  // ── Floor 18 ────────────────────────────────────────────
+  // ── Group 4 (Floors 16-20): Fortress — Warriors, constructs
   {
     id: "gelatinous-glob",
     name: "Gelatinous Glob",
@@ -514,11 +517,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["acid-touch"],
     resistances: r({ acid: 100, lightning: 50 }),
-    unlockFloor: 18,
+    minFloor: 16,
+    maxFloor: 20,
     boss: false,
   },
-
-  // ── Floor 19 ────────────────────────────────────────────
   {
     id: "animated-bronze-statue",
     name: "Animated Bronze Statue",
@@ -531,7 +533,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch"],
     resistances: r({ lightning: 50, drain: 100 }),
-    unlockFloor: 19,
+    minFloor: 16,
+    maxFloor: 20,
     boss: false,
   },
   {
@@ -546,11 +549,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 19,
+    minFloor: 17,
+    maxFloor: 20,
     boss: false,
   },
-
-  // ── Floor 20 ────────────────────────────────────────────
   {
     id: "dark-wraith",
     name: "Dark Wraith",
@@ -563,11 +565,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-constitution", "flying"],
     resistances: r({ cold: 75, drain: 100 }),
-    unlockFloor: 20,
+    minFloor: 18,
+    maxFloor: 20,
     boss: false,
   },
-
-  // ── Floor 21 ────────────────────────────────────────────
   {
     id: "gruesome-troll",
     name: "Gruesome Troll",
@@ -580,7 +581,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["regenerate"],
     resistances: r({ fire: -50 }),
-    unlockFloor: 21,
+    minFloor: 18,
+    maxFloor: 20,
     boss: false,
   },
   {
@@ -595,11 +597,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["tail-spikes", "flying"],
     resistances: NO_RESIST,
-    unlockFloor: 21,
+    minFloor: 19,
+    maxFloor: 20,
     boss: false,
   },
-
-  // ── Floor 22 ────────────────────────────────────────────
   {
     id: "wizard",
     name: "Wizard",
@@ -617,11 +618,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
       "summon-monster",
     ],
     resistances: NO_RESIST,
-    unlockFloor: 22,
+    minFloor: 19,
+    maxFloor: 20,
     boss: false,
   },
-
-  // ── Floor 23 ────────────────────────────────────────────
   {
     id: "animated-iron-statue",
     name: "Animated Iron Statue",
@@ -634,7 +634,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch"],
     resistances: r({ lightning: 75, drain: 100 }),
-    unlockFloor: 23,
+    minFloor: 20,
+    maxFloor: 20,
     boss: false,
   },
   {
@@ -649,11 +650,12 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "caster",
     abilities: ["cast-cold-bolt", "cast-lightning-bolt", "summon-undead"],
     resistances: r({ drain: 50 }),
-    unlockFloor: 23,
+    minFloor: 20,
+    maxFloor: 20,
     boss: false,
   },
 
-  // ── Floor 24 ────────────────────────────────────────────
+  // ── Group 5 (Floors 21-25): Depths — Demons, elementals ───
   {
     id: "eerie-ghost",
     name: "Eerie Ghost",
@@ -666,11 +668,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-intelligence", "phase-through-walls", "flying"],
     resistances: r({ cold: 75, drain: 100 }),
-    unlockFloor: 24,
+    minFloor: 21,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 25 ────────────────────────────────────────────
   {
     id: "spectre",
     name: "Spectre",
@@ -683,7 +684,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-level", "flying"],
     resistances: r({ cold: 100, drain: 100 }),
-    unlockFloor: 25,
+    minFloor: 21,
+    maxFloor: 25,
     boss: false,
   },
   {
@@ -698,11 +700,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["drain-hp", "drain-level"],
     resistances: r({ cold: 50, drain: 100 }),
-    unlockFloor: 25,
+    minFloor: 21,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 26 ────────────────────────────────────────────
   {
     id: "animated-marble-statue",
     name: "Animated Marble Statue",
@@ -715,11 +716,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch"],
     resistances: r({ lightning: 100, drain: 100 }),
-    unlockFloor: 26,
+    minFloor: 22,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 27 ────────────────────────────────────────────
   {
     id: "rat-man",
     name: "Rat-Man",
@@ -732,7 +732,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: [],
     resistances: NO_RESIST,
-    unlockFloor: 27,
+    minFloor: 22,
+    maxFloor: 25,
     boss: false,
   },
   {
@@ -747,11 +748,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["charge"],
     resistances: NO_RESIST,
-    unlockFloor: 27,
+    minFloor: 22,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 28 ────────────────────────────────────────────
   {
     id: "hill-giant",
     name: "Hill Giant",
@@ -764,11 +764,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-boulder"],
     resistances: NO_RESIST,
-    unlockFloor: 28,
+    minFloor: 23,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 29 ────────────────────────────────────────────
   {
     id: "ice-devil",
     name: "Ice Devil",
@@ -781,7 +780,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch", "flying"],
     resistances: r({ cold: 100, fire: -50, drain: 50 }),
-    unlockFloor: 29,
+    minFloor: 24,
+    maxFloor: 25,
     boss: false,
   },
   {
@@ -796,11 +796,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch", "flying"],
     resistances: r({ lightning: 50, drain: 100 }),
-    unlockFloor: 29,
+    minFloor: 24,
+    maxFloor: 25,
     boss: false,
   },
-
-  // ── Floor 30 ────────────────────────────────────────────
   {
     id: "dust-elemental",
     name: "Dust Elemental",
@@ -813,11 +812,12 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["blind", "flying"],
     resistances: r({ drain: 100 }),
-    unlockFloor: 30,
+    minFloor: 25,
+    maxFloor: 25,
     boss: false,
   },
 
-  // ── Floor 31 ────────────────────────────────────────────
+  // ── Group 6 (Floors 26-30): Castle — Elite, legendary ─────
   {
     id: "two-headed-giant",
     name: "Two-Headed Giant",
@@ -830,7 +830,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-boulder"],
     resistances: NO_RESIST,
-    unlockFloor: 31,
+    minFloor: 26,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -845,11 +846,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch", "flying"],
     resistances: r({ fire: 100, cold: -50, drain: 100 }),
-    unlockFloor: 31,
+    minFloor: 26,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 32 ────────────────────────────────────────────
   {
     id: "water-elemental",
     name: "Water Elemental",
@@ -862,11 +862,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch", "flying"],
     resistances: r({ fire: 50, cold: 50, drain: 100 }),
-    unlockFloor: 32,
+    minFloor: 27,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 33 ────────────────────────────────────────────
   {
     id: "frost-giant",
     name: "Frost Giant",
@@ -879,7 +878,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-ice-ball"],
     resistances: r({ cold: 100, fire: -50 }),
-    unlockFloor: 33,
+    minFloor: 27,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -894,11 +894,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch", "flying"],
     resistances: r({ cold: 50, fire: 100, drain: 50 }),
-    unlockFloor: 33,
+    minFloor: 27,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 34 ────────────────────────────────────────────
   {
     id: "ice-elemental",
     name: "Ice Elemental",
@@ -911,11 +910,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch", "flying"],
     resistances: r({ cold: 100, fire: -50, drain: 100 }),
-    unlockFloor: 34,
+    minFloor: 28,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 35 ────────────────────────────────────────────
   {
     id: "earth-elemental",
     name: "Earth Elemental",
@@ -928,7 +926,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["acid-touch"],
     resistances: r({ lightning: 50, drain: 100 }),
-    unlockFloor: 35,
+    minFloor: 28,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -943,11 +942,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch"],
     resistances: r({ fire: 100, cold: -75, drain: 100 }),
-    unlockFloor: 35,
+    minFloor: 28,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 36 ────────────────────────────────────────────
   {
     id: "stone-giant",
     name: "Stone Giant",
@@ -960,11 +958,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-boulder"],
     resistances: r({ lightning: 50 }),
-    unlockFloor: 36,
+    minFloor: 29,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 37 ────────────────────────────────────────────
   {
     id: "horned-devil",
     name: "Horned Devil",
@@ -977,7 +974,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["fire-touch", "flying"],
     resistances: r({ cold: 50, fire: 100, drain: 75 }),
-    unlockFloor: 37,
+    minFloor: 29,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -992,11 +990,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["fire-touch", "throw-boulder"],
     resistances: r({ fire: 100, cold: -50 }),
-    unlockFloor: 37,
+    minFloor: 29,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 38 ────────────────────────────────────────────
   {
     id: "white-dragon",
     name: "White Dragon",
@@ -1009,11 +1006,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["breath-cold", "flying"],
     resistances: r({ cold: 100, fire: -25 }),
-    unlockFloor: 38,
+    minFloor: 29,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 39 ────────────────────────────────────────────
   {
     id: "blue-dragon",
     name: "Blue Dragon",
@@ -1026,7 +1022,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["breath-lightning", "flying"],
     resistances: r({ lightning: 100 }),
-    unlockFloor: 39,
+    minFloor: 30,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -1041,11 +1038,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["breath-acid", "flying"],
     resistances: r({ acid: 100 }),
-    unlockFloor: 39,
+    minFloor: 30,
+    maxFloor: 30,
     boss: false,
   },
-
-  // ── Floor 40 ────────────────────────────────────────────
   {
     id: "abyss-fiend",
     name: "Abyss Fiend",
@@ -1058,7 +1054,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "summoner",
     abilities: ["summon-devil", "teleport", "fire-touch", "flying"],
     resistances: r({ cold: 50, fire: 100, drain: 100 }),
-    unlockFloor: 40,
+    minFloor: 30,
+    maxFloor: 30,
     boss: false,
   },
   {
@@ -1073,11 +1070,80 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["breath-fire", "flying"],
     resistances: r({ fire: 100, cold: -25 }),
-    unlockFloor: 40,
+    minFloor: 30,
+    maxFloor: 30,
+    boss: false,
+  },
+
+  // ── Special (cross-group) ─────────────────────────────────
+  {
+    id: "shrieker",
+    name: "Shrieker",
+    sprite: "ghost-moth",
+    hp: [5, 10],
+    damage: [0, 0],
+    speed: 0,
+    xpValue: 2,
+    armor: 0,
+    ai: "stationary",
+    abilities: ["alert-floor"],
+    resistances: NO_RESIST,
+    minFloor: 3,
+    maxFloor: 30,
+    boss: false,
+  },
+  {
+    id: "war-drummer",
+    name: "War Drummer",
+    sprite: "warmonger",
+    hp: [20, 30],
+    damage: [4, 8],
+    speed: 0.9,
+    xpValue: 15,
+    armor: 2,
+    ai: "melee",
+    abilities: ["alert-radius"],
+    resistances: NO_RESIST,
+    minFloor: 11,
+    maxFloor: 30,
     boss: false,
   },
 
   // ── Boss Monsters (specific floors only) ────────────────
+  {
+    id: "queen-ant",
+    name: "Queen Ant",
+    sprite: "queen-ant",
+    hp: [80, 100],
+    damage: [8, 14],
+    speed: 0.8,
+    xpValue: 50,
+    armor: 5,
+    ai: "melee",
+    abilities: ["poison"],
+    resistances: NO_RESIST,
+    minFloor: 5,
+    maxFloor: 5,
+    boss: true,
+    bossFloor: 5,
+  },
+  {
+    id: "iron-golem",
+    name: "Iron Golem",
+    sprite: "iron-golem",
+    hp: [150, 180],
+    damage: [12, 20],
+    speed: 0.7,
+    xpValue: 100,
+    armor: 7,
+    ai: "melee",
+    abilities: [],
+    resistances: r({ fire: 50, cold: 50, lightning: 50 }),
+    minFloor: 10,
+    maxFloor: 10,
+    boss: true,
+    bossFloor: 10,
+  },
   {
     id: "hill-giant-king",
     name: "Hrungnir, Hill Giant Lord",
@@ -1090,7 +1156,8 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-boulder"],
     resistances: NO_RESIST,
-    unlockFloor: 99,
+    minFloor: 15,
+    maxFloor: 15,
     boss: true,
     bossFloor: 15,
   },
@@ -1106,25 +1173,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "melee",
     abilities: ["cold-touch"],
     resistances: r({ cold: 50 }),
-    unlockFloor: 99,
+    minFloor: 20,
+    maxFloor: 20,
     boss: true,
     bossFloor: 20,
-  },
-  {
-    id: "bear-man",
-    name: "Bear-Man",
-    sprite: "bear-man",
-    hp: [130, 170],
-    damage: [18, 38],
-    speed: 1,
-    xpValue: 320,
-    armor: 10,
-    ai: "melee",
-    abilities: ["fire-touch"],
-    resistances: r({ fire: 50 }),
-    unlockFloor: 99,
-    boss: true,
-    bossFloor: 25,
   },
   {
     id: "frost-giant-king",
@@ -1138,41 +1190,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
     ai: "ranged",
     abilities: ["throw-ice-ball"],
     resistances: r({ cold: 100, fire: -50 }),
-    unlockFloor: 99,
+    minFloor: 25,
+    maxFloor: 25,
     boss: true,
-    bossFloor: 30,
-  },
-  {
-    id: "stone-giant-king",
-    name: "Stone Giant King",
-    sprite: "stone-giant-king",
-    hp: [160, 210],
-    damage: [24, 48],
-    speed: 0.7,
-    xpValue: 450,
-    armor: 15,
-    ai: "ranged",
-    abilities: ["throw-boulder"],
-    resistances: r({ lightning: 75 }),
-    unlockFloor: 99,
-    boss: true,
-    bossFloor: 33,
-  },
-  {
-    id: "fire-giant-king",
-    name: "Fire Giant King",
-    sprite: "fire-giant-king",
-    hp: [170, 220],
-    damage: [26, 50],
-    speed: 0.9,
-    xpValue: 500,
-    armor: 14,
-    ai: "ranged",
-    abilities: ["fire-touch", "throw-boulder"],
-    resistances: r({ fire: 100, cold: -50 }),
-    unlockFloor: 99,
-    boss: true,
-    bossFloor: 36,
+    bossFloor: 25,
   },
   {
     id: "surtur",
@@ -1191,9 +1212,10 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
       "throw-boulder",
     ],
     resistances: r({ fire: 100, cold: -50, drain: 50 }),
-    unlockFloor: 99,
+    minFloor: 30,
+    maxFloor: 30,
     boss: true,
-    bossFloor: 40,
+    bossFloor: 30,
   },
 ];
 
@@ -1207,22 +1229,12 @@ export const MONSTER_BY_ID: Record<string, MonsterTemplate> =
 
 /**
  * Returns non-boss monster templates available at the given depth.
+ * Uses hard cutoffs: minFloor <= depth <= maxFloor.
  */
 export function getMonstersForDepth(depth: number): MonsterTemplate[] {
-  return MONSTER_TEMPLATES.filter((m) => !m.boss && depth >= m.unlockFloor);
-}
-
-/**
- * Returns the highest unlock floor among available monsters at this depth.
- */
-export function getNewestUnlockFloor(depth: number): number {
-  let max = 1;
-  for (const m of MONSTER_TEMPLATES) {
-    if (!m.boss && depth >= m.unlockFloor && m.unlockFloor > max) {
-      max = m.unlockFloor;
-    }
-  }
-  return max;
+  return MONSTER_TEMPLATES.filter(
+    (m) => !m.boss && depth >= m.minFloor && depth <= m.maxFloor,
+  );
 }
 
 /**

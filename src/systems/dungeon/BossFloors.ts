@@ -3,45 +3,57 @@
 // Pre-designed layouts for all 7 boss encounters.
 // ============================================================
 
-import type { Floor, Tile, Vector2, Difficulty, PlacedItem } from '../../core/types';
-import { getBossForFloor, MONSTER_BY_ID } from '../../data/monsters';
-import { createMonster } from '../monsters/spawning';
-import { getItemsForDepth, ALL_ITEM_TEMPLATES } from '../../data/items';
-import { createItemFromTemplate } from '../items/loot';
-import { getDungeonForFloor, TILESETS, type Tileset } from './Tilesets';
+import type {
+  Floor,
+  Tile,
+  Vector2,
+  Difficulty,
+  PlacedItem,
+} from "../../core/types";
+import { getBossForFloor, MONSTER_BY_ID } from "../../data/monsters";
+import { createMonster } from "../monsters/spawning";
+import { getItemsForDepth, ALL_ITEM_TEMPLATES } from "../../data/items";
+import { createItemFromTemplate } from "../items/loot";
+import { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
 
-const BOSS_FLOORS = new Set([15, 20, 25, 30, 33, 36, 40]);
+const BOSS_FLOORS = new Set([5, 10, 15, 20, 25, 30]);
 
 // ── Tile factories (use active tileset) ───────────────────
 
-let ts: Tileset = TILESETS['mine'];
+let ts: Tileset = TILESETS["mine"];
 
 function wall(): Tile {
-  return { type: 'wall', sprite: ts.wall, walkable: false, transparent: false };
+  return { type: "wall", sprite: ts.wall, walkable: false, transparent: false };
 }
 
 function floor(): Tile {
-  return { type: 'floor', sprite: ts.floor, walkable: true, transparent: true };
+  return { type: "floor", sprite: ts.floor, walkable: true, transparent: true };
 }
 
 function stairsUp(): Tile {
-  return { type: 'stairs-up', sprite: 'stairs-up', walkable: true, transparent: true };
+  return {
+    type: "stairs-up",
+    sprite: "stairs-up",
+    walkable: true,
+    transparent: true,
+  };
 }
 
 function stairsDown(): Tile {
-  return { type: 'stairs-down', sprite: 'stairs-down', walkable: true, transparent: true };
-}
-
-function trap(trapType: string): Tile {
-  return { type: 'trap', sprite: ts.floor, walkable: true, transparent: true, trapType, trapRevealed: false };
+  return {
+    type: "stairs-down",
+    sprite: "stairs-down",
+    walkable: true,
+    transparent: true,
+  };
 }
 
 function decor(sprite: string): Tile {
-  return { type: 'decor', sprite, walkable: true, transparent: true };
+  return { type: "decor", sprite, walkable: true, transparent: true };
 }
 
 function water(): Tile {
-  return { type: 'water', sprite: 'water', walkable: true, transparent: true };
+  return { type: "water", sprite: "water", walkable: true, transparent: true };
 }
 
 // ── Grid helpers ──────────────────────────────────────────
@@ -66,7 +78,13 @@ function initBoolGrid(w: number, h: number): boolean[][] {
   return g;
 }
 
-function carveRect(tiles: Tile[][], x: number, y: number, w: number, h: number): void {
+function carveRect(
+  tiles: Tile[][],
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void {
   for (let ry = y; ry < y + h; ry++) {
     for (let rx = x; rx < x + w; rx++) {
       if (ry >= 0 && ry < tiles.length && rx >= 0 && rx < tiles[0].length) {
@@ -110,19 +128,23 @@ function placeLoot(
   if (candidates.length === 0) return;
 
   // Boss guaranteed unique drop (always in NG+, else for bosses F30+)
-  const uniqueCandidates = ALL_ITEM_TEMPLATES.filter(t => t.unique && depth >= t.depthMin && depth <= t.depthMax);
-  const guaranteeUnique = ngPlus >= 1 || depth >= 30;
+  const uniqueCandidates = ALL_ITEM_TEMPLATES.filter(
+    (t) => t.unique && depth >= t.depthMin && depth <= t.depthMax,
+  );
+  const guaranteeUnique = ngPlus >= 1 || depth >= 20;
 
   let placed = 0;
   for (const pos of positions) {
     if (placed >= count) break;
     const t = tiles[pos.y]?.[pos.x];
-    if (!t?.walkable || t.type === 'stairs-up' || t.type === 'stairs-down') continue;
+    if (!t?.walkable || t.type === "stairs-up" || t.type === "stairs-down")
+      continue;
 
     let tpl;
     if (placed === 0 && guaranteeUnique && uniqueCandidates.length > 0) {
       // First item is guaranteed unique
-      tpl = uniqueCandidates[Math.floor(Math.random() * uniqueCandidates.length)];
+      tpl =
+        uniqueCandidates[Math.floor(Math.random() * uniqueCandidates.length)];
     } else {
       tpl = candidates[Math.floor(Math.random() * candidates.length)];
     }
@@ -142,24 +164,34 @@ function rand01(): number {
 // ── Boss floor decoration ────────────────────────────────
 
 const BOSS_DECOR: { sprite: string; minDepth: number; weight: number }[] = [
-  { sprite: 'pillar-stone', minDepth: 1, weight: 4 },
-  { sprite: 'pillar-broken', minDepth: 5, weight: 3 },
-  { sprite: 'altar', minDepth: 10, weight: 1 },
-  { sprite: 'altar-2', minDepth: 20, weight: 1 },
-  { sprite: 'statue', minDepth: 10, weight: 2 },
-  { sprite: 'stone-coffin', minDepth: 15, weight: 2 },
-  { sprite: 'fountain', minDepth: 10, weight: 1 },
+  { sprite: "pillar-stone", minDepth: 1, weight: 4 },
+  { sprite: "pillar-broken", minDepth: 5, weight: 3 },
+  { sprite: "altar", minDepth: 10, weight: 1 },
+  { sprite: "altar-2", minDepth: 20, weight: 1 },
+  { sprite: "statue", minDepth: 10, weight: 2 },
+  { sprite: "stone-coffin", minDepth: 15, weight: 2 },
+  { sprite: "fountain", minDepth: 10, weight: 1 },
 ];
 
-function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2, count: number, items: PlacedItem[] = []): void {
-  const W = tiles[0].length, H = tiles.length;
-  const available = BOSS_DECOR.filter(d => depth >= d.minDepth);
+function decorateBossFloor(
+  tiles: Tile[][],
+  depth: number,
+  playerStart: Vector2,
+  count: number,
+  items: PlacedItem[] = [],
+): void {
+  const W = tiles[0].length,
+    H = tiles.length;
+  const available = BOSS_DECOR.filter((d) => depth >= d.minDepth);
   if (available.length === 0) return;
 
   const totalW = available.reduce((s, d) => s + d.weight, 0);
   function pick() {
     let roll = Math.random() * totalW;
-    for (const d of available) { roll -= d.weight; if (roll <= 0) return d; }
+    for (const d of available) {
+      roll -= d.weight;
+      if (roll <= 0) return d;
+    }
     return available[available.length - 1];
   }
 
@@ -168,14 +200,19 @@ function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2,
     const x = 1 + Math.floor(Math.random() * (W - 2));
     const y = 1 + Math.floor(Math.random() * (H - 2));
     const t = tiles[y][x];
-    if (t.type !== 'floor') continue;
+    if (t.type !== "floor") continue;
     if (x === playerStart.x && y === playerStart.y) continue;
     // Don't place on items
-    if (items.some(i => i.position.x === x && i.position.y === y)) continue;
+    if (items.some((i) => i.position.x === x && i.position.y === y)) continue;
     // Not adjacent to stairs
-    const near = [[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy]) => {
-      const adj = tiles[y+dy]?.[x+dx];
-      return adj?.type === 'stairs-up' || adj?.type === 'stairs-down';
+    const near = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ].some(([dx, dy]) => {
+      const adj = tiles[y + dy]?.[x + dx];
+      return adj?.type === "stairs-up" || adj?.type === "stairs-down";
     });
     if (near) continue;
 
@@ -189,12 +226,20 @@ function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2,
     for (let w = 0; w < 2; w++) {
       const wx = 2 + Math.floor(Math.random() * (W - 4));
       const wy = 2 + Math.floor(Math.random() * (H - 4));
-      if (tiles[wy][wx].type === 'floor') {
+      if (tiles[wy][wx].type === "floor") {
         tiles[wy][wx] = water();
         // Spread 1-2 adjacent
-        for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-          if (Math.random() < 0.4 && tiles[wy+dy]?.[wx+dx]?.type === 'floor') {
-            tiles[wy+dy][wx+dx] = water();
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]) {
+          if (
+            Math.random() < 0.4 &&
+            tiles[wy + dy]?.[wx + dx]?.type === "floor"
+          ) {
+            tiles[wy + dy][wx + dx] = water();
           }
         }
       }
@@ -202,11 +247,164 @@ function decorateBossFloor(tiles: Tile[][], depth: number, playerStart: Vector2,
   }
 }
 
+// ── Floor 5: First Boss Arena ─────────────────────────────
+// Map 30x25. Simple open arena with stairs.
+
+function buildFloor5(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 30,
+    H = 25;
+  const tiles = initGrid(W, H);
+
+  // Entry corridor at top
+  carveRect(tiles, 13, 1, 4, 4);
+
+  // Central arena 14x12 at (8, 8)
+  carveRect(tiles, 8, 8, 14, 12);
+
+  // Corridor: entry -> arena
+  carveV(tiles, 4, 8, 15);
+
+  // Stairs up at entry
+  tiles[2][15] = stairsUp();
+  const playerStart: Vector2 = { x: 15, y: 2 };
+
+  // Corridor: arena south -> stairs down
+  carveV(tiles, 19, 22, 15);
+  // Stairs down behind boss
+  tiles[22][15] = stairsDown();
+
+  const monsters = [];
+  const items: PlacedItem[] = [];
+
+  // Boss in center of arena
+  const bossTpl = getBossForFloor(depth);
+  if (bossTpl) {
+    monsters.push(
+      createMonster(bossTpl, { x: 15, y: 14 }, depth, rand01, difficulty),
+    );
+  }
+
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 10, y: 9 },
+      { x: 19, y: 9 },
+      { x: 15, y: 18 },
+    ],
+    3,
+  );
+
+  return {
+    floor: {
+      id: `${dungeonId}-5`,
+      tiles,
+      monsters,
+      items,
+      explored: initBoolGrid(W, H),
+      visible: initBoolGrid(W, H),
+      lit: initBoolGrid(W, H),
+      decals: [],
+      width: W,
+      height: H,
+    },
+    playerStart,
+  };
+}
+
+// ── Floor 10: Pillar Arena ───────────────────────────────
+// Map 30x25. Arena with some pillars for cover.
+
+function buildFloor10(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 30,
+    H = 25;
+  const tiles = initGrid(W, H);
+
+  // Entry corridor at top
+  carveRect(tiles, 13, 1, 4, 4);
+
+  // Central arena 14x12 at (8, 8)
+  carveRect(tiles, 8, 8, 14, 12);
+
+  // Pillars inside arena for cover
+  tiles[10][11] = wall();
+  tiles[10][18] = wall();
+  tiles[16][11] = wall();
+  tiles[16][18] = wall();
+  tiles[13][14] = wall();
+  tiles[13][15] = wall();
+
+  // Corridor: entry -> arena
+  carveV(tiles, 4, 8, 15);
+
+  // Stairs up at entry
+  tiles[2][15] = stairsUp();
+  const playerStart: Vector2 = { x: 15, y: 2 };
+
+  // Corridor: arena south -> stairs down
+  carveV(tiles, 19, 22, 15);
+  // Stairs down behind boss
+  tiles[22][15] = stairsDown();
+
+  const monsters = [];
+  const items: PlacedItem[] = [];
+
+  // Boss in center of arena
+  const bossTpl = getBossForFloor(depth);
+  if (bossTpl) {
+    monsters.push(
+      createMonster(bossTpl, { x: 15, y: 14 }, depth, rand01, difficulty),
+    );
+  }
+
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 9, y: 9 },
+      { x: 20, y: 9 },
+      { x: 15, y: 18 },
+    ],
+    3,
+  );
+
+  return {
+    floor: {
+      id: `${dungeonId}-10`,
+      tiles,
+      monsters,
+      items,
+      explored: initBoolGrid(W, H),
+      visible: initBoolGrid(W, H),
+      lit: initBoolGrid(W, H),
+      decals: [],
+      width: W,
+      height: H,
+    },
+    playerStart,
+  };
+}
+
 // ── Floor 15: Hrungnir, Hill Giant Lord ───────────────────
 // Map 30x25. Large 12x10 central arena, 2 small 5x5 side rooms.
 
-function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 30, H = 25;
+function buildFloor15(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 30,
+    H = 25;
   const tiles = initGrid(W, H);
 
   // Entry corridor at top (2 wide, from y=1 to y=4 at x=14)
@@ -243,30 +441,50 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
   // Boss in center of arena
   const bossTpl = getBossForFloor(depth);
   if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 15, y: 13 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(bossTpl, { x: 15, y: 13 }, depth, rand01, difficulty),
+    );
   }
 
   // 3 ogre minions: 2 in side rooms, 1 in arena
-  const ogre = MONSTER_BY_ID['huge-ogre'];
+  const ogre = MONSTER_BY_ID["huge-ogre"];
   if (ogre) {
-    monsters.push(createMonster(ogre, { x: 3, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(ogre, { x: 26, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(ogre, { x: 11, y: 15 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(ogre, { x: 3, y: 12 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(ogre, { x: 26, y: 12 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(ogre, { x: 11, y: 15 }, depth, rand01, difficulty),
+    );
   }
 
   // 3 bonus loot items in arena
-  placeLoot(tiles, items, depth, [
-    { x: 10, y: 9 }, { x: 19, y: 9 }, { x: 15, y: 16 },
-  ], 3);
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 10, y: 9 },
+      { x: 19, y: 9 },
+      { x: 15, y: 16 },
+    ],
+    3,
+  );
 
   return {
     floor: {
       id: `${dungeonId}-15`,
-      tiles, monsters, items,
+      tiles,
+      monsters,
+      items,
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
+      decals: [],
+      width: W,
+      height: H,
     },
     playerStart,
   };
@@ -275,8 +493,13 @@ function buildFloor15(dungeonId: string, depth: number, difficulty: Difficulty):
 // ── Floor 20: Wolf-Man ────────────────────────────────────
 // Map 30x25. 10x10 arena with 4 pillar walls, 2 side rooms with 2 white-wolf each.
 
-function buildFloor20(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 30, H = 25;
+function buildFloor20(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 30,
+    H = 25;
   const tiles = initGrid(W, H);
 
   // Entry hall 4x3 at top
@@ -317,104 +540,67 @@ function buildFloor20(dungeonId: string, depth: number, difficulty: Difficulty):
   // Boss in arena center
   const bossTpl = getBossForFloor(depth);
   if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 15, y: 13 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(bossTpl, { x: 15, y: 13 }, depth, rand01, difficulty),
+    );
   }
 
   // 2 white-wolf per side room
-  const whiteWolf = MONSTER_BY_ID['white-wolf'];
+  const whiteWolf = MONSTER_BY_ID["white-wolf"];
   if (whiteWolf) {
-    monsters.push(createMonster(whiteWolf, { x: 3, y: 11 }, depth, rand01, difficulty));
-    monsters.push(createMonster(whiteWolf, { x: 5, y: 13 }, depth, rand01, difficulty));
-    monsters.push(createMonster(whiteWolf, { x: 25, y: 11 }, depth, rand01, difficulty));
-    monsters.push(createMonster(whiteWolf, { x: 26, y: 13 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(whiteWolf, { x: 3, y: 11 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(whiteWolf, { x: 5, y: 13 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(whiteWolf, { x: 25, y: 11 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(whiteWolf, { x: 26, y: 13 }, depth, rand01, difficulty),
+    );
   }
 
-  placeLoot(tiles, items, depth, [
-    { x: 11, y: 9 }, { x: 18, y: 9 }, { x: 14, y: 16 },
-  ], 3);
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 11, y: 9 },
+      { x: 18, y: 9 },
+      { x: 14, y: 16 },
+    ],
+    3,
+  );
 
   return {
     floor: {
       id: `${dungeonId}-20`,
-      tiles, monsters, items,
+      tiles,
+      monsters,
+      items,
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
+      decals: [],
+      width: W,
+      height: H,
     },
     playerStart,
   };
 }
 
-// ── Floor 25: Bear-Man ────────────────────────────────────
-// Map 35x28. Entry 8x8 -> corridor -> guard room 8x6 -> corridor -> boss chamber 12x10.
-
-function buildFloor25(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 35, H = 28;
-  const tiles = initGrid(W, H);
-
-  // Entry room 8x8 at (1, 1)
-  carveRect(tiles, 1, 1, 8, 8);
-
-  // Corridor entry -> guard room
-  carveH(tiles, 9, 13, 5);
-
-  // Guard room 8x6 at (13, 3)
-  carveRect(tiles, 13, 3, 8, 6);
-
-  // Corridor guard -> boss chamber
-  carveH(tiles, 21, 22, 5);
-
-  // Boss chamber 12x10 at (22, 1)
-  carveRect(tiles, 22, 1, 12, 10);
-
-  // Stairs up in entry room
-  tiles[2][3] = stairsUp();
-  const playerStart: Vector2 = { x: 3, y: 2 };
-
-  // Stairs down in boss chamber
-  tiles[6][29] = stairsDown();
-
-  const monsters = [];
-  const items: PlacedItem[] = [];
-
-  // Boss in boss chamber
-  const bossTpl = getBossForFloor(depth);
-  if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 28, y: 5 }, depth, rand01, difficulty));
-  }
-
-  // 2 cave-bear in guard room, 2 in boss chamber
-  const caveBear = MONSTER_BY_ID['cave-bear'];
-  if (caveBear) {
-    monsters.push(createMonster(caveBear, { x: 15, y: 5 }, depth, rand01, difficulty));
-    monsters.push(createMonster(caveBear, { x: 19, y: 7 }, depth, rand01, difficulty));
-    monsters.push(createMonster(caveBear, { x: 24, y: 3 }, depth, rand01, difficulty));
-    monsters.push(createMonster(caveBear, { x: 32, y: 8 }, depth, rand01, difficulty));
-  }
-
-  placeLoot(tiles, items, depth, [
-    { x: 3, y: 5 }, { x: 6, y: 7 }, { x: 25, y: 2 }, { x: 31, y: 2 },
-  ], 4);
-
-  return {
-    floor: {
-      id: `${dungeonId}-25`,
-      tiles, monsters, items,
-      explored: initBoolGrid(W, H),
-      visible: initBoolGrid(W, H),
-      lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
-    },
-    playerStart,
-  };
-}
-
-// ── Floor 30: Frost Giant King ────────────────────────────
+// ── Floor 25: Frost Giant King ────────────────────────────
 // Map 40x30. Entry -> left wing -> right wing -> boss chamber 14x10.
 
-function buildFloor30(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 40, H = 30;
+function buildFloor25(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 40,
+    H = 30;
   const tiles = initGrid(W, H);
 
   // Entry room 6x6 at (1, 12)
@@ -456,219 +642,79 @@ function buildFloor30(dungeonId: string, depth: number, difficulty: Difficulty):
   // Boss in chamber
   const bossTpl = getBossForFloor(depth);
   if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 28, y: 15 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(bossTpl, { x: 28, y: 15 }, depth, rand01, difficulty),
+    );
   }
 
   // 4 frost-giants spread across wings and chamber
-  const frostGiant = MONSTER_BY_ID['frost-giant'];
+  const frostGiant = MONSTER_BY_ID["frost-giant"];
   if (frostGiant) {
-    monsters.push(createMonster(frostGiant, { x: 9, y: 22 }, depth, rand01, difficulty));
-    monsters.push(createMonster(frostGiant, { x: 14, y: 23 }, depth, rand01, difficulty));
-    monsters.push(createMonster(frostGiant, { x: 24, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(frostGiant, { x: 33, y: 18 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(frostGiant, { x: 9, y: 22 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(frostGiant, { x: 14, y: 23 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(frostGiant, { x: 24, y: 12 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(frostGiant, { x: 33, y: 18 }, depth, rand01, difficulty),
+    );
   }
 
   // 2 ice-devils in left wing
-  const iceDevil = MONSTER_BY_ID['ice-devil'];
+  const iceDevil = MONSTER_BY_ID["ice-devil"];
   if (iceDevil) {
-    monsters.push(createMonster(iceDevil, { x: 10, y: 7 }, depth, rand01, difficulty));
-    monsters.push(createMonster(iceDevil, { x: 14, y: 9 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(iceDevil, { x: 10, y: 7 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(iceDevil, { x: 14, y: 9 }, depth, rand01, difficulty),
+    );
   }
 
-  placeLoot(tiles, items, depth, [
-    { x: 3, y: 13 }, { x: 9, y: 6 }, { x: 13, y: 21 }, { x: 23, y: 11 },
-  ], 4);
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 3, y: 13 },
+      { x: 9, y: 6 },
+      { x: 13, y: 21 },
+      { x: 23, y: 11 },
+    ],
+    4,
+  );
 
   return {
     floor: {
-      id: `${dungeonId}-30`,
-      tiles, monsters, items,
+      id: `${dungeonId}-25`,
+      tiles,
+      monsters,
+      items,
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
+      decals: [],
+      width: W,
+      height: H,
     },
     playerStart,
   };
 }
 
-// ── Floor 33: Stone Giant King ────────────────────────────
-// Map 40x30. Entry -> corridor maze -> 2 guard rooms -> throne room 14x12.
-
-function buildFloor33(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 40, H = 30;
-  const tiles = initGrid(W, H);
-
-  // Entry room 6x5 at (1, 12)
-  carveRect(tiles, 1, 12, 6, 5);
-
-  // Maze-like corridor
-  carveH(tiles, 7, 12, 14);
-  carveV(tiles, 8, 14, 12);
-  carveH(tiles, 12, 16, 8);
-  carveV(tiles, 8, 14, 16);
-  carveH(tiles, 16, 20, 14);
-
-  // Guard room 1: 7x5 at (11, 1)
-  carveRect(tiles, 11, 1, 7, 5);
-  carveV(tiles, 5, 8, 14);
-
-  // Guard room 2: 7x5 at (11, 21)
-  carveRect(tiles, 11, 21, 7, 5);
-  carveV(tiles, 14, 21, 14);
-
-  // Corridor to throne
-  carveH(tiles, 20, 24, 14);
-
-  // Throne room 14x12 at (24, 8)
-  carveRect(tiles, 24, 8, 14, 12);
-
-  // Stone pillar obstacles in throne room
-  tiles[10][27] = wall();
-  tiles[10][33] = wall();
-  tiles[16][27] = wall();
-  tiles[16][33] = wall();
-  tiles[13][30] = wall(); // center pillar
-
-  // Stairs up in entry
-  tiles[14][3] = stairsUp();
-  const playerStart: Vector2 = { x: 3, y: 14 };
-
-  // Stairs down in throne room
-  tiles[14][36] = stairsDown();
-
-  // Traps in maze corridor
-  tiles[14][9] = trap('pit');
-  tiles[8][14] = trap('arrow');
-  tiles[14][18] = trap('fire');
-
-  const monsters = [];
-  const items: PlacedItem[] = [];
-
-  // Boss in throne room
-  const bossTpl = getBossForFloor(depth);
-  if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 30, y: 14 }, depth, rand01, difficulty));
-  }
-
-  // 4 stone-giants across guard rooms and throne
-  const stoneGiant = MONSTER_BY_ID['stone-giant'];
-  if (stoneGiant) {
-    monsters.push(createMonster(stoneGiant, { x: 13, y: 3 }, depth, rand01, difficulty));
-    monsters.push(createMonster(stoneGiant, { x: 16, y: 3 }, depth, rand01, difficulty));
-    monsters.push(createMonster(stoneGiant, { x: 13, y: 23 }, depth, rand01, difficulty));
-    monsters.push(createMonster(stoneGiant, { x: 16, y: 23 }, depth, rand01, difficulty));
-  }
-
-  // 2 earth-elementals in throne room
-  const earthElem = MONSTER_BY_ID['earth-elemental'];
-  if (earthElem) {
-    monsters.push(createMonster(earthElem, { x: 26, y: 10 }, depth, rand01, difficulty));
-    monsters.push(createMonster(earthElem, { x: 35, y: 17 }, depth, rand01, difficulty));
-  }
-
-  placeLoot(tiles, items, depth, [
-    { x: 3, y: 13 }, { x: 14, y: 2 }, { x: 14, y: 22 }, { x: 25, y: 9 }, { x: 36, y: 16 },
-  ], 5);
-
-  return {
-    floor: {
-      id: `${dungeonId}-33`,
-      tiles, monsters, items,
-      explored: initBoolGrid(W, H),
-      visible: initBoolGrid(W, H),
-      lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
-    },
-    playerStart,
-  };
-}
-
-// ── Floor 36: Fire Giant King ─────────────────────────────
-// Map 40x30. Entry -> fire trap corridor -> armory -> forge -> throne room.
-
-function buildFloor36(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 40, H = 30;
-  const tiles = initGrid(W, H);
-
-  // Entry room 6x5 at (1, 12)
-  carveRect(tiles, 1, 12, 6, 5);
-
-  // Fire trap corridor 8x3 at (7, 13)
-  carveRect(tiles, 7, 13, 8, 3);
-
-  // Fire traps in corridor
-  tiles[14][9] = trap('fire');
-  tiles[14][12] = trap('fire');
-  tiles[14][13] = trap('fire');
-
-  // Armory room 8x7 at (15, 11)
-  carveRect(tiles, 15, 11, 8, 7);
-
-  // Forge room 8x7 at (15, 18) — connected below armory via short corridor
-  carveRect(tiles, 15, 19, 8, 7);
-  carveV(tiles, 18, 19, 19);
-
-  // Corridor armory -> throne
-  carveH(tiles, 23, 26, 14);
-
-  // Throne room 12x12 at (26, 8)
-  carveRect(tiles, 26, 8, 12, 12);
-
-  // Stairs up in entry
-  tiles[14][3] = stairsUp();
-  const playerStart: Vector2 = { x: 3, y: 14 };
-
-  // Stairs down in throne room
-  tiles[14][36] = stairsDown();
-
-  const monsters = [];
-  const items: PlacedItem[] = [];
-
-  // Boss in throne room
-  const bossTpl = getBossForFloor(depth);
-  if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 31, y: 14 }, depth, rand01, difficulty));
-  }
-
-  // 4 fire-giants spread across rooms
-  const fireGiant = MONSTER_BY_ID['fire-giant'];
-  if (fireGiant) {
-    monsters.push(createMonster(fireGiant, { x: 17, y: 13 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireGiant, { x: 21, y: 13 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireGiant, { x: 17, y: 21 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireGiant, { x: 21, y: 23 }, depth, rand01, difficulty));
-  }
-
-  // 2 fire-elementals in throne room
-  const fireElem = MONSTER_BY_ID['fire-elemental'];
-  if (fireElem) {
-    monsters.push(createMonster(fireElem, { x: 28, y: 10 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireElem, { x: 35, y: 17 }, depth, rand01, difficulty));
-  }
-
-  placeLoot(tiles, items, depth, [
-    { x: 3, y: 13 }, { x: 16, y: 12 }, { x: 22, y: 12 }, { x: 16, y: 20 }, { x: 27, y: 9 },
-  ], 5);
-
-  return {
-    floor: {
-      id: `${dungeonId}-36`,
-      tiles, monsters, items,
-      explored: initBoolGrid(W, H),
-      visible: initBoolGrid(W, H),
-      lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
-    },
-    playerStart,
-  };
-}
-
-// ── Floor 40: Surtur (final boss) ─────────────────────────
+// ── Floor 30: Surtur (final boss) ─────────────────────────
 // Map 45x35. Entry hall -> left/right guardian chambers -> grand corridor -> throne room 16x14.
 
-function buildFloor40(dungeonId: string, depth: number, difficulty: Difficulty): { floor: Floor; playerStart: Vector2 } {
-  const W = 45, H = 35;
+function buildFloor30(
+  dungeonId: string,
+  depth: number,
+  difficulty: Difficulty,
+): { floor: Floor; playerStart: Vector2 } {
+  const W = 45,
+    H = 35;
   const tiles = initGrid(W, H);
 
   // Entry hall 8x6 at (1, 14)
@@ -716,36 +762,63 @@ function buildFloor40(dungeonId: string, depth: number, difficulty: Difficulty):
   // Surtur — final boss
   const bossTpl = getBossForFloor(depth);
   if (bossTpl) {
-    monsters.push(createMonster(bossTpl, { x: 28, y: 17 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(bossTpl, { x: 28, y: 17 }, depth, rand01, difficulty),
+    );
   }
 
-  // 3 fire-giant-kings as guardians
-  const fireGiantKing = MONSTER_BY_ID['fire-giant-king'];
-  if (fireGiantKing) {
-    monsters.push(createMonster(fireGiantKing, { x: 10, y: 8 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireGiantKing, { x: 14, y: 9 }, depth, rand01, difficulty));
-    monsters.push(createMonster(fireGiantKing, { x: 10, y: 26 }, depth, rand01, difficulty));
+  // 3 fire giants as guardians
+  const fireGiant = MONSTER_BY_ID["fire-giant"];
+  if (fireGiant) {
+    monsters.push(
+      createMonster(fireGiant, { x: 10, y: 8 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(fireGiant, { x: 14, y: 9 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(fireGiant, { x: 10, y: 26 }, depth, rand01, difficulty),
+    );
   }
 
   // 2 abyss-fiends in throne room
-  const abyssFiend = MONSTER_BY_ID['abyss-fiend'];
+  const abyssFiend = MONSTER_BY_ID["abyss-fiend"];
   if (abyssFiend) {
-    monsters.push(createMonster(abyssFiend, { x: 23, y: 12 }, depth, rand01, difficulty));
-    monsters.push(createMonster(abyssFiend, { x: 34, y: 20 }, depth, rand01, difficulty));
+    monsters.push(
+      createMonster(abyssFiend, { x: 23, y: 12 }, depth, rand01, difficulty),
+    );
+    monsters.push(
+      createMonster(abyssFiend, { x: 34, y: 20 }, depth, rand01, difficulty),
+    );
   }
 
-  placeLoot(tiles, items, depth, [
-    { x: 3, y: 15 }, { x: 9, y: 7 }, { x: 14, y: 25 }, { x: 22, y: 11 }, { x: 35, y: 11 }, { x: 22, y: 22 },
-  ], 6);
+  placeLoot(
+    tiles,
+    items,
+    depth,
+    [
+      { x: 3, y: 15 },
+      { x: 9, y: 7 },
+      { x: 14, y: 25 },
+      { x: 22, y: 11 },
+      { x: 35, y: 11 },
+      { x: 22, y: 22 },
+    ],
+    6,
+  );
 
   return {
     floor: {
-      id: `${dungeonId}-40`,
-      tiles, monsters, items,
+      id: `${dungeonId}-30`,
+      tiles,
+      monsters,
+      items,
       explored: initBoolGrid(W, H),
       visible: initBoolGrid(W, H),
       lit: initBoolGrid(W, H),
-      decals: [], width: W, height: H,
+      decals: [],
+      width: W,
+      height: H,
     },
     playerStart,
   };
@@ -760,24 +833,41 @@ export function generateBossFloor(
   difficulty: Difficulty,
 ): { floor: Floor; playerStart: Vector2 } | null {
   if (!BOSS_FLOORS.has(floorNum)) return null;
-  ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS['mine'];
+  ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS["mine"];
 
   // Use floorNum for boss/monster lookups, depth for scaling
   let result: { floor: Floor; playerStart: Vector2 } | null = null;
   switch (floorNum) {
-    case 15: result = buildFloor15(dungeonId, floorNum, difficulty); break;
-    case 20: result = buildFloor20(dungeonId, floorNum, difficulty); break;
-    case 25: result = buildFloor25(dungeonId, floorNum, difficulty); break;
-    case 30: result = buildFloor30(dungeonId, floorNum, difficulty); break;
-    case 33: result = buildFloor33(dungeonId, floorNum, difficulty); break;
-    case 36: result = buildFloor36(dungeonId, floorNum, difficulty); break;
-    case 40: result = buildFloor40(dungeonId, floorNum, difficulty); break;
+    case 5:
+      result = buildFloor5(dungeonId, floorNum, difficulty);
+      break;
+    case 10:
+      result = buildFloor10(dungeonId, floorNum, difficulty);
+      break;
+    case 15:
+      result = buildFloor15(dungeonId, floorNum, difficulty);
+      break;
+    case 20:
+      result = buildFloor20(dungeonId, floorNum, difficulty);
+      break;
+    case 25:
+      result = buildFloor25(dungeonId, floorNum, difficulty);
+      break;
+    case 30:
+      result = buildFloor30(dungeonId, floorNum, difficulty);
+      break;
   }
 
   // Add decorative elements to boss floors
   if (result) {
     const decorCount = floorNum >= 30 ? 8 : floorNum >= 20 ? 6 : 4;
-    decorateBossFloor(result.floor.tiles, depth, result.playerStart, decorCount, result.floor.items);
+    decorateBossFloor(
+      result.floor.tiles,
+      depth,
+      result.playerStart,
+      decorCount,
+      result.floor.items,
+    );
   }
 
   return result;

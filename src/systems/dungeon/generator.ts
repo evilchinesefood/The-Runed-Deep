@@ -133,7 +133,7 @@ export function generateFloor(
   const bossFloor = generateBossFloor(
     dungeonId,
     floorNum,
-    floorNum + 1,
+    floorNum,
     difficulty,
   );
   if (bossFloor) return bossFloor;
@@ -300,32 +300,31 @@ function generateFloorAttempt(
     height: FLOOR_HEIGHT,
   };
 
-  // Spawn monsters appropriate for this depth
-  const effectiveDepth = floorNum + 1;
+  // Spawn monsters appropriate for this depth (1-indexed)
   floor.monsters = spawnMonsters(
     floor,
-    effectiveDepth,
+    floorNum,
     playerStart,
     rand,
     difficulty,
   );
 
   // Place decorative objects FIRST so items/traps don't spawn on them
-  placeDecor(floor, rooms, effectiveDepth, playerStart, rand);
+  placeDecor(floor, rooms, floorNum, playerStart, rand);
   ensureConnectivity(floor);
 
   // Place items/treasure in rooms (only on floor tiles, not decor/water)
   floor.items = placeGroundItems(
     floor,
     rooms,
-    effectiveDepth,
+    floorNum,
     playerStart,
     rand,
     ngPlus,
   );
 
   // Place traps in corridors and rooms (not on stairs or player start)
-  placeTraps(floor, rooms, effectiveDepth, playerStart, rand);
+  placeTraps(floor, rooms, floorNum, playerStart, rand);
 
   // Validate floor quality
   if (!skipValidation) {

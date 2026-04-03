@@ -30,7 +30,7 @@ export function createMapScreen(
   const screen = createScreen();
   screen.style.minHeight = '100vh';
 
-  screen.appendChild(createTitleBar(`Floor ${state.currentFloor + 1} Map`, () => { cleanup(); onClose(); }));
+  screen.appendChild(createTitleBar(`Floor ${state.currentFloor} Map`, () => { cleanup(); onClose(); }));
 
   if (!floor) {
     screen.appendChild(el('div', { color: '#888' }, 'No map data available.'));

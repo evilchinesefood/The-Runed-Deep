@@ -28,7 +28,7 @@ import { AnimationRenderer } from "./rendering/animations";
 import { drainAnimations } from "./rendering/animation-queue";
 import { computeFov } from "./utils/fov";
 import { loadGame, saveGame } from "./core/save-load";
-import type { GameState, Screen } from "./core/types";
+import type { GameState, Screen, Floor } from "./core/types";
 import { generateTestFloor, getAllSpellIds } from "./systems/dungeon/TestFloor";
 import {
   createEmptyEquipment,
@@ -46,6 +46,8 @@ import {
 } from "./systems/Achievements";
 import { showAchievementToast } from "./ui/AchievementToast";
 import { createAchievementsScreen } from "./ui/AchievementsScreen";
+import { createRiftMenuScreen } from "./ui/RiftMenuScreen";
+import { createRiftSummaryScreen } from "./ui/RiftSummaryScreen";
 
 injectTheme();
 setOnUnlockCallback(showAchievementToast);
@@ -653,15 +655,15 @@ touchControls.setMenuHandler((action) => {
     gameLoop.setState(teleportToTown(state));
   }
   if (action === "debug-f10") {
-    const input = prompt("Floor (1-40, 0=town):");
+    const input = prompt("Floor (1-30, 0=town):");
     if (!input) return;
     const num = parseInt(input);
-    if (isNaN(num) || num < 0 || num > 40) return;
+    if (isNaN(num) || num < 0 || num > 30) return;
     const state = gameLoop.getState();
     if (num === 0) {
       gameLoop.setState(teleportToTown(state));
     } else {
-      const targetFloor = num - 1;
+      const targetFloor = num;
       const targetDungeon = getDungeonForFloor(targetFloor);
       const floorKey = `${targetDungeon}-${targetFloor}`;
       let floors = { ...state.floors };
@@ -771,10 +773,11 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         armorValue: 6,
         equipDamageBonus: 0,
         equipAccuracyBonus: 0,
+        runeShards: 0,
       },
-      currentFloor: 0,
+      currentFloor: 1,
       currentDungeon: "mine",
-      floors: { "mine-0": testFloor },
+      floors: { "mine-1": testFloor },
       town: {
         id: "hamlet",
         shopInventories: {},
@@ -812,6 +815,9 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       activeBuildingId: "",
       ngPlusCount: 0,
       stash: [],
+      riftStoneUnlocked: false,
+      riftOffering: null,
+      activeRift: null,
     };
     gameLoop.setState(testState);
   }
@@ -819,10 +825,10 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
   // F10: Jump to any floor (or town) — keeps current hero as-is
   if (e.code === "F10") {
     e.preventDefault();
-    const input = prompt("Enter floor number (1-40), or 0 for town:");
+    const input = prompt("Enter floor number (1-30), or 0 for town:");
     if (!input) return;
     const num = parseInt(input);
-    if (isNaN(num) || num < 0 || num > 40) return;
+    if (isNaN(num) || num < 0 || num > 30) return;
 
     const state = gameLoop.getState();
     if (state.screen !== "game") return;
@@ -833,7 +839,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       return;
     }
 
-    const targetFloor = num - 1; // 0-indexed
+    const targetFloor = num;
     const targetDungeon = getDungeonForFloor(targetFloor);
     const floorKey = `${targetDungeon}-${targetFloor}`;
     let floors = { ...state.floors };
@@ -952,7 +958,10 @@ function render(state: GameState): void {
           const isBlinded = state.hero.activeEffects.some(
             (e) => e.id === "blinded",
           );
-          const fovRadius = isBlinded ? 1 : 4;
+          const hasDarkness =
+            state.activeRift?.modifiers.some((m) => m.id === "darkness") ??
+            false;
+          const fovRadius = isBlinded ? 1 : hasDarkness ? 2 : 4;
           computeFov(
             floor,
             state.hero.position.x,
@@ -1044,9 +1053,9 @@ function switchScreen(state: GameState): void {
           // Generate first dungeon floor (for when player enters the mine)
           const { floor: dungeonFloor } = generateFloor(
             "mine",
-            0,
+            1,
             Date.now(),
-            true,
+            false,
             true,
             result.difficulty,
           );
@@ -1061,7 +1070,6 @@ function switchScreen(state: GameState): void {
             "armor-shop",
             "general-store",
             "magic-shop",
-            "junk-store",
           ];
           const shopInventories: Record<string, import("./core/types").Item[]> =
             {};
@@ -1074,8 +1082,8 @@ function switchScreen(state: GameState): void {
             hero,
             difficulty: result.difficulty,
             currentDungeon: "town",
-            currentFloor: 0,
-            floors: { "mine-0": dungeonFloor, "town-0": townFloor },
+            currentFloor: 1,
+            floors: { "mine-1": dungeonFloor, "town-0": townFloor },
             town: {
               id: "hamlet",
               shopInventories,
@@ -1337,9 +1345,9 @@ function switchScreen(state: GameState): void {
           const { floor: townFloor } = generateTownMap();
           const { floor: dungeonFloor } = generateFloor(
             "mine",
-            0,
+            1,
             Date.now(),
-            true,
+            false,
             true,
             nextDifficulty,
           );
@@ -1348,11 +1356,11 @@ function switchScreen(state: GameState): void {
             ...s,
             screen: "game",
             currentDungeon: "town",
-            currentFloor: 0,
-            floors: { "mine-0": dungeonFloor, "town-0": townFloor },
+            currentFloor: 1,
+            floors: { "mine-1": dungeonFloor, "town-0": townFloor },
             difficulty: nextDifficulty,
             ngPlusCount: ngCount,
-            returnFloor: 0,
+            returnFloor: 1,
             messages: [
               {
                 text: `=== NEW GAME PLUS ${ngCount} ===`,
@@ -1397,7 +1405,10 @@ function switchScreen(state: GameState): void {
         const regenKey = `${regenDungeon}-${regenFloor}`;
 
         const { floor: townFloor } = generateTownMap();
-        const floors = { ...s.floors, "town-0": townFloor };
+        const floors: Record<string, Floor> = {
+          ...s.floors,
+          "town-0": townFloor,
+        };
         // Always regenerate the dungeon floor
         const { floor: newDungeonFloor } = generateFloor(
           regenDungeon,
@@ -1411,14 +1422,13 @@ function switchScreen(state: GameState): void {
         floors[regenKey] = newDungeonFloor;
 
         // Refresh shop inventories
-        const deepest = Math.max(s.town.deepestFloor, regenFloor + 1);
+        const deepest = Math.max(s.town.deepestFloor, regenFloor);
         const shopInventories: Record<string, any> = {};
         for (const sid of [
           "weapon-shop",
           "armor-shop",
           "general-store",
           "magic-shop",
-          "junk-store",
         ]) {
           shopInventories[sid] = initShopInventory(sid, deepest);
         }
@@ -1464,6 +1474,41 @@ function switchScreen(state: GameState): void {
       });
       addScreenCleanup(achScreen.cleanup);
       root.appendChild(achScreen);
+      break;
+    }
+
+    case "rift-menu": {
+      input.setEnabled(false);
+      const riftScreen = createRiftMenuScreen(
+        gameLoop.getState(),
+        (action) => {
+          gameLoop.handleAction(action);
+          if (gameLoop.getState().screen === "rift-menu") {
+            root.replaceChildren();
+            switchScreen(gameLoop.getState());
+          }
+        },
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+      );
+      addScreenCleanup(riftScreen.cleanup);
+      root.replaceChildren(riftScreen);
+      break;
+    }
+
+    case "rift-summary": {
+      input.setEnabled(false);
+      const rift = (gameLoop.getState() as any).activeRift;
+      const riftSumScreen = createRiftSummaryScreen(
+        gameLoop.getState(),
+        rift?.shardsEarned ?? 0,
+        rift?.currentFloor ?? 0,
+        rift?.modifiers ?? [],
+        () => {
+          gameLoop.handleAction({ type: "exitRift" } as any);
+        },
+      );
+      addScreenCleanup(riftSumScreen.cleanup);
+      root.replaceChildren(riftSumScreen);
       break;
     }
 

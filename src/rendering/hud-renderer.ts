@@ -19,15 +19,29 @@ function bar(pct: number, color: string): HTMLElement {
 }
 
 function compactBar(pct: number, color: string): HTMLElement {
-  const track = el("div", { background: "#333", height: "4px", width: "60px", display: "inline-block", verticalAlign: "middle", marginLeft: "4px", borderRadius: "2px" });
-  const fill = el("div", { background: color, height: "100%", width: `${pct}%`, borderRadius: "2px" });
+  const track = el("div", {
+    background: "#333",
+    height: "4px",
+    width: "60px",
+    display: "inline-block",
+    verticalAlign: "middle",
+    marginLeft: "4px",
+    borderRadius: "2px",
+  });
+  const fill = el("div", {
+    background: color,
+    height: "100%",
+    width: `${pct}%`,
+    borderRadius: "2px",
+  });
   track.appendChild(fill);
   return track;
 }
 
 export type SpellClickHandler = (spellId: string) => void;
 
-const isLandscapeMobile = () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+const isLandscapeMobile = () =>
+  window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
 
 export class HudRenderer {
   private container: HTMLElement;
@@ -36,9 +50,9 @@ export class HudRenderer {
   private spellBarEl: HTMLElement;
   private onSpellClick: SpellClickHandler | null = null;
   private landscape: boolean;
-  private _prevStats = '';
+  private _prevStats = "";
   private _prevMsgCount = 0;
-  private _prevSpellKey = '';
+  private _prevSpellKey = "";
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -94,15 +108,16 @@ export class HudRenderer {
         fontSize: "10px",
         pointerEvents: "none",
       });
-      this.messagesEl.setAttribute('role', 'log');
-      this.messagesEl.setAttribute('aria-live', 'polite');
-      this.messagesEl.setAttribute('aria-label', 'Game messages');
+      this.messagesEl.setAttribute("role", "log");
+      this.messagesEl.setAttribute("aria-live", "polite");
+      this.messagesEl.setAttribute("aria-label", "Game messages");
 
       document.body.appendChild(this.statsEl);
       document.body.appendChild(this.messagesEl);
     } else {
       // Portrait + Desktop: normal flow layout below map
-      const isPortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+      const isPortrait =
+        window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
       const hud = el("div", {
         display: "flex",
         width: "100%",
@@ -122,9 +137,9 @@ export class HudRenderer {
         border: "1px solid #333",
         padding: "4px 6px",
       });
-      this.messagesEl.setAttribute('role', 'log');
-      this.messagesEl.setAttribute('aria-live', 'polite');
-      this.messagesEl.setAttribute('aria-label', 'Game messages');
+      this.messagesEl.setAttribute("role", "log");
+      this.messagesEl.setAttribute("aria-live", "polite");
+      this.messagesEl.setAttribute("aria-label", "Game messages");
 
       this.statsEl = el("div", {
         width: "clamp(140px, 30%, 220px)",
@@ -168,7 +183,7 @@ export class HudRenderer {
     const mpPct = h.maxMp > 0 ? Math.round((h.mp / h.maxMp) * 100) : 0;
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
 
-    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${state.currentFloor}|${state.turn}|${h.activeEffects.map(e => e.id + e.turnsRemaining).join(',')}`;
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${state.currentFloor}|${state.turn}|${h.runeShards}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
     if (key === this._prevStats) return;
     this._prevStats = key;
 
@@ -176,30 +191,49 @@ export class HudRenderer {
 
     // All in one row: Name Lv | HP bar | MP bar | Floor | Turn
     const add = (text: string, color = "#ccc") => {
-      this.statsEl.appendChild(el("span", { color, whiteSpace: "nowrap" }, text));
+      this.statsEl.appendChild(
+        el("span", { color, whiteSpace: "nowrap" }, text),
+      );
     };
 
     add(`${h.name} Lv${h.level}`, "#fff");
-    const hpSpan = el("span", { whiteSpace: "nowrap" }, `HP:${h.hp}/${h.maxHp}`);
+    const hpSpan = el(
+      "span",
+      { whiteSpace: "nowrap" },
+      `HP:${h.hp}/${h.maxHp}`,
+    );
     hpSpan.style.color = hpColor;
     hpSpan.appendChild(compactBar(hpPct, hpColor));
     this.statsEl.appendChild(hpSpan);
 
-    const mpSpan = el("span", { whiteSpace: "nowrap" }, `MP:${h.mp}/${h.maxMp}`);
+    const mpSpan = el(
+      "span",
+      { whiteSpace: "nowrap" },
+      `MP:${h.mp}/${h.maxMp}`,
+    );
     mpSpan.style.color = "#48f";
     mpSpan.appendChild(compactBar(mpPct, "#48f"));
     this.statsEl.appendChild(mpSpan);
 
-    const floorLabel = state.currentDungeon !== "town" ? `F${state.currentFloor + 1}` : "Town";
+    const floorLabel =
+      state.currentDungeon !== "town" ? `F${state.currentFloor}` : "Town";
     add(`${floorLabel} T:${state.turn}`, "#888");
+    if (h.runeShards > 0) add(`\u25C6${h.runeShards}`, "#a6f");
 
     // Status effects
     if (h.activeEffects.length > 0) {
       const icons: Record<string, string> = {
-        shield: "🛡", "resist-cold": "❄", "resist-fire": "🔥",
-        "resist-lightning": "⚡", poisoned: "☠", levitation: "🪶", light: "💡",
+        shield: "🛡",
+        "resist-cold": "❄",
+        "resist-fire": "🔥",
+        "resist-lightning": "⚡",
+        poisoned: "☠",
+        levitation: "🪶",
+        light: "💡",
       };
-      const effectStr = h.activeEffects.map(e => `${icons[e.id] ?? "✦"}${e.turnsRemaining}`).join(" ");
+      const effectStr = h.activeEffects
+        .map((e) => `${icons[e.id] ?? "✦"}${e.turnsRemaining}`)
+        .join(" ");
       add(effectStr, "#aaa");
     }
   }
@@ -212,7 +246,7 @@ export class HudRenderer {
     const hpColor = hpPct <= 25 ? "#f44" : hpPct <= 50 ? "#fa0" : "#4f4";
     const mpColor = "#48f";
 
-    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${h.xp}|${h.armorValue}|${state.currentFloor}|${state.currentDungeon}|${state.turn}|${state.difficulty}|${h.activeEffects.map(e => e.id + e.turnsRemaining).join(',')}`;
+    const key = `${h.name}|${h.level}|${h.hp}|${h.maxHp}|${h.mp}|${h.maxMp}|${h.xp}|${h.armorValue}|${state.currentFloor}|${state.currentDungeon}|${state.turn}|${state.difficulty}|${h.runeShards}|${h.activeEffects.map((e) => e.id + e.turnsRemaining).join(",")}`;
     if (key === this._prevStats) return;
     this._prevStats = key;
 
@@ -230,28 +264,49 @@ export class HudRenderer {
     nameRow.appendChild(strong);
     nameRow.appendChild(el("span", { fontSize: "12px" }, `Lv.${h.level}`));
 
-    const acBadge = el("span", {
-      fontSize: "9px", color: "#bbb", background: "#1a1a1a",
-      border: "1px solid #bbb", borderRadius: "3px",
-      padding: "0px 3px", whiteSpace: "nowrap",
-    }, `🛡${h.armorValue}`);
+    const acBadge = el(
+      "span",
+      {
+        fontSize: "9px",
+        color: "#bbb",
+        background: "#1a1a1a",
+        border: "1px solid #bbb",
+        borderRadius: "3px",
+        padding: "0px 3px",
+        whiteSpace: "nowrap",
+      },
+      `🛡${h.armorValue}`,
+    );
     acBadge.title = `Armor Class: ${h.armorValue}`;
     nameRow.appendChild(acBadge);
 
     if (h.activeEffects.length > 0) {
       const effectStyles: Record<string, [string, string]> = {
-        shield: ["🛡", "#48f"], "resist-cold": ["❄", "#4af"],
-        "resist-fire": ["🔥", "#f64"], "resist-lightning": ["⚡", "#ff4"],
-        poisoned: ["☠", "#4f4"], paralyzed: ["⛓", "#f84"],
-        blinded: ["👁", "#888"], levitation: ["🪶", "#aaf"], light: ["💡", "#ff8"],
+        shield: ["🛡", "#48f"],
+        "resist-cold": ["❄", "#4af"],
+        "resist-fire": ["🔥", "#f64"],
+        "resist-lightning": ["⚡", "#ff4"],
+        poisoned: ["☠", "#4f4"],
+        paralyzed: ["⛓", "#f84"],
+        blinded: ["👁", "#888"],
+        levitation: ["🪶", "#aaf"],
+        light: ["💡", "#ff8"],
       };
       for (const eff of h.activeEffects) {
         const [icon, color] = effectStyles[eff.id] ?? ["✦", "#aaa"];
-        const badge = el("span", {
-          fontSize: "9px", color, background: "#1a1a1a",
-          border: `1px solid ${color}33`, borderRadius: "3px",
-          padding: "0px 3px", whiteSpace: "nowrap",
-        }, `${icon}${eff.turnsRemaining}`);
+        const badge = el(
+          "span",
+          {
+            fontSize: "9px",
+            color,
+            background: "#1a1a1a",
+            border: `1px solid ${color}33`,
+            borderRadius: "3px",
+            padding: "0px 3px",
+            whiteSpace: "nowrap",
+          },
+          `${icon}${eff.turnsRemaining}`,
+        );
         badge.title = `${eff.name} (${eff.turnsRemaining} turns)`;
         nameRow.appendChild(badge);
       }
@@ -269,24 +324,45 @@ export class HudRenderer {
     this.statsEl.appendChild(bar(mpPct, mpColor));
 
     const xpNeeded = xpToNextLevel(h, state.difficulty);
-    const xpDisplay = xpNeeded === Infinity ? "MAX" : `${h.xp} (${xpNeeded} to next)`;
-    this.statsEl.appendChild(el("div", { fontSize: "11px", marginTop: "4px" }, `XP: ${xpDisplay}`));
+    const xpDisplay =
+      xpNeeded === Infinity ? "MAX" : `${h.xp} (${xpNeeded} to next)`;
+    this.statsEl.appendChild(
+      el("div", { fontSize: "11px", marginTop: "4px" }, `XP: ${xpDisplay}`),
+    );
 
-    const floorLabel = state.currentDungeon !== "town" ? `Floor: ${state.currentFloor + 1}` : "Town";
-    this.statsEl.appendChild(el("div", { fontSize: "11px", marginTop: "2px" }, `${floorLabel} | Turn: ${state.turn}`));
+    const floorLabel =
+      state.currentDungeon !== "town" ? `Floor: ${state.currentFloor}` : "Town";
+    this.statsEl.appendChild(
+      el(
+        "div",
+        { fontSize: "11px", marginTop: "2px" },
+        `${floorLabel} | Turn: ${state.turn}`,
+      ),
+    );
+    if (h.runeShards > 0) {
+      this.statsEl.appendChild(
+        el("div", { fontSize: "11px", marginTop: "2px", color: "#a6f" }, `\u25C6 ${h.runeShards} Rune Shards`),
+      );
+    }
   }
 
   private renderSpellBar(state: GameState): void {
     const hotkeys = state.hero.spellHotkeys;
     const mp = state.hero.mp;
-    const spellKey = `${hotkeys.join(',')}|${mp}`;
+    const spellKey = `${hotkeys.join(",")}|${mp}`;
     if (spellKey === this._prevSpellKey) return;
     this._prevSpellKey = spellKey;
 
     this.spellBarEl.replaceChildren();
 
     if (hotkeys.length === 0) {
-      this.spellBarEl.appendChild(el("div", { color: "#555", padding: "2px 4px" }, "Press Z to manage spells"));
+      this.spellBarEl.appendChild(
+        el(
+          "div",
+          { color: "#555", padding: "2px 4px" },
+          "Press Z to manage spells",
+        ),
+      );
       return;
     }
 
@@ -296,20 +372,27 @@ export class HudRenderer {
       if (!spell) continue;
       const canCast = mp >= spell.manaCost;
       const spellId = hotkeys[i];
-      const btn = el("div", {
-        padding: "4px 7px",
-        background: canCast ? "#1a1a2a" : "#1a1a1a",
-        border: `1px solid ${canCast ? "#446" : "#222"}`,
-        color: canCast ? "#aac" : "#555",
-        cursor: canCast ? "pointer" : "default",
-        whiteSpace: "nowrap",
-        userSelect: "none",
-        borderRadius: "3px",
-        minHeight: "28px",
-        display: "flex",
-        alignItems: "center",
-      }, `${i + 1}:${spell.name}`);
-      if (canCast) btn.addEventListener("click", () => { this.onSpellClick?.(spellId); });
+      const btn = el(
+        "div",
+        {
+          padding: "4px 7px",
+          background: canCast ? "#1a1a2a" : "#1a1a1a",
+          border: `1px solid ${canCast ? "#446" : "#222"}`,
+          color: canCast ? "#aac" : "#555",
+          cursor: canCast ? "pointer" : "default",
+          whiteSpace: "nowrap",
+          userSelect: "none",
+          borderRadius: "3px",
+          minHeight: "28px",
+          display: "flex",
+          alignItems: "center",
+        },
+        `${i + 1}:${spell.name}`,
+      );
+      if (canCast)
+        btn.addEventListener("click", () => {
+          this.onSpellClick?.(spellId);
+        });
       this.spellBarEl.appendChild(btn);
     }
   }
@@ -319,7 +402,10 @@ export class HudRenderer {
 
     const limit = this.landscape ? 3 : 50;
     const colors: Record<string, string> = {
-      combat: '#fa0', important: '#4f4', system: '#888', normal: '#ccc',
+      combat: "#fa0",
+      important: "#4f4",
+      system: "#888",
+      normal: "#ccc",
     };
 
     // If messages were cleared or shrunk, full rebuild
@@ -335,31 +421,33 @@ export class HudRenderer {
 
     for (let i = newStart; i < messages.length; i++) {
       const m = messages[i];
-      const baseColor = colors[m.severity] ?? '#ccc';
-      const line = document.createElement('div');
-      line.style.margin = '1px 0';
-      const parts = m.text.split(/(\S+(?:\s+\S+){0,2}\s+\+\d+|\S+(?:\s+\S+){0,2}\s+-\d+|\d+)/g);
+      const baseColor = colors[m.severity] ?? "#ccc";
+      const line = document.createElement("div");
+      line.style.margin = "1px 0";
+      const parts = m.text.split(
+        /(\S+(?:\s+\S+){0,2}\s+\+\d+|\S+(?:\s+\S+){0,2}\s+-\d+|\d+)/g,
+      );
       for (const part of parts) {
         if (/\s\+\d+$/.test(part)) {
-          const span = document.createElement('span');
+          const span = document.createElement("span");
           span.textContent = part;
-          span.style.color = '#4af';
-          span.style.fontWeight = 'bold';
+          span.style.color = "#4af";
+          span.style.fontWeight = "bold";
           line.appendChild(span);
         } else if (/\s-\d+$/.test(part)) {
-          const span = document.createElement('span');
+          const span = document.createElement("span");
           span.textContent = part;
-          span.style.color = '#f44';
-          span.style.fontWeight = 'bold';
+          span.style.color = "#f44";
+          span.style.fontWeight = "bold";
           line.appendChild(span);
         } else if (/^\d+$/.test(part)) {
-          const num = document.createElement('span');
+          const num = document.createElement("span");
           num.textContent = part;
-          num.style.color = '#fff';
-          num.style.fontWeight = 'bold';
+          num.style.color = "#fff";
+          num.style.fontWeight = "bold";
           line.appendChild(num);
         } else {
-          const txt = document.createElement('span');
+          const txt = document.createElement("span");
           txt.textContent = part;
           txt.style.color = baseColor;
           line.appendChild(txt);
@@ -374,6 +462,7 @@ export class HudRenderer {
     }
 
     this._prevMsgCount = messages.length;
-    if (!this.landscape) this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+    if (!this.landscape)
+      this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   }
 }

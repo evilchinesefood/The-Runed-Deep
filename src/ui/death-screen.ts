@@ -17,7 +17,7 @@ export function createDeathScreen(
     : "unknown causes";
 
   const score = calculateScore(
-    hero.level, state.currentFloor + 1, hero.xp, state.turn, hero.gold, state.difficulty,
+    hero.level, state.currentFloor, hero.xp, state.turn, hero.gold, state.difficulty,
   );
 
   const screen = createScreen();
@@ -33,7 +33,7 @@ export function createDeathScreen(
 
   tombstone.appendChild(el("div", { fontSize: "32px", fontWeight: "bold", color: "#888", marginBottom: "16px", fontFamily: "serif" }, "You Have Fallen"));
   tombstone.appendChild(el("div", { fontSize: "20px", color: "#aaa", marginBottom: "8px", fontFamily: "serif" }, hero.name));
-  tombstone.appendChild(el("div", { fontSize: "14px", color: "#666", marginBottom: "16px" }, `Level ${hero.level} · Floor ${state.currentFloor + 1}`));
+  tombstone.appendChild(el("div", { fontSize: "14px", color: "#666", marginBottom: "16px" }, `Level ${hero.level} · Floor ${state.currentFloor}`));
   tombstone.appendChild(el("hr", { border: "none", borderTop: "1px solid #333", margin: "12px 0" }));
   tombstone.appendChild(el("div", { fontSize: "13px", color: "#f44", marginBottom: "6px" }, `Slain by: ${causeOfDeath}`));
   tombstone.appendChild(el("div", { fontSize: "13px", color: "#777", marginBottom: "6px" }, `Difficulty: ${state.difficulty}`));

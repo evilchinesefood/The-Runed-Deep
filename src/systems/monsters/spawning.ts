@@ -5,11 +5,7 @@ import type {
   Floor,
   Difficulty,
 } from "../../core/types";
-import {
-  getMonstersForDepth,
-  getNewestUnlockFloor,
-  type MonsterTemplate,
-} from "../../data/monsters";
+import { getMonstersForDepth, type MonsterTemplate } from "../../data/monsters";
 import { getDifficultyConfig } from "../../data/difficulty";
 
 let nextMonsterId = Date.now();
@@ -89,38 +85,35 @@ export function createMonster(
     fleeing: 0,
     hasFled: false,
     bled: false,
+    alerted: false,
   };
 }
 
+/** Alerter template IDs with special spawn rules */
+const ALERTER_IDS = new Set(["shrieker", "war-drummer"]);
+
 /**
  * Picks a random monster template for the given depth.
- * Each monster is weighted by how recently it was unlocked:
- * - Monsters from the current or most recent unlock floor get weight 10
- * - Each floor of age reduces weight (older monsters fade out)
- * - Minimum weight of 1 so old monsters can still rarely appear
+ * All monsters in the valid range have equal base weight.
+ * Alerters (shrieker, war-drummer) have reduced weight (0.5).
  */
 function pickTemplate(
   depth: number,
   rand: () => number,
+  existingTemplateIds: string[] = [],
 ): MonsterTemplate | null {
-  const candidates = getMonstersForDepth(depth);
+  let candidates = getMonstersForDepth(depth);
   if (candidates.length === 0) return null;
 
-  const newestFloor = getNewestUnlockFloor(depth);
+  // Limit alerters to max 1 per floor
+  for (const aid of ALERTER_IDS) {
+    if (existingTemplateIds.includes(aid)) {
+      candidates = candidates.filter((m) => m.id !== aid);
+    }
+  }
+  if (candidates.length === 0) return null;
 
-  // Weight each candidate: newer = higher weight
-  const weights = candidates.map((m) => {
-    const age = newestFloor - m.unlockFloor; // 0 = brand new, higher = older
-    // New monsters (age 0-2): weight 10
-    // Recent (age 3-5): weight 5
-    // Old (age 6-10): weight 2
-    // Ancient (age 11+): weight 1
-    if (age <= 2) return 10;
-    if (age <= 5) return 5;
-    if (age <= 10) return 2;
-    return 1;
-  });
-
+  const weights = candidates.map((m) => (ALERTER_IDS.has(m.id) ? 0.5 : 1));
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   let roll = rand() * totalWeight;
 
@@ -184,8 +177,9 @@ export function spawnMonsters(
   const usedPositions = new Set<string>();
 
   // Spawn regular monsters
+  const spawnedTemplateIds: string[] = [];
   for (let i = 0; i < count && i < positions.length; i++) {
-    const template = pickTemplate(depth, rand);
+    const template = pickTemplate(depth, rand, spawnedTemplateIds);
     if (!template) continue;
 
     const pos = positions[i];
@@ -193,6 +187,7 @@ export function spawnMonsters(
     if (usedPositions.has(key)) continue;
     usedPositions.add(key);
 
+    spawnedTemplateIds.push(template.id);
     monsters.push(createMonster(template, pos, depth, rand, difficulty));
   }
 

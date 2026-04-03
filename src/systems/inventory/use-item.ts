@@ -57,7 +57,10 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
     const pct = item.properties["healPct"] ?? 0;
     const flat = item.properties["healAmount"] ?? 0;
     const mult = getDifficultyConfig(state.difficulty).healingMult;
-    const heal = Math.max(Math.round(flat * mult), Math.floor(hero.maxHp * pct * mult));
+    const heal = Math.max(
+      Math.round(flat * mult),
+      Math.floor(hero.maxHp * pct * mult),
+    );
     const oldHp = hero.hp;
     hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
     const healed = hero.hp - oldHp;
@@ -75,7 +78,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
-    showGameToast('+1 Strength!', 'success');
+    showGameToast("+1 Strength!", "success");
     messages.push({
       text: "You feel stronger! (+1 Strength)",
       severity: "important",
@@ -90,7 +93,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
-    showGameToast('+1 Intelligence!', 'success');
+    showGameToast("+1 Intelligence!", "success");
     messages.push({
       text: "You feel smarter! (+1 Intelligence)",
       severity: "important",
@@ -105,7 +108,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
-    showGameToast('+1 Constitution!', 'success');
+    showGameToast("+1 Constitution!", "success");
     messages.push({
       text: "You feel healthier! (+1 Constitution)",
       severity: "important",
@@ -120,7 +123,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
       },
     };
     hero = recomputeDerivedStats(hero);
-    showGameToast('+1 Dexterity!', 'success');
+    showGameToast("+1 Dexterity!", "success");
     messages.push({
       text: "You feel more agile! (+1 Dexterity)",
       severity: "important",
@@ -153,7 +156,12 @@ function useScroll(state: GameState, item: Item, idx: number): GameState {
     hero = result.hero;
     state = result.state;
     hero = removeFromInventory(hero, idx);
-    return { ...state, hero, messages: [...state.messages, ...messages], turn: state.turn + 1 };
+    return {
+      ...state,
+      hero,
+      messages: [...state.messages, ...messages],
+      turn: state.turn + 1,
+    };
   } else if (item.templateId === "scroll-rune-of-return") {
     if (state.currentDungeon === "town") {
       hero = removeFromInventory(hero, idx);
@@ -228,8 +236,10 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     };
   }
   if (state.hero.knownSpells.includes(spellId)) {
-    const name = spellId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    showGameToast(`Already learned ${name}`, 'warning');
+    const name = spellId
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    showGameToast(`Already learned ${name}`, "warning");
     return {
       ...state,
       messages: [
@@ -257,7 +267,7 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
     },
     idx,
   );
-  showGameToast(`Learned ${spellName}!`, 'success');
+  showGameToast(`Learned ${spellName}!`, "success");
   return {
     ...state,
     hero,
@@ -274,6 +284,21 @@ function useSpellbook(state: GameState, item: Item, idx: number): GameState {
 }
 
 function useWand(state: GameState, item: Item, idx: number): GameState {
+  // Silence rift modifier blocks wand usage
+  if (state.activeRift?.modifiers.some((m) => m.id === "silence")) {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          text: "Silence prevents spellcasting!",
+          severity: "important" as const,
+          turn: state.turn,
+        },
+      ],
+    };
+  }
+
   const tpl = ITEM_BY_ID[item.templateId];
   const spellId = tpl?.spellId;
   if (!spellId) {

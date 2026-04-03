@@ -7,9 +7,13 @@ import type {
   TownState,
   Difficulty,
   Gender,
-} from './types';
-import { computeMaxHp, computeMaxMp, computeBaseArmorValue } from '../systems/character/derived-stats';
-import { getDifficultyConfig } from '../data/difficulty';
+} from "./types";
+import {
+  computeMaxHp,
+  computeMaxMp,
+  computeBaseArmorValue,
+} from "../systems/character/derived-stats";
+import { getDifficultyConfig } from "../data/difficulty";
 
 export function createDefaultAttributes(): Attributes {
   return { strength: 50, intelligence: 50, constitution: 50, dexterity: 50 };
@@ -42,7 +46,7 @@ export function createHero(
   gender: Gender,
   attributes: Attributes,
   startingSpell?: string,
-  difficulty: Difficulty = 'intermediate',
+  difficulty: Difficulty = "intermediate",
 ): Hero {
   const maxHp = computeMaxHp(attributes.constitution, 1);
   const maxMp = computeMaxMp(attributes.intelligence, 1);
@@ -70,24 +74,27 @@ export function createHero(
     armorValue,
     equipDamageBonus: 0,
     equipAccuracyBonus: 0,
+    runeShards: 0,
   };
 }
 
 export function createDefaultTown(): TownState {
   return {
-    id: 'hamlet',
+    id: "hamlet",
     shopInventories: {},
     bankBalance: 0,
     deepestFloor: 0,
   };
 }
 
-export function createInitialGameState(difficulty: Difficulty = 'normal'): GameState {
+export function createInitialGameState(
+  difficulty: Difficulty = "normal",
+): GameState {
   return {
-    screen: 'splash',
-    hero: createHero('Hero', 'male', createDefaultAttributes()),
-    currentFloor: 0,
-    currentDungeon: 'mine',
+    screen: "splash",
+    hero: createHero("Hero", "male", createDefaultAttributes()),
+    currentFloor: 1,
+    currentDungeon: "mine",
     floors: {},
     town: createDefaultTown(),
     messages: [],
@@ -95,9 +102,12 @@ export function createInitialGameState(difficulty: Difficulty = 'normal'): GameS
     gameTime: 0,
     difficulty,
     rngSeed: Date.now(),
-    returnFloor: 0,
-    activeBuildingId: '',
+    returnFloor: 1,
+    activeBuildingId: "",
     ngPlusCount: 0,
     stash: [],
+    riftStoneUnlocked: false,
+    riftOffering: null,
+    activeRift: null,
   };
 }

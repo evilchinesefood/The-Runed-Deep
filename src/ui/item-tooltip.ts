@@ -84,10 +84,10 @@ export function buildTooltipContent(item: Item): HTMLElement {
     };
     let slotText = slotNames[tpl.equipSlot] ?? tpl.equipSlot;
     if (item.properties['twoHanded']) slotText += ' (Two-Handed)';
-    slotText += ` (Floors ${tpl.depthMin}\u2013${tpl.depthMax === 99 ? '40' : tpl.depthMax})`;
+    slotText += ` (Floors ${tpl.depthMin}\u2013${tpl.depthMax === 30 ? '30' : tpl.depthMax})`;
     container.appendChild(d('div', { color: '#777', fontSize: TT_SIZE, marginBottom: '4px' }, slotText));
   } else if (tpl) {
-    container.appendChild(d('div', { color: '#777', fontSize: TT_SIZE, marginBottom: '4px' }, `Floors ${tpl.depthMin}\u2013${tpl.depthMax === 99 ? '40' : tpl.depthMax}`));
+    container.appendChild(d('div', { color: '#777', fontSize: TT_SIZE, marginBottom: '4px' }, `Floors ${tpl.depthMin}\u2013${tpl.depthMax === 30 ? '30' : tpl.depthMax}`));
   }
 
   // Blessed/Cursed + Material tier on one line

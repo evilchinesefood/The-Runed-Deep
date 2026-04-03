@@ -49,6 +49,7 @@ function makeMonster(
     fleeing: 0,
     hasFled: false,
     bled: false,
+    alerted: false,
   };
 }
 

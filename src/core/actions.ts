@@ -39,6 +39,11 @@ import {
 import { ITEM_BY_ID } from "../data/items";
 import { TRAP_DATA } from "../data/Traps";
 import { getDisplayName } from "../systems/inventory/display-name";
+import {
+  rollRiftModifiers,
+  getRiftShardReward,
+} from "../systems/rift/RiftModifiers";
+import { generateRiftFloor } from "../systems/rift/RiftGen";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N: { x: 0, y: -1 },
@@ -176,6 +181,16 @@ export function processAction(state: GameState, action: GameAction): GameState {
     }
     case "newGame":
       return { ...state, screen: "character-creation" };
+    case "openRiftMenu":
+      return processOpenRiftMenu(state);
+    case "enterRift":
+      return processEnterRift(state);
+    case "exitRift":
+      return processExitRift(state);
+    case "rerollRift":
+      return processRerollRift(state);
+    case "riftComplete":
+      return processRiftComplete(state);
     default:
       return state;
   }
@@ -456,7 +471,7 @@ function processMove(state: GameState, direction: Direction): GameState {
     movedTile?.type === "stairs-down" &&
     state.currentDungeon === "town"
   ) {
-    const targetFloor = state.returnFloor + 1;
+    const targetFloor = state.returnFloor || 1;
     messages.push({
       text: `The entrance to the Abandoned Mine. Floor ${targetFloor} awaits. (Press Enter or E to enter)`,
       severity: "normal" as const,
@@ -477,6 +492,9 @@ function processCastSpell(
   state: GameState,
   action: Extract<GameAction, { type: "castSpell" }>,
 ): GameState {
+  if (hasRiftMod(state, "silence")) {
+    return addMessage(state, "Silence prevents spellcasting!", "important");
+  }
   return castSpell(state, action.spellId, action.direction, action.target);
 }
 
@@ -488,13 +506,7 @@ function processEnterBuilding(state: GameState): GameState {
   if (tile.type !== "building" || !tile.buildingId) {
     return addMessage(state, "There is no building here.", "system");
   }
-  const shopIds = [
-    "weapon-shop",
-    "armor-shop",
-    "general-store",
-    "magic-shop",
-    "junk-store",
-  ];
+  const shopIds = ["weapon-shop", "armor-shop", "general-store", "magic-shop"];
   const screen = shopIds.includes(tile.buildingId)
     ? ("shop" as const)
     : ("service" as const);
@@ -528,6 +540,88 @@ function processUseStairs(state: GameState): GameState {
     return processEnterBuilding(state);
   }
 
+  // Rift stair handling
+  if (state.currentDungeon === "rift" && state.activeRift) {
+    const rift = state.activeRift;
+    if (heroTile.type === "stairs-down") {
+      Sound.stairs();
+      if (rift.currentFloor >= rift.totalFloors) {
+        // Last floor — rift complete
+        return processRiftComplete(state);
+      }
+      // Advance to next rift floor
+      const newRift = { ...rift, currentFloor: rift.currentFloor + 1 };
+      const { floor: newFloor, playerStart } = generateRiftFloor(
+        newRift,
+        state,
+      );
+      const riftKey = `rift-${newRift.currentFloor}`;
+      return {
+        ...state,
+        activeRift: newRift,
+        currentFloor: newRift.currentFloor,
+        floors: { ...state.floors, [riftKey]: newFloor },
+        hero: { ...state.hero, position: playerStart },
+        messages: [
+          ...state.messages,
+          {
+            text: `You descend deeper into the rift. (Floor ${newRift.currentFloor}/${newRift.totalFloors})`,
+            severity: "important" as const,
+            turn: state.turn,
+          },
+        ],
+        turn: state.turn + 1,
+      };
+    } else if (heroTile.type === "stairs-up") {
+      Sound.stairs();
+      if (rift.currentFloor <= 1) {
+        return processExitRift(state);
+      }
+      // Go back up in rift
+      const newRift = { ...rift, currentFloor: rift.currentFloor - 1 };
+      const riftKey = `rift-${newRift.currentFloor}`;
+      let floors = state.floors;
+      let pos = state.hero.position;
+      if (!floors[riftKey]) {
+        const { floor: f, playerStart } = generateRiftFloor(newRift, state);
+        floors = { ...floors, [riftKey]: f };
+        pos = playerStart;
+      } else {
+        const f = floors[riftKey];
+        for (let y = 0; y < f.height; y++) {
+          for (let x = 0; x < f.width; x++) {
+            if (f.tiles[y][x].type === "stairs-down") {
+              pos = { x, y };
+              break;
+            }
+          }
+          if (
+            pos.x !== state.hero.position.x ||
+            pos.y !== state.hero.position.y
+          )
+            break;
+        }
+      }
+      return {
+        ...state,
+        activeRift: newRift,
+        currentFloor: newRift.currentFloor,
+        floors,
+        hero: { ...state.hero, position: pos },
+        messages: [
+          ...state.messages,
+          {
+            text: `You ascend. (Floor ${newRift.currentFloor}/${newRift.totalFloors})`,
+            severity: "important" as const,
+            turn: state.turn,
+          },
+        ],
+        turn: state.turn + 1,
+      };
+    }
+    return addMessage(state, "There are no stairs here.", "system");
+  }
+
   if (heroTile.type === "stairs-down") {
     Sound.stairs();
     if (state.currentDungeon === "town") {
@@ -536,7 +630,7 @@ function processUseStairs(state: GameState): GameState {
     return goToFloor(state, state.currentFloor + 1, "descend");
   } else if (heroTile.type === "stairs-up") {
     Sound.stairs();
-    if (state.currentFloor === 0) {
+    if (state.currentFloor <= 1) {
       return teleportToTown(state);
     }
     // If the floor below doesn't exist (pruned), go to town instead
@@ -550,13 +644,7 @@ function processUseStairs(state: GameState): GameState {
   return addMessage(state, "There are no stairs here.", "system");
 }
 
-const SHOP_IDS = [
-  "weapon-shop",
-  "armor-shop",
-  "general-store",
-  "magic-shop",
-  "junk-store",
-];
+const SHOP_IDS = ["weapon-shop", "armor-shop", "general-store", "magic-shop"];
 
 export function teleportToTown(state: GameState): GameState {
   let floors = { ...state.floors };
@@ -566,7 +654,7 @@ export function teleportToTown(state: GameState): GameState {
   const { floor: townFloor } = generateTownMap();
   floors = { ...floors, [townKey]: townFloor };
 
-  const deepest = Math.max(state.town.deepestFloor, state.currentFloor + 1);
+  const deepest = Math.max(state.town.deepestFloor, state.currentFloor);
 
   let shopInventories = { ...state.town.shopInventories };
   for (const sid of SHOP_IDS) {
@@ -603,7 +691,7 @@ function returnToDungeon(state: GameState): GameState {
   const floor = state.floors[floorKey];
 
   if (!floor) {
-    if (targetFloor === 0) {
+    if (targetFloor === 1) {
       const { floor: newFloor } = generateFloor(
         targetDungeon,
         targetFloor,
@@ -638,7 +726,7 @@ function returnToDungeon(state: GameState): GameState {
     messages: [
       ...state.messages,
       {
-        text: `You return to dungeon level ${targetFloor + 1}.`,
+        text: `You return to dungeon level ${targetFloor}.`,
         severity: "important" as const,
         turn: state.turn,
       },
@@ -700,7 +788,7 @@ function goToFloor(
   const floorCleared = oldFloor && oldFloor.monsters.length === 0;
   if (floorCleared) {
     trackFloorCleared(oldFloorKey, 0);
-    const deepest = Math.max(state.town.deepestFloor, targetFloor + 1);
+    const deepest = Math.max(state.town.deepestFloor, targetFloor);
     const shopInvs = { ...state.town.shopInventories };
     for (const sid of SHOP_IDS) {
       shopInvs[sid] = shopInvs[sid]?.length
@@ -715,7 +803,7 @@ function goToFloor(
 
   trackFloorReached(targetFloor);
 
-  const depthLabel = targetFloor + 1;
+  const depthLabel = targetFloor;
   const verb = direction === "descend" ? "descends to" : "ascends to";
   const messages = [
     ...state.messages,
@@ -736,6 +824,16 @@ function goToFloor(
     };
     messages.push({
       text: `You enter ${tierNames[targetDungeon] ?? targetDungeon}. The air grows heavier.`,
+      severity: "important" as const,
+      turn: state.turn,
+    });
+  }
+
+  // Rift stone unlock at floor 15+
+  if (targetFloor >= 15 && !state.riftStoneUnlocked) {
+    state = { ...state, riftStoneUnlocked: true };
+    messages.push({
+      text: "A strange resonance pulses through you... The Rift Stone in town has awakened.",
       severity: "important" as const,
       turn: state.turn,
     });
@@ -1075,5 +1173,144 @@ function processSearch(state: GameState): GameState {
     floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
     messages,
     turn: state.turn + 1,
+  };
+}
+
+// ── Rift helpers ────────────────────────────────────────────
+
+function hasRiftMod(state: GameState, modId: string): boolean {
+  return state.activeRift?.modifiers.some((m) => m.id === modId) ?? false;
+}
+
+const RIFT_TOTAL_FLOORS = 5;
+
+function processOpenRiftMenu(state: GameState): GameState {
+  if (!state.riftStoneUnlocked) {
+    return addMessage(state, "The Rift Stone is dormant.", "system");
+  }
+  let offering = state.riftOffering;
+  if (!offering) {
+    const seed = Date.now();
+    offering = { seed, modifiers: rollRiftModifiers(seed), rerollCount: 0 };
+  }
+  return { ...state, riftOffering: offering, screen: "rift-menu" };
+}
+
+function processEnterRift(state: GameState): GameState {
+  const offering = state.riftOffering;
+  if (!offering)
+    return addMessage(state, "No rift offering available.", "system");
+
+  const rift: import("./types").RiftState = {
+    seed: offering.seed,
+    modifiers: offering.modifiers,
+    currentFloor: 1,
+    totalFloors: RIFT_TOTAL_FLOORS,
+    shardsEarned: 0,
+  };
+
+  const { floor, playerStart } = generateRiftFloor(rift, state);
+  const riftKey = "rift-1";
+
+  let hero = { ...state.hero, position: playerStart };
+
+  // Enfeebled modifier: halve HP and MP
+  if (rift.modifiers.some((m) => m.id === "enfeebled")) {
+    hero = {
+      ...hero,
+      hp: Math.max(1, Math.floor(hero.maxHp / 2)),
+      mp: Math.floor(hero.maxMp / 2),
+    };
+  }
+
+  return {
+    ...state,
+    activeRift: rift,
+    riftOffering: null,
+    currentDungeon: "rift",
+    currentFloor: 1,
+    floors: { ...state.floors, [riftKey]: floor },
+    hero,
+    screen: "game",
+    messages: [
+      ...state.messages,
+      {
+        text: "You step into the Fractured Rift...",
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+function processExitRift(state: GameState): GameState {
+  return {
+    ...teleportToTown({ ...state, currentFloor: state.returnFloor || 1 }),
+    activeRift: null,
+    messages: [
+      ...state.messages,
+      {
+        text: "You escape the rift and return to town.",
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+function processRerollRift(state: GameState): GameState {
+  const offering = state.riftOffering;
+  if (!offering)
+    return addMessage(state, "No rift offering to reroll.", "system");
+
+  const cost = 50;
+  if (state.hero.gold < cost) {
+    return addMessage(
+      state,
+      `Not enough gold. Reroll costs ${cost}g.`,
+      "system",
+    );
+  }
+
+  const newSeed = offering.seed + offering.rerollCount + 1;
+  const newOffering = {
+    seed: newSeed,
+    modifiers: rollRiftModifiers(newSeed),
+    rerollCount: offering.rerollCount + 1,
+  };
+
+  return {
+    ...state,
+    hero: { ...state.hero, gold: state.hero.gold - cost },
+    riftOffering: newOffering,
+    messages: [
+      ...state.messages,
+      {
+        text: "The rift shifts... new modifiers appear.",
+        severity: "system" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+function processRiftComplete(state: GameState): GameState {
+  const rift = state.activeRift;
+  if (!rift) return state;
+
+  const shards = getRiftShardReward(rift.modifiers);
+  return {
+    ...state,
+    activeRift: { ...rift, shardsEarned: shards },
+    hero: { ...state.hero, runeShards: state.hero.runeShards + shards },
+    screen: "rift-summary",
+    messages: [
+      ...state.messages,
+      {
+        text: `Rift conquered! You earned ${shards} Rune Shards.`,
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
   };
 }

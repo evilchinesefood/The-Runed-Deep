@@ -2,11 +2,11 @@
 // Shop system — buy/sell logic + inventory management
 // ============================================================
 
-import type { GameState, Item } from '../../core/types';
-import { ALL_ITEM_TEMPLATES, getItemsForDepth } from '../../data/items';
-import { createItemFromTemplate } from '../items/loot';
-import { trackGoldSpent } from '../Achievements';
-import { getDisplayName } from '../inventory/display-name';
+import type { GameState, Item } from "../../core/types";
+import { ALL_ITEM_TEMPLATES, getItemsForDepth } from "../../data/items";
+import { createItemFromTemplate } from "../items/loot";
+import { trackGoldSpent } from "../Achievements";
+import { getDisplayName } from "../inventory/display-name";
 
 export interface ShopDef {
   id: string;
@@ -18,11 +18,46 @@ export interface ShopDef {
 }
 
 export const SHOP_DEFS: Record<string, ShopDef> = {
-  'weapon-shop':   { id: 'weapon-shop',   name: 'Weapon Shop',     categories: ['weapon'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
-  'armor-shop':    { id: 'armor-shop',    name: 'Armor Shop',      categories: ['armor','shield','helmet','cloak','gauntlets','boots','belt'], buyMult: 1.0, sellOnCat: 0.6, sellOffCat: 0.3 },
-  'general-store': { id: 'general-store', name: 'General Store',   categories: ['potion','ring','amulet','misc','container'], buyMult: 1.0, sellOnCat: 0.5, sellOffCat: 0.35 },
-  'magic-shop':    { id: 'magic-shop',    name: 'Magic Shop',      categories: ['spellbook','wand','staff','scroll'], buyMult: 1.2, sellOnCat: 0.55, sellOffCat: 0.25 },
-  'junk-store':    { id: 'junk-store',    name: "Olaf's Junk Store", categories: [], buyMult: 0.8, sellOnCat: 0.4, sellOffCat: 0.4 },
+  "weapon-shop": {
+    id: "weapon-shop",
+    name: "Weapon Shop",
+    categories: ["weapon"],
+    buyMult: 1.0,
+    sellOnCat: 0.6,
+    sellOffCat: 0.3,
+  },
+  "armor-shop": {
+    id: "armor-shop",
+    name: "Armor Shop",
+    categories: [
+      "armor",
+      "shield",
+      "helmet",
+      "cloak",
+      "gauntlets",
+      "boots",
+      "belt",
+    ],
+    buyMult: 1.0,
+    sellOnCat: 0.6,
+    sellOffCat: 0.3,
+  },
+  "general-store": {
+    id: "general-store",
+    name: "General Store",
+    categories: ["potion", "ring", "amulet", "misc", "container"],
+    buyMult: 1.0,
+    sellOnCat: 0.5,
+    sellOffCat: 0.35,
+  },
+  "magic-shop": {
+    id: "magic-shop",
+    name: "Magic Shop",
+    categories: ["spellbook", "wand", "staff", "scroll"],
+    buyMult: 1.2,
+    sellOnCat: 0.55,
+    sellOffCat: 0.25,
+  },
 };
 
 export function getShopDef(shopId: string): ShopDef | undefined {
@@ -38,8 +73,7 @@ export function getBuyPrice(item: Item, shopId: string): number {
 export function getSellPrice(item: Item, shopId: string): number {
   const shop = SHOP_DEFS[shopId];
   if (!shop) return 1;
-  const isJunk = shopId === 'junk-store';
-  const inCat = !isJunk && shop.categories.includes(item.category);
+  const inCat = shop.categories.includes(item.category);
   const mult = inCat ? shop.sellOnCat : shop.sellOffCat;
   return Math.max(1, Math.floor(item.value * mult));
 }
@@ -50,12 +84,16 @@ export function initShopInventory(shopId: string, depth: number): Item[] {
 
   const count = 8 + Math.floor(Math.random() * 5); // 8-12
   // Filter to shop categories, exclude worthless/broken items (value <= 5)
-  const candidates = getItemsForDepth(depth).filter(t =>
-    (shop.categories.length === 0 || shop.categories.includes(t.category)) && t.value > 5
+  const candidates = getItemsForDepth(depth).filter(
+    (t) =>
+      (shop.categories.length === 0 || shop.categories.includes(t.category)) &&
+      t.value > 5,
   );
 
-  // Fallback for junk store — use depth-1 everything
-  const pool = candidates.length > 0 ? candidates : ALL_ITEM_TEMPLATES.filter(t => t.depthMin === 1);
+  const pool =
+    candidates.length > 0
+      ? candidates
+      : ALL_ITEM_TEMPLATES.filter((t) => t.depthMin === 1);
 
   const items: Item[] = [];
   for (let i = 0; i < count; i++) {
@@ -68,63 +106,98 @@ export function initShopInventory(shopId: string, depth: number): Item[] {
   return items;
 }
 
-export function restockShop(items: Item[], shopId: string, depth: number): Item[] {
+export function restockShop(
+  items: Item[],
+  shopId: string,
+  depth: number,
+): Item[] {
   if (items.length >= 20) return items;
   const toAdd = 1 + Math.floor(Math.random() * 3); // 1-3
   const newItems = initShopInventory(shopId, depth).slice(0, toAdd);
   return [...items, ...newItems];
 }
 
-function addMsg(state: GameState, text: string, severity: 'normal' | 'important' | 'system' = 'important'): GameState {
-  return { ...state, messages: [...state.messages, { text, severity, turn: state.turn }] };
+function addMsg(
+  state: GameState,
+  text: string,
+  severity: "normal" | "important" | "system" = "important",
+): GameState {
+  return {
+    ...state,
+    messages: [...state.messages, { text, severity, turn: state.turn }],
+  };
 }
 
-export function buyItem(state: GameState, shopId: string, itemId: string): GameState {
+export function buyItem(
+  state: GameState,
+  shopId: string,
+  itemId: string,
+): GameState {
   const shopInv = state.town.shopInventories[shopId] ?? [];
-  const idx = shopInv.findIndex(i => i.id === itemId);
-  if (idx === -1) return addMsg(state, 'Item not found.', 'system');
+  const idx = shopInv.findIndex((i) => i.id === itemId);
+  if (idx === -1) return addMsg(state, "Item not found.", "system");
 
   const item = shopInv[idx];
   const price = getBuyPrice(item, shopId);
 
   if (state.hero.gold < price) {
-    return addMsg(state, `You cannot afford that. (${price} gold needed)`, 'system');
+    return addMsg(
+      state,
+      `You cannot afford that. (${price} gold needed)`,
+      "system",
+    );
   }
 
   const newShopInv = shopInv.filter((_, i) => i !== idx);
   trackGoldSpent(price);
-  return addMsg({
-    ...state,
-    hero: {
-      ...state.hero,
-      gold: state.hero.gold - price,
-      inventory: [...state.hero.inventory, item],
+  return addMsg(
+    {
+      ...state,
+      hero: {
+        ...state.hero,
+        gold: state.hero.gold - price,
+        inventory: [...state.hero.inventory, item],
+      },
+      town: {
+        ...state.town,
+        shopInventories: {
+          ...state.town.shopInventories,
+          [shopId]: newShopInv,
+        },
+      },
     },
-    town: {
-      ...state.town,
-      shopInventories: { ...state.town.shopInventories, [shopId]: newShopInv },
-    },
-  }, `You buy ${item.name} for ${price} gold.`);
+    `You buy ${item.name} for ${price} gold.`,
+  );
 }
 
-export function sellItem(state: GameState, shopId: string, itemId: string): GameState {
-  const idx = state.hero.inventory.findIndex(i => i.id === itemId);
-  if (idx === -1) return addMsg(state, 'Item not found.', 'system');
+export function sellItem(
+  state: GameState,
+  shopId: string,
+  itemId: string,
+): GameState {
+  const idx = state.hero.inventory.findIndex((i) => i.id === itemId);
+  if (idx === -1) return addMsg(state, "Item not found.", "system");
 
   const item = state.hero.inventory[idx];
   const price = getSellPrice(item, shopId);
   const shopInv = state.town.shopInventories[shopId] ?? [];
 
-  return addMsg({
-    ...state,
-    hero: {
-      ...state.hero,
-      gold: state.hero.gold + price,
-      inventory: state.hero.inventory.filter((_, i) => i !== idx),
+  return addMsg(
+    {
+      ...state,
+      hero: {
+        ...state.hero,
+        gold: state.hero.gold + price,
+        inventory: state.hero.inventory.filter((_, i) => i !== idx),
+      },
+      town: {
+        ...state.town,
+        shopInventories: {
+          ...state.town.shopInventories,
+          [shopId]: [...shopInv, item],
+        },
+      },
     },
-    town: {
-      ...state.town,
-      shopInventories: { ...state.town.shopInventories, [shopId]: [...shopInv, item] },
-    },
-  }, `You sell ${getDisplayName(item)} for ${price} gold.`);
+    `You sell ${getDisplayName(item)} for ${price} gold.`,
+  );
 }
