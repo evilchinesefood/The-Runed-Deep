@@ -1099,16 +1099,11 @@ function processAlertAbilities(
   let cur = state;
 
   if (monster.abilities.includes("alert-floor")) {
-    // Check if there are any non-alerted monsters to alert
     const curFloor = cur.floors[floorKey];
     if (!curFloor) return cur;
-    const hasUnalerted = curFloor.monsters.some(
-      (m, i) => i !== idx && !m.alerted && m.hp > 0,
-    );
-    if (!hasUnalerted) return cur;
 
     // Alert ALL monsters on the floor (including self to mark as used)
-    const monsters = curFloor.monsters.map((m, i) =>
+    const monsters = curFloor.monsters.map((m) =>
       !m.alerted && m.hp > 0 ? { ...m, alerted: true } : m,
     );
     cur = {
@@ -1125,14 +1120,6 @@ function processAlertAbilities(
   if (monster.abilities.includes("alert-radius")) {
     const curFloor = cur.floors[floorKey];
     if (!curFloor) return cur;
-    const hasUnalerted = curFloor.monsters.some(
-      (m, i) =>
-        i !== idx &&
-        !m.alerted &&
-        m.hp > 0 &&
-        manhattan(m.position, monster.position) <= 10,
-    );
-    if (!hasUnalerted) return cur;
 
     // Alert monsters within 10 Manhattan distance (and self)
     const monsters = curFloor.monsters.map((m, i) => {
