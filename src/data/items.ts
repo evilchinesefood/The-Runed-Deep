@@ -256,6 +256,8 @@ const SPELLBOOKS: ItemTemplate[] = [
     weight: 500, value: 600, depthMin: 25, depthMax: 30, spellId: 'transmogrify-monster' },
   { id: 'book-time-stop', name: 'Spellbook of Time Stop', category: 'spellbook', sprite: 'spell-book',
     weight: 500, value: 1500, depthMin: 15, depthMax: 30, spellId: 'time-stop', ngMin: 1 },
+  { id: 'book-warcry', name: 'Spellbook of Warcry', category: 'spellbook', sprite: 'spell-book',
+    weight: 500, value: 400, depthMin: 20, depthMax: 30, spellId: 'warcry' },
 ];
 
 // ── Wands ─────────────────────────────────────────────────

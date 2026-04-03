@@ -839,12 +839,23 @@ function goToFloor(
     });
   }
 
+  // Prune old floors — keep current + previous only
+  const keepKeys = new Set<string>();
+  keepKeys.add(targetKey);
+  if (targetFloor > 1) {
+    keepKeys.add(`${getDungeonForFloor(targetFloor - 1)}-${targetFloor - 1}`);
+  }
+  const prunedFloors: typeof floors = {};
+  for (const [k, v] of Object.entries(floors)) {
+    if (keepKeys.has(k)) prunedFloors[k] = v;
+  }
+
   let newState: GameState = {
     ...state,
     hero: { ...state.hero, position: arrivalPos },
     currentDungeon: targetDungeon,
     currentFloor: targetFloor,
-    floors,
+    floors: prunedFloors,
     turn: state.turn + 1,
     messages,
   };

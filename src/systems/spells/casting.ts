@@ -261,6 +261,24 @@ function resolveSpellEffect(
       };
     }
 
+    case "warcry": {
+      const fk = `${state.currentDungeon}-${state.currentFloor}`;
+      const fl = state.floors[fk];
+      if (!fl) return addMsg(state, "Your warcry echoes into silence.", "system");
+      const monsters = fl.monsters.map((m) =>
+        m.hp > 0 ? { ...m, alerted: true } : m,
+      );
+      queueAnimation(buildBuffAnimation(state.hero.position, "#f84"));
+      return {
+        ...addMsg(
+          state,
+          "You let out a deafening warcry! Every creature on the floor turns toward you...",
+          "important",
+        ),
+        floors: { ...state.floors, [fk]: { ...fl, monsters } },
+      };
+    }
+
     default:
       return addMsg(state, `${spell.name} fizzles.`, "system");
   }

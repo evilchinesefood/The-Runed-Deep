@@ -355,6 +355,16 @@ export const SPELLS: SpellDef[] = [
     aoe: false,
     description: 'Removes a curse from an equipped item, allowing it to be unequipped.',
   },
+  {
+    id: 'warcry',
+    name: 'Warcry',
+    category: 'control',
+    level: 10,
+    manaCost: 15,
+    targeting: 'none',
+    aoe: false,
+    description: 'Let out a deafening warcry, alerting all monsters on the floor to your presence.',
+  },
 ];
 
 /** All spells indexed by id for fast lookup */
