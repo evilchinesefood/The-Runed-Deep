@@ -272,14 +272,37 @@ async function buildSheet(category, outputName) {
         newClassPos.set(sprites[i].className, { x, y });
       }
 
-      // Convert DCSS path to expected new class name (same category only)
-      function dcssToNewClass(dcssPath, prefix) {
-        if (!dcssPath.startsWith(prefix)) return null;
-        let p = dcssPath.slice(prefix.length).replace(".png", "");
-        let parts = p.split("/");
-        let topSub = parts[0];
-        let name = parts[parts.length - 1];
-        return topSub + "-" + name;
+      // Build filename-based lookup for fuzzy matching
+      const nameToClass = new Map();
+      for (const s of sprites) {
+        // Index by raw name (without subfolder prefix)
+        if (!nameToClass.has(s.name)) nameToClass.set(s.name, s.className);
+        // Also index with underscores→hyphens
+        const hyphenName = s.name.replace(/_/g, '-');
+        if (!nameToClass.has(hyphenName)) nameToClass.set(hyphenName, s.className);
+      }
+
+      // Try multiple strategies to find a match
+      function findMatch(dcssPath) {
+        if (!dcssPath) return null;
+        const fname = path.basename(dcssPath, '.png');
+
+        // Strategy 1: direct subfolder-name class
+        const parts = dcssPath.replace(/^(mon|player|item|dngn)\//, '').replace('.png', '').split('/');
+        const topSub = parts[0];
+        const name = parts[parts.length - 1];
+        const direct = topSub + '-' + name;
+        if (newClassPos.has(direct)) return direct;
+
+        // Strategy 2: search by filename in all subfolders
+        if (nameToClass.has(fname) && newClassPos.has(nameToClass.get(fname))) return nameToClass.get(fname);
+
+        // Strategy 3: try with hyphens
+        const hyphen = fname.replace(/_/g, '-');
+        if (nameToClass.has(hyphen) && newClassPos.has(nameToClass.get(hyphen))) return nameToClass.get(hyphen);
+
+        // Strategy 4: check if legacy class name itself exists as a new class
+        return null;
       }
 
       if (entries.length > 0) {
@@ -293,14 +316,17 @@ async function buildSheet(category, outputName) {
         for (const entry of entries) {
           const cls = entry[1];
           const dcssPath = mapping[cls];
-          let newCls = null;
 
-          if (dcssPath && dcssPath.startsWith(legacyInfo.prefix)) {
-            newCls = dcssToNewClass(dcssPath, legacyInfo.prefix);
-            if (newCls && newClassPos.has(newCls)) {
-              matched.push({ cls, newCls, pos: newClassPos.get(newCls) });
-              continue;
-            }
+          // Also check if the legacy class itself exists as a new DCSS class
+          if (newClassPos.has(cls)) {
+            matched.push({ cls, newCls: cls, pos: newClassPos.get(cls) });
+            continue;
+          }
+
+          const newCls = findMatch(dcssPath);
+          if (newCls) {
+            matched.push({ cls, newCls, pos: newClassPos.get(newCls) });
+            continue;
           }
 
           // Unresolved: cross-category, missing from new sheet, or no mapping

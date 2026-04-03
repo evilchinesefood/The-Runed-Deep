@@ -6278,6 +6278,10 @@
     background: url('../../assets/monsters.png') -576px -128px;
     background-size: 1024px 1600px;
 }
+.skeleton {
+    background: url('../../assets/monsters.png') -704px -768px;
+    background-size: 1024px 1600px;
+}
 .viper {
     background: url('../../assets/monsters.png') -480px -64px;
     background-size: 1024px 1600px;
@@ -6410,12 +6414,20 @@
     background: url('../../assets/monsters.png') -416px -576px;
     background-size: 1024px 1600px;
 }
+.two-headed-giant {
+    background: url('../../assets/monsters.png') -32px -768px;
+    background-size: 1024px 1600px;
+}
 .fire-elemental {
     background: url('../../assets/monsters.png') -512px -576px;
     background-size: 1024px 1600px;
 }
 .water-elemental {
     background: url('../../assets/monsters.png') -96px -704px;
+    background-size: 1024px 1600px;
+}
+.frost-giant {
+    background: url('../../assets/monsters.png') -352px -448px;
     background-size: 1024px 1600px;
 }
 .spiked-devil {
@@ -6428,6 +6440,10 @@
 }
 .magma-elemental {
     background: url('../../assets/monsters.png') -928px -608px;
+    background-size: 1024px 1600px;
+}
+.stone-giant {
+    background: url('../../assets/monsters.png') -352px -448px;
     background-size: 1024px 1600px;
 }
 .horned-devil {
@@ -6468,6 +6484,10 @@
 }
 .hill-giant-king {
     background: url('../../assets/monsters.png') -896px -1472px;
+    background-size: 1024px 1600px;
+}
+.frost-giant-king {
+    background: url('../../assets/monsters.png') -352px -448px;
     background-size: 1024px 1600px;
 }
 .stone-giant-king {
@@ -6742,6 +6762,18 @@
     background: url('../../assets/monsters.png') -160px -192px;
     background-size: 1024px 1600px;
 }
+.spriggan-berserker {
+    background: url('../../assets/monsters.png') -864px -480px;
+    background-size: 1024px 1600px;
+}
+.spriggan-defender {
+    background: url('../../assets/monsters.png') -896px -480px;
+    background-size: 1024px 1600px;
+}
+.spriggan-druid {
+    background: url('../../assets/monsters.png') -928px -480px;
+    background-size: 1024px 1600px;
+}
 .pandemonium-lord {
     background: url('../../assets/monsters.png') -960px -736px;
     background-size: 1024px 1600px;
@@ -6764,6 +6796,10 @@
 }
 .geryon {
     background: url('../../assets/monsters.png') -96px -1440px;
+    background-size: 1024px 1600px;
+}
+.jormungandr {
+    background: url('../../assets/monsters.png') -96px -768px;
     background-size: 1024px 1600px;
 }
 .mnoleg {
@@ -6794,6 +6830,18 @@
     background: url('../../assets/monsters.png') -992px -1408px;
     background-size: 1024px 1600px;
 }
+.warmonger {
+    background: url('../../assets/monsters.png') -256px -512px;
+    background-size: 1024px 1600px;
+}
+.blood-saint {
+    background: url('../../assets/monsters.png') -832px -384px;
+    background-size: 1024px 1600px;
+}
+.corrupter {
+    background: url('../../assets/monsters.png') -960px -384px;
+    background-size: 1024px 1600px;
+}
 /* --- Legacy game sprites (unresolved, appended pixels) --- */
 .male-hero {
     background: url('../../assets/monsters.png') -704px -1536px;
@@ -6811,119 +6859,71 @@
     background: url('../../assets/monsters.png') -800px -1536px;
     background-size: 1024px 1600px;
 }
-.skeleton {
+.giant-trapdoor-spider {
     background: url('../../assets/monsters.png') -832px -1536px;
     background-size: 1024px 1600px;
 }
-.giant-trapdoor-spider {
+.carrion-creeper {
     background: url('../../assets/monsters.png') -864px -1536px;
     background-size: 1024px 1600px;
 }
-.carrion-creeper {
+.walking-corpse {
     background: url('../../assets/monsters.png') -896px -1536px;
     background-size: 1024px 1600px;
 }
-.walking-corpse {
+.shadow {
     background: url('../../assets/monsters.png') -928px -1536px;
     background-size: 1024px 1600px;
 }
-.shadow {
+.bull-man {
     background: url('../../assets/monsters.png') -960px -1536px;
     background-size: 1024px 1600px;
 }
-.bull-man {
+.ice-elemental {
     background: url('../../assets/monsters.png') -992px -1536px;
     background-size: 1024px 1600px;
 }
-.two-headed-giant {
+.shadow-fiend {
     background: url('../../assets/monsters.png') -0px -1568px;
     background-size: 1024px 1600px;
 }
-.frost-giant {
+.hell-beast {
     background: url('../../assets/monsters.png') -32px -1568px;
     background-size: 1024px 1600px;
 }
-.ice-elemental {
+.quasit {
     background: url('../../assets/monsters.png') -64px -1568px;
     background-size: 1024px 1600px;
 }
-.stone-giant {
+.guardian-golem {
     background: url('../../assets/monsters.png') -96px -1568px;
     background-size: 1024px 1600px;
 }
-.frost-giant-king {
+.queen-ant {
     background: url('../../assets/monsters.png') -128px -1568px;
     background-size: 1024px 1600px;
 }
-.shadow-fiend {
+.soldier-ant {
     background: url('../../assets/monsters.png') -160px -1568px;
     background-size: 1024px 1600px;
 }
-.hell-beast {
+.death-ooze {
     background: url('../../assets/monsters.png') -192px -1568px;
     background-size: 1024px 1600px;
 }
-.quasit {
+.giant-eyeball {
     background: url('../../assets/monsters.png') -224px -1568px;
     background-size: 1024px 1600px;
 }
-.guardian-golem {
+.shark {
     background: url('../../assets/monsters.png') -256px -1568px;
     background-size: 1024px 1600px;
 }
-.queen-ant {
+.black-sun {
     background: url('../../assets/monsters.png') -288px -1568px;
     background-size: 1024px 1600px;
 }
-.soldier-ant {
-    background: url('../../assets/monsters.png') -320px -1568px;
-    background-size: 1024px 1600px;
-}
-.death-ooze {
-    background: url('../../assets/monsters.png') -352px -1568px;
-    background-size: 1024px 1600px;
-}
-.giant-eyeball {
-    background: url('../../assets/monsters.png') -384px -1568px;
-    background-size: 1024px 1600px;
-}
-.shark {
-    background: url('../../assets/monsters.png') -416px -1568px;
-    background-size: 1024px 1600px;
-}
-.spriggan-berserker {
-    background: url('../../assets/monsters.png') -448px -1568px;
-    background-size: 1024px 1600px;
-}
-.spriggan-defender {
-    background: url('../../assets/monsters.png') -480px -1568px;
-    background-size: 1024px 1600px;
-}
-.spriggan-druid {
-    background: url('../../assets/monsters.png') -512px -1568px;
-    background-size: 1024px 1600px;
-}
-.jormungandr {
-    background: url('../../assets/monsters.png') -544px -1568px;
-    background-size: 1024px 1600px;
-}
-.warmonger {
-    background: url('../../assets/monsters.png') -576px -1568px;
-    background-size: 1024px 1600px;
-}
-.blood-saint {
-    background: url('../../assets/monsters.png') -608px -1568px;
-    background-size: 1024px 1600px;
-}
-.black-sun {
-    background: url('../../assets/monsters.png') -640px -1568px;
-    background-size: 1024px 1600px;
-}
 .chaos-champion {
-    background: url('../../assets/monsters.png') -672px -1568px;
-    background-size: 1024px 1600px;
-}
-.corrupter {
-    background: url('../../assets/monsters.png') -704px -1568px;
+    background: url('../../assets/monsters.png') -320px -1568px;
     background-size: 1024px 1600px;
 }

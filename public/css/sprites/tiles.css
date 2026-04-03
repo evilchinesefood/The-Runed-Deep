@@ -8980,6 +8980,14 @@
     background: url('../../assets/tiles.png') -0px -576px;
     background-size: 1024px 2272px;
 }
+.stairs-up {
+    background: url('../../assets/tiles.png') -544px -864px;
+    background-size: 1024px 2272px;
+}
+.stairs-down {
+    background: url('../../assets/tiles.png') -512px -864px;
+    background-size: 1024px 2272px;
+}
 .town-wall {
     background: url('../../assets/tiles.png') -704px -1728px;
     background-size: 1024px 2272px;
@@ -9041,47 +9049,39 @@
     background: url('../../assets/tiles.png') -800px -2208px;
     background-size: 1024px 2272px;
 }
-.stairs-up {
+.pillar-broken {
     background: url('../../assets/tiles.png') -832px -2208px;
     background-size: 1024px 2272px;
 }
-.stairs-down {
+.gold {
     background: url('../../assets/tiles.png') -864px -2208px;
     background-size: 1024px 2272px;
 }
-.pillar-broken {
+.altar-2 {
     background: url('../../assets/tiles.png') -896px -2208px;
     background-size: 1024px 2272px;
 }
-.gold {
+.arrow-trap {
     background: url('../../assets/tiles.png') -928px -2208px;
     background-size: 1024px 2272px;
 }
-.altar-2 {
+.wind-trap {
     background: url('../../assets/tiles.png') -960px -2208px;
     background-size: 1024px 2272px;
 }
-.arrow-trap {
+.dart-trap {
     background: url('../../assets/tiles.png') -992px -2208px;
     background-size: 1024px 2272px;
 }
-.wind-trap {
+.cobweb-trap {
     background: url('../../assets/tiles.png') -0px -2240px;
     background-size: 1024px 2272px;
 }
-.dart-trap {
+.lightning-trap {
     background: url('../../assets/tiles.png') -32px -2240px;
     background-size: 1024px 2272px;
 }
-.cobweb-trap {
-    background: url('../../assets/tiles.png') -64px -2240px;
-    background-size: 1024px 2272px;
-}
-.lightning-trap {
-    background: url('../../assets/tiles.png') -96px -2240px;
-    background-size: 1024px 2272px;
-}
 .acid-trap {
-    background: url('../../assets/tiles.png') -128px -2240px;
+    background: url('../../assets/tiles.png') -64px -2240px;
     background-size: 1024px 2272px;
 }

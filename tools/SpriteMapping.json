@@ -19623,6 +19623,10 @@
       "source": "monsters.css"
     },
     {
+      "cls": "skeleton",
+      "source": "monsters.css"
+    },
+    {
       "cls": "viper",
       "source": "monsters.css"
     },
@@ -19755,11 +19759,19 @@
       "source": "monsters.css"
     },
     {
+      "cls": "two-headed-giant",
+      "source": "monsters.css"
+    },
+    {
       "cls": "fire-elemental",
       "source": "monsters.css"
     },
     {
       "cls": "water-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "frost-giant",
       "source": "monsters.css"
     },
     {
@@ -19772,6 +19784,10 @@
     },
     {
       "cls": "magma-elemental",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "stone-giant",
       "source": "monsters.css"
     },
     {
@@ -19812,6 +19828,10 @@
     },
     {
       "cls": "hill-giant-king",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "frost-giant-king",
       "source": "monsters.css"
     },
     {
@@ -20087,6 +20107,18 @@
       "source": "monsters.css"
     },
     {
+      "cls": "spriggan-berserker",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spriggan-defender",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "spriggan-druid",
+      "source": "monsters.css"
+    },
+    {
       "cls": "pandemonium-lord",
       "source": "monsters.css"
     },
@@ -20108,6 +20140,10 @@
     },
     {
       "cls": "geryon",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "jormungandr",
       "source": "monsters.css"
     },
     {
@@ -20139,6 +20175,18 @@
       "source": "monsters.css"
     },
     {
+      "cls": "warmonger",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "blood-saint",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "corrupter",
+      "source": "monsters.css"
+    },
+    {
       "cls": "male-hero",
       "source": "monsters.css"
     },
@@ -20152,10 +20200,6 @@
     },
     {
       "cls": "giant-red-ant",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "skeleton",
       "source": "monsters.css"
     },
     {
@@ -20179,23 +20223,7 @@
       "source": "monsters.css"
     },
     {
-      "cls": "two-headed-giant",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "frost-giant",
-      "source": "monsters.css"
-    },
-    {
       "cls": "ice-elemental",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "stone-giant",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "frost-giant-king",
       "source": "monsters.css"
     },
     {
@@ -20235,39 +20263,11 @@
       "source": "monsters.css"
     },
     {
-      "cls": "spriggan-berserker",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "spriggan-defender",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "spriggan-druid",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "jormungandr",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "warmonger",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "blood-saint",
-      "source": "monsters.css"
-    },
-    {
       "cls": "black-sun",
       "source": "monsters.css"
     },
     {
       "cls": "chaos-champion",
-      "source": "monsters.css"
-    },
-    {
-      "cls": "corrupter",
       "source": "monsters.css"
     },
     {
@@ -20364,6 +20364,10 @@
     },
     {
       "cls": "wand-of-nothing",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-fire-bolt",
       "source": "items.css"
     },
     {
@@ -20619,10 +20623,6 @@
       "source": "items.css"
     },
     {
-      "cls": "wand-of-fire-bolt",
-      "source": "items.css"
-    },
-    {
       "cls": "amulet",
       "source": "items.css"
     },
@@ -20859,6 +20859,14 @@
       "source": "tiles.css"
     },
     {
+      "cls": "stairs-up",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "stairs-down",
+      "source": "tiles.css"
+    },
+    {
       "cls": "town-wall",
       "source": "tiles.css"
     },
@@ -20919,14 +20927,6 @@
       "source": "tiles.css"
     },
     {
-      "cls": "stairs-up",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "stairs-down",
-      "source": "tiles.css"
-    },
-    {
       "cls": "pillar-broken",
       "source": "tiles.css"
     },
@@ -20963,5 +20963,5 @@
       "source": "tiles.css"
     }
   ],
-  "timestamp": "2026-04-03T20:38:35.672Z"
+  "timestamp": "2026-04-03T20:59:25.386Z"
 }
