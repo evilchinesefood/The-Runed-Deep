@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sprite Slots — Item Sprite Assignments</title>
+    <link rel="stylesheet" href="css/sprites/monsters.css" />
+    <link rel="stylesheet" href="css/sprites/items.css" />
+    <link rel="stylesheet" href="css/sprites/tiles.css" />
+    <link rel="stylesheet" href="css/sprites/effects.css" />
+    <link rel="stylesheet" href="css/sprites/player.css" />
+    <link rel="stylesheet" href="css/sprites/buildings.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a1a;
+        color: #ccc;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      ::selection {
+        background: #c9a84c;
+        color: #1a1a1a;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 3px;
+      }
+
+      /* Top bar */
+      #topbar {
+        background: #111;
+        border-bottom: 1px solid #333;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      #topbar h1 {
+        font-size: 16px;
+        color: #c9a84c;
+        white-space: nowrap;
+      }
+      .btn {
+        padding: 5px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+      }
+      .btn-gold {
+        background: #c9a84c;
+        color: #1a1a1a;
+      }
+      .btn-gold:hover {
+        background: #dabb5e;
+      }
+      .btn-dim {
+        background: #333;
+        color: #999;
+      }
+      .btn-dim:hover {
+        background: #444;
+        color: #ccc;
+      }
+      .btn-danger {
+        background: #633;
+        color: #faa;
+      }
+      .btn-danger:hover {
+        background: #844;
+      }
+      #progress {
+        margin-left: auto;
+        font-size: 12px;
+        color: #888;
+      }
+      #progress b {
+        color: #c9a84c;
+      }
+
+      /* Panels */
+      #panels {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* Left panel */
+      #left {
+        width: 30%;
+        border-right: 1px solid #333;
+        overflow-y: auto;
+        background: #161616;
+        flex-shrink: 0;
+      }
+      .cat-hdr {
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #c9a84c;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #1e1e1e;
+        border-bottom: 1px solid #222;
+        user-select: none;
+      }
+      .cat-hdr:hover {
+        background: #252525;
+      }
+      .cat-arrow {
+        font-size: 10px;
+        transition: transform 0.15s;
+        color: #888;
+      }
+      .cat-hdr.open .cat-arrow {
+        transform: rotate(90deg);
+      }
+      .cat-badge {
+        margin-left: auto;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+      .cat-badge.empty {
+        background: #633;
+        color: #faa;
+      }
+      .cat-badge.ok {
+        background: #263;
+        color: #afa;
+      }
+      .cat-slots {
+        display: none;
+      }
+      .cat-hdr.open + .cat-slots {
+        display: block;
+      }
+      .slot-item {
+        padding: 5px 12px 5px 28px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border-bottom: 1px solid #1a1a1a;
+        color: #999;
+      }
+      .slot-item:hover {
+        background: #222;
+        color: #ccc;
+      }
+      .slot-item.active {
+        background: #446;
+        color: #fff;
+      }
+      .slot-badge {
+        font-size: 9px;
+        padding: 1px 5px;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-left: auto;
+      }
+      .slot-badge.empty {
+        background: #633;
+        color: #faa;
+      }
+      .slot-badge.ok {
+        background: #263;
+        color: #afa;
+      }
+
+      /* Center panel */
+      #center {
+        width: 45%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      #center-hdr {
+        padding: 8px 16px;
+        background: #1e1e1e;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      #center-hdr h2 {
+        font-size: 14px;
+        color: #c9a84c;
+      }
+      #center-hdr .slot-count {
+        font-size: 11px;
+        color: #888;
+      }
+      #pool-grid {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-content: flex-start;
+      }
+      #pool-empty {
+        display: none;
+        padding: 40px;
+        text-align: center;
+        color: #555;
+        font-size: 13px;
+        width: 100%;
+      }
+      .pool-card {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 8px;
+        width: 130px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        position: relative;
+      }
+      .pool-card.unique {
+        border-color: #f90;
+      }
+      .pool-preview {
+        width: 32px;
+        height: 32px;
+        position: relative;
+        image-rendering: pixelated;
+      }
+      .pool-preview .sprite-box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 32px;
+        height: 32px;
+        image-rendering: pixelated;
+      }
+      .pool-layers {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .layer-thumb {
+        width: 18px;
+        height: 18px;
+        border: 1px solid #444;
+        border-radius: 2px;
+        position: relative;
+        cursor: grab;
+        image-rendering: pixelated;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .layer-thumb .sprite-box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 18px;
+        height: 18px;
+        image-rendering: pixelated;
+        transform: scale(0.5625);
+        transform-origin: top left;
+      }
+      .layer-thumb.dragging {
+        opacity: 0.4;
+      }
+      .layer-thumb.drag-over {
+        border-color: #c9a84c;
+      }
+      .pool-actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .pool-actions .btn {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+      .pool-remove {
+        position: absolute;
+        top: 2px;
+        right: 4px;
+        cursor: pointer;
+        color: #666;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .pool-remove:hover {
+        color: #f66;
+      }
+      .pool-unique-wrap {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        color: #888;
+      }
+      .pool-unique-wrap input {
+        accent-color: #f90;
+      }
+      .pool-unique-lbl {
+        color: #f90;
+      }
+      #center-footer {
+        padding: 8px 16px;
+        border-top: 1px solid #333;
+        background: #1e1e1e;
+        flex-shrink: 0;
+        display: flex;
+        gap: 8px;
+      }
+
+      /* Right panel */
+      #right {
+        width: 25%;
+        border-left: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        background: #161616;
+        flex-shrink: 0;
+      }
+      #right.layer-mode {
+        border-color: #c9a84c;
+        box-shadow: inset 0 0 12px rgba(201, 168, 76, 0.15);
+      }
+      #right-hdr {
+        padding: 6px 10px;
+        background: #1e1e1e;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      #right-hdr h3 {
+        font-size: 13px;
+        color: #c9a84c;
+      }
+      #layer-mode-bar {
+        display: none;
+        padding: 6px 10px;
+        background: #3a3520;
+        border-bottom: 1px solid #c9a84c;
+        font-size: 11px;
+        color: #c9a84c;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      #layer-mode-bar .btn {
+        margin-left: 8px;
+      }
+      #right.layer-mode #layer-mode-bar {
+        display: block;
+      }
+      .browse-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 6px 8px;
+        background: #151515;
+        border-bottom: 1px solid #222;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+      .browse-tab {
+        padding: 3px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 11px;
+        background: #222;
+        color: #888;
+        border: 1px solid #333;
+      }
+      .browse-tab:hover {
+        color: #ccc;
+      }
+      .browse-tab.active {
+        background: #c9a84c;
+        color: #1a1a1a;
+        border-color: #c9a84c;
+        font-weight: 600;
+      }
+      #browse-search {
+        margin: 6px 8px;
+        background: #222;
+        border: 1px solid #444;
+        color: #ccc;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      #browse-search:focus {
+        outline: none;
+        border-color: #c9a84c;
+      }
+      #browse-grid {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 8px;
+        align-content: flex-start;
+      }
+      .browse-card {
+        width: 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 3px;
+        border-radius: 3px;
+        border: 1px solid transparent;
+      }
+      .browse-card:hover {
+        background: #2a2a2a;
+        border-color: #444;
+      }
+      .browse-card .sprite-box {
+        width: 32px;
+        height: 32px;
+        display: block;
+        image-rendering: pixelated;
+      }
+      .browse-card .browse-lbl {
+        font-size: 7px;
+        color: #666;
+        text-align: center;
+        word-break: break-all;
+        line-height: 1;
+        margin-top: 1px;
+        max-height: 14px;
+        overflow: hidden;
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #c9a84c;
+        color: #1a1a1a;
+        padding: 6px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        display: none;
+        z-index: 300;
+      }
+
+      /* No-slot selected state */
+      .no-slot-msg {
+        padding: 40px;
+        text-align: center;
+        color: #555;
+        font-size: 13px;
+      }
+
+      /* Hidden file input */
+      #file-input {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="topbar">
+      <h1>Sprite Slots &mdash; Item Sprite Assignments</h1>
+      <button class="btn btn-gold" id="btn-download">Download Config</button>
+      <button class="btn btn-dim" id="btn-load">Load Config</button>
+      <input type="file" id="file-input" accept=".json" />
+      <span id="progress"><b>0</b> of <b>0</b> slots configured</span>
+    </div>
+
+    <div id="panels">
+      <!-- Left: Slot Navigator -->
+      <div id="left"></div>
+
+      <!-- Center: Sprite Pool -->
+      <div id="center">
+        <div id="center-hdr">
+          <h2 id="slot-title">Select a slot</h2>
+          <span class="slot-count" id="slot-count"></span>
+        </div>
+        <div id="pool-grid">
+          <div id="pool-empty" class="no-slot-msg">
+            Select a slot from the left panel to begin.
+          </div>
+        </div>
+        <div id="center-footer" style="display: none">
+          <button class="btn btn-gold" id="btn-add-sprites">Add Sprites</button>
+        </div>
+      </div>
+
+      <!-- Right: Sprite Browser -->
+      <div id="right">
+        <div id="right-hdr">
+          <h3>Sprite Browser</h3>
+        </div>
+        <div id="layer-mode-bar">
+          Adding layer &mdash; click a sprite below
+          <button class="btn btn-dim" id="btn-layer-done">Done</button>
+        </div>
+        <div class="browse-tabs" id="browse-tabs"></div>
+        <input id="browse-search" type="text" placeholder="Search sprites..." />
+        <div id="browse-grid"></div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+      /* ========== DATA ========== */
+      const STORAGE_KEY = "rd-sprite-slots";
+      const SHEETS = ["monsters", "items", "tiles", "effects", "player"];
+
+      const SLOT_TREE = [
+        {
+          cat: "Weapon",
+          slots: ["sword", "axe", "mace", "spear", "dagger", "club", "flail"],
+        },
+        { cat: "Shield", slots: ["wood", "metal"] },
+        { cat: "Helmet", slots: ["leather", "metal"] },
+        { cat: "Body", slots: ["leather", "chain", "plate"] },
+        { cat: "Cloak", slots: [] },
+        { cat: "Gauntlets", slots: [] },
+        { cat: "Belt", slots: [] },
+        { cat: "Boots", slots: [] },
+        { cat: "Ring", slots: [] },
+        { cat: "Amulet", slots: [] },
+        { cat: "Pack", slots: [] },
+        {
+          cat: "Potion",
+          slots: [
+            "heal-minor",
+            "heal-medium",
+            "heal-major",
+            "gain-str",
+            "gain-int",
+            "gain-con",
+            "gain-dex",
+          ],
+        },
+        {
+          cat: "Spellbook",
+          slots: [
+            "levitation",
+            "clairvoyance",
+            "lightning-bolt",
+            "fire-bolt",
+            "resist-fire",
+            "resist-cold",
+            "resist-lightning",
+            "sleep-monster",
+            "slow-monster",
+            "cold-ball",
+            "teleport",
+            "remove-curse",
+            "ball-lightning",
+            "fire-ball",
+            "transmogrify-monster",
+            "time-stop",
+            "warcry",
+          ],
+        },
+      ];
+
+      let manifest = {};
+      let config = {};
+      let activeSlot = null;
+      let layerMode = null; // null or { cardIdx: number }
+      let browseSheet = "items";
+      let browseSearch = "";
+
+      /* ========== HELPERS ========== */
+      function slotKey(cat, sub) {
+        let k = cat.toLowerCase();
+        if (sub) k += "-" + sub;
+        return k;
+      }
+
+      function allSlotKeys() {
+        let keys = [];
+        for (let g of SLOT_TREE) {
+          if (g.slots.length === 0) keys.push(slotKey(g.cat));
+          else for (let s of g.slots) keys.push(slotKey(g.cat, s));
+        }
+        return keys;
+      }
+
+      function getPool(key) {
+        return config[key] || [];
+      }
+
+      function setPool(key, pool) {
+        config[key] = pool;
+        save();
+      }
+
+      function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        updateProgress();
+      }
+
+      function load(data) {
+        config = data || {};
+        save();
+        renderNav();
+        renderPool();
+      }
+
+      function toast(msg) {
+        let t = document.getElementById("toast");
+        t.textContent = msg;
+        t.style.display = "block";
+        setTimeout(() => (t.style.display = "none"), 1500);
+      }
+
+      /* ========== PROGRESS ========== */
+      function updateProgress() {
+        let keys = allSlotKeys();
+        let done = keys.filter((k) => (config[k] || []).length > 0).length;
+        let el = document.getElementById("progress");
+        el.textContent = "";
+        let b1 = document.createElement("b");
+        b1.textContent = done;
+        let b2 = document.createElement("b");
+        b2.textContent = keys.length;
+        el.appendChild(b1);
+        el.appendChild(document.createTextNode(" of "));
+        el.appendChild(b2);
+        el.appendChild(document.createTextNode(" slots configured"));
+      }
+
+      /* ========== LEFT NAV ========== */
+      function renderNav() {
+        let $left = document.getElementById("left");
+        $left.textContent = "";
+
+        for (let g of SLOT_TREE) {
+          let keys =
+            g.slots.length === 0
+              ? [slotKey(g.cat)]
+              : g.slots.map((s) => slotKey(g.cat, s));
+          let total = keys.reduce((n, k) => n + (config[k] || []).length, 0);
+
+          let hdr = document.createElement("div");
+          hdr.className = "cat-hdr";
+
+          let arrow = document.createElement("span");
+          arrow.className = "cat-arrow";
+          arrow.textContent = "\u25B6";
+          hdr.appendChild(arrow);
+
+          let name = document.createElement("span");
+          name.textContent = g.cat;
+          hdr.appendChild(name);
+
+          let badge = document.createElement("span");
+          badge.className = "cat-badge " + (total > 0 ? "ok" : "empty");
+          badge.textContent = total;
+          hdr.appendChild(badge);
+
+          $left.appendChild(hdr);
+
+          let slotsDiv = document.createElement("div");
+          slotsDiv.className = "cat-slots";
+
+          if (g.slots.length === 0) {
+            let item = makeSlotItem(g.cat, slotKey(g.cat));
+            slotsDiv.appendChild(item);
+          } else {
+            for (let s of g.slots) {
+              let item = makeSlotItem(s, slotKey(g.cat, s));
+              slotsDiv.appendChild(item);
+            }
+          }
+
+          $left.appendChild(slotsDiv);
+
+          hdr.addEventListener("click", () => {
+            hdr.classList.toggle("open");
+          });
+
+          // Auto-open if active slot is in this group
+          if (activeSlot && keys.includes(activeSlot)) {
+            hdr.classList.add("open");
+          }
+        }
+      }
+
+      function makeSlotItem(label, key) {
+        let item = document.createElement("div");
+        item.className = "slot-item";
+        if (key === activeSlot) item.classList.add("active");
+
+        let txt = document.createElement("span");
+        txt.textContent = label;
+        item.appendChild(txt);
+
+        let count = (config[key] || []).length;
+        let badge = document.createElement("span");
+        badge.className = "slot-badge " + (count > 0 ? "ok" : "empty");
+        badge.textContent = count;
+        item.appendChild(badge);
+
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          activeSlot = key;
+          exitLayerMode();
+          renderNav();
+          renderPool();
+          document.getElementById("center-footer").style.display = "flex";
+        });
+
+        return item;
+      }
+
+      /* ========== CENTER POOL ========== */
+      function renderPool() {
+        let $title = document.getElementById("slot-title");
+        let $count = document.getElementById("slot-count");
+        let $grid = document.getElementById("pool-grid");
+        let $empty = document.getElementById("pool-empty");
+
+        $grid.textContent = "";
+
+        if (!activeSlot) {
+          $title.textContent = "Select a slot";
+          $count.textContent = "";
+          $empty.style.display = "block";
+          $empty.textContent = "Select a slot from the left panel to begin.";
+          $grid.appendChild($empty);
+          document.getElementById("center-footer").style.display = "none";
+          return;
+        }
+
+        $title.textContent = activeSlot;
+        let pool = getPool(activeSlot);
+        $count.textContent = pool.length + " sprite(s)";
+
+        if (pool.length === 0) {
+          $empty.style.display = "block";
+          $empty.textContent =
+            "No sprites assigned. Use the browser on the right to add sprites.";
+          $grid.appendChild($empty);
+          return;
+        }
+
+        $empty.style.display = "none";
+
+        for (let i = 0; i < pool.length; i++) {
+          let entry = pool[i];
+          let card = document.createElement("div");
+          card.className = "pool-card";
+          if (entry.uniqueOnly) card.classList.add("unique");
+
+          // Remove button
+          let rm = document.createElement("span");
+          rm.className = "pool-remove";
+          rm.textContent = "\u00D7";
+          rm.addEventListener("click", () => {
+            pool.splice(i, 1);
+            setPool(activeSlot, pool);
+            renderNav();
+            renderPool();
+          });
+          card.appendChild(rm);
+
+          // Composite preview
+          let preview = document.createElement("div");
+          preview.className = "pool-preview";
+          for (let cls of entry.layers) {
+            let box = document.createElement("div");
+            box.className = "sprite-box " + cls;
+            preview.appendChild(box);
+          }
+          card.appendChild(preview);
+
+          // Layer thumbs
+          let layersDiv = document.createElement("div");
+          layersDiv.className = "pool-layers";
+          for (let li = 0; li < entry.layers.length; li++) {
+            let thumb = document.createElement("div");
+            thumb.className = "layer-thumb";
+            thumb.draggable = true;
+            thumb.dataset.idx = li;
+            thumb.dataset.card = i;
+
+            let box = document.createElement("div");
+            box.className = "sprite-box " + entry.layers[li];
+            thumb.appendChild(box);
+
+            // Drag events for reorder
+            thumb.addEventListener("dragstart", (e) => {
+              thumb.classList.add("dragging");
+              e.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify({ card: i, layer: li }),
+              );
+            });
+            thumb.addEventListener("dragend", () =>
+              thumb.classList.remove("dragging"),
+            );
+            thumb.addEventListener("dragover", (e) => {
+              e.preventDefault();
+              thumb.classList.add("drag-over");
+            });
+            thumb.addEventListener("dragleave", () =>
+              thumb.classList.remove("drag-over"),
+            );
+            thumb.addEventListener("drop", (e) => {
+              e.preventDefault();
+              thumb.classList.remove("drag-over");
+              let src = JSON.parse(e.dataTransfer.getData("text/plain"));
+              if (src.card !== i) return;
+              let arr = entry.layers;
+              let moved = arr.splice(src.layer, 1)[0];
+              arr.splice(li, 0, moved);
+              setPool(activeSlot, pool);
+              renderPool();
+            });
+
+            layersDiv.appendChild(thumb);
+          }
+          card.appendChild(layersDiv);
+
+          // Unique checkbox
+          let uWrap = document.createElement("label");
+          uWrap.className = "pool-unique-wrap";
+          let uCheck = document.createElement("input");
+          uCheck.type = "checkbox";
+          uCheck.checked = entry.uniqueOnly;
+          uCheck.addEventListener("change", () => {
+            entry.uniqueOnly = uCheck.checked;
+            setPool(activeSlot, pool);
+            renderPool();
+          });
+          uWrap.appendChild(uCheck);
+          let uLbl = document.createElement("span");
+          uLbl.className = entry.uniqueOnly ? "pool-unique-lbl" : "";
+          uLbl.textContent = "Unique Only";
+          uWrap.appendChild(uLbl);
+          card.appendChild(uWrap);
+
+          // Actions
+          let acts = document.createElement("div");
+          acts.className = "pool-actions";
+
+          let addLayerBtn = document.createElement("button");
+          addLayerBtn.className = "btn btn-dim";
+          addLayerBtn.textContent = "Add Layer";
+          addLayerBtn.addEventListener("click", () => enterLayerMode(i));
+          acts.appendChild(addLayerBtn);
+
+          // Remove last layer if > 1
+          if (entry.layers.length > 1) {
+            let rmLayer = document.createElement("button");
+            rmLayer.className = "btn btn-danger";
+            rmLayer.textContent = "- Layer";
+            rmLayer.addEventListener("click", () => {
+              entry.layers.pop();
+              setPool(activeSlot, pool);
+              renderPool();
+            });
+            acts.appendChild(rmLayer);
+          }
+
+          card.appendChild(acts);
+          $grid.appendChild(card);
+        }
+      }
+
+      /* ========== LAYER MODE ========== */
+      function enterLayerMode(cardIdx) {
+        layerMode = { cardIdx };
+        document.getElementById("right").classList.add("layer-mode");
+        renderPool();
+      }
+
+      function exitLayerMode() {
+        layerMode = null;
+        document.getElementById("right").classList.remove("layer-mode");
+      }
+
+      document
+        .getElementById("btn-layer-done")
+        .addEventListener("click", () => {
+          exitLayerMode();
+          renderPool();
+        });
+
+      /* ========== RIGHT BROWSER ========== */
+      function buildBrowseTabs() {
+        let $tabs = document.getElementById("browse-tabs");
+        $tabs.textContent = "";
+        for (let s of SHEETS) {
+          let tab = document.createElement("div");
+          tab.className = "browse-tab" + (s === browseSheet ? " active" : "");
+          tab.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+          tab.addEventListener("click", () => {
+            browseSheet = s;
+            buildBrowseTabs();
+            renderBrowser();
+          });
+          $tabs.appendChild(tab);
+        }
+      }
+
+      document
+        .getElementById("browse-search")
+        .addEventListener("input", (e) => {
+          browseSearch = e.target.value.toLowerCase();
+          renderBrowser();
+        });
+
+      function renderBrowser() {
+        let $grid = document.getElementById("browse-grid");
+        $grid.textContent = "";
+        let sheet = manifest[browseSheet];
+        if (!sheet) return;
+
+        let sprites = sheet.sprites;
+        if (browseSearch) {
+          sprites = sprites.filter((s) =>
+            s.className.toLowerCase().includes(browseSearch),
+          );
+        }
+
+        let frag = document.createDocumentFragment();
+        for (let sp of sprites) {
+          let card = document.createElement("div");
+          card.className = "browse-card";
+
+          let box = document.createElement("div");
+          box.className = "sprite-box " + sp.className;
+          card.appendChild(box);
+
+          let lbl = document.createElement("div");
+          lbl.className = "browse-lbl";
+          lbl.textContent = sp.className;
+          card.appendChild(lbl);
+
+          card.addEventListener("click", () => onBrowseClick(sp.className));
+          frag.appendChild(card);
+        }
+        $grid.appendChild(frag);
+      }
+
+      function onBrowseClick(className) {
+        if (!activeSlot) {
+          toast("Select a slot first");
+          return;
+        }
+
+        let pool = getPool(activeSlot);
+
+        if (layerMode) {
+          // Add as layer to the specific card
+          let entry = pool[layerMode.cardIdx];
+          if (entry) {
+            entry.layers.push(className);
+            setPool(activeSlot, pool);
+            renderPool();
+            toast("Layer added: " + className);
+          }
+        } else {
+          // Add new sprite entry
+          pool.push({ layers: [className], uniqueOnly: false });
+          setPool(activeSlot, pool);
+          renderNav();
+          renderPool();
+          toast("Added: " + className);
+        }
+      }
+
+      document
+        .getElementById("btn-add-sprites")
+        .addEventListener("click", () => {
+          exitLayerMode();
+          document.getElementById("browse-search").focus();
+        });
+
+      /* ========== SAVE / LOAD ========== */
+      document.getElementById("btn-download").addEventListener("click", () => {
+        let blob = new Blob([JSON.stringify(config, null, 2)], {
+          type: "application/json",
+        });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "sprite-slots.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast("Config downloaded");
+      });
+
+      document.getElementById("btn-load").addEventListener("click", () => {
+        document.getElementById("file-input").click();
+      });
+
+      document.getElementById("file-input").addEventListener("change", (e) => {
+        let file = e.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            let data = JSON.parse(ev.target.result);
+            load(data);
+            toast("Config loaded");
+          } catch (err) {
+            toast("Invalid JSON file");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      });
+
+      /* ========== INIT ========== */
+      // Load from localStorage
+      try {
+        let stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) config = JSON.parse(stored);
+      } catch (e) {
+        config = {};
+      }
+
+      // Fetch manifest and boot
+      fetch("sprites-manifest.json")
+        .then((r) => r.json())
+        .then((data) => {
+          manifest = data;
+          buildBrowseTabs();
+          renderBrowser();
+          renderNav();
+          updateProgress();
+          renderPool();
+        })
+        .catch((err) => {
+          document.getElementById("browse-grid").textContent = "";
+          let msg = document.createElement("div");
+          msg.style.cssText =
+            "padding:20px;color:#c44;font-size:12px;text-align:center";
+          msg.textContent = "Failed to load manifest: " + err.message;
+          document.getElementById("browse-grid").appendChild(msg);
+        });
+    </script>
+  </body>
+</html>
