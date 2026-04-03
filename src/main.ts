@@ -1055,7 +1055,7 @@ function switchScreen(state: GameState): void {
             "mine",
             1,
             Date.now(),
-            false,
+            true,
             true,
             result.difficulty,
           );
@@ -1347,7 +1347,7 @@ function switchScreen(state: GameState): void {
             "mine",
             1,
             Date.now(),
-            false,
+            true,
             true,
             nextDifficulty,
           );
