@@ -1082,7 +1082,7 @@ function switchScreen(state: GameState): void {
             hero,
             difficulty: result.difficulty,
             currentDungeon: "town",
-            currentFloor: 1,
+            currentFloor: 0,
             floors: { "mine-1": dungeonFloor, "town-0": townFloor },
             town: {
               id: "hamlet",
@@ -1356,7 +1356,7 @@ function switchScreen(state: GameState): void {
             ...s,
             screen: "game",
             currentDungeon: "town",
-            currentFloor: 1,
+            currentFloor: 0,
             floors: { "mine-1": dungeonFloor, "town-0": townFloor },
             difficulty: nextDifficulty,
             ngPlusCount: ngCount,

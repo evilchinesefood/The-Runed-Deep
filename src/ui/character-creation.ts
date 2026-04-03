@@ -91,7 +91,7 @@ export function createCharacterCreationScreen(
       state.gender = g;
       genderBtns.querySelectorAll("button").forEach((b) => {
         const bb = b as HTMLButtonElement;
-        bb.style.cssText = `padding:6px 14px;font-size:13px;border:1px solid #555;cursor:pointer;${bb.dataset.gender === g ? "background:#446;color:#aaf;" : "background:#222;color:#888;"}`;
+        bb.style.cssText = `padding:6px 14px;font-size:13px;font-weight:bold;border:2px solid #555;border-bottom:3px solid #333;border-radius:4px;cursor:pointer;letter-spacing:0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.8);${bb.dataset.gender === g ? "background:linear-gradient(180deg,#3a3020,#2a2010,#1a1508);color:#ffd700;border-color:#7a6530;" : "background:linear-gradient(180deg,#4a4a4a,#2a2a2a,#1a1a1a);color:#c9a84c;"}`;
       });
     });
     genderBtns.appendChild(btn);
@@ -118,8 +118,14 @@ export function createCharacterCreationScreen(
     let interval: number | null = null;
     let timeout: number | null = null;
     const stop = () => {
-      if (timeout) { clearTimeout(timeout); timeout = null; }
-      if (interval) { clearInterval(interval); interval = null; }
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
     };
     const start = () => {
       action();
@@ -128,7 +134,10 @@ export function createCharacterCreationScreen(
       }, 300);
     };
     btn.addEventListener("mousedown", start);
-    btn.addEventListener("touchstart", (e) => { e.preventDefault(); start(); });
+    btn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      start();
+    });
     btn.addEventListener("mouseup", stop);
     btn.addEventListener("mouseleave", stop);
     btn.addEventListener("touchend", stop);
