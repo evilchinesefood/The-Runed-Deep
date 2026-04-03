@@ -1280,8 +1280,21 @@ function switchScreen(state: GameState): void {
 
     case "map": {
       input.setEnabled(false);
-      const mapScreen = createMapScreen(gameLoop.getState(), () =>
-        gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+      const mapScreen = createMapScreen(
+        gameLoop.getState(),
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+        (target) => {
+          // Click-to-move from map: close map, then pathfind to target
+          const s = gameLoop.getState();
+          const fk = `${s.currentDungeon}-${s.currentFloor}`;
+          const fl = s.floors[fk];
+          if (!fl) return;
+          const path = findPath(fl, s.hero.position, target, 50, heroCanLevitate(s));
+          if (path.length > 0) {
+            autoPath = path;
+            stepAutoPath();
+          }
+        },
       );
       addScreenCleanup(mapScreen.cleanup);
       root.appendChild(mapScreen);

@@ -23,6 +23,7 @@ const TILE_COLORS: Record<string, string> = {
 export function createMapScreen(
   state: GameState,
   onClose: () => void,
+  onClickTile?: (target: { x: number; y: number }) => void,
 ): HTMLElement & { cleanup: () => void } {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
@@ -126,6 +127,25 @@ export function createMapScreen(
   ctx.strokeStyle = "#fff";
   ctx.lineWidth = 1;
   ctx.strokeRect(hx * CELL, hy * CELL, CELL, CELL);
+
+  // Click-to-move: click a tile on the map to walk there
+  if (onClickTile) {
+    canvas.style.cursor = "pointer";
+    canvas.addEventListener("click", (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const tileX = Math.floor((e.clientX - rect.left) * scaleX / CELL);
+      const tileY = Math.floor((e.clientY - rect.top) * scaleY / CELL);
+      if (tileX >= 0 && tileX < floor.width && tileY >= 0 && tileY < floor.height) {
+        if (floor.explored[tileY][tileX] && floor.tiles[tileY][tileX].walkable) {
+          cleanup();
+          onClose();
+          onClickTile({ x: tileX, y: tileY });
+        }
+      }
+    });
+  }
 
   // Legend
   const legend = el("div", {
