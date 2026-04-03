@@ -19607,11 +19607,27 @@
       "source": "monsters.css"
     },
     {
+      "cls": "male-hero",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "female-hero",
+      "source": "monsters.css"
+    },
+    {
       "cls": "giant-rat",
       "source": "monsters.css"
     },
     {
+      "cls": "kobold",
+      "source": "monsters.css"
+    },
+    {
       "cls": "large-snake",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "giant-red-ant",
       "source": "monsters.css"
     },
     {
@@ -19627,7 +19643,15 @@
       "source": "monsters.css"
     },
     {
+      "cls": "giant-trapdoor-spider",
+      "source": "monsters.css"
+    },
+    {
       "cls": "viper",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "carrion-creeper",
       "source": "monsters.css"
     },
     {
@@ -19636,6 +19660,10 @@
     },
     {
       "cls": "giant-scorpion",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "walking-corpse",
       "source": "monsters.css"
     },
     {
@@ -19648,6 +19676,10 @@
     },
     {
       "cls": "hobgoblin",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "shadow",
       "source": "monsters.css"
     },
     {
@@ -19743,6 +19775,10 @@
       "source": "monsters.css"
     },
     {
+      "cls": "bull-man",
+      "source": "monsters.css"
+    },
+    {
       "cls": "hill-giant",
       "source": "monsters.css"
     },
@@ -19776,6 +19812,10 @@
     },
     {
       "cls": "spiked-devil",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "ice-elemental",
       "source": "monsters.css"
     },
     {
@@ -19911,6 +19951,10 @@
       "source": "monsters.css"
     },
     {
+      "cls": "shadow-fiend",
+      "source": "monsters.css"
+    },
+    {
       "cls": "green-death",
       "source": "monsters.css"
     },
@@ -19924,6 +19968,10 @@
     },
     {
       "cls": "efreet",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "hell-beast",
       "source": "monsters.css"
     },
     {
@@ -19944,6 +19992,10 @@
     },
     {
       "cls": "crimson-imp",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "quasit",
       "source": "monsters.css"
     },
     {
@@ -19983,6 +20035,10 @@
       "source": "monsters.css"
     },
     {
+      "cls": "guardian-golem",
+      "source": "monsters.css"
+    },
+    {
       "cls": "iron-elemental",
       "source": "monsters.css"
     },
@@ -20015,7 +20071,15 @@
       "source": "monsters.css"
     },
     {
+      "cls": "queen-ant",
+      "source": "monsters.css"
+    },
+    {
       "cls": "killer-bee",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "soldier-ant",
       "source": "monsters.css"
     },
     {
@@ -20040,6 +20104,10 @@
     },
     {
       "cls": "dire-elephant",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "death-ooze",
       "source": "monsters.css"
     },
     {
@@ -20075,6 +20143,10 @@
       "source": "monsters.css"
     },
     {
+      "cls": "giant-eyeball",
+      "source": "monsters.css"
+    },
+    {
       "cls": "treant",
       "source": "monsters.css"
     },
@@ -20104,6 +20176,10 @@
     },
     {
       "cls": "electric-eel",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "shark",
       "source": "monsters.css"
     },
     {
@@ -20180,6 +20256,14 @@
     },
     {
       "cls": "blood-saint",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "black-sun",
+      "source": "monsters.css"
+    },
+    {
+      "cls": "chaos-champion",
       "source": "monsters.css"
     },
     {
@@ -20267,6 +20351,10 @@
       "source": "items.css"
     },
     {
+      "cls": "wand-of-fire-ball",
+      "source": "items.css"
+    },
+    {
       "cls": "wand-of-lightning-ball",
       "source": "items.css"
     },
@@ -20283,11 +20371,47 @@
       "source": "items.css"
     },
     {
+      "cls": "wand-of-cold-ball",
+      "source": "items.css"
+    },
+    {
+      "cls": "wand-of-cold-bolt",
+      "source": "items.css"
+    },
+    {
       "cls": "wand-of-fire-bolt",
       "source": "items.css"
     },
     {
       "cls": "wand-of-lightning",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-resist-fire",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-resist-lightning",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-resist-cold",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-resist-drain",
       "source": "items.css"
     },
     {
@@ -20351,6 +20475,18 @@
       "source": "items.css"
     },
     {
+      "cls": "metal-shield",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-shield-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "metal-shield-enchanted",
+      "source": "items.css"
+    },
+    {
       "cls": "wood-shield",
       "source": "items.css"
     },
@@ -20391,31 +20527,7 @@
       "source": "items.css"
     },
     {
-      "cls": "bracers",
-      "source": "items.css"
-    },
-    {
-      "cls": "bracers-cursed",
-      "source": "items.css"
-    },
-    {
-      "cls": "bracers-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "gauntlet",
-      "source": "items.css"
-    },
-    {
       "cls": "gauntlet-cursed",
-      "source": "items.css"
-    },
-    {
-      "cls": "gauntlet-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "gauntlet-of-slaying",
       "source": "items.css"
     },
     {
@@ -20431,27 +20543,31 @@
       "source": "items.css"
     },
     {
+      "cls": "boots",
+      "source": "items.css"
+    },
+    {
+      "cls": "boots-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "boots-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "boots-of-speed",
+      "source": "items.css"
+    },
+    {
+      "cls": "boots-of-levitation",
+      "source": "items.css"
+    },
+    {
       "cls": "ring",
       "source": "items.css"
     },
     {
       "cls": "ring-cursed",
-      "source": "items.css"
-    },
-    {
-      "cls": "ring-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "pack",
-      "source": "items.css"
-    },
-    {
-      "cls": "pack-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "pack-cursed",
       "source": "items.css"
     },
     {
@@ -20475,34 +20591,6 @@
       "source": "items.css"
     },
     {
-      "cls": "belt",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-wand-quiver",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-wand-quiver-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-wand-quiver-cursed",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-enchanted",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-cursed",
-      "source": "items.css"
-    },
-    {
-      "cls": "belt-utility",
-      "source": "items.css"
-    },
-    {
       "cls": "parchment",
       "source": "items.css"
     },
@@ -20511,7 +20599,11 @@
       "source": "items.css"
     },
     {
-      "cls": "apple",
+      "cls": "elemental-portal",
+      "source": "items.css"
+    },
+    {
+      "cls": "amulet-of-kings",
       "source": "items.css"
     },
     {
@@ -20559,19 +20651,11 @@
       "source": "items.css"
     },
     {
-      "cls": "broken-gauntlet",
-      "source": "items.css"
-    },
-    {
-      "cls": "broken-bracer",
-      "source": "items.css"
-    },
-    {
       "cls": "broken-cloak",
       "source": "items.css"
     },
     {
-      "cls": "broken-pack",
+      "cls": "broken-boot",
       "source": "items.css"
     },
     {
@@ -20611,15 +20695,135 @@
       "source": "items.css"
     },
     {
+      "cls": "dagger",
+      "source": "items.css"
+    },
+    {
+      "cls": "dagger-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-sword",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-two-handed-sword",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-leather",
+      "source": "items.css"
+    },
+    {
+      "cls": "belt-leather-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-small",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-large",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "purse-leather",
+      "source": "items.css"
+    },
+    {
+      "cls": "purse-leather-enchanted",
+      "source": "items.css"
+    },
+    {
+      "cls": "purse-leather-cursed",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-broken",
+      "source": "items.css"
+    },
+    {
+      "cls": "elven-chain-mail",
+      "source": "items.css"
+    },
+    {
+      "cls": "elven-cloak",
+      "source": "items.css"
+    },
+    {
+      "cls": "gloves-leather",
+      "source": "items.css"
+    },
+    {
+      "cls": "gloves-iron",
+      "source": "items.css"
+    },
+    {
+      "cls": "gloves-elven",
+      "source": "items.css"
+    },
+    {
+      "cls": "gloves-meteoric",
+      "source": "items.css"
+    },
+    {
+      "cls": "elven-belt",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-belt",
+      "source": "items.css"
+    },
+    {
+      "cls": "elven-ring",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-ring",
+      "source": "items.css"
+    },
+    {
+      "cls": "elven-amulet",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-amulet",
+      "source": "items.css"
+    },
+    {
+      "cls": "meteoric-cloak",
+      "source": "items.css"
+    },
+    {
+      "cls": "scroll-identify",
+      "source": "items.css"
+    },
+    {
+      "cls": "scroll-teleport",
+      "source": "items.css"
+    },
+    {
+      "cls": "scroll-return",
+      "source": "items.css"
+    },
+    {
+      "cls": "backpack-elven",
+      "source": "items.css"
+    },
+    {
       "cls": "tile",
       "source": "tiles.css"
     },
     {
       "cls": "rock",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "path-rock",
       "source": "tiles.css"
     },
     {
@@ -20639,27 +20843,11 @@
       "source": "tiles.css"
     },
     {
-      "cls": "favicon",
-      "source": "tiles.css"
-    },
-    {
       "cls": "grass",
       "source": "tiles.css"
     },
     {
-      "cls": "path-grass",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "destoyed-vege-patch",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "well",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "wagon",
+      "cls": "pillar-stone",
       "source": "tiles.css"
     },
     {
@@ -20667,55 +20855,19 @@
       "source": "tiles.css"
     },
     {
-      "cls": "wall-dark-dgn",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "castle-corner-parapet",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "castle-wall",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "castle-parapet",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "ashes",
-      "source": "tiles.css"
-    },
-    {
       "cls": "water",
       "source": "tiles.css"
     },
     {
-      "cls": "water-grass",
+      "cls": "altar",
       "source": "tiles.css"
     },
     {
-      "cls": "blue-square",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "fountain",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "status",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "throne",
+      "cls": "statue",
       "source": "tiles.css"
     },
     {
       "cls": "path",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "water-path",
       "source": "tiles.css"
     },
     {
@@ -20727,23 +20879,11 @@
       "source": "tiles.css"
     },
     {
-      "cls": "town-wall-corner",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "town-wall-stop",
-      "source": "tiles.css"
-    },
-    {
       "cls": "town-wall",
       "source": "tiles.css"
     },
     {
       "cls": "lit-dgn",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "wall-lit-dgn",
       "source": "tiles.css"
     },
     {
@@ -20755,43 +20895,15 @@
       "source": "tiles.css"
     },
     {
-      "cls": "door-broken",
+      "cls": "pillar-broken",
       "source": "tiles.css"
     },
     {
-      "cls": "cobweb",
+      "cls": "gold",
       "source": "tiles.css"
     },
     {
-      "cls": "pillar",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "grass10-cave90",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "hex",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "bed",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "table",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "white50-cave50",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "white90-cave10",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "dead-body",
+      "cls": "altar-2",
       "source": "tiles.css"
     },
     {
@@ -20799,11 +20911,7 @@
       "source": "tiles.css"
     },
     {
-      "cls": "stone-coffin-broke",
-      "source": "tiles.css"
-    },
-    {
-      "cls": "trap-door",
+      "cls": "fountain",
       "source": "tiles.css"
     },
     {
@@ -20811,15 +20919,27 @@
       "source": "tiles.css"
     },
     {
+      "cls": "arrow-trap",
+      "source": "tiles.css"
+    },
+    {
       "cls": "portal-trap",
       "source": "tiles.css"
     },
     {
-      "cls": "water-trap",
+      "cls": "wind-trap",
       "source": "tiles.css"
     },
     {
-      "cls": "shell-trap",
+      "cls": "dart-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "cobweb-trap",
+      "source": "tiles.css"
+    },
+    {
+      "cls": "lightning-trap",
       "source": "tiles.css"
     },
     {
@@ -20827,11 +20947,11 @@
       "source": "tiles.css"
     },
     {
-      "cls": "target-trap",
+      "cls": "acid-trap",
       "source": "tiles.css"
     },
     {
-      "cls": "debri-trap",
+      "cls": "target-trap",
       "source": "tiles.css"
     },
     {
@@ -20843,5 +20963,5 @@
       "source": "tiles.css"
     }
   ],
-  "timestamp": "2026-04-03T20:12:12.187Z"
+  "timestamp": "2026-04-03T20:26:43.851Z"
 }

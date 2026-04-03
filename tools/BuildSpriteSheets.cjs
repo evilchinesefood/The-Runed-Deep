@@ -213,77 +213,100 @@ async function buildSheet(category, outputName) {
     cssLines.push(`}`);
   }
 
-  // Build file path → sprite index lookup for legacy mapping
-  const fileToIdx = new Map();
-  for (let i = 0; i < sprites.length; i++) {
-    // Map by relative path from dcss-tiles category dir
-    const rel = path.relative(path.join(SRC_DIR, category), sprites[i].file).replace(/\\/g, '/');
-    fileToIdx.set(rel, i);
-    // Also map by just filename for fuzzy matching
-    fileToIdx.set(sprites[i].name, i);
-  }
-
-  // Load legacy mappings and create aliases
-  const LEGACY_MAP_FILES = {
-    monsters: ['MappingMonsters.json'],
-    item: ['MappingItems.json'],
-    dungeon: ['MappingTiles.json'],
+  // Append legacy sprites from old game sheets
+  const LEGACY_SHEETS = {
+    monsters: { png: 'monsters-legacy.png', css: 'monsters-legacy.css' },
+    item: { png: 'items-legacy.png', css: 'items-legacy.css' },
+    dungeon: { png: 'tiles-legacy.png', css: 'tiles-legacy.css' },
   };
-  const mapFiles = LEGACY_MAP_FILES[category] || [];
+  const legacyInfo = LEGACY_SHEETS[category];
   let legacyCount = 0;
-  const legacyAliases = new Set();
 
-  for (const mf of mapFiles) {
-    const mfPath = path.join(__dirname, mf);
-    if (!fs.existsSync(mfPath)) continue;
-    const mapping = JSON.parse(fs.readFileSync(mfPath, 'utf8'));
+  if (legacyInfo) {
+    // Parse old CSS to get class names and positions
+    const oldCssPath = path.join(CSS_DIR, legacyInfo.css);
+    if (fs.existsSync(oldCssPath)) {
+      const oldCss = fs.readFileSync(oldCssPath, 'utf8');
+      const entries = [...oldCss.matchAll(/^\.([a-zA-Z0-9_-]+)\s*\{[^}]*background:\s*url\([^)]+\)\s*(-?\d+)px\s*(-?\d+)px/gm)];
 
-    cssLines.push(`/* --- Legacy aliases --- */`);
-    for (const [legacyCls, dcssPath] of Object.entries(mapping)) {
-      if (legacyCls.startsWith('_')) continue;
-      if (legacyAliases.has(legacyCls)) continue;
+      if (entries.length > 0) {
+        // Read old PNG
+        const oldPngPath = path.join(OUT_DIR, 'assets', legacyInfo.png);
+        if (fs.existsSync(oldPngPath)) {
+          const oldImg = sharp(oldPngPath);
+          const oldMeta = await oldImg.metadata();
 
-      // Try to find the DCSS file in our sprite list
-      // dcssPath is like "mon/animals/quokka.png" — remap to new folder structure
-      let searchPath = dcssPath
-        .replace(/^mon\//, '')
-        .replace(/^player\//, '../player/')
-        .replace(/^item\//, '')
-        .replace(/^dngn\//, '');
+          cssLines.push(`/* --- Legacy game sprites --- */`);
+          for (const entry of entries) {
+            const cls = entry[1];
+            const ox = Math.abs(parseInt(entry[2]));
+            const oy = Math.abs(parseInt(entry[3]));
 
-      // Try exact match first
-      let idx = fileToIdx.get(searchPath.replace('.png', ''));
+            // Extract 32x32 tile from old sheet
+            const tileBuf = await sharp(oldPngPath)
+              .extract({ left: ox, top: oy, width: TILE_SIZE, height: TILE_SIZE })
+              .toBuffer();
 
-      // Try just the filename without subfolder
-      if (idx === undefined) {
-        const fname = path.basename(dcssPath, '.png');
-        idx = fileToIdx.get(fname);
-      }
+            // Add to the end of our sprite list
+            const idx = sprites.length + legacyCount;
+            const nx = (idx % COLS) * TILE_SIZE;
+            const ny = Math.floor(idx / COLS) * TILE_SIZE;
 
-      // Try with underscores replaced by hyphens and vice versa
-      if (idx === undefined) {
-        const fname = path.basename(dcssPath, '.png');
-        idx = fileToIdx.get(fname.replace(/-/g, '_'));
-      }
-      if (idx === undefined) {
-        const fname = path.basename(dcssPath, '.png');
-        idx = fileToIdx.get(fname.replace(/_/g, '-'));
-      }
-
-      if (idx !== undefined) {
-        const x = (idx % COLS) * TILE_SIZE;
-        const y = Math.floor(idx / COLS) * TILE_SIZE;
-        cssLines.push(`.${legacyCls} {`);
-        cssLines.push(`    background: url('${assetRef}') -${x}px -${y}px;`);
-        cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
-        cssLines.push(`}`);
-        legacyCount++;
-        legacyAliases.add(legacyCls);
+            cssLines.push(`.${cls} {`);
+            cssLines.push(`    background: url('${assetRef}') -${nx}px -${ny}px;`);
+            cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+            cssLines.push(`}`);
+            legacyCount++;
+          }
+          console.log(`  Found ${legacyCount} legacy sprites to append`);
+        }
       }
     }
   }
+
+  // If we have legacy sprites, rebuild the sheet with extra rows
   if (legacyCount > 0) {
-    console.log(`  Added ${legacyCount} legacy aliases`);
+    const totalSprites = sprites.length + legacyCount;
+    const newRows = Math.ceil(totalSprites / COLS);
+    const newSheetH = newRows * TILE_SIZE;
+
+    // Re-extract legacy tiles
+    const oldPngPath = path.join(OUT_DIR, 'assets', legacyInfo.png);
+    const oldCss = fs.readFileSync(path.join(CSS_DIR, legacyInfo.css), 'utf8');
+    const entries = [...oldCss.matchAll(/^\.([a-zA-Z0-9_-]+)\s*\{[^}]*background:\s*url\([^)]+\)\s*(-?\d+)px\s*(-?\d+)px/gm)];
+
+    const legacyComposites = [];
+    for (let li = 0; li < entries.length; li++) {
+      const ox = Math.abs(parseInt(entries[li][2]));
+      const oy = Math.abs(parseInt(entries[li][3]));
+      const tileBuf = await sharp(oldPngPath)
+        .extract({ left: ox, top: oy, width: TILE_SIZE, height: TILE_SIZE })
+        .toBuffer();
+      const idx = sprites.length + li;
+      legacyComposites.push({
+        input: tileBuf,
+        left: (idx % COLS) * TILE_SIZE,
+        top: Math.floor(idx / COLS) * TILE_SIZE,
+      });
+    }
+
+    // Rebuild sheet with legacy appended
+    const allComposites = [...composites, ...legacyComposites];
+    const newSheet = sharp({
+      create: { width: sheetW, height: newSheetH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    }).composite(allComposites).png({ compressionLevel: 9 });
+
+    await newSheet.toFile(pngPath);
+    const newStat = fs.statSync(pngPath);
+    console.log(`  Rewrote ${pngPath} with legacy (${(newStat.size / 1024).toFixed(0)} KB, ${newRows} rows)`);
+
+    // Update background-size in ALL CSS entries to new height
+    for (let i = 0; i < cssLines.length; i++) {
+      cssLines[i] = cssLines[i].replace(
+        `background-size: ${sheetW}px ${sheetH}px;`,
+        `background-size: ${sheetW}px ${newSheetH}px;`
+      );
+    }
   }
 
   const cssPath = path.join(CSS_DIR, `${outputName}.css`);
