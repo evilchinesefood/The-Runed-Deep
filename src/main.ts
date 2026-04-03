@@ -513,26 +513,25 @@ function stepAutoPath(): void {
     return;
   }
 
-  const next = autoPath[0];
-  const dx = next.x - state.hero.position.x;
-  const dy = next.y - state.hero.position.y;
-
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (floor) {
-    // Stop auto-walk if a monster is adjacent
-    const hasAdjacentMonster = floor.monsters.some((m) => {
-      const mx = Math.abs(m.position.x - state.hero.position.x);
-      const my = Math.abs(m.position.y - state.hero.position.y);
-      return mx <= 1 && my <= 1;
-    });
-    if (hasAdjacentMonster) {
-      aeMsg("Auto-move stopped — monster nearby!");
+    // Stop if any monster is visible
+    const hasVisibleMonster = floor.monsters.some(
+      (m) =>
+        m.hp > 0 &&
+        (floor.visible[m.position.y]?.[m.position.x] ||
+          floor.lit[m.position.y]?.[m.position.x]),
+    );
+    if (hasVisibleMonster) {
+      aeMsg("Auto-move stopped — monster spotted!");
       autoPath = [];
       return;
     }
 
-    // Stop at locked doors only — closed doors open automatically on move
+    const next = autoPath[0];
+
+    // Stop at locked doors
     const nextTile = floor.tiles[next.y]?.[next.x];
     if (nextTile?.type === "door-locked") {
       aeMsg("Auto-move stopped — locked door ahead.");
@@ -547,7 +546,7 @@ function stepAutoPath(): void {
       return;
     }
 
-    // Stop at valuable items on the ground (ignore junk)
+    // Stop at valuable items on the ground
     const nextHasValuable = floor.items.some(
       (i) =>
         i.position.x === next.x &&
@@ -561,11 +560,23 @@ function stepAutoPath(): void {
     }
   }
 
+  const next = autoPath[0];
+  const dx = next.x - state.hero.position.x;
+  const dy = next.y - state.hero.position.y;
   const direction = dxdyToDirection(dx, dy);
   if (direction) {
     autoPath.shift();
     gameLoop.handleAction({ type: "move", direction });
     playPendingAnimations();
+
+    // Stop if combat happened (monster on the path)
+    const postState = gameLoop.getState();
+    if (postState.hero.hp < state.hero.hp) {
+      aeMsg("Auto-move stopped — taking damage!");
+      autoPath = [];
+      return;
+    }
+
     if (autoPath.length > 0) {
       autoWalkTimer = window.setTimeout(stepAutoPath, 120);
     }
