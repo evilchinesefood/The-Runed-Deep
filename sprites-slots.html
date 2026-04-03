@@ -920,6 +920,7 @@
             setPool(activeSlot, pool);
             renderNav();
             renderPool();
+            renderBrowser();
           });
           card.appendChild(rm);
 
@@ -1070,6 +1071,21 @@
           renderBrowser();
         });
 
+      // Build set of all sprite classes assigned to ANY slot
+      function getAllAssignedSprites() {
+        var assigned = new Set();
+        var keys = allSlotKeys();
+        for (var i = 0; i < keys.length; i++) {
+          var pool = getPool(keys[i]);
+          for (var j = 0; j < pool.length; j++) {
+            for (var k = 0; k < pool[j].layers.length; k++) {
+              assigned.add(pool[j].layers[k]);
+            }
+          }
+        }
+        return assigned;
+      }
+
       function renderBrowser() {
         let $grid = document.getElementById("browse-grid");
         $grid.textContent = "";
@@ -1083,10 +1099,14 @@
           );
         }
 
+        let assigned = getAllAssignedSprites();
         let frag = document.createDocumentFragment();
         for (let sp of sprites) {
           let card = document.createElement("div");
           card.className = "browse-card";
+          if (assigned.has(sp.className)) {
+            card.style.opacity = "0.5";
+          }
 
           let box = document.createElement("div");
           box.className = "sprite-box " + sp.className;
@@ -1118,6 +1138,7 @@
             entry.layers.push(className);
             setPool(activeSlot, pool);
             renderPool();
+            renderBrowser();
             toast("Layer added: " + className);
           }
         } else {
@@ -1126,6 +1147,7 @@
           setPool(activeSlot, pool);
           renderNav();
           renderPool();
+          renderBrowser();
           toast("Added: " + className);
         }
       }
@@ -1162,6 +1184,7 @@
         setPool(activeSlot, pool);
         renderNav();
         renderPool();
+        renderBrowser();
         toast("Added " + sprites.length + " sprites");
       });
 
@@ -1171,6 +1194,7 @@
         setPool(activeSlot, []);
         renderNav();
         renderPool();
+        renderBrowser();
         toast("Pool cleared");
       });
 
