@@ -747,16 +747,22 @@
         let $title = document.getElementById("slot-title");
         let $count = document.getElementById("slot-count");
         let $grid = document.getElementById("pool-grid");
-        let $empty = document.getElementById("pool-empty");
+        if (!$title || !$count || !$grid) return;
 
-        $grid.textContent = "";
+        while ($grid.firstChild) $grid.removeChild($grid.firstChild);
+
+        function showEmpty(msg) {
+          var em = document.createElement("div");
+          em.className = "no-slot-msg";
+          em.style.display = "block";
+          em.textContent = msg;
+          $grid.appendChild(em);
+        }
 
         if (!activeSlot) {
           $title.textContent = "Select a slot";
           $count.textContent = "";
-          $empty.style.display = "block";
-          $empty.textContent = "Select a slot from the left panel to begin.";
-          $grid.appendChild($empty);
+          showEmpty("Select a slot from the left panel to begin.");
           document.getElementById("center-footer").style.display = "none";
           return;
         }
@@ -766,14 +772,9 @@
         $count.textContent = pool.length + " sprite(s)";
 
         if (pool.length === 0) {
-          $empty.style.display = "block";
-          $empty.textContent =
-            "No sprites assigned. Use the browser on the right to add sprites.";
-          $grid.appendChild($empty);
+          showEmpty("No sprites assigned. Use the browser on the right to add sprites.");
           return;
         }
-
-        $empty.style.display = "none";
 
         for (let i = 0; i < pool.length; i++) {
           let entry = pool[i];
