@@ -1105,13 +1105,14 @@ export function createServiceScreen(
     screen.appendChild(bar);
 
     if (buildingId !== "inn") {
-      const goldEl = el("div", {
-        color: "#c90",
-        fontSize: "13px",
-        marginBottom: "8px",
-      });
-      goldEl.textContent = `Gold: ${state.hero.gold}`;
-      screen.appendChild(goldEl);
+      const currencyEl = el("div", { fontSize: "13px", marginBottom: "8px", display: "flex", gap: "12px" });
+      const gLabel = el("span", { color: "#fff" }, "Gold: ");
+      gLabel.appendChild(el("span", { color: "#fc4" }, `\u0024${state.hero.gold}`));
+      currencyEl.appendChild(gLabel);
+      const sLabel = el("span", { color: "#fff" }, "Runes: ");
+      sLabel.appendChild(el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`));
+      currencyEl.appendChild(sLabel);
+      screen.appendChild(currencyEl);
     }
 
     function handleUpdate(next: GameState): void {

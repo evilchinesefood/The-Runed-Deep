@@ -437,12 +437,14 @@ export function createShopScreen(
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
 
-    const copperLine = el(
-      "div",
-      { color: "#c90", fontSize: "13px", marginBottom: "8px" },
-      `\u0024${gold}`,
-    );
-    screen.appendChild(copperLine);
+    const currencyLine = el("div", { fontSize: "13px", marginBottom: "8px", display: "flex", gap: "12px" });
+    const goldLabel = el("span", { color: "#fff" }, "Gold: ");
+    goldLabel.appendChild(el("span", { color: "#fc4" }, `\u0024${gold}`));
+    currencyLine.appendChild(goldLabel);
+    const shardLabel = el("span", { color: "#fff" }, "Runes: ");
+    shardLabel.appendChild(el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`));
+    currencyLine.appendChild(shardLabel);
+    screen.appendChild(currencyLine);
 
     const row = el("div", {
       display: "flex",
