@@ -209,6 +209,7 @@ async function buildSheet(category, outputName) {
 
     cssLines.push(`.${s.className} {`);
     cssLines.push(`    background: url('${assetRef}') -${x}px -${y}px;`);
+    cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
     cssLines.push(`}`);
   }
 

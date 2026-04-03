@@ -8,3350 +8,4461 @@
 /* --- amulet --- */
 .amulet-amethyst {
     background: url('../../assets/items.png') -0px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-azure {
     background: url('../../assets/items.png') -32px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-beryl {
     background: url('../../assets/items.png') -64px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-blue {
     background: url('../../assets/items.png') -96px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-bone {
     background: url('../../assets/items.png') -128px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-brass {
     background: url('../../assets/items.png') -160px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-bronze {
     background: url('../../assets/items.png') -192px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-cabochon {
     background: url('../../assets/items.png') -224px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-cameo {
     background: url('../../assets/items.png') -256px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-citrine {
     background: url('../../assets/items.png') -288px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-cluster {
     background: url('../../assets/items.png') -320px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-copper {
     background: url('../../assets/items.png') -352px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-diamond {
     background: url('../../assets/items.png') -384px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-drop {
     background: url('../../assets/items.png') -416px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-emerald {
     background: url('../../assets/items.png') -448px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-filigree {
     background: url('../../assets/items.png') -480px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-fluorescent {
     background: url('../../assets/items.png') -512px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-garnet {
     background: url('../../assets/items.png') -544px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-golden {
     background: url('../../assets/items.png') -576px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-acrobat {
     background: url('../../assets/items.png') -608px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-alchemy {
     background: url('../../assets/items.png') -640px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-dissipation {
     background: url('../../assets/items.png') -672px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-faith {
     background: url('../../assets/items.png') -704px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-gourmand {
     background: url('../../assets/items.png') -736px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-harm {
     background: url('../../assets/items.png') -768px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-inaccuracy {
     background: url('../../assets/items.png') -800px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-m-regeneration {
     background: url('../../assets/items.png') -832px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-rage {
     background: url('../../assets/items.png') -864px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-reflection {
     background: url('../../assets/items.png') -896px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-regeneration {
     background: url('../../assets/items.png') -928px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-spirit {
     background: url('../../assets/items.png') -960px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-i-wildshape {
     background: url('../../assets/items.png') -992px -0px;
+    background-size: 1024px 1120px;
 }
 .amulet-jade {
     background: url('../../assets/items.png') -0px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-jasper {
     background: url('../../assets/items.png') -32px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-knot {
     background: url('../../assets/items.png') -64px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-lapis_lazuli {
     background: url('../../assets/items.png') -96px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-malachite {
     background: url('../../assets/items.png') -128px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-pearl {
     background: url('../../assets/items.png') -160px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-peridot {
     background: url('../../assets/items.png') -192px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-platinum {
     background: url('../../assets/items.png') -224px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-ruby {
     background: url('../../assets/items.png') -256px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-sapphire {
     background: url('../../assets/items.png') -288px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-scarab {
     background: url('../../assets/items.png') -320px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-silver {
     background: url('../../assets/items.png') -352px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-skull {
     background: url('../../assets/items.png') -384px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-soapstone {
     background: url('../../assets/items.png') -416px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-spider {
     background: url('../../assets/items.png') -448px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-steel {
     background: url('../../assets/items.png') -480px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-sun {
     background: url('../../assets/items.png') -512px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_air {
     background: url('../../assets/items.png') -544px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_amulet_invisibility {
     background: url('../../assets/items.png') -576px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_bloodlust {
     background: url('../../assets/items.png') -608px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_brooch_of_shielding {
     background: url('../../assets/items.png') -640px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_cekugob {
     background: url('../../assets/items.png') -672px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_dreamdust {
     background: url('../../assets/items.png') -704px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_dreamshard {
     background: url('../../assets/items.png') -736px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_elemental_vulnerability {
     background: url('../../assets/items.png') -768px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_finger {
     background: url('../../assets/items.png') -800px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_four_winds {
     background: url('../../assets/items.png') -832px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_hermit_pendant {
     background: url('../../assets/items.png') -864px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-urand_vitality {
     background: url('../../assets/items.png') -896px -32px;
+    background-size: 1024px 1120px;
 }
 .amulet-zirconium {
     background: url('../../assets/items.png') -928px -32px;
+    background-size: 1024px 1120px;
 }
 /* --- armour --- */
 .armour-acid_dragon_armour {
     background: url('../../assets/items.png') -960px -32px;
+    background-size: 1024px 1120px;
 }
 .armour-acid_dragon_armour_art {
     background: url('../../assets/items.png') -992px -32px;
+    background-size: 1024px 1120px;
 }
 .armour-animal_skin1 {
     background: url('../../assets/items.png') -0px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-animal_skin2 {
     background: url('../../assets/items.png') -32px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-animal_skin3 {
     background: url('../../assets/items.png') -64px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-april_boots1 {
     background: url('../../assets/items.png') -96px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-april_boots2 {
     background: url('../../assets/items.png') -128px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-april_hat1 {
     background: url('../../assets/items.png') -160px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-april_hat2 {
     background: url('../../assets/items.png') -192px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-barding1 {
     background: url('../../assets/items.png') -224px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-barding2 {
     background: url('../../assets/items.png') -256px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-barding3 {
     background: url('../../assets/items.png') -288px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots_art1 {
     background: url('../../assets/items.png') -320px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots_art2 {
     background: url('../../assets/items.png') -352px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots_ego1 {
     background: url('../../assets/items.png') -384px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots_ego2 {
     background: url('../../assets/items.png') -416px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots1 {
     background: url('../../assets/items.png') -448px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-boots2 {
     background: url('../../assets/items.png') -480px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-buckler_spriggan {
     background: url('../../assets/items.png') -512px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-buckler1 {
     background: url('../../assets/items.png') -544px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-buckler2 {
     background: url('../../assets/items.png') -576px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-buckler3 {
     background: url('../../assets/items.png') -608px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-cap_jester {
     background: url('../../assets/items.png') -640px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-chain_mail1 {
     background: url('../../assets/items.png') -672px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-chain_mail2 {
     background: url('../../assets/items.png') -704px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-chain_mail3 {
     background: url('../../assets/items.png') -736px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-cloak1_leather {
     background: url('../../assets/items.png') -768px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-cloak2 {
     background: url('../../assets/items.png') -800px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-cloak3 {
     background: url('../../assets/items.png') -832px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-cloak4 {
     background: url('../../assets/items.png') -864px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-crystal_plate {
     background: url('../../assets/items.png') -896px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-crystal_plate2 {
     background: url('../../assets/items.png') -928px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-crystal_plate3 {
     background: url('../../assets/items.png') -960px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-deep_troll_leather {
     background: url('../../assets/items.png') -992px -64px;
+    background-size: 1024px 1120px;
 }
 .armour-elven_leather_helm {
     background: url('../../assets/items.png') -0px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-fire_dragon_armour {
     background: url('../../assets/items.png') -32px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-fire_dragon_armour_art {
     background: url('../../assets/items.png') -64px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-glove1 {
     background: url('../../assets/items.png') -96px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-glove2 {
     background: url('../../assets/items.png') -128px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-glove3 {
     background: url('../../assets/items.png') -160px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-glove4 {
     background: url('../../assets/items.png') -192px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-glove5 {
     background: url('../../assets/items.png') -224px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-golden_dragon_armour {
     background: url('../../assets/items.png') -256px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-golden_dragon_armour_art {
     background: url('../../assets/items.png') -288px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat_archer {
     background: url('../../assets/items.png') -320px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat_archer2 {
     background: url('../../assets/items.png') -352px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat_explorer {
     background: url('../../assets/items.png') -384px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat_explorer2 {
     background: url('../../assets/items.png') -416px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat_wiglaf {
     background: url('../../assets/items.png') -448px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat1 {
     background: url('../../assets/items.png') -480px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat2 {
     background: url('../../assets/items.png') -512px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-hat3 {
     background: url('../../assets/items.png') -544px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_art1 {
     background: url('../../assets/items.png') -576px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_art2 {
     background: url('../../assets/items.png') -608px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_art3 {
     background: url('../../assets/items.png') -640px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_ego1 {
     background: url('../../assets/items.png') -672px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_ego2 {
     background: url('../../assets/items.png') -704px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_ego3 {
     background: url('../../assets/items.png') -736px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet_ego4 {
     background: url('../../assets/items.png') -768px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet1 {
     background: url('../../assets/items.png') -800px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet2 {
     background: url('../../assets/items.png') -832px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet3 {
     background: url('../../assets/items.png') -864px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet4 {
     background: url('../../assets/items.png') -896px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-helmet5 {
     background: url('../../assets/items.png') -928px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-i-air {
     background: url('../../assets/items.png') -960px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-i-archery {
     background: url('../../assets/items.png') -992px -96px;
+    background-size: 1024px 1120px;
 }
 .armour-i-archmagi {
     background: url('../../assets/items.png') -0px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-attunement {
     background: url('../../assets/items.png') -32px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-cloud-immune {
     background: url('../../assets/items.png') -64px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-cold-res {
     background: url('../../assets/items.png') -96px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-command {
     background: url('../../assets/items.png') -128px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-corrosion-res {
     background: url('../../assets/items.png') -160px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-death {
     background: url('../../assets/items.png') -192px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-dexterity {
     background: url('../../assets/items.png') -224px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-earth {
     background: url('../../assets/items.png') -256px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-energy {
     background: url('../../assets/items.png') -288px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-fire {
     background: url('../../assets/items.png') -320px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-fire-res {
     background: url('../../assets/items.png') -352px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-flying {
     background: url('../../assets/items.png') -384px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-glass {
     background: url('../../assets/items.png') -416px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-guile {
     background: url('../../assets/items.png') -448px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-harm {
     background: url('../../assets/items.png') -480px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-hurling {
     background: url('../../assets/items.png') -512px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-ice {
     background: url('../../assets/items.png') -544px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-infusion {
     background: url('../../assets/items.png') -576px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-intelligence {
     background: url('../../assets/items.png') -608px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-invisibility {
     background: url('../../assets/items.png') -640px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-jumping {
     background: url('../../assets/items.png') -672px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-light {
     background: url('../../assets/items.png') -704px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-lunging {
     background: url('../../assets/items.png') -736px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-magic-res {
     background: url('../../assets/items.png') -768px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-mayhem {
     background: url('../../assets/items.png') -800px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-mesmerism {
     background: url('../../assets/items.png') -832px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-parrying {
     background: url('../../assets/items.png') -864px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-poison-res {
     background: url('../../assets/items.png') -896px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-ponderous {
     background: url('../../assets/items.png') -928px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-positive-energy {
     background: url('../../assets/items.png') -960px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-power {
     background: url('../../assets/items.png') -992px -128px;
+    background-size: 1024px 1120px;
 }
 .armour-i-protection {
     background: url('../../assets/items.png') -0px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-rage {
     background: url('../../assets/items.png') -32px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-reflection {
     background: url('../../assets/items.png') -64px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-repulsion {
     background: url('../../assets/items.png') -96px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-resistance {
     background: url('../../assets/items.png') -128px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-resonance {
     background: url('../../assets/items.png') -160px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-running {
     background: url('../../assets/items.png') -192px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-see-invis {
     background: url('../../assets/items.png') -224px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-shadows {
     background: url('../../assets/items.png') -256px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-sniping {
     background: url('../../assets/items.png') -288px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-spirit {
     background: url('../../assets/items.png') -320px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-stardust {
     background: url('../../assets/items.png') -352px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-stealth {
     background: url('../../assets/items.png') -384px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-storms {
     background: url('../../assets/items.png') -416px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-i-strength {
     background: url('../../assets/items.png') -448px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-ice_dragon_armour {
     background: url('../../assets/items.png') -480px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-ice_dragon_armour_art {
     background: url('../../assets/items.png') -512px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-iron_troll_leather {
     background: url('../../assets/items.png') -544px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield_dd {
     background: url('../../assets/items.png') -576px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield_dd_scion {
     background: url('../../assets/items.png') -608px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield_donald {
     background: url('../../assets/items.png') -640px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield1 {
     background: url('../../assets/items.png') -672px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield2 {
     background: url('../../assets/items.png') -704px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-kite_shield3 {
     background: url('../../assets/items.png') -736px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-leather_armour1 {
     background: url('../../assets/items.png') -768px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-leather_armour2 {
     background: url('../../assets/items.png') -800px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-leather_armour3 {
     background: url('../../assets/items.png') -832px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-orb {
     background: url('../../assets/items.png') -864px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-orb_randart1 {
     background: url('../../assets/items.png') -896px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-orb_randart2 {
     background: url('../../assets/items.png') -928px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-orb_randart3 {
     background: url('../../assets/items.png') -960px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-orb_randart4 {
     background: url('../../assets/items.png') -992px -160px;
+    background-size: 1024px 1120px;
 }
 .armour-pearl_dragon_armour {
     background: url('../../assets/items.png') -0px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-pearl_dragon_armour_art {
     background: url('../../assets/items.png') -32px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-plate1 {
     background: url('../../assets/items.png') -64px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-plate2 {
     background: url('../../assets/items.png') -96px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-plate3 {
     background: url('../../assets/items.png') -128px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-quicksilver_dragon_armour {
     background: url('../../assets/items.png') -160px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-quicksilver_dragon_armour_art {
     background: url('../../assets/items.png') -192px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-ring_mail1 {
     background: url('../../assets/items.png') -224px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-ring_mail2 {
     background: url('../../assets/items.png') -256px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-ring_mail3 {
     background: url('../../assets/items.png') -288px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe_art1 {
     background: url('../../assets/items.png') -320px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe_art2 {
     background: url('../../assets/items.png') -352px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe_ego1 {
     background: url('../../assets/items.png') -384px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe_ego2 {
     background: url('../../assets/items.png') -416px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe1 {
     background: url('../../assets/items.png') -448px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-robe2 {
     background: url('../../assets/items.png') -480px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-santa_hat {
     background: url('../../assets/items.png') -512px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scale_mail1 {
     background: url('../../assets/items.png') -544px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scale_mail2 {
     background: url('../../assets/items.png') -576px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scale_mail3 {
     background: url('../../assets/items.png') -608px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scarf1 {
     background: url('../../assets/items.png') -640px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scarf2_1 {
     background: url('../../assets/items.png') -672px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scarf2_2 {
     background: url('../../assets/items.png') -704px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scarf2_3 {
     background: url('../../assets/items.png') -736px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-scarf3 {
     background: url('../../assets/items.png') -768px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-shadow_dragon_armour {
     background: url('../../assets/items.png') -800px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-shadow_dragon_armour_art {
     background: url('../../assets/items.png') -832px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-steam_dragon_armour {
     background: url('../../assets/items.png') -864px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-steam_dragon_armour_art {
     background: url('../../assets/items.png') -896px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-storm_dragon_armour {
     background: url('../../assets/items.png') -928px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-storm_dragon_armour_art {
     background: url('../../assets/items.png') -960px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-swamp_dragon_armour {
     background: url('../../assets/items.png') -992px -192px;
+    background-size: 1024px 1120px;
 }
 .armour-swamp_dragon_armour_art {
     background: url('../../assets/items.png') -0px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-tower_shield_dd_dk {
     background: url('../../assets/items.png') -32px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-tower_shield_louise {
     background: url('../../assets/items.png') -64px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-tower_shield1 {
     background: url('../../assets/items.png') -96px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-tower_shield2 {
     background: url('../../assets/items.png') -128px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-tower_shield3 {
     background: url('../../assets/items.png') -160px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-troll_leather_armour {
     background: url('../../assets/items.png') -192px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-troll_leather_armour_art {
     background: url('../../assets/items.png') -224px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_alchemist {
     background: url('../../assets/items.png') -256px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_assassin {
     background: url('../../assets/items.png') -288px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_augmentation {
     background: url('../../assets/items.png') -320px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_battle {
     background: url('../../assets/items.png') -352px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_bear {
     background: url('../../assets/items.png') -384px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_bk_barding {
     background: url('../../assets/items.png') -416px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_bullseye {
     background: url('../../assets/items.png') -448px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_charlatan {
     background: url('../../assets/items.png') -480px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_cigotuvi {
     background: url('../../assets/items.png') -512px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_clouds {
     background: url('../../assets/items.png') -544px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_crown_of_vainglory {
     background: url('../../assets/items.png') -576px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_delatra {
     background: url('../../assets/items.png') -608px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_dispater {
     background: url('../../assets/items.png') -640px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_dragon_king {
     background: url('../../assets/items.png') -672px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_dragonmask {
     background: url('../../assets/items.png') -704px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_dragonskin {
     background: url('../../assets/items.png') -736px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_dyrovepreva {
     background: url('../../assets/items.png') -768px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_eternal_torment {
     background: url('../../assets/items.png') -800px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_etheric_cage {
     background: url('../../assets/items.png') -832px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_faerie {
     background: url('../../assets/items.png') -864px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_fencer {
     background: url('../../assets/items.png') -896px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_flash {
     background: url('../../assets/items.png') -928px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_folly {
     background: url('../../assets/items.png') -960px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_fungal_fisticloak {
     background: url('../../assets/items.png') -992px -224px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_gadgeteer {
     background: url('../../assets/items.png') -0px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_gong {
     background: url('../../assets/items.png') -32px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_high_council {
     background: url('../../assets/items.png') -64px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_hood_assassin {
     background: url('../../assets/items.png') -96px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_ignorance {
     background: url('../../assets/items.png') -128px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_justicars_regalia {
     background: url('../../assets/items.png') -160px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_kryias {
     background: url('../../assets/items.png') -192px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_lear {
     background: url('../../assets/items.png') -224px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_lightning_scales {
     background: url('../../assets/items.png') -256px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_maxwell {
     background: url('../../assets/items.png') -288px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_misfortune {
     background: url('../../assets/items.png') -320px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_moon_troll_leather_armour {
     background: url('../../assets/items.png') -352px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_mountain {
     background: url('../../assets/items.png') -384px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_night {
     background: url('../../assets/items.png') -416px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_orange_crystal {
     background: url('../../assets/items.png') -448px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_pondering {
     background: url('../../assets/items.png') -480px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_power_gloves {
     background: url('../../assets/items.png') -512px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_ratskin_cloak {
     background: url('../../assets/items.png') -544px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_resistance {
     background: url('../../assets/items.png') -576px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_salamander {
     background: url('../../assets/items.png') -608px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_scarf_invisibility {
     background: url('../../assets/items.png') -640px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_seven_league_boots {
     background: url('../../assets/items.png') -672px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_skull_of_zonguldrok {
     background: url('../../assets/items.png') -704px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_slippers {
     background: url('../../assets/items.png') -736px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_spider {
     background: url('../../assets/items.png') -768px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_starlight {
     background: url('../../assets/items.png') -800px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_storm_queen {
     background: url('../../assets/items.png') -832px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_talos {
     background: url('../../assets/items.png') -864px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_thief {
     background: url('../../assets/items.png') -896px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_victor {
     background: url('../../assets/items.png') -928px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_vines {
     background: url('../../assets/items.png') -960px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_war {
     background: url('../../assets/items.png') -992px -256px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_warlock {
     background: url('../../assets/items.png') -0px -288px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_wucad_mu {
     background: url('../../assets/items.png') -32px -288px;
+    background-size: 1024px 1120px;
 }
 .armour-urand_zhor {
     background: url('../../assets/items.png') -64px -288px;
+    background-size: 1024px 1120px;
 }
 .armour-wizard_hat {
     background: url('../../assets/items.png') -96px -288px;
+    background-size: 1024px 1120px;
 }
 /* --- book --- */
 .book-book_of_the_dead {
     background: url('../../assets/items.png') -128px -288px;
+    background-size: 1024px 1120px;
 }
 .book-bookmark {
     background: url('../../assets/items.png') -160px -288px;
+    background-size: 1024px 1120px;
 }
 .book-bronze {
     background: url('../../assets/items.png') -192px -288px;
+    background-size: 1024px 1120px;
 }
 .book-buckle {
     background: url('../../assets/items.png') -224px -288px;
+    background-size: 1024px 1120px;
 }
 .book-cloth {
     background: url('../../assets/items.png') -256px -288px;
+    background-size: 1024px 1120px;
 }
 .book-copper {
     background: url('../../assets/items.png') -288px -288px;
+    background-size: 1024px 1120px;
 }
 .book-cyan {
     background: url('../../assets/items.png') -320px -288px;
+    background-size: 1024px 1120px;
 }
 .book-dark_blue {
     background: url('../../assets/items.png') -352px -288px;
+    background-size: 1024px 1120px;
 }
 .book-dark_brown {
     background: url('../../assets/items.png') -384px -288px;
+    background-size: 1024px 1120px;
 }
 .book-dark_gray {
     background: url('../../assets/items.png') -416px -288px;
+    background-size: 1024px 1120px;
 }
 .book-dark_green {
     background: url('../../assets/items.png') -448px -288px;
+    background-size: 1024px 1120px;
 }
 .book-gold {
     background: url('../../assets/items.png') -480px -288px;
+    background-size: 1024px 1120px;
 }
 .book-leather {
     background: url('../../assets/items.png') -512px -288px;
+    background-size: 1024px 1120px;
 }
 .book-light_blue {
     background: url('../../assets/items.png') -544px -288px;
+    background-size: 1024px 1120px;
 }
 .book-light_brown {
     background: url('../../assets/items.png') -576px -288px;
+    background-size: 1024px 1120px;
 }
 .book-light_gray {
     background: url('../../assets/items.png') -608px -288px;
+    background-size: 1024px 1120px;
 }
 .book-light_green {
     background: url('../../assets/items.png') -640px -288px;
+    background-size: 1024px 1120px;
 }
 .book-magenta {
     background: url('../../assets/items.png') -672px -288px;
+    background-size: 1024px 1120px;
 }
 .book-manual1 {
     background: url('../../assets/items.png') -704px -288px;
+    background-size: 1024px 1120px;
 }
 .book-manual2 {
     background: url('../../assets/items.png') -736px -288px;
+    background-size: 1024px 1120px;
 }
 .book-metal_blue {
     background: url('../../assets/items.png') -768px -288px;
+    background-size: 1024px 1120px;
 }
 .book-metal_cyan {
     background: url('../../assets/items.png') -800px -288px;
+    background-size: 1024px 1120px;
 }
 .book-metal_green {
     background: url('../../assets/items.png') -832px -288px;
+    background-size: 1024px 1120px;
 }
 .book-parchment {
     background: url('../../assets/items.png') -864px -288px;
+    background-size: 1024px 1120px;
 }
 .book-pink {
     background: url('../../assets/items.png') -896px -288px;
+    background-size: 1024px 1120px;
 }
 .book-plaid {
     background: url('../../assets/items.png') -928px -288px;
+    background-size: 1024px 1120px;
 }
 .book-purple {
     background: url('../../assets/items.png') -960px -288px;
+    background-size: 1024px 1120px;
 }
 .book-red {
     background: url('../../assets/items.png') -992px -288px;
+    background-size: 1024px 1120px;
 }
 .book-silver {
     background: url('../../assets/items.png') -0px -320px;
+    background-size: 1024px 1120px;
 }
 .book-tan {
     background: url('../../assets/items.png') -32px -320px;
+    background-size: 1024px 1120px;
 }
 .book-thick {
     background: url('../../assets/items.png') -64px -320px;
+    background-size: 1024px 1120px;
 }
 .book-thin {
     background: url('../../assets/items.png') -96px -320px;
+    background-size: 1024px 1120px;
 }
 .book-turquoise {
     background: url('../../assets/items.png') -128px -320px;
+    background-size: 1024px 1120px;
 }
 .book-vellum {
     background: url('../../assets/items.png') -160px -320px;
+    background-size: 1024px 1120px;
 }
 .book-velvet {
     background: url('../../assets/items.png') -192px -320px;
+    background-size: 1024px 1120px;
 }
 .book-white {
     background: url('../../assets/items.png') -224px -320px;
+    background-size: 1024px 1120px;
 }
 .book-wrinkled {
     background: url('../../assets/items.png') -256px -320px;
+    background-size: 1024px 1120px;
 }
 .book-yellow {
     background: url('../../assets/items.png') -288px -320px;
+    background-size: 1024px 1120px;
 }
 /* --- food --- */
 .food-apple {
     background: url('../../assets/items.png') -320px -320px;
+    background-size: 1024px 1120px;
 }
 .food-apricot {
     background: url('../../assets/items.png') -352px -320px;
+    background-size: 1024px 1120px;
 }
 .food-banana {
     background: url('../../assets/items.png') -384px -320px;
+    background-size: 1024px 1120px;
 }
 .food-beef_jerky {
     background: url('../../assets/items.png') -416px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone_humanoid1 {
     background: url('../../assets/items.png') -448px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone_humanoid2 {
     background: url('../../assets/items.png') -480px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone_humanoid3 {
     background: url('../../assets/items.png') -512px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone_humanoid4 {
     background: url('../../assets/items.png') -544px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone1 {
     background: url('../../assets/items.png') -576px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone2 {
     background: url('../../assets/items.png') -608px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone3 {
     background: url('../../assets/items.png') -640px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bone4 {
     background: url('../../assets/items.png') -672px -320px;
+    background-size: 1024px 1120px;
 }
 .food-bread_ration {
     background: url('../../assets/items.png') -704px -320px;
+    background-size: 1024px 1120px;
 }
 .food-cheese {
     background: url('../../assets/items.png') -736px -320px;
+    background-size: 1024px 1120px;
 }
 .food-choko {
     background: url('../../assets/items.png') -768px -320px;
+    background-size: 1024px 1120px;
 }
 .food-chunk {
     background: url('../../assets/items.png') -800px -320px;
+    background-size: 1024px 1120px;
 }
 .food-chunk_rotten {
     background: url('../../assets/items.png') -832px -320px;
+    background-size: 1024px 1120px;
 }
 .food-fruit {
     background: url('../../assets/items.png') -864px -320px;
+    background-size: 1024px 1120px;
 }
 .food-grape {
     background: url('../../assets/items.png') -896px -320px;
+    background-size: 1024px 1120px;
 }
 .food-honeycomb {
     background: url('../../assets/items.png') -928px -320px;
+    background-size: 1024px 1120px;
 }
 .food-i-decay {
     background: url('../../assets/items.png') -960px -320px;
+    background-size: 1024px 1120px;
 }
 .food-i-forbidden {
     background: url('../../assets/items.png') -992px -320px;
+    background-size: 1024px 1120px;
 }
 .food-i-inedible {
     background: url('../../assets/items.png') -0px -352px;
+    background-size: 1024px 1120px;
 }
 .food-i-poison {
     background: url('../../assets/items.png') -32px -352px;
+    background-size: 1024px 1120px;
 }
 .food-lemon {
     background: url('../../assets/items.png') -64px -352px;
+    background-size: 1024px 1120px;
 }
 .food-meat_ration {
     background: url('../../assets/items.png') -96px -352px;
+    background-size: 1024px 1120px;
 }
 .food-orange {
     background: url('../../assets/items.png') -128px -352px;
+    background-size: 1024px 1120px;
 }
 .food-pear {
     background: url('../../assets/items.png') -160px -352px;
+    background-size: 1024px 1120px;
 }
 .food-pizza {
     background: url('../../assets/items.png') -192px -352px;
+    background-size: 1024px 1120px;
 }
 .food-sausage {
     background: url('../../assets/items.png') -224px -352px;
+    background-size: 1024px 1120px;
 }
 .food-snozzcumber {
     background: url('../../assets/items.png') -256px -352px;
+    background-size: 1024px 1120px;
 }
 .food-strawberry {
     background: url('../../assets/items.png') -288px -352px;
+    background-size: 1024px 1120px;
 }
 /* --- gem --- */
 .gem-crypt_found_broken {
     background: url('../../assets/items.png') -320px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-crypt_found_whole {
     background: url('../../assets/items.png') -352px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-depths_found_broken {
     background: url('../../assets/items.png') -384px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-depths_found_whole {
     background: url('../../assets/items.png') -416px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-dungeon_found_broken {
     background: url('../../assets/items.png') -448px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-dungeon_found_whole {
     background: url('../../assets/items.png') -480px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-elf_found_broken {
     background: url('../../assets/items.png') -512px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-elf_found_whole {
     background: url('../../assets/items.png') -544px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-generic_unfound {
     background: url('../../assets/items.png') -576px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-generic_unfound_broken {
     background: url('../../assets/items.png') -608px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-lair_found_broken {
     background: url('../../assets/items.png') -640px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-lair_found_whole {
     background: url('../../assets/items.png') -672px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-orc_found_broken {
     background: url('../../assets/items.png') -704px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-orc_found_whole {
     background: url('../../assets/items.png') -736px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-shoals_found_broken {
     background: url('../../assets/items.png') -768px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-shoals_found_whole {
     background: url('../../assets/items.png') -800px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-slime_found_broken {
     background: url('../../assets/items.png') -832px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-slime_found_whole {
     background: url('../../assets/items.png') -864px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-snake_found_broken {
     background: url('../../assets/items.png') -896px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-snake_found_whole {
     background: url('../../assets/items.png') -928px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-spider_found_broken {
     background: url('../../assets/items.png') -960px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-spider_found_whole {
     background: url('../../assets/items.png') -992px -352px;
+    background-size: 1024px 1120px;
 }
 .gem-swamp_found_broken {
     background: url('../../assets/items.png') -0px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-swamp_found_whole {
     background: url('../../assets/items.png') -32px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-tomb_found_broken {
     background: url('../../assets/items.png') -64px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-tomb_found_whole {
     background: url('../../assets/items.png') -96px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-vaults_found_broken {
     background: url('../../assets/items.png') -128px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-vaults_found_whole {
     background: url('../../assets/items.png') -160px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-zot_found_broken {
     background: url('../../assets/items.png') -192px -384px;
+    background-size: 1024px 1120px;
 }
 .gem-zot_found_whole {
     background: url('../../assets/items.png') -224px -384px;
+    background-size: 1024px 1120px;
 }
 /* --- gizmo --- */
 .gizmo-gizmo0 {
     background: url('../../assets/items.png') -256px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo1 {
     background: url('../../assets/items.png') -288px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo2 {
     background: url('../../assets/items.png') -320px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo3 {
     background: url('../../assets/items.png') -352px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo4 {
     background: url('../../assets/items.png') -384px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo5 {
     background: url('../../assets/items.png') -416px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo6 {
     background: url('../../assets/items.png') -448px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo7 {
     background: url('../../assets/items.png') -480px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo8 {
     background: url('../../assets/items.png') -512px -384px;
+    background-size: 1024px 1120px;
 }
 .gizmo-gizmo9 {
     background: url('../../assets/items.png') -544px -384px;
+    background-size: 1024px 1120px;
 }
 /* --- gold --- */
 .gold-01 {
     background: url('../../assets/items.png') -576px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-02 {
     background: url('../../assets/items.png') -608px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-03 {
     background: url('../../assets/items.png') -640px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-04 {
     background: url('../../assets/items.png') -672px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-05 {
     background: url('../../assets/items.png') -704px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-06 {
     background: url('../../assets/items.png') -736px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-07 {
     background: url('../../assets/items.png') -768px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-08 {
     background: url('../../assets/items.png') -800px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-09 {
     background: url('../../assets/items.png') -832px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-10 {
     background: url('../../assets/items.png') -864px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-16 {
     background: url('../../assets/items.png') -896px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-19 {
     background: url('../../assets/items.png') -928px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-23 {
     background: url('../../assets/items.png') -960px -384px;
+    background-size: 1024px 1120px;
 }
 .gold-25 {
     background: url('../../assets/items.png') -992px -384px;
+    background-size: 1024px 1120px;
 }
 /* --- misc --- */
 .misc-bauble_flux {
     background: url('../../assets/items.png') -0px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-generic {
     background: url('../../assets/items.png') -32px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-generic {
     background: url('../../assets/items.png') -64px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_bottle {
     background: url('../../assets/items.png') -96px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_box_of_beasts {
     background: url('../../assets/items.png') -128px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_box_of_beasts_inert {
     background: url('../../assets/items.png') -160px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_crystal {
     background: url('../../assets/items.png') -192px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_fan {
     background: url('../../assets/items.png') -224px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_fan_inert {
     background: url('../../assets/items.png') -256px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_horn {
     background: url('../../assets/items.png') -288px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_lamp {
     background: url('../../assets/items.png') -320px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_lamp_inert {
     background: url('../../assets/items.png') -352px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_lantern {
     background: url('../../assets/items.png') -384px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_lightning_rod {
     background: url('../../assets/items.png') -416px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_lightning_rod_inert {
     background: url('../../assets/items.png') -448px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_phantom_mirror {
     background: url('../../assets/items.png') -480px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_phial {
     background: url('../../assets/items.png') -512px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_phial_inert {
     background: url('../../assets/items.png') -544px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_quad {
     background: url('../../assets/items.png') -576px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_sack {
     background: url('../../assets/items.png') -608px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_sack_inert {
     background: url('../../assets/items.png') -640px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_stone {
     background: url('../../assets/items.png') -672px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_stone_inert {
     background: url('../../assets/items.png') -704px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_tambourine {
     background: url('../../assets/items.png') -736px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_tambourine_inert {
     background: url('../../assets/items.png') -768px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_tremorstones {
     background: url('../../assets/items.png') -800px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_tremorstones_inert {
     background: url('../../assets/items.png') -832px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_vane {
     background: url('../../assets/items.png') -864px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_vane_inert {
     background: url('../../assets/items.png') -896px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_voucher {
     background: url('../../assets/items.png') -928px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-misc_zigfig {
     background: url('../../assets/items.png') -960px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-orb_of_zot1 {
     background: url('../../assets/items.png') -992px -416px;
+    background-size: 1024px 1120px;
 }
 .misc-orb_of_zot2 {
     background: url('../../assets/items.png') -0px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-orb_of_zot3 {
     background: url('../../assets/items.png') -32px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-orb_of_zot4 {
     background: url('../../assets/items.png') -64px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-orb_of_zot5 {
     background: url('../../assets/items.png') -96px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_abyss {
     background: url('../../assets/items.png') -128px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_abyss {
     background: url('../../assets/items.png') -160px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_cerebov {
     background: url('../../assets/items.png') -192px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_cerebov {
     background: url('../../assets/items.png') -224px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_cocytus {
     background: url('../../assets/items.png') -256px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_cocytus {
     background: url('../../assets/items.png') -288px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic {
     background: url('../../assets/items.png') -320px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_1 {
     background: url('../../assets/items.png') -352px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_2 {
     background: url('../../assets/items.png') -384px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_3 {
     background: url('../../assets/items.png') -416px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_4 {
     background: url('../../assets/items.png') -448px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_5 {
     background: url('../../assets/items.png') -480px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-rune_demonic_6 {
     background: url('../../assets/items.png') -512px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_dis {
     background: url('../../assets/items.png') -544px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_dis {
     background: url('../../assets/items.png') -576px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_elven {
     background: url('../../assets/items.png') -608px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_elven {
     background: url('../../assets/items.png') -640px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_gehenna {
     background: url('../../assets/items.png') -672px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_gehenna {
     background: url('../../assets/items.png') -704px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_gloorx_vloq {
     background: url('../../assets/items.png') -736px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_gloorx_vloq {
     background: url('../../assets/items.png') -768px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_lom_lobon {
     background: url('../../assets/items.png') -800px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_lom_lobon {
     background: url('../../assets/items.png') -832px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_mnoleg {
     background: url('../../assets/items.png') -864px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_mnoleg {
     background: url('../../assets/items.png') -896px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_shoals {
     background: url('../../assets/items.png') -928px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_shoals {
     background: url('../../assets/items.png') -960px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_slime {
     background: url('../../assets/items.png') -992px -448px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_slime {
     background: url('../../assets/items.png') -0px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_snake {
     background: url('../../assets/items.png') -32px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_snake {
     background: url('../../assets/items.png') -64px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_spider {
     background: url('../../assets/items.png') -96px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_spider {
     background: url('../../assets/items.png') -128px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_swamp {
     background: url('../../assets/items.png') -160px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_swamp {
     background: url('../../assets/items.png') -192px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_tartarus {
     background: url('../../assets/items.png') -224px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_tartarus {
     background: url('../../assets/items.png') -256px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_tomb {
     background: url('../../assets/items.png') -288px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_tomb {
     background: url('../../assets/items.png') -320px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-runes-rune_vaults {
     background: url('../../assets/items.png') -352px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_runes-rune_vaults {
     background: url('../../assets/items.png') -384px -480px;
+    background-size: 1024px 1120px;
 }
 .misc-uncollected_orb {
     background: url('../../assets/items.png') -416px -480px;
+    background-size: 1024px 1120px;
 }
 /* --- parchment --- */
 .parchment-base_parchment_high_level {
     background: url('../../assets/items.png') -448px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-base_parchment_low_level {
     background: url('../../assets/items.png') -480px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-base_parchment_mid_level {
     background: url('../../assets/items.png') -512px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_air {
     background: url('../../assets/items.png') -544px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_air_high {
     background: url('../../assets/items.png') -576px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_alch {
     background: url('../../assets/items.png') -608px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_alch_high {
     background: url('../../assets/items.png') -640px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_conj {
     background: url('../../assets/items.png') -672px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_conj_high {
     background: url('../../assets/items.png') -704px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_earth {
     background: url('../../assets/items.png') -736px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_earth_high {
     background: url('../../assets/items.png') -768px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_fire {
     background: url('../../assets/items.png') -800px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_fire_high {
     background: url('../../assets/items.png') -832px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_forge {
     background: url('../../assets/items.png') -864px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_forge_high {
     background: url('../../assets/items.png') -896px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_hexes {
     background: url('../../assets/items.png') -928px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_hexes_high {
     background: url('../../assets/items.png') -960px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_ice {
     background: url('../../assets/items.png') -992px -480px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_ice_high {
     background: url('../../assets/items.png') -0px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_necro {
     background: url('../../assets/items.png') -32px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_necro_high {
     background: url('../../assets/items.png') -64px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_summ {
     background: url('../../assets/items.png') -96px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_summ_high {
     background: url('../../assets/items.png') -128px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_tloc {
     background: url('../../assets/items.png') -160px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_left_tloc_high {
     background: url('../../assets/items.png') -192px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_air {
     background: url('../../assets/items.png') -224px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_air_high {
     background: url('../../assets/items.png') -256px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_alch {
     background: url('../../assets/items.png') -288px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_alch_high {
     background: url('../../assets/items.png') -320px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_conj {
     background: url('../../assets/items.png') -352px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_conj_high {
     background: url('../../assets/items.png') -384px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_earth {
     background: url('../../assets/items.png') -416px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_earth_high {
     background: url('../../assets/items.png') -448px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_fire {
     background: url('../../assets/items.png') -480px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_fire_high {
     background: url('../../assets/items.png') -512px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_forge {
     background: url('../../assets/items.png') -544px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_forge_high {
     background: url('../../assets/items.png') -576px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_hexes {
     background: url('../../assets/items.png') -608px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_hexes_high {
     background: url('../../assets/items.png') -640px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_ice {
     background: url('../../assets/items.png') -672px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_ice_high {
     background: url('../../assets/items.png') -704px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_necro {
     background: url('../../assets/items.png') -736px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_necro_high {
     background: url('../../assets/items.png') -768px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_summ {
     background: url('../../assets/items.png') -800px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_summ_high {
     background: url('../../assets/items.png') -832px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_tloc {
     background: url('../../assets/items.png') -864px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_multi_right_tloc_high {
     background: url('../../assets/items.png') -896px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_air {
     background: url('../../assets/items.png') -928px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_air_high {
     background: url('../../assets/items.png') -960px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_alch {
     background: url('../../assets/items.png') -992px -512px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_alch_high {
     background: url('../../assets/items.png') -0px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_conj {
     background: url('../../assets/items.png') -32px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_conj_high {
     background: url('../../assets/items.png') -64px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_earth {
     background: url('../../assets/items.png') -96px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_earth_high {
     background: url('../../assets/items.png') -128px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_fire {
     background: url('../../assets/items.png') -160px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_fire_high {
     background: url('../../assets/items.png') -192px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_forge {
     background: url('../../assets/items.png') -224px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_forge_high {
     background: url('../../assets/items.png') -256px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_hexes {
     background: url('../../assets/items.png') -288px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_hexes_high {
     background: url('../../assets/items.png') -320px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_ice {
     background: url('../../assets/items.png') -352px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_ice_high {
     background: url('../../assets/items.png') -384px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_necro {
     background: url('../../assets/items.png') -416px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_necro_high {
     background: url('../../assets/items.png') -448px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_summ {
     background: url('../../assets/items.png') -480px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_summ_high {
     background: url('../../assets/items.png') -512px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_tloc {
     background: url('../../assets/items.png') -544px -544px;
+    background-size: 1024px 1120px;
 }
 .parchment-parchment_single_tloc_high {
     background: url('../../assets/items.png') -576px -544px;
+    background-size: 1024px 1120px;
 }
 /* --- potion --- */
 .potion-black {
     background: url('../../assets/items.png') -608px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-brilliant_blue {
     background: url('../../assets/items.png') -640px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-brown {
     background: url('../../assets/items.png') -672px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-bubbly {
     background: url('../../assets/items.png') -704px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-cloudy {
     background: url('../../assets/items.png') -736px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-cyan {
     background: url('../../assets/items.png') -768px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-dark {
     background: url('../../assets/items.png') -800px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-effervescent {
     background: url('../../assets/items.png') -832px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-emerald {
     background: url('../../assets/items.png') -864px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-fizzy {
     background: url('../../assets/items.png') -896px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-golden {
     background: url('../../assets/items.png') -928px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-i-ambrosia {
     background: url('../../assets/items.png') -960px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-i-attraction {
     background: url('../../assets/items.png') -992px -544px;
+    background-size: 1024px 1120px;
 }
 .potion-i-berserk-rage {
     background: url('../../assets/items.png') -0px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-blood {
     background: url('../../assets/items.png') -32px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-brilliance {
     background: url('../../assets/items.png') -64px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-cancel {
     background: url('../../assets/items.png') -96px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-coagulated-blood {
     background: url('../../assets/items.png') -128px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-confusion {
     background: url('../../assets/items.png') -160px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-cure-mutation {
     background: url('../../assets/items.png') -192px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-curing {
     background: url('../../assets/items.png') -224px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-decay {
     background: url('../../assets/items.png') -256px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-degeneration {
     background: url('../../assets/items.png') -288px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-experience {
     background: url('../../assets/items.png') -320px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-flight {
     background: url('../../assets/items.png') -352px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-gain-dexterity {
     background: url('../../assets/items.png') -384px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-gain-intelligence {
     background: url('../../assets/items.png') -416px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-gain-strength {
     background: url('../../assets/items.png') -448px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-good-mutation {
     background: url('../../assets/items.png') -480px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-haste {
     background: url('../../assets/items.png') -512px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-heal-wounds {
     background: url('../../assets/items.png') -544px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-invisibility {
     background: url('../../assets/items.png') -576px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-label {
     background: url('../../assets/items.png') -608px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-lignify {
     background: url('../../assets/items.png') -640px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-magic {
     background: url('../../assets/items.png') -672px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-might {
     background: url('../../assets/items.png') -704px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-mutation {
     background: url('../../assets/items.png') -736px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-paralysis {
     background: url('../../assets/items.png') -768px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-poison {
     background: url('../../assets/items.png') -800px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-porridge {
     background: url('../../assets/items.png') -832px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-resistance {
     background: url('../../assets/items.png') -864px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-restore-abilities {
     background: url('../../assets/items.png') -896px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-slowing {
     background: url('../../assets/items.png') -928px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-i-strong-poison {
     background: url('../../assets/items.png') -960px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-magenta {
     background: url('../../assets/items.png') -992px -576px;
+    background-size: 1024px 1120px;
 }
 .potion-murky {
     background: url('../../assets/items.png') -0px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-orange {
     background: url('../../assets/items.png') -32px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-pink {
     background: url('../../assets/items.png') -64px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-puce {
     background: url('../../assets/items.png') -96px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-purple_red {
     background: url('../../assets/items.png') -128px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-ruby {
     background: url('../../assets/items.png') -160px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-silver {
     background: url('../../assets/items.png') -192px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-sky_blue {
     background: url('../../assets/items.png') -224px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-unknown {
     background: url('../../assets/items.png') -256px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-white {
     background: url('../../assets/items.png') -288px -608px;
+    background-size: 1024px 1120px;
 }
 .potion-yellow {
     background: url('../../assets/items.png') -320px -608px;
+    background-size: 1024px 1120px;
 }
 /* --- ring --- */
 .ring-agate {
     background: url('../../assets/items.png') -352px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-anvil {
     background: url('../../assets/items.png') -384px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-blood {
     background: url('../../assets/items.png') -416px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-brass {
     background: url('../../assets/items.png') -448px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-bronze {
     background: url('../../assets/items.png') -480px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-bronze-flower {
     background: url('../../assets/items.png') -512px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-clay {
     background: url('../../assets/items.png') -544px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-copper {
     background: url('../../assets/items.png') -576px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-coral {
     background: url('../../assets/items.png') -608px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-dark {
     background: url('../../assets/items.png') -640px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-diamond {
     background: url('../../assets/items.png') -672px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-double {
     background: url('../../assets/items.png') -704px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-emerald {
     background: url('../../assets/items.png') -736px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-eye {
     background: url('../../assets/items.png') -768px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-fire {
     background: url('../../assets/items.png') -800px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-flower {
     background: url('../../assets/items.png') -832px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-four-colour {
     background: url('../../assets/items.png') -864px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-glass {
     background: url('../../assets/items.png') -896px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-gold {
     background: url('../../assets/items.png') -928px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-gold_blue {
     background: url('../../assets/items.png') -960px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-gold_green {
     background: url('../../assets/items.png') -992px -608px;
+    background-size: 1024px 1120px;
 }
 .ring-gold_red {
     background: url('../../assets/items.png') -0px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-granite {
     background: url('../../assets/items.png') -32px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-green {
     background: url('../../assets/items.png') -64px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-attention {
     background: url('../../assets/items.png') -96px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-c-teleport {
     background: url('../../assets/items.png') -128px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-dex {
     background: url('../../assets/items.png') -160px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-evasion {
     background: url('../../assets/items.png') -192px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-fire {
     background: url('../../assets/items.png') -224px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-flight {
     background: url('../../assets/items.png') -256px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-ice {
     background: url('../../assets/items.png') -288px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-int {
     background: url('../../assets/items.png') -320px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-magical-power {
     background: url('../../assets/items.png') -352px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-positive-energy {
     background: url('../../assets/items.png') -384px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-protection {
     background: url('../../assets/items.png') -416px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-r-cold {
     background: url('../../assets/items.png') -448px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-r-corrosion {
     background: url('../../assets/items.png') -480px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-r-fire {
     background: url('../../assets/items.png') -512px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-r-poison {
     background: url('../../assets/items.png') -544px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-s-attr {
     background: url('../../assets/items.png') -576px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-see-invis {
     background: url('../../assets/items.png') -608px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-slaying {
     background: url('../../assets/items.png') -640px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-stealth {
     background: url('../../assets/items.png') -672px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-str {
     background: url('../../assets/items.png') -704px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-teleport {
     background: url('../../assets/items.png') -736px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-willpower {
     background: url('../../assets/items.png') -768px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-i-wizardry {
     background: url('../../assets/items.png') -800px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-ice {
     background: url('../../assets/items.png') -832px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-iron {
     background: url('../../assets/items.png') -864px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-ivory {
     background: url('../../assets/items.png') -896px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-jade {
     background: url('../../assets/items.png') -928px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-moonstone {
     background: url('../../assets/items.png') -960px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-opal {
     background: url('../../assets/items.png') -992px -640px;
+    background-size: 1024px 1120px;
 }
 .ring-pearl {
     background: url('../../assets/items.png') -0px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-pink {
     background: url('../../assets/items.png') -32px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-plain_black {
     background: url('../../assets/items.png') -64px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-plain_red {
     background: url('../../assets/items.png') -96px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-plain_yellow {
     background: url('../../assets/items.png') -128px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-red-blue {
     background: url('../../assets/items.png') -160px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-ruby {
     background: url('../../assets/items.png') -192px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-silver {
     background: url('../../assets/items.png') -224px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-snake {
     background: url('../../assets/items.png') -256px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-steel {
     background: url('../../assets/items.png') -288px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-tiger_eye {
     background: url('../../assets/items.png') -320px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-tourmaline {
     background: url('../../assets/items.png') -352px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-urand_hare {
     background: url('../../assets/items.png') -384px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-urand_mage {
     background: url('../../assets/items.png') -416px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-urand_octoring {
     background: url('../../assets/items.png') -448px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-urand_shadows {
     background: url('../../assets/items.png') -480px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-urand_tortoise {
     background: url('../../assets/items.png') -512px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-wooden {
     background: url('../../assets/items.png') -544px -672px;
+    background-size: 1024px 1120px;
 }
 .ring-zircon {
     background: url('../../assets/items.png') -576px -672px;
+    background-size: 1024px 1120px;
 }
 /* --- rod --- */
 .rod-rod00 {
     background: url('../../assets/items.png') -608px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod01 {
     background: url('../../assets/items.png') -640px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod02 {
     background: url('../../assets/items.png') -672px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod03 {
     background: url('../../assets/items.png') -704px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod04 {
     background: url('../../assets/items.png') -736px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod05 {
     background: url('../../assets/items.png') -768px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod06 {
     background: url('../../assets/items.png') -800px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod07 {
     background: url('../../assets/items.png') -832px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod08 {
     background: url('../../assets/items.png') -864px -672px;
+    background-size: 1024px 1120px;
 }
 .rod-rod09 {
     background: url('../../assets/items.png') -896px -672px;
+    background-size: 1024px 1120px;
 }
 /* --- scroll --- */
 .scroll-i-acquirement {
     background: url('../../assets/items.png') -928px -672px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-amnesia {
     background: url('../../assets/items.png') -960px -672px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-blinking {
     background: url('../../assets/items.png') -992px -672px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-brand-weapon {
     background: url('../../assets/items.png') -0px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-butterflies {
     background: url('../../assets/items.png') -32px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-curse_armour {
     background: url('../../assets/items.png') -64px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-curse_weapon {
     background: url('../../assets/items.png') -96px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-curse-jewellery {
     background: url('../../assets/items.png') -128px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-enchant_armour {
     background: url('../../assets/items.png') -160px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-enchant-weapon {
     background: url('../../assets/items.png') -192px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-fear {
     background: url('../../assets/items.png') -224px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-fog {
     background: url('../../assets/items.png') -256px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-holy_word {
     background: url('../../assets/items.png') -288px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-identify {
     background: url('../../assets/items.png') -320px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-immolation {
     background: url('../../assets/items.png') -352px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-magic_mapping {
     background: url('../../assets/items.png') -384px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-noise {
     background: url('../../assets/items.png') -416px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-poison {
     background: url('../../assets/items.png') -448px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-random_uselessness {
     background: url('../../assets/items.png') -480px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-recharging {
     background: url('../../assets/items.png') -512px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-remove_curse {
     background: url('../../assets/items.png') -544px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-silence {
     background: url('../../assets/items.png') -576px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-teleportation {
     background: url('../../assets/items.png') -608px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-torment {
     background: url('../../assets/items.png') -640px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-unholy_creation {
     background: url('../../assets/items.png') -672px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-i-vulnerability {
     background: url('../../assets/items.png') -704px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll {
     background: url('../../assets/items.png') -736px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-blue {
     background: url('../../assets/items.png') -768px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-brown {
     background: url('../../assets/items.png') -800px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-cyan {
     background: url('../../assets/items.png') -832px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-green {
     background: url('../../assets/items.png') -864px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-grey {
     background: url('../../assets/items.png') -896px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-purple {
     background: url('../../assets/items.png') -928px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-red {
     background: url('../../assets/items.png') -960px -704px;
+    background-size: 1024px 1120px;
 }
 .scroll-scroll-yellow {
     background: url('../../assets/items.png') -992px -704px;
+    background-size: 1024px 1120px;
 }
 /* --- staff --- */
 .staff-i-staff_air {
     background: url('../../assets/items.png') -0px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_channeling {
     background: url('../../assets/items.png') -32px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_cold {
     background: url('../../assets/items.png') -64px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_conjuration {
     background: url('../../assets/items.png') -96px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_earth {
     background: url('../../assets/items.png') -128px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_enchantment {
     background: url('../../assets/items.png') -160px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_energy {
     background: url('../../assets/items.png') -192px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_fire {
     background: url('../../assets/items.png') -224px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_necromancy {
     background: url('../../assets/items.png') -256px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_poison {
     background: url('../../assets/items.png') -288px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_power {
     background: url('../../assets/items.png') -320px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_summoning {
     background: url('../../assets/items.png') -352px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-i-staff_wizardry {
     background: url('../../assets/items.png') -384px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact1 {
     background: url('../../assets/items.png') -416px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact2 {
     background: url('../../assets/items.png') -448px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact3 {
     background: url('../../assets/items.png') -480px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact4 {
     background: url('../../assets/items.png') -512px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact5 {
     background: url('../../assets/items.png') -544px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact6 {
     background: url('../../assets/items.png') -576px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff-artefact7 {
     background: url('../../assets/items.png') -608px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff00 {
     background: url('../../assets/items.png') -640px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff01 {
     background: url('../../assets/items.png') -672px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff02 {
     background: url('../../assets/items.png') -704px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff03 {
     background: url('../../assets/items.png') -736px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff04 {
     background: url('../../assets/items.png') -768px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff05 {
     background: url('../../assets/items.png') -800px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff06 {
     background: url('../../assets/items.png') -832px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff07 {
     background: url('../../assets/items.png') -864px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff08 {
     background: url('../../assets/items.png') -896px -736px;
+    background-size: 1024px 1120px;
 }
 .staff-staff09 {
     background: url('../../assets/items.png') -928px -736px;
+    background-size: 1024px 1120px;
 }
 /* --- talisman --- */
 .talisman-blade {
     background: url('../../assets/items.png') -960px -736px;
+    background-size: 1024px 1120px;
 }
 .talisman-death {
     background: url('../../assets/items.png') -992px -736px;
+    background-size: 1024px 1120px;
 }
 .talisman-dragon {
     background: url('../../assets/items.png') -0px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-eel {
     background: url('../../assets/items.png') -32px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-fortress {
     background: url('../../assets/items.png') -64px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-hive {
     background: url('../../assets/items.png') -96px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-inkwell {
     background: url('../../assets/items.png') -128px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-lupine {
     background: url('../../assets/items.png') -160px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-maw {
     background: url('../../assets/items.png') -192px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-medusa {
     background: url('../../assets/items.png') -224px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-protean {
     background: url('../../assets/items.png') -256px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-quill {
     background: url('../../assets/items.png') -288px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-rimehorn {
     background: url('../../assets/items.png') -320px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-scarab {
     background: url('../../assets/items.png') -352px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-snake {
     background: url('../../assets/items.png') -384px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-sphinx {
     background: url('../../assets/items.png') -416px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-spider {
     background: url('../../assets/items.png') -448px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-spore {
     background: url('../../assets/items.png') -480px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-statue {
     background: url('../../assets/items.png') -512px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-storm {
     background: url('../../assets/items.png') -544px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-vampire {
     background: url('../../assets/items.png') -576px -768px;
+    background-size: 1024px 1120px;
 }
 .talisman-water {
     background: url('../../assets/items.png') -608px -768px;
+    background-size: 1024px 1120px;
 }
 /* --- wand --- */
 .wand-gem_bone {
     background: url('../../assets/items.png') -640px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_brass {
     background: url('../../assets/items.png') -672px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_bronze {
     background: url('../../assets/items.png') -704px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_copper {
     background: url('../../assets/items.png') -736px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_glass {
     background: url('../../assets/items.png') -768px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_gold {
     background: url('../../assets/items.png') -800px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_iron {
     background: url('../../assets/items.png') -832px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_ivory {
     background: url('../../assets/items.png') -864px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_lead {
     background: url('../../assets/items.png') -896px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_plastic {
     background: url('../../assets/items.png') -928px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_silver {
     background: url('../../assets/items.png') -960px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-gem_wood {
     background: url('../../assets/items.png') -992px -768px;
+    background-size: 1024px 1120px;
 }
 .wand-i-acid {
     background: url('../../assets/items.png') -0px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-charming {
     background: url('../../assets/items.png') -32px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-clouds {
     background: url('../../assets/items.png') -64px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-confusion {
     background: url('../../assets/items.png') -96px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-digging {
     background: url('../../assets/items.png') -128px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-disruption {
     background: url('../../assets/items.png') -160px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-flame {
     background: url('../../assets/items.png') -192px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-gravitation {
     background: url('../../assets/items.png') -224px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-hasting {
     background: url('../../assets/items.png') -256px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-heal_wounds {
     background: url('../../assets/items.png') -288px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-iceblast {
     background: url('../../assets/items.png') -320px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-light {
     background: url('../../assets/items.png') -352px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-lightning {
     background: url('../../assets/items.png') -384px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-mindburst {
     background: url('../../assets/items.png') -416px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-paralysis {
     background: url('../../assets/items.png') -448px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-polymorph {
     background: url('../../assets/items.png') -480px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-quicksilver {
     background: url('../../assets/items.png') -512px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-random_effects {
     background: url('../../assets/items.png') -544px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-rending {
     background: url('../../assets/items.png') -576px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-roots {
     background: url('../../assets/items.png') -608px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-scattershot {
     background: url('../../assets/items.png') -640px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-slowing {
     background: url('../../assets/items.png') -672px -800px;
+    background-size: 1024px 1120px;
 }
 .wand-i-teleportation {
     background: url('../../assets/items.png') -704px -800px;
+    background-size: 1024px 1120px;
 }
 /* --- weapon --- */
 .weapon-april_staff1 {
     background: url('../../assets/items.png') -736px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-april_staff2 {
     background: url('../../assets/items.png') -768px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-arbalest1 {
     background: url('../../assets/items.png') -800px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-arbalest2 {
     background: url('../../assets/items.png') -832px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-arbalest3 {
     background: url('../../assets/items.png') -864px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-arrow1 {
     background: url('../../assets/items.png') -896px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-arrow2 {
     background: url('../../assets/items.png') -928px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-bardiche1 {
     background: url('../../assets/items.png') -960px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-bardiche2 {
     background: url('../../assets/items.png') -992px -800px;
+    background-size: 1024px 1120px;
 }
 .weapon-bardiche3 {
     background: url('../../assets/items.png') -0px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-battle_axe1 {
     background: url('../../assets/items.png') -32px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-battle_axe2 {
     background: url('../../assets/items.png') -64px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-battle_axe3 {
     background: url('../../assets/items.png') -96px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-blessed_blade {
     background: url('../../assets/items.png') -128px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-blowgun1 {
     background: url('../../assets/items.png') -160px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-blowgun2 {
     background: url('../../assets/items.png') -192px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-boomerang1 {
     background: url('../../assets/items.png') -224px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-boomerang2 {
     background: url('../../assets/items.png') -256px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-broad_axe1 {
     background: url('../../assets/items.png') -288px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-broad_axe2 {
     background: url('../../assets/items.png') -320px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-broad_axe3 {
     background: url('../../assets/items.png') -352px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-bullwhip {
     background: url('../../assets/items.png') -384px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-bullwhip2 {
     background: url('../../assets/items.png') -416px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-bullwhip3 {
     background: url('../../assets/items.png') -448px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-club {
     background: url('../../assets/items.png') -480px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-club2 {
     background: url('../../assets/items.png') -512px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-crossbow_bolt1 {
     background: url('../../assets/items.png') -544px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-crossbow_bolt2 {
     background: url('../../assets/items.png') -576px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dagger {
     background: url('../../assets/items.png') -608px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dagger2 {
     background: url('../../assets/items.png') -640px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dagger3 {
     background: url('../../assets/items.png') -672px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart-a {
     background: url('../../assets/items.png') -704px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart-c {
     background: url('../../assets/items.png') -736px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart-d {
     background: url('../../assets/items.png') -768px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart-p {
     background: url('../../assets/items.png') -800px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart-t {
     background: url('../../assets/items.png') -832px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart1 {
     background: url('../../assets/items.png') -864px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-dart2 {
     background: url('../../assets/items.png') -896px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_blade {
     background: url('../../assets/items.png') -928px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_blade2 {
     background: url('../../assets/items.png') -960px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_blade3 {
     background: url('../../assets/items.png') -992px -832px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_trident {
     background: url('../../assets/items.png') -0px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_trident2 {
     background: url('../../assets/items.png') -32px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_trident3 {
     background: url('../../assets/items.png') -64px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_whip {
     background: url('../../assets/items.png') -96px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_whip2 {
     background: url('../../assets/items.png') -128px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-demon_whip3 {
     background: url('../../assets/items.png') -160px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-dire_flail1 {
     background: url('../../assets/items.png') -192px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-dire_flail2 {
     background: url('../../assets/items.png') -224px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-dire_flail3 {
     background: url('../../assets/items.png') -256px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-double_sword {
     background: url('../../assets/items.png') -288px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-double_sword2 {
     background: url('../../assets/items.png') -320px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-double_sword3 {
     background: url('../../assets/items.png') -352px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-eveningstar1 {
     background: url('../../assets/items.png') -384px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-eveningstar2 {
     background: url('../../assets/items.png') -416px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-eveningstar3 {
     background: url('../../assets/items.png') -448px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-executioner_axe1 {
     background: url('../../assets/items.png') -480px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-executioner_axe2 {
     background: url('../../assets/items.png') -512px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-executioner_axe3 {
     background: url('../../assets/items.png') -544px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-falchion1 {
     background: url('../../assets/items.png') -576px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-falchion2 {
     background: url('../../assets/items.png') -608px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-falchion3 {
     background: url('../../assets/items.png') -640px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-flail1 {
     background: url('../../assets/items.png') -672px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-flail2 {
     background: url('../../assets/items.png') -704px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-flail3 {
     background: url('../../assets/items.png') -736px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_club {
     background: url('../../assets/items.png') -768px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_club2 {
     background: url('../../assets/items.png') -800px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_club3 {
     background: url('../../assets/items.png') -832px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_spiked_club {
     background: url('../../assets/items.png') -864px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_spiked_club2 {
     background: url('../../assets/items.png') -896px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-giant_spiked_club3 {
     background: url('../../assets/items.png') -928px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-glaive1 {
     background: url('../../assets/items.png') -960px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-glaive2 {
     background: url('../../assets/items.png') -992px -864px;
+    background-size: 1024px 1120px;
 }
 .weapon-glaive3 {
     background: url('../../assets/items.png') -0px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-greatsword1 {
     background: url('../../assets/items.png') -32px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-greatsword2 {
     background: url('../../assets/items.png') -64px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-greatsword3 {
     background: url('../../assets/items.png') -96px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-halberd1 {
     background: url('../../assets/items.png') -128px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-halberd2 {
     background: url('../../assets/items.png') -160px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-halberd3 {
     background: url('../../assets/items.png') -192px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hammer1 {
     background: url('../../assets/items.png') -224px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hammer2 {
     background: url('../../assets/items.png') -256px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hammer3 {
     background: url('../../assets/items.png') -288px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_axe1 {
     background: url('../../assets/items.png') -320px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_axe2 {
     background: url('../../assets/items.png') -352px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_axe3 {
     background: url('../../assets/items.png') -384px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_cannon {
     background: url('../../assets/items.png') -416px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_cannon2 {
     background: url('../../assets/items.png') -448px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-hand_cannon3 {
     background: url('../../assets/items.png') -480px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-acid {
     background: url('../../assets/items.png') -512px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-antimagic {
     background: url('../../assets/items.png') -544px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-blinding {
     background: url('../../assets/items.png') -576px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-chaos {
     background: url('../../assets/items.png') -608px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-chaotic {
     background: url('../../assets/items.png') -640px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-concussion {
     background: url('../../assets/items.png') -672px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-confusion {
     background: url('../../assets/items.png') -704px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-curare {
     background: url('../../assets/items.png') -736px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-devious {
     background: url('../../assets/items.png') -768px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-dispersal {
     background: url('../../assets/items.png') -800px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-distortion {
     background: url('../../assets/items.png') -832px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-draining {
     background: url('../../assets/items.png') -864px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-electrocution {
     background: url('../../assets/items.png') -896px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-entangling {
     background: url('../../assets/items.png') -928px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-evasion {
     background: url('../../assets/items.png') -960px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-explosion {
     background: url('../../assets/items.png') -992px -896px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-flaming {
     background: url('../../assets/items.png') -0px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-foul_flame {
     background: url('../../assets/items.png') -32px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-freezing {
     background: url('../../assets/items.png') -64px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-frenzy {
     background: url('../../assets/items.png') -96px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-heavy {
     background: url('../../assets/items.png') -128px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-holy_wrath {
     background: url('../../assets/items.png') -160px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-pain {
     background: url('../../assets/items.png') -192px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-paralysis {
     background: url('../../assets/items.png') -224px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-penetration {
     background: url('../../assets/items.png') -256px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-protection {
     background: url('../../assets/items.png') -288px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-reaping {
     background: url('../../assets/items.png') -320px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-returning {
     background: url('../../assets/items.png') -352px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-sickness {
     background: url('../../assets/items.png') -384px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-sleep {
     background: url('../../assets/items.png') -416px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-slowing {
     background: url('../../assets/items.png') -448px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-spectral {
     background: url('../../assets/items.png') -480px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-speed {
     background: url('../../assets/items.png') -512px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-sundering {
     background: url('../../assets/items.png') -544px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-valour {
     background: url('../../assets/items.png') -576px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-vampirism {
     background: url('../../assets/items.png') -608px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-i-venom {
     background: url('../../assets/items.png') -640px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-javelin1 {
     background: url('../../assets/items.png') -672px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-javelin2 {
     background: url('../../assets/items.png') -704px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-lajatang1 {
     background: url('../../assets/items.png') -736px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-lajatang2 {
     background: url('../../assets/items.png') -768px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-lajatang3 {
     background: url('../../assets/items.png') -800px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-long_sword1 {
     background: url('../../assets/items.png') -832px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-long_sword2 {
     background: url('../../assets/items.png') -864px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-long_sword3 {
     background: url('../../assets/items.png') -896px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-longbow1 {
     background: url('../../assets/items.png') -928px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-longbow2 {
     background: url('../../assets/items.png') -960px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-longbow3 {
     background: url('../../assets/items.png') -992px -928px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace_large1 {
     background: url('../../assets/items.png') -0px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace_large2 {
     background: url('../../assets/items.png') -32px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace_large3 {
     background: url('../../assets/items.png') -64px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace1 {
     background: url('../../assets/items.png') -96px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace2 {
     background: url('../../assets/items.png') -128px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-mace3 {
     background: url('../../assets/items.png') -160px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-morningstar1 {
     background: url('../../assets/items.png') -192px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-morningstar2 {
     background: url('../../assets/items.png') -224px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-morningstar3 {
     background: url('../../assets/items.png') -256px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-orcbow1 {
     background: url('../../assets/items.png') -288px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-orcbow2 {
     background: url('../../assets/items.png') -320px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-orcbow3 {
     background: url('../../assets/items.png') -352px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-partisan1 {
     background: url('../../assets/items.png') -384px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-partisan2 {
     background: url('../../assets/items.png') -416px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-partisan3 {
     background: url('../../assets/items.png') -448px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quarterstaff {
     background: url('../../assets/items.png') -480px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quarterstaff2 {
     background: url('../../assets/items.png') -512px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quarterstaff3 {
     background: url('../../assets/items.png') -544px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quickblade1 {
     background: url('../../assets/items.png') -576px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quickblade2 {
     background: url('../../assets/items.png') -608px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-quickblade3 {
     background: url('../../assets/items.png') -640px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-rapier1 {
     background: url('../../assets/items.png') -672px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-rapier2 {
     background: url('../../assets/items.png') -704px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-rapier3 {
     background: url('../../assets/items.png') -736px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-rock {
     background: url('../../assets/items.png') -768px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-sacred_scourge {
     background: url('../../assets/items.png') -800px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scimitar1 {
     background: url('../../assets/items.png') -832px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scimitar2 {
     background: url('../../assets/items.png') -864px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scimitar3 {
     background: url('../../assets/items.png') -896px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scythe1 {
     background: url('../../assets/items.png') -928px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scythe2 {
     background: url('../../assets/items.png') -960px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-scythe3 {
     background: url('../../assets/items.png') -992px -960px;
+    background-size: 1024px 1120px;
 }
 .weapon-short_sword1 {
     background: url('../../assets/items.png') -0px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-short_sword2 {
     background: url('../../assets/items.png') -32px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-short_sword3 {
     background: url('../../assets/items.png') -64px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-shortbow1 {
     background: url('../../assets/items.png') -96px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-shortbow2 {
     background: url('../../assets/items.png') -128px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-shortbow3 {
     background: url('../../assets/items.png') -160px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_arrow1 {
     background: url('../../assets/items.png') -192px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_arrow2 {
     background: url('../../assets/items.png') -224px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_boomerang {
     background: url('../../assets/items.png') -256px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_crossbow_bolt1 {
     background: url('../../assets/items.png') -288px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_crossbow_bolt2 {
     background: url('../../assets/items.png') -320px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_javelin1 {
     background: url('../../assets/items.png') -352px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_javelin2 {
     background: url('../../assets/items.png') -384px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_sling_bullet1 {
     background: url('../../assets/items.png') -416px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-silver_sling_bullet2 {
     background: url('../../assets/items.png') -448px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-sling_bullet1 {
     background: url('../../assets/items.png') -480px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-sling_bullet2 {
     background: url('../../assets/items.png') -512px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-sling1 {
     background: url('../../assets/items.png') -544px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-sling2 {
     background: url('../../assets/items.png') -576px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-sling3 {
     background: url('../../assets/items.png') -608px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spear1 {
     background: url('../../assets/items.png') -640px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spear2 {
     background: url('../../assets/items.png') -672px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spear3 {
     background: url('../../assets/items.png') -704px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_demon_axe {
     background: url('../../assets/items.png') -736px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_glaive_of_prune {
     background: url('../../assets/items.png') -768px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_holy_axe {
     background: url('../../assets/items.png') -800px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_mace_of_variability {
     background: url('../../assets/items.png') -832px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_majin {
     background: url('../../assets/items.png') -864px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_mule {
     background: url('../../assets/items.png') -896px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_sceptre_of_asmodeus {
     background: url('../../assets/items.png') -928px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_sceptre_of_torment {
     background: url('../../assets/items.png') -960px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_scythe_of_curses {
     background: url('../../assets/items.png') -992px -992px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_singing_sword {
     background: url('../../assets/items.png') -0px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_staff_of_olgreb {
     background: url('../../assets/items.png') -32px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_sword_of_cerebov {
     background: url('../../assets/items.png') -64px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_sword_of_power {
     background: url('../../assets/items.png') -96px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_sword_of_zonguldrok {
     background: url('../../assets/items.png') -128px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_vampires_tooth {
     background: url('../../assets/items.png') -160px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_wrath_of_trog {
     background: url('../../assets/items.png') -192px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-spwpn_wucad_mu {
     background: url('../../assets/items.png') -224px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-staff {
     background: url('../../assets/items.png') -256px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-staff_mummy {
     background: url('../../assets/items.png') -288px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_arrow1 {
     background: url('../../assets/items.png') -320px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_arrow2 {
     background: url('../../assets/items.png') -352px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_crossbow_bolt1 {
     background: url('../../assets/items.png') -384px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_crossbow_bolt2 {
     background: url('../../assets/items.png') -416px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_javelin1 {
     background: url('../../assets/items.png') -448px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_javelin2 {
     background: url('../../assets/items.png') -480px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_sling_bullet1 {
     background: url('../../assets/items.png') -512px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-steel_sling_bullet2 {
     background: url('../../assets/items.png') -544px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-stone {
     background: url('../../assets/items.png') -576px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-throwing_net {
     background: url('../../assets/items.png') -608px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-trident1 {
     background: url('../../assets/items.png') -640px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-trident2 {
     background: url('../../assets/items.png') -672px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-trident3 {
     background: url('../../assets/items.png') -704px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-triple_crossbow {
     background: url('../../assets/items.png') -736px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-triple_crossbow2 {
     background: url('../../assets/items.png') -768px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-triple_sword {
     background: url('../../assets/items.png') -800px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-triple_sword2 {
     background: url('../../assets/items.png') -832px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-triple_sword3 {
     background: url('../../assets/items.png') -864px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-trishula {
     background: url('../../assets/items.png') -896px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-unrand_zealot_sword {
     background: url('../../assets/items.png') -928px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_arc_blade {
     background: url('../../assets/items.png') -960px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_arga {
     background: url('../../assets/items.png') -992px -1024px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_axe_of_woe {
     background: url('../../assets/items.png') -0px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_bloodbane {
     background: url('../../assets/items.png') -32px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_blowgun {
     background: url('../../assets/items.png') -64px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_botono {
     background: url('../../assets/items.png') -96px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_brilliance {
     background: url('../../assets/items.png') -128px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_chilly_death {
     background: url('../../assets/items.png') -160px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_condemnation {
     background: url('../../assets/items.png') -192px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_crystal_spear {
     background: url('../../assets/items.png') -224px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_cutlass {
     background: url('../../assets/items.png') -256px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_damnation {
     background: url('../../assets/items.png') -288px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_dark_maul {
     background: url('../../assets/items.png') -320px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_dread_knight {
     background: url('../../assets/items.png') -352px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_elemental {
     background: url('../../assets/items.png') -384px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_eos {
     background: url('../../assets/items.png') -416px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_finisher {
     background: url('../../assets/items.png') -448px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_firestarter {
     background: url('../../assets/items.png') -480px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_flaming_death {
     background: url('../../assets/items.png') -512px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_force_lance {
     background: url('../../assets/items.png') -544px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_frostbite {
     background: url('../../assets/items.png') -576px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_guard {
     background: url('../../assets/items.png') -608px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_gyre {
     background: url('../../assets/items.png') -640px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_katana {
     background: url('../../assets/items.png') -672px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_knife_of_accuracy {
     background: url('../../assets/items.png') -704px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_leech {
     background: url('../../assets/items.png') -736px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_lochaber_axe {
     background: url('../../assets/items.png') -768px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_meek {
     background: url('../../assets/items.png') -800px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_morg {
     background: url('../../assets/items.png') -832px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_octopus_king {
     background: url('../../assets/items.png') -864px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_order {
     background: url('../../assets/items.png') -896px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_piercer {
     background: url('../../assets/items.png') -928px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_plutonium {
     background: url('../../assets/items.png') -960px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_punk {
     background: url('../../assets/items.png') -992px -1056px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_rift {
     background: url('../../assets/items.png') -0px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_shillelagh {
     background: url('../../assets/items.png') -32px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_skullcrusher {
     background: url('../../assets/items.png') -64px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_snakebite {
     background: url('../../assets/items.png') -96px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_sniper {
     background: url('../../assets/items.png') -128px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_spellbinder {
     background: url('../../assets/items.png') -160px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_spriggans_knife {
     background: url('../../assets/items.png') -192px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_staff_of_battle {
     background: url('../../assets/items.png') -224px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_storm_bow {
     background: url('../../assets/items.png') -256px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_thermic_engine {
     background: url('../../assets/items.png') -288px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_throatcutter {
     background: url('../../assets/items.png') -320px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_undeadhunter {
     background: url('../../assets/items.png') -352px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_woodcutters_axe {
     background: url('../../assets/items.png') -384px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_wyrmbane {
     background: url('../../assets/items.png') -416px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_wyrmbane1 {
     background: url('../../assets/items.png') -448px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_wyrmbane2 {
     background: url('../../assets/items.png') -480px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_wyrmbane3 {
     background: url('../../assets/items.png') -512px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_wyrmbane4 {
     background: url('../../assets/items.png') -544px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-urand_zephyr {
     background: url('../../assets/items.png') -576px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-war_axe1 {
     background: url('../../assets/items.png') -608px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-war_axe2 {
     background: url('../../assets/items.png') -640px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-war_axe3 {
     background: url('../../assets/items.png') -672px -1088px;
+    background-size: 1024px 1120px;
 }
 .weapon-xmas-scythe {
     background: url('../../assets/items.png') -704px -1088px;
+    background-size: 1024px 1120px;
 }
