@@ -315,7 +315,7 @@ function exploreNext(): void {
         floor.tiles[hero.y][hero.x] = {
           ...tile,
           type: "stairs-down",
-          sprite: "stairs-down",
+          sprite: "gateways-stone_stairs_down",
         };
         aeMsg("The ground crumbles, revealing a stairway down!");
         autoExploring = false;
@@ -339,7 +339,7 @@ function exploreNext(): void {
         floor.tiles[hero.y][hero.x] = {
           ...tile,
           type: "stairs-down",
-          sprite: "stairs-down",
+          sprite: "gateways-stone_stairs_down",
         };
         aeMsg("The ground crumbles, revealing a stairway down!");
         autoExploring = false;
@@ -540,7 +540,11 @@ function stepAutoPath(): void {
     }
 
     // Stop at traps if not immune
-    if (nextTile?.type === "trap" && nextTile.trapRevealed && !heroIsTrapImmune()) {
+    if (
+      nextTile?.type === "trap" &&
+      nextTile.trapRevealed &&
+      !heroIsTrapImmune()
+    ) {
       aeMsg("Auto-move stopped — trap ahead!");
       autoPath = [];
       return;
@@ -1310,7 +1314,13 @@ function switchScreen(state: GameState): void {
           const fk = `${s.currentDungeon}-${s.currentFloor}`;
           const fl = s.floors[fk];
           if (!fl) return;
-          const path = findPath(fl, s.hero.position, target, 50, heroCanLevitate(s));
+          const path = findPath(
+            fl,
+            s.hero.position,
+            target,
+            50,
+            heroCanLevitate(s),
+          );
           if (path.length > 0) {
             autoPath = path;
             stepAutoPath();

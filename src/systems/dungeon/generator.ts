@@ -65,7 +65,7 @@ function createFloorTile(): Tile {
 function createDoorTile(): Tile {
   return {
     type: "door-closed",
-    sprite: "door-closed",
+    sprite: "doors-closed_door",
     walkable: false,
     transparent: false,
   };
@@ -74,7 +74,7 @@ function createDoorTile(): Tile {
 function createLockedDoorTile(): Tile {
   return {
     type: "door-locked",
-    sprite: "door-closed",
+    sprite: "doors-closed_door",
     walkable: false,
     transparent: false,
   };
@@ -92,7 +92,10 @@ function createSecretDoorTile(): Tile {
 function createStairsTile(direction: "up" | "down"): Tile {
   return {
     type: direction === "up" ? "stairs-up" : "stairs-down",
-    sprite: direction === "up" ? "stairs-up" : "stairs-down",
+    sprite:
+      direction === "up"
+        ? "gateways-stone_stairs_up"
+        : "gateways-stone_stairs_down",
     walkable: true,
     transparent: true,
   };
@@ -745,56 +748,56 @@ interface DecorDef {
 
 const DECOR_TYPES: DecorDef[] = [
   {
-    sprite: "pillar-stone",
+    sprite: "statues-depths_column",
     walkable: true,
     transparent: true,
     minDepth: 1,
     weight: 5,
   },
   {
-    sprite: "pillar-broken",
+    sprite: "statues-crumbled_column_1",
     walkable: true,
     transparent: true,
     minDepth: 5,
     weight: 3,
   },
   {
-    sprite: "altar",
+    sprite: "altars-ecumenical",
     walkable: true,
     transparent: true,
     minDepth: 10,
     weight: 1,
   },
   {
-    sprite: "altar-2",
+    sprite: "altars-ashenzari",
     walkable: true,
     transparent: true,
     minDepth: 15,
     weight: 1,
   },
   {
-    sprite: "statue",
+    sprite: "statues-statue_ancient_hero",
     walkable: true,
     transparent: true,
     minDepth: 8,
     weight: 2,
   },
   {
-    sprite: "water",
+    sprite: "water-deep_water",
     walkable: false,
     transparent: true,
     minDepth: 1,
     weight: 3,
   },
   {
-    sprite: "stone-coffin",
+    sprite: "statues-statue_demonic_bust",
     walkable: true,
     transparent: true,
     minDepth: 12,
     weight: 2,
   },
   {
-    sprite: "fountain",
+    sprite: "decor-sparkling_fountain",
     walkable: true,
     transparent: true,
     minDepth: 10,
@@ -861,7 +864,7 @@ function placeDecor(
         const decor = pickDecor();
 
         // Water can spread — patches scale larger on deeper floors
-        if (decor.sprite === "water") {
+        if (decor.sprite === "water-deep_water") {
           const baseSpread = 1 + Math.floor(rand() * 3);
           const depthBonus = Math.floor(depth / 10);
           const spread = Math.min(8, baseSpread + depthBonus);
@@ -878,7 +881,7 @@ function placeDecor(
               if (wt.type === "floor") {
                 floor.tiles[wy][wx] = {
                   type: "water",
-                  sprite: "water",
+                  sprite: "water-deep_water",
                   walkable: false,
                   transparent: true,
                 };
@@ -887,7 +890,7 @@ function placeDecor(
           }
           floor.tiles[y][x] = {
             type: "water",
-            sprite: "water",
+            sprite: "water-deep_water",
             walkable: false,
             transparent: true,
           };
@@ -955,7 +958,7 @@ function ensureConnectivity(floor: Floor): void {
   for (const wt of waterTiles) {
     floor.tiles[wt.y][wt.x] = {
       type: "floor",
-      sprite: "floor",
+      sprite: activeTileset.floor,
       walkable: true,
       transparent: true,
     };

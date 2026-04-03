@@ -65,7 +65,7 @@ export function createCharacterInfoScreen(
   });
 
   const spriteEl = el("div", { width: "32px", height: "32px" });
-  spriteEl.className = h.gender === "male" ? "male-hero" : "female-hero";
+  spriteEl.className = h.gender === "male" ? "base-human_m" : "base-human_f";
   heroSprite.appendChild(spriteEl);
 
   const nameBlock = el("div");

@@ -296,7 +296,7 @@ function processMove(state: GameState, direction: Direction): GameState {
     newTiles[newPos.y] = [...newTiles[newPos.y]];
     newTiles[newPos.y][newPos.x] = {
       type: "door-open",
-      sprite: "door-open",
+      sprite: "doors-open_door",
       walkable: true,
       transparent: true,
     };
@@ -324,7 +324,7 @@ function processMove(state: GameState, direction: Direction): GameState {
       newTiles[newPos.y] = [...newTiles[newPos.y]];
       newTiles[newPos.y][newPos.x] = {
         type: "door-open",
-        sprite: "door-open",
+        sprite: "doors-open_door",
         walkable: true,
         transparent: true,
       };
@@ -1123,7 +1123,7 @@ function processSearch(state: GameState): GameState {
         }
         newTiles[y][x] = {
           type: "door-closed",
-          sprite: "door-closed",
+          sprite: "doors-closed_door",
           walkable: false,
           transparent: false,
         };
@@ -1139,16 +1139,16 @@ function processSearch(state: GameState): GameState {
       // Reveal hidden traps
       if (tile.type === "trap" && !tile.trapRevealed) {
         const trapSprites: Record<string, string> = {
-          pit: "pit-trap",
-          arrow: "arrow-trap",
-          fire: "fire-trap",
-          dart: "dart-trap",
-          portal: "portal-trap",
-          acid: "acid-trap",
-          lightning: "lightning-trap",
-          wind: "wind-trap",
-          rune: "rune-trap",
-          cobweb: "cobweb-trap",
+          pit: "traps-shaft",
+          arrow: "traps-bolt",
+          fire: "traps-alarm",
+          dart: "traps-spear",
+          portal: "traps-teleport",
+          acid: "traps-net",
+          lightning: "traps-zot",
+          wind: "traps-dispersal",
+          rune: "traps-binding_sigil",
+          cobweb: "traps-cobweb_NESW",
         };
         if (!clonedRows.has(y)) {
           newTiles[y] = [...newTiles[y]];
@@ -1157,7 +1157,7 @@ function processSearch(state: GameState): GameState {
         newTiles[y][x] = {
           ...tile,
           trapRevealed: true,
-          sprite: trapSprites[tile.trapType ?? ""] ?? "pit-trap",
+          sprite: trapSprites[tile.trapType ?? ""] ?? "traps-shaft",
         };
         messages.push({
           text: `You found a ${tile.trapType} trap!`,

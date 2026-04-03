@@ -345,7 +345,7 @@
         "subfolder": "amorphous",
         "x": 512,
         "y": 32,
-        "used": false
+        "used": true
       },
       {
         "className": "amorphous-caustic_sporangium",
@@ -394,7 +394,7 @@
         "subfolder": "amorphous",
         "x": 736,
         "y": 32,
-        "used": false
+        "used": true
       },
       {
         "className": "amorphous-morphogenic_ooze",
@@ -604,7 +604,7 @@
         "subfolder": "animals",
         "x": 672,
         "y": 64,
-        "used": false
+        "used": true
       },
       {
         "className": "animals-bennu",
@@ -793,7 +793,7 @@
         "subfolder": "animals",
         "x": 512,
         "y": 96,
-        "used": false
+        "used": true
       },
       {
         "className": "animals-caustic_shrike",
@@ -919,7 +919,7 @@
         "subfolder": "animals",
         "x": 64,
         "y": 128,
-        "used": false
+        "used": true
       },
       {
         "className": "animals-giant_cockroach",
@@ -1017,7 +1017,7 @@
         "subfolder": "animals",
         "x": 512,
         "y": 128,
-        "used": false
+        "used": true
       },
       {
         "className": "animals-inugami",
@@ -1360,7 +1360,7 @@
         "subfolder": "animals",
         "x": 32,
         "y": 192,
-        "used": false
+        "used": true
       },
       {
         "className": "animals-wolf",
@@ -1906,7 +1906,7 @@
         "subfolder": "demons",
         "x": 480,
         "y": 256,
-        "used": false
+        "used": true
       },
       {
         "className": "demons-ice_fiend",
@@ -1983,7 +1983,7 @@
         "subfolder": "demons",
         "x": 832,
         "y": 256,
-        "used": false
+        "used": true
       },
       {
         "className": "demons-rust_devil",
@@ -2277,7 +2277,7 @@
         "subfolder": "dragons",
         "x": 128,
         "y": 320,
-        "used": false
+        "used": true
       },
       {
         "className": "dragons-iron_dragon",
@@ -2333,7 +2333,7 @@
         "subfolder": "dragons",
         "x": 384,
         "y": 320,
-        "used": false
+        "used": true
       },
       {
         "className": "dragons-swamp_drake",
@@ -3222,7 +3222,7 @@
         "subfolder": "humanoids",
         "x": 352,
         "y": 448,
-        "used": false
+        "used": true
       },
       {
         "className": "humanoids-iron_troll",
@@ -3649,7 +3649,7 @@
         "subfolder": "humanoids",
         "x": 256,
         "y": 512,
-        "used": false
+        "used": true
       },
       {
         "className": "humanoids-water_nymph",
@@ -3978,7 +3978,7 @@
         "subfolder": "nonliving",
         "x": 736,
         "y": 544,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-ancestor",
@@ -4132,7 +4132,7 @@
         "subfolder": "nonliving",
         "x": 416,
         "y": 576,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-earthen_tome",
@@ -4153,7 +4153,7 @@
         "subfolder": "nonliving",
         "x": 512,
         "y": 576,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-fire_vortex1",
@@ -4335,7 +4335,7 @@
         "subfolder": "nonliving",
         "x": 320,
         "y": 608,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-kinetic_discus",
@@ -4468,7 +4468,7 @@
         "subfolder": "nonliving",
         "x": 928,
         "y": 608,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-orb_of_winter",
@@ -4958,7 +4958,7 @@
         "subfolder": "nonliving",
         "x": 96,
         "y": 704,
-        "used": false
+        "used": true
       },
       {
         "className": "nonliving-wellspring",
@@ -5392,7 +5392,7 @@
         "subfolder": "player",
         "x": 32,
         "y": 768,
-        "used": false
+        "used": true
       },
       {
         "className": "player-jack_o_lantern",
@@ -5539,7 +5539,7 @@
         "subfolder": "skeletons",
         "x": 704,
         "y": 768,
-        "used": false
+        "used": true
       },
       {
         "className": "skeletons-skeleton_hydra1",
@@ -6071,7 +6071,7 @@
         "subfolder": "statues",
         "x": 64,
         "y": 864,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-test_spawner",
@@ -6092,7 +6092,7 @@
         "subfolder": "statues",
         "x": 160,
         "y": 864,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-undefined_statue",
@@ -8626,7 +8626,7 @@
         "subfolder": "undead",
         "x": 480,
         "y": 1216,
-        "used": false
+        "used": true
       },
       {
         "className": "undead-ghoul",
@@ -8731,7 +8731,7 @@
         "subfolder": "undead",
         "x": 960,
         "y": 1216,
-        "used": false
+        "used": true
       },
       {
         "className": "undead-pharaoh_ant",
@@ -9186,7 +9186,7 @@
         "subfolder": "undead",
         "x": 992,
         "y": 1280,
-        "used": false
+        "used": true
       },
       {
         "className": "undead-vampire_bloodprince",
@@ -9935,7 +9935,7 @@
         "subfolder": "unique",
         "x": 320,
         "y": 1408,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-cerebov_swordless",
@@ -9977,7 +9977,7 @@
         "subfolder": "unique",
         "x": 512,
         "y": 1408,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-dowan",
@@ -10012,7 +10012,7 @@
         "subfolder": "unique",
         "x": 672,
         "y": 1408,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-edmund_weaponless",
@@ -10068,7 +10068,7 @@
         "subfolder": "unique",
         "x": 928,
         "y": 1408,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-frances",
@@ -10131,7 +10131,7 @@
         "subfolder": "unique",
         "x": 192,
         "y": 1440,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-grunn",
@@ -10229,7 +10229,7 @@
         "subfolder": "unique",
         "x": 640,
         "y": 1440,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-khufu",
@@ -10362,14 +10362,14 @@
         "subfolder": "unique",
         "x": 224,
         "y": 1472,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-maurice",
         "subfolder": "unique",
         "x": 256,
         "y": 1472,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-menkaure",
@@ -10509,7 +10509,7 @@
         "subfolder": "unique",
         "x": 896,
         "y": 1472,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-prince_ribbit",
@@ -10614,7 +10614,7 @@
         "subfolder": "unique",
         "x": 352,
         "y": 1504,
-        "used": false
+        "used": true
       },
       {
         "className": "unique-sojobo",
@@ -10796,14 +10796,14 @@
         "subfolder": "vault",
         "x": 160,
         "y": 1536,
-        "used": false
+        "used": true
       },
       {
         "className": "vault-deformed_orc",
         "subfolder": "vault",
         "x": 192,
         "y": 1536,
-        "used": false
+        "used": true
       },
       {
         "className": "vault-demonspawn_monk_ghost",
@@ -10909,671 +10909,6 @@
         "x": 672,
         "y": 1536,
         "used": false
-      },
-      {
-        "className": "giant-rat",
-        "subfolder": "giant",
-        "x": 0,
-        "y": 160,
-        "used": true
-      },
-      {
-        "className": "large-snake",
-        "subfolder": "large",
-        "x": 32,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "giant-bat",
-        "subfolder": "giant",
-        "x": 672,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "wild-dog",
-        "subfolder": "wild",
-        "x": 576,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "skeleton",
-        "subfolder": "root",
-        "x": 704,
-        "y": 768,
-        "used": true
-      },
-      {
-        "className": "viper",
-        "subfolder": "root",
-        "x": 480,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "goblin",
-        "subfolder": "root",
-        "x": 192,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "giant-scorpion",
-        "subfolder": "giant",
-        "x": 256,
-        "y": 160,
-        "used": true
-      },
-      {
-        "className": "huge-lizard",
-        "subfolder": "huge",
-        "x": 512,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "green-slime",
-        "subfolder": "green",
-        "x": 736,
-        "y": 32,
-        "used": true
-      },
-      {
-        "className": "hobgoblin",
-        "subfolder": "root",
-        "x": 160,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "huge-ogre",
-        "subfolder": "huge",
-        "x": 352,
-        "y": 1504,
-        "used": true
-      },
-      {
-        "className": "gray-wolf",
-        "subfolder": "gray",
-        "x": 64,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "bandit",
-        "subfolder": "root",
-        "x": 672,
-        "y": 1408,
-        "used": true
-      },
-      {
-        "className": "smirking-sneak-thief",
-        "subfolder": "smirking",
-        "x": 256,
-        "y": 1472,
-        "used": true
-      },
-      {
-        "className": "white-wolf",
-        "subfolder": "white",
-        "x": 64,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "barrow-wight",
-        "subfolder": "barrow",
-        "x": 128,
-        "y": 1312,
-        "used": true
-      },
-      {
-        "className": "brown-bear",
-        "subfolder": "brown",
-        "x": 736,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "animated-wooden-statue",
-        "subfolder": "animated",
-        "x": 160,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "cave-bear",
-        "subfolder": "cave",
-        "x": 960,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "gelatinous-glob",
-        "subfolder": "gelatinous",
-        "x": 512,
-        "y": 32,
-        "used": true
-      },
-      {
-        "className": "animated-bronze-statue",
-        "subfolder": "animated",
-        "x": 64,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "evil-warrior",
-        "subfolder": "evil",
-        "x": 512,
-        "y": 1408,
-        "used": true
-      },
-      {
-        "className": "dark-wraith",
-        "subfolder": "dark",
-        "x": 256,
-        "y": 1248,
-        "used": true
-      },
-      {
-        "className": "gruesome-troll",
-        "subfolder": "gruesome",
-        "x": 352,
-        "y": 1504,
-        "used": true
-      },
-      {
-        "className": "manticore",
-        "subfolder": "root",
-        "x": 512,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "wizard",
-        "subfolder": "root",
-        "x": 928,
-        "y": 1408,
-        "used": true
-      },
-      {
-        "className": "animated-iron-statue",
-        "subfolder": "animated",
-        "x": 320,
-        "y": 608,
-        "used": true
-      },
-      {
-        "className": "necromancer",
-        "subfolder": "root",
-        "x": 640,
-        "y": 1440,
-        "used": true
-      },
-      {
-        "className": "eerie-ghost",
-        "subfolder": "eerie",
-        "x": 480,
-        "y": 1216,
-        "used": true
-      },
-      {
-        "className": "spectre",
-        "subfolder": "root",
-        "x": 960,
-        "y": 1216,
-        "used": true
-      },
-      {
-        "className": "vampire",
-        "subfolder": "root",
-        "x": 992,
-        "y": 1280,
-        "used": true
-      },
-      {
-        "className": "animated-marble-statue",
-        "subfolder": "animated",
-        "x": 320,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "rat-man",
-        "subfolder": "rat",
-        "x": 160,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "hill-giant",
-        "subfolder": "hill",
-        "x": 896,
-        "y": 1472,
-        "used": true
-      },
-      {
-        "className": "ice-devil",
-        "subfolder": "ice",
-        "x": 480,
-        "y": 256,
-        "used": true
-      },
-      {
-        "className": "wind-elemental",
-        "subfolder": "wind",
-        "x": 736,
-        "y": 544,
-        "used": true
-      },
-      {
-        "className": "dust-elemental",
-        "subfolder": "dust",
-        "x": 416,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "two-headed-giant",
-        "subfolder": "two",
-        "x": 32,
-        "y": 768,
-        "used": true
-      },
-      {
-        "className": "fire-elemental",
-        "subfolder": "fire",
-        "x": 512,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "water-elemental",
-        "subfolder": "water",
-        "x": 96,
-        "y": 704,
-        "used": true
-      },
-      {
-        "className": "frost-giant",
-        "subfolder": "frost",
-        "x": 352,
-        "y": 448,
-        "used": true
-      },
-      {
-        "className": "spiked-devil",
-        "subfolder": "spiked",
-        "x": 832,
-        "y": 256,
-        "used": true
-      },
-      {
-        "className": "earth-elemental",
-        "subfolder": "earth",
-        "x": 416,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "magma-elemental",
-        "subfolder": "magma",
-        "x": 928,
-        "y": 608,
-        "used": true
-      },
-      {
-        "className": "stone-giant",
-        "subfolder": "stone",
-        "x": 352,
-        "y": 448,
-        "used": true
-      },
-      {
-        "className": "horned-devil",
-        "subfolder": "horned",
-        "x": 416,
-        "y": 256,
-        "used": true
-      },
-      {
-        "className": "fire-giant",
-        "subfolder": "fire",
-        "x": 224,
-        "y": 1472,
-        "used": true
-      },
-      {
-        "className": "white-dragon",
-        "subfolder": "white",
-        "x": 128,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "blue-dragon",
-        "subfolder": "blue",
-        "x": 352,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "green-dragon",
-        "subfolder": "green",
-        "x": 384,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "abyss-fiend",
-        "subfolder": "abyss",
-        "x": 960,
-        "y": 224,
-        "used": true
-      },
-      {
-        "className": "red-dragon",
-        "subfolder": "red",
-        "x": 960,
-        "y": 288,
-        "used": true
-      },
-      {
-        "className": "wolf-man",
-        "subfolder": "wolf",
-        "x": 192,
-        "y": 1440,
-        "used": true
-      },
-      {
-        "className": "hill-giant-king",
-        "subfolder": "hill",
-        "x": 896,
-        "y": 1472,
-        "used": true
-      },
-      {
-        "className": "frost-giant-king",
-        "subfolder": "frost",
-        "x": 352,
-        "y": 448,
-        "used": true
-      },
-      {
-        "className": "surtur",
-        "subfolder": "root",
-        "x": 320,
-        "y": 1408,
-        "used": true
-      },
-      {
-        "className": "bone-dragon",
-        "subfolder": "bone",
-        "x": 96,
-        "y": 1184,
-        "used": true
-      },
-      {
-        "className": "death-knight",
-        "subfolder": "death",
-        "x": 160,
-        "y": 1280,
-        "used": true
-      },
-      {
-        "className": "balrug",
-        "subfolder": "root",
-        "x": 896,
-        "y": 224,
-        "used": false
-      },
-      {
-        "className": "executioner",
-        "subfolder": "root",
-        "x": 320,
-        "y": 256,
-        "used": false
-      },
-      {
-        "className": "tormentor",
-        "subfolder": "root",
-        "x": 128,
-        "y": 288,
-        "used": false
-      },
-      {
-        "className": "reaper",
-        "subfolder": "root",
-        "x": 768,
-        "y": 256,
-        "used": false
-      },
-      {
-        "className": "soul-eater",
-        "subfolder": "soul",
-        "x": 32,
-        "y": 288,
-        "used": true
-      },
-      {
-        "className": "hell-sentinel",
-        "subfolder": "hell",
-        "x": 384,
-        "y": 256,
-        "used": true
-      },
-      {
-        "className": "brimstone-fiend",
-        "subfolder": "brimstone",
-        "x": 960,
-        "y": 224,
-        "used": true
-      },
-      {
-        "className": "blizzard-demon",
-        "subfolder": "blizzard",
-        "x": 928,
-        "y": 224,
-        "used": true
-      },
-      {
-        "className": "smoke-demon",
-        "subfolder": "smoke",
-        "x": 0,
-        "y": 288,
-        "used": true
-      },
-      {
-        "className": "golden-dragon",
-        "subfolder": "golden",
-        "x": 960,
-        "y": 288,
-        "used": true
-      },
-      {
-        "className": "shadow-dragon",
-        "subfolder": "shadow",
-        "x": 288,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "wyvern",
-        "subfolder": "root",
-        "x": 576,
-        "y": 320,
-        "used": false
-      },
-      {
-        "className": "iron-golem",
-        "subfolder": "iron",
-        "x": 320,
-        "y": 608,
-        "used": true
-      },
-      {
-        "className": "flesh-golem",
-        "subfolder": "flesh",
-        "x": 672,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "electric-golem",
-        "subfolder": "electric",
-        "x": 480,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "ball-lightning",
-        "subfolder": "ball",
-        "x": 928,
-        "y": 544,
-        "used": true
-      },
-      {
-        "className": "emperor-scorpion",
-        "subfolder": "emperor",
-        "x": 928,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "death-yak",
-        "subfolder": "death",
-        "x": 736,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "killer-bee",
-        "subfolder": "killer",
-        "x": 640,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "ghost-moth",
-        "subfolder": "ghost",
-        "x": 64,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "wolf-spider",
-        "subfolder": "wolf",
-        "x": 96,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "seraph",
-        "subfolder": "root",
-        "x": 736,
-        "y": 384,
-        "used": false
-      },
-      {
-        "className": "eye-of-devastation",
-        "subfolder": "eye",
-        "x": 608,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "shining-eye",
-        "subfolder": "shining",
-        "x": 800,
-        "y": 320,
-        "used": true
-      },
-      {
-        "className": "warmonger",
-        "subfolder": "root",
-        "x": 256,
-        "y": 512,
-        "used": true
-      },
-      {
-        "className": "male-hero",
-        "subfolder": "male",
-        "x": 704,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "female-hero",
-        "subfolder": "female",
-        "x": 736,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "kobold",
-        "subfolder": "root",
-        "x": 768,
-        "y": 1536,
-        "used": false
-      },
-      {
-        "className": "giant-red-ant",
-        "subfolder": "giant",
-        "x": 800,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "giant-trapdoor-spider",
-        "subfolder": "giant",
-        "x": 832,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "carrion-creeper",
-        "subfolder": "carrion",
-        "x": 864,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "walking-corpse",
-        "subfolder": "walking",
-        "x": 896,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "shadow",
-        "subfolder": "root",
-        "x": 928,
-        "y": 1536,
-        "used": false
-      },
-      {
-        "className": "bull-man",
-        "subfolder": "bull",
-        "x": 960,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "ice-elemental",
-        "subfolder": "ice",
-        "x": 992,
-        "y": 1536,
-        "used": true
-      },
-      {
-        "className": "queen-ant",
-        "subfolder": "queen",
-        "x": 128,
-        "y": 1568,
-        "used": true
       }
     ]
   },
@@ -19358,559 +18693,6 @@
         "x": 704,
         "y": 1088,
         "used": false
-      },
-      {
-        "className": "potion",
-        "subfolder": "root",
-        "x": 256,
-        "y": 608,
-        "used": false
-      },
-      {
-        "className": "potion-heal-minor",
-        "subfolder": "potion",
-        "x": 160,
-        "y": 608,
-        "used": true
-      },
-      {
-        "className": "potion-heal-medium",
-        "subfolder": "potion",
-        "x": 992,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "potion-heal-major",
-        "subfolder": "potion",
-        "x": 640,
-        "y": 544,
-        "used": true
-      },
-      {
-        "className": "potion-gain-attribute",
-        "subfolder": "potion",
-        "x": 928,
-        "y": 544,
-        "used": true
-      },
-      {
-        "className": "scroll",
-        "subfolder": "root",
-        "x": 736,
-        "y": 704,
-        "used": false
-      },
-      {
-        "className": "spell-book",
-        "subfolder": "spell",
-        "x": 992,
-        "y": 288,
-        "used": true
-      },
-      {
-        "className": "staff",
-        "subfolder": "root",
-        "x": 640,
-        "y": 736,
-        "used": false
-      },
-      {
-        "className": "wand",
-        "subfolder": "root",
-        "x": 992,
-        "y": 768,
-        "used": false
-      },
-      {
-        "className": "axe",
-        "subfolder": "root",
-        "x": 320,
-        "y": 896,
-        "used": true
-      },
-      {
-        "className": "axe-cursed",
-        "subfolder": "axe",
-        "x": 352,
-        "y": 896,
-        "used": true
-      },
-      {
-        "className": "axe-enchanted",
-        "subfolder": "axe",
-        "x": 384,
-        "y": 896,
-        "used": true
-      },
-      {
-        "className": "sword",
-        "subfolder": "root",
-        "x": 832,
-        "y": 928,
-        "used": true
-      },
-      {
-        "className": "sword-enchanted",
-        "subfolder": "sword",
-        "x": 896,
-        "y": 928,
-        "used": true
-      },
-      {
-        "className": "mace",
-        "subfolder": "root",
-        "x": 96,
-        "y": 960,
-        "used": true
-      },
-      {
-        "className": "mace-enchanted",
-        "subfolder": "mace",
-        "x": 160,
-        "y": 960,
-        "used": true
-      },
-      {
-        "className": "leather-armour",
-        "subfolder": "leather",
-        "x": 768,
-        "y": 160,
-        "used": true
-      },
-      {
-        "className": "leather-armour-enchanted",
-        "subfolder": "leather",
-        "x": 384,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "metal-armour",
-        "subfolder": "metal",
-        "x": 64,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "metal-armour-cursed",
-        "subfolder": "metal",
-        "x": 256,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "metal-armour-enchanted",
-        "subfolder": "metal",
-        "x": 608,
-        "y": 192,
-        "used": true
-      },
-      {
-        "className": "wood-shield",
-        "subfolder": "wood",
-        "x": 544,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "metal-helmet",
-        "subfolder": "metal",
-        "x": 800,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "metal-helmet-cursed",
-        "subfolder": "metal",
-        "x": 832,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "metal-helmet-enchanted",
-        "subfolder": "metal",
-        "x": 672,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "metal-helmet-of-detect-monsters",
-        "subfolder": "metal",
-        "x": 736,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "leather-helmet",
-        "subfolder": "leather",
-        "x": 480,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "cloak",
-        "subfolder": "root",
-        "x": 768,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "cloak-enchanted",
-        "subfolder": "cloak",
-        "x": 832,
-        "y": 64,
-        "used": true
-      },
-      {
-        "className": "ring",
-        "subfolder": "root",
-        "x": 192,
-        "y": 672,
-        "used": true
-      },
-      {
-        "className": "coins-gold",
-        "subfolder": "coins",
-        "x": 768,
-        "y": 384,
-        "used": true
-      },
-      {
-        "className": "treasure-pile",
-        "subfolder": "treasure",
-        "x": 896,
-        "y": 384,
-        "used": true
-      },
-      {
-        "className": "parchment",
-        "subfolder": "root",
-        "x": 736,
-        "y": 704,
-        "used": true
-      },
-      {
-        "className": "metal-helmet-of-storms",
-        "subfolder": "metal",
-        "x": 768,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "flail",
-        "subfolder": "root",
-        "x": 672,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "flail-cursed",
-        "subfolder": "flail",
-        "x": 704,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "spear",
-        "subfolder": "root",
-        "x": 640,
-        "y": 992,
-        "used": true
-      },
-      {
-        "className": "spear-enchanted",
-        "subfolder": "spear",
-        "x": 704,
-        "y": 992,
-        "used": true
-      },
-      {
-        "className": "club",
-        "subfolder": "root",
-        "x": 480,
-        "y": 832,
-        "used": true
-      },
-      {
-        "className": "amulet",
-        "subfolder": "root",
-        "x": 832,
-        "y": 1088,
-        "used": false
-      },
-      {
-        "className": "amulet-enchanted",
-        "subfolder": "amulet",
-        "x": 896,
-        "y": 1088,
-        "used": true
-      },
-      {
-        "className": "amulet-resist-fire",
-        "subfolder": "amulet",
-        "x": 928,
-        "y": 1088,
-        "used": true
-      },
-      {
-        "className": "amulet-resist-lightning",
-        "subfolder": "amulet",
-        "x": 960,
-        "y": 1088,
-        "used": true
-      },
-      {
-        "className": "amulet-resist-cold",
-        "subfolder": "amulet",
-        "x": 992,
-        "y": 1088,
-        "used": true
-      },
-      {
-        "className": "amulet-resist-drain",
-        "subfolder": "amulet",
-        "x": 0,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "metal-shield",
-        "subfolder": "metal",
-        "x": 32,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "metal-shield-cursed",
-        "subfolder": "metal",
-        "x": 64,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "metal-shield-enchanted",
-        "subfolder": "metal",
-        "x": 96,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "boots",
-        "subfolder": "root",
-        "x": 128,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "boots-cursed",
-        "subfolder": "boots",
-        "x": 160,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "boots-enchanted",
-        "subfolder": "boots",
-        "x": 192,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "boots-of-levitation",
-        "subfolder": "boots",
-        "x": 256,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "elemental-portal",
-        "subfolder": "elemental",
-        "x": 288,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "amulet-of-kings",
-        "subfolder": "amulet",
-        "x": 320,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "dagger",
-        "subfolder": "root",
-        "x": 384,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "dagger-enchanted",
-        "subfolder": "dagger",
-        "x": 416,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "meteoric-sword",
-        "subfolder": "meteoric",
-        "x": 448,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "meteoric-two-handed-sword",
-        "subfolder": "meteoric",
-        "x": 480,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "belt-leather",
-        "subfolder": "belt",
-        "x": 512,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "belt-leather-enchanted",
-        "subfolder": "belt",
-        "x": 544,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "backpack-small",
-        "subfolder": "backpack",
-        "x": 576,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "backpack-large",
-        "subfolder": "backpack",
-        "x": 608,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "backpack-enchanted",
-        "subfolder": "backpack",
-        "x": 640,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "backpack-cursed",
-        "subfolder": "backpack",
-        "x": 672,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "backpack-broken",
-        "subfolder": "backpack",
-        "x": 800,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "elven-chain-mail",
-        "subfolder": "elven",
-        "x": 832,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "elven-cloak",
-        "subfolder": "elven",
-        "x": 864,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "gloves-leather",
-        "subfolder": "gloves",
-        "x": 896,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "gloves-iron",
-        "subfolder": "gloves",
-        "x": 928,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "gloves-elven",
-        "subfolder": "gloves",
-        "x": 960,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "gloves-meteoric",
-        "subfolder": "gloves",
-        "x": 992,
-        "y": 1120,
-        "used": true
-      },
-      {
-        "className": "elven-belt",
-        "subfolder": "elven",
-        "x": 0,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "meteoric-belt",
-        "subfolder": "meteoric",
-        "x": 32,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "elven-ring",
-        "subfolder": "elven",
-        "x": 64,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "meteoric-ring",
-        "subfolder": "meteoric",
-        "x": 96,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "elven-amulet",
-        "subfolder": "elven",
-        "x": 128,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "meteoric-amulet",
-        "subfolder": "meteoric",
-        "x": 160,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "meteoric-cloak",
-        "subfolder": "meteoric",
-        "x": 192,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "backpack-elven",
-        "subfolder": "backpack",
-        "x": 320,
-        "y": 1152,
-        "used": true
       }
     ]
   },
@@ -19924,7 +18706,7 @@
         "subfolder": "altars",
         "x": 0,
         "y": 0,
-        "used": false
+        "used": true
       },
       {
         "className": "altars-beogh",
@@ -19973,7 +18755,7 @@
         "subfolder": "altars",
         "x": 224,
         "y": 0,
-        "used": false
+        "used": true
       },
       {
         "className": "altars-elyvilon",
@@ -20631,7 +19413,7 @@
         "subfolder": "decor",
         "x": 160,
         "y": 96,
-        "used": false
+        "used": true
       },
       {
         "className": "decor-sparkling_fountain2",
@@ -20673,7 +19455,7 @@
         "subfolder": "doors",
         "x": 352,
         "y": 96,
-        "used": false
+        "used": true
       },
       {
         "className": "doors-closed_door_crypt",
@@ -20967,7 +19749,7 @@
         "subfolder": "doors",
         "x": 672,
         "y": 128,
-        "used": false
+        "used": true
       },
       {
         "className": "doors-open_door_crypt",
@@ -21520,7 +20302,7 @@
         "subfolder": "floor",
         "x": 128,
         "y": 224,
-        "used": false
+        "used": true
       },
       {
         "className": "floor-cobble_blood10",
@@ -22346,7 +21128,7 @@
         "subfolder": "floor",
         "x": 832,
         "y": 320,
-        "used": false
+        "used": true
       },
       {
         "className": "floor-grass_n",
@@ -22724,7 +21506,7 @@
         "subfolder": "floor",
         "x": 512,
         "y": 384,
-        "used": false
+        "used": true
       },
       {
         "className": "floor-grey_dirt1",
@@ -26084,14 +24866,14 @@
         "subfolder": "gateways",
         "x": 512,
         "y": 864,
-        "used": false
+        "used": true
       },
       {
         "className": "gateways-stone_stairs_up",
         "subfolder": "gateways",
         "x": 544,
         "y": 864,
-        "used": false
+        "used": true
       },
       {
         "className": "gateways-transit_pandemonium",
@@ -26427,7 +25209,7 @@
         "subfolder": "statues",
         "x": 32,
         "y": 928,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-crumbled_column_2",
@@ -26469,7 +25251,7 @@
         "subfolder": "statues",
         "x": 224,
         "y": 928,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-depths_crumbled_column",
@@ -26490,7 +25272,7 @@
         "subfolder": "statues",
         "x": 320,
         "y": 928,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-statue_ancient_evil",
@@ -26504,7 +25286,7 @@
         "subfolder": "statues",
         "x": 384,
         "y": 928,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-statue_angel",
@@ -26553,7 +25335,7 @@
         "subfolder": "statues",
         "x": 608,
         "y": 928,
-        "used": false
+        "used": true
       },
       {
         "className": "statues-statue_depths_asmodeus",
@@ -26861,7 +25643,7 @@
         "subfolder": "traps",
         "x": 992,
         "y": 960,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-archmage",
@@ -26875,14 +25657,14 @@
         "subfolder": "traps",
         "x": 32,
         "y": 992,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-bolt",
         "subfolder": "traps",
         "x": 64,
         "y": 992,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-cobweb_E",
@@ -26938,7 +25720,7 @@
         "subfolder": "traps",
         "x": 320,
         "y": 992,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-cobweb_NEW",
@@ -27036,7 +25818,7 @@
         "subfolder": "traps",
         "x": 768,
         "y": 992,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-dispersal_inactive",
@@ -27085,7 +25867,7 @@
         "subfolder": "traps",
         "x": 992,
         "y": 992,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-passage_of_golubria",
@@ -27106,21 +25888,21 @@
         "subfolder": "traps",
         "x": 64,
         "y": 1024,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-spear",
         "subfolder": "traps",
         "x": 96,
         "y": 1024,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-teleport",
         "subfolder": "traps",
         "x": 128,
         "y": 1024,
-        "used": false
+        "used": true
       },
       {
         "className": "traps-teleport_permanent",
@@ -27141,7 +25923,7 @@
         "subfolder": "traps",
         "x": 224,
         "y": 1024,
-        "used": false
+        "used": true
       },
       {
         "className": "trees-dead_tree_of_woe1",
@@ -29549,7 +28331,7 @@
         "subfolder": "wall",
         "x": 992,
         "y": 1344,
-        "used": false
+        "used": true
       },
       {
         "className": "wall-brick_dark_1_1",
@@ -30221,7 +29003,7 @@
         "subfolder": "wall",
         "x": 992,
         "y": 1440,
-        "used": false
+        "used": true
       },
       {
         "className": "wall-brick_gray1",
@@ -34722,7 +33504,7 @@
         "subfolder": "water",
         "x": 64,
         "y": 2112,
-        "used": false
+        "used": true
       },
       {
         "className": "water-deep_water_murky",
@@ -35535,230 +34317,6 @@
         "x": 704,
         "y": 2208,
         "used": false
-      },
-      {
-        "className": "rock",
-        "subfolder": "root",
-        "x": 992,
-        "y": 1440,
-        "used": true
-      },
-      {
-        "className": "mine-entrance",
-        "subfolder": "mine",
-        "x": 192,
-        "y": 800,
-        "used": true
-      },
-      {
-        "className": "sign",
-        "subfolder": "root",
-        "x": 832,
-        "y": 896,
-        "used": true
-      },
-      {
-        "className": "grass",
-        "subfolder": "root",
-        "x": 704,
-        "y": 352,
-        "used": true
-      },
-      {
-        "className": "dark-dgn",
-        "subfolder": "dark",
-        "x": 512,
-        "y": 384,
-        "used": true
-      },
-      {
-        "className": "water",
-        "subfolder": "root",
-        "x": 64,
-        "y": 2112,
-        "used": true
-      },
-      {
-        "className": "path",
-        "subfolder": "root",
-        "x": 0,
-        "y": 576,
-        "used": true
-      },
-      {
-        "className": "stairs-up",
-        "subfolder": "stairs",
-        "x": 544,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "stairs-down",
-        "subfolder": "stairs",
-        "x": 512,
-        "y": 864,
-        "used": true
-      },
-      {
-        "className": "town-wall",
-        "subfolder": "town",
-        "x": 704,
-        "y": 1728,
-        "used": true
-      },
-      {
-        "className": "lit-dgn",
-        "subfolder": "lit",
-        "x": 320,
-        "y": 480,
-        "used": true
-      },
-      {
-        "className": "door-closed",
-        "subfolder": "door",
-        "x": 352,
-        "y": 96,
-        "used": true
-      },
-      {
-        "className": "door-open",
-        "subfolder": "door",
-        "x": 672,
-        "y": 128,
-        "used": true
-      },
-      {
-        "className": "stone-coffin",
-        "subfolder": "stone",
-        "x": 736,
-        "y": 1152,
-        "used": true
-      },
-      {
-        "className": "fountain",
-        "subfolder": "root",
-        "x": 96,
-        "y": 928,
-        "used": true
-      },
-      {
-        "className": "pit-trap",
-        "subfolder": "pit",
-        "x": 64,
-        "y": 1024,
-        "used": true
-      },
-      {
-        "className": "portal-trap",
-        "subfolder": "portal",
-        "x": 160,
-        "y": 1024,
-        "used": true
-      },
-      {
-        "className": "fire-trap",
-        "subfolder": "fire",
-        "x": 96,
-        "y": 1024,
-        "used": true
-      },
-      {
-        "className": "blood-trap",
-        "subfolder": "blood",
-        "x": 288,
-        "y": 224,
-        "used": true
-      },
-      {
-        "className": "rune-trap",
-        "subfolder": "rune",
-        "x": 224,
-        "y": 1024,
-        "used": true
-      },
-      {
-        "className": "pillar-stone",
-        "subfolder": "pillar",
-        "x": 736,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "altar",
-        "subfolder": "root",
-        "x": 768,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "statue",
-        "subfolder": "root",
-        "x": 800,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "pillar-broken",
-        "subfolder": "pillar",
-        "x": 832,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "gold",
-        "subfolder": "root",
-        "x": 864,
-        "y": 2208,
-        "used": false
-      },
-      {
-        "className": "altar-2",
-        "subfolder": "altar",
-        "x": 896,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "arrow-trap",
-        "subfolder": "arrow",
-        "x": 928,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "wind-trap",
-        "subfolder": "wind",
-        "x": 960,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "dart-trap",
-        "subfolder": "dart",
-        "x": 992,
-        "y": 2208,
-        "used": true
-      },
-      {
-        "className": "cobweb-trap",
-        "subfolder": "cobweb",
-        "x": 0,
-        "y": 2240,
-        "used": true
-      },
-      {
-        "className": "lightning-trap",
-        "subfolder": "lightning",
-        "x": 32,
-        "y": 2240,
-        "used": true
-      },
-      {
-        "className": "acid-trap",
-        "subfolder": "acid",
-        "x": 64,
-        "y": 2240,
-        "used": true
       }
     ]
   },

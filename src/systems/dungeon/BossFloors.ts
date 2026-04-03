@@ -33,7 +33,7 @@ function floor(): Tile {
 function stairsUp(): Tile {
   return {
     type: "stairs-up",
-    sprite: "stairs-up",
+    sprite: "gateways-stone_stairs_up",
     walkable: true,
     transparent: true,
   };
@@ -42,7 +42,7 @@ function stairsUp(): Tile {
 function stairsDown(): Tile {
   return {
     type: "stairs-down",
-    sprite: "stairs-down",
+    sprite: "gateways-stone_stairs_down",
     walkable: true,
     transparent: true,
   };
@@ -53,7 +53,12 @@ function decor(sprite: string): Tile {
 }
 
 function water(): Tile {
-  return { type: "water", sprite: "water", walkable: true, transparent: true };
+  return {
+    type: "water",
+    sprite: "water-deep_water",
+    walkable: true,
+    transparent: true,
+  };
 }
 
 // ── Grid helpers ──────────────────────────────────────────
@@ -164,13 +169,13 @@ function rand01(): number {
 // ── Boss floor decoration ────────────────────────────────
 
 const BOSS_DECOR: { sprite: string; minDepth: number; weight: number }[] = [
-  { sprite: "pillar-stone", minDepth: 1, weight: 4 },
-  { sprite: "pillar-broken", minDepth: 5, weight: 3 },
-  { sprite: "altar", minDepth: 10, weight: 1 },
-  { sprite: "altar-2", minDepth: 20, weight: 1 },
-  { sprite: "statue", minDepth: 10, weight: 2 },
-  { sprite: "stone-coffin", minDepth: 15, weight: 2 },
-  { sprite: "fountain", minDepth: 10, weight: 1 },
+  { sprite: "statues-depths_column", minDepth: 1, weight: 4 },
+  { sprite: "statues-crumbled_column_1", minDepth: 5, weight: 3 },
+  { sprite: "altars-ecumenical", minDepth: 10, weight: 1 },
+  { sprite: "altars-ashenzari", minDepth: 20, weight: 1 },
+  { sprite: "statues-statue_ancient_hero", minDepth: 10, weight: 2 },
+  { sprite: "statues-statue_demonic_bust", minDepth: 15, weight: 2 },
+  { sprite: "decor-sparkling_fountain", minDepth: 10, weight: 1 },
 ];
 
 function decorateBossFloor(

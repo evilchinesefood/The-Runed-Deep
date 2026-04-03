@@ -50,7 +50,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "giant-rat",
     name: "Giant Rat",
-    sprite: "giant-rat",
+    sprite: "animals-quokka",
     hp: [6, 10],
     damage: [2, 4],
     speed: 1.1,
@@ -82,7 +82,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "large-snake",
     name: "Large Snake",
-    sprite: "large-snake",
+    sprite: "animals-water_moccasin",
     hp: [8, 14],
     damage: [2, 5],
     speed: 1,
@@ -114,7 +114,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "giant-bat",
     name: "Giant Bat",
-    sprite: "giant-bat",
+    sprite: "animals-bat",
     hp: [8, 14],
     damage: [2, 5],
     speed: 1.4,
@@ -130,7 +130,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "wild-dog",
     name: "Wild Dog",
-    sprite: "wild-dog",
+    sprite: "animals-jackal",
     hp: [12, 18],
     damage: [3, 7],
     speed: 1.2,
@@ -146,7 +146,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "skeleton",
     name: "Skeleton",
-    sprite: "skeleton",
+    sprite: "skeletons-skeleton_humanoid_small",
     hp: [14, 22],
     damage: [4, 8],
     speed: 0.9,
@@ -422,7 +422,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "viper",
     name: "Viper",
-    sprite: "viper",
+    sprite: "animals-adder",
     hp: [12, 20],
     damage: [4, 8],
     speed: 1.1,
@@ -438,7 +438,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "hobgoblin",
     name: "Hobgoblin",
-    sprite: "hobgoblin",
+    sprite: "vault-deformed_human",
     hp: [24, 36],
     damage: [6, 13],
     speed: 1,
@@ -486,7 +486,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "goblin",
     name: "Goblin",
-    sprite: "goblin",
+    sprite: "vault-deformed_orc",
     hp: [16, 24],
     damage: [4, 9],
     speed: 1,
@@ -502,7 +502,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "giant-scorpion",
     name: "Giant Scorpion",
-    sprite: "giant-scorpion",
+    sprite: "animals-scorpion",
     hp: [18, 28],
     damage: [5, 10],
     speed: 1,
@@ -534,7 +534,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "huge-lizard",
     name: "Huge Lizard",
-    sprite: "huge-lizard",
+    sprite: "animals-iguana",
     hp: [22, 34],
     damage: [6, 12],
     speed: 0.9,
@@ -550,7 +550,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "green-slime",
     name: "Red Slime",
-    sprite: "green-slime",
+    sprite: "amorphous-jelly",
     hp: [22, 35],
     damage: [4, 9],
     speed: 0.5,
@@ -810,7 +810,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "huge-ogre",
     name: "Huge Ogre",
-    sprite: "huge-ogre",
+    sprite: "unique-snorg",
     hp: [28, 42],
     damage: [7, 14],
     speed: 0.8,
@@ -826,7 +826,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "gray-wolf",
     name: "Gray Wolf",
-    sprite: "gray-wolf",
+    sprite: "animals-wolf",
     hp: [24, 36],
     damage: [6, 13],
     speed: 1.3,
@@ -842,7 +842,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "bandit",
     name: "Bandit",
-    sprite: "bandit",
+    sprite: "unique-edmund",
     hp: [26, 40],
     damage: [7, 14],
     speed: 1,
@@ -858,7 +858,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "smirking-sneak-thief",
     name: "Smirking Sneak Thief",
-    sprite: "smirking-sneak-thief",
+    sprite: "unique-maurice",
     hp: [18, 28],
     damage: [5, 10],
     speed: 1.5,
@@ -874,7 +874,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "white-wolf",
     name: "White Wolf",
-    sprite: "white-wolf",
+    sprite: "animals-wolf",
     hp: [28, 42],
     damage: [7, 15],
     speed: 1.3,
@@ -890,7 +890,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "barrow-wight",
     name: "Barrow Wight",
-    sprite: "barrow-wight",
+    sprite: "undead-wight",
     hp: [28, 42],
     damage: [7, 14],
     speed: 0.9,
@@ -906,7 +906,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "brown-bear",
     name: "Brown Bear",
-    sprite: "brown-bear",
+    sprite: "animals-black_bear",
     hp: [34, 50],
     damage: [8, 16],
     speed: 1,
@@ -922,7 +922,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "animated-wooden-statue",
     name: "Animated Wooden Statue",
-    sprite: "animated-wooden-statue",
+    sprite: "statues-training_dummy",
     hp: [30, 44],
     damage: [7, 14],
     speed: 0.8,
@@ -938,7 +938,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "cave-bear",
     name: "Cave Bear",
-    sprite: "cave-bear",
+    sprite: "animals-polar_bear",
     hp: [40, 58],
     damage: [9, 18],
     speed: 1,
@@ -1198,7 +1198,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "gelatinous-glob",
     name: "Gelatinous Glob",
-    sprite: "gelatinous-glob",
+    sprite: "amorphous-azure_jelly",
     hp: [30, 48],
     damage: [6, 12],
     speed: 0.4,
@@ -1214,7 +1214,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "animated-bronze-statue",
     name: "Animated Bronze Statue",
-    sprite: "animated-bronze-statue",
+    sprite: "statues-statue_base",
     hp: [36, 52],
     damage: [8, 16],
     speed: 0.7,
@@ -1230,7 +1230,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "evil-warrior",
     name: "Evil Warrior",
-    sprite: "evil-warrior",
+    sprite: "unique-donald",
     hp: [38, 56],
     damage: [9, 18],
     speed: 1,
@@ -1246,7 +1246,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "dark-wraith",
     name: "Dark Wraith",
-    sprite: "dark-wraith",
+    sprite: "undead-shadow_wraith",
     hp: [32, 48],
     damage: [8, 16],
     speed: 1.1,
@@ -1262,7 +1262,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "gruesome-troll",
     name: "Gruesome Troll",
-    sprite: "gruesome-troll",
+    sprite: "unique-snorg",
     hp: [48, 70],
     damage: [10, 20],
     speed: 1,
@@ -1278,7 +1278,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "manticore",
     name: "Manticore",
-    sprite: "manticore",
+    sprite: "animals-catoblepas",
     hp: [44, 64],
     damage: [10, 20],
     speed: 1.2,
@@ -1294,7 +1294,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "wizard",
     name: "Wizard",
-    sprite: "wizard",
+    sprite: "unique-fannar",
     hp: [30, 44],
     damage: [6, 12],
     speed: 1,
@@ -1315,7 +1315,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "animated-iron-statue",
     name: "Animated Iron Statue",
-    sprite: "animated-iron-statue",
+    sprite: "nonliving-iron_golem",
     hp: [50, 72],
     damage: [10, 20],
     speed: 0.6,
@@ -1331,7 +1331,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "necromancer",
     name: "Necromancer",
-    sprite: "necromancer",
+    sprite: "unique-josephine",
     hp: [34, 50],
     damage: [7, 14],
     speed: 1,
@@ -1591,7 +1591,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "eerie-ghost",
     name: "Eerie Ghost",
-    sprite: "eerie-ghost",
+    sprite: "undead-ghost",
     hp: [38, 56],
     damage: [9, 18],
     speed: 1.2,
@@ -1607,7 +1607,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "spectre",
     name: "Spectre",
-    sprite: "spectre",
+    sprite: "undead-phantom",
     hp: [44, 64],
     damage: [10, 22],
     speed: 1.1,
@@ -1623,7 +1623,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "vampire",
     name: "Vampire",
-    sprite: "vampire",
+    sprite: "undead-vampire",
     hp: [52, 75],
     damage: [11, 22],
     speed: 1.2,
@@ -1639,7 +1639,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "animated-marble-statue",
     name: "Animated Marble Statue",
-    sprite: "animated-marble-statue",
+    sprite: "nonliving-crystal_guardian",
     hp: [56, 80],
     damage: [11, 22],
     speed: 0.6,
@@ -1655,7 +1655,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "rat-man",
     name: "Rat-Man",
-    sprite: "rat-man",
+    sprite: "vault-deformed_human",
     hp: [44, 64],
     damage: [10, 20],
     speed: 1.2,
@@ -1687,7 +1687,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "hill-giant",
     name: "Hill Giant",
-    sprite: "hill-giant",
+    sprite: "unique-polyphemus",
     hp: [64, 95],
     damage: [14, 28],
     speed: 0.8,
@@ -1703,7 +1703,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "ice-devil",
     name: "Ice Devil",
-    sprite: "ice-devil",
+    sprite: "demons-ice_devil",
     hp: [58, 85],
     damage: [12, 24],
     speed: 1,
@@ -1719,7 +1719,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "wind-elemental",
     name: "Wind Elemental",
-    sprite: "wind-elemental",
+    sprite: "nonliving-air_elemental",
     hp: [46, 68],
     damage: [10, 20],
     speed: 1.5,
@@ -1735,7 +1735,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "dust-elemental",
     name: "Dust Elemental",
-    sprite: "dust-elemental",
+    sprite: "nonliving-earth_elemental",
     hp: [50, 74],
     damage: [10, 20],
     speed: 1,
@@ -1995,7 +1995,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "two-headed-giant",
     name: "Two-Headed Giant",
-    sprite: "two-headed-giant",
+    sprite: "player-giaggostuono",
     hp: [75, 110],
     damage: [16, 32],
     speed: 0.8,
@@ -2011,7 +2011,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "fire-elemental",
     name: "Fire Elemental",
-    sprite: "fire-elemental",
+    sprite: "nonliving-fire_elemental",
     hp: [56, 82],
     damage: [12, 26],
     speed: 1.1,
@@ -2027,7 +2027,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "water-elemental",
     name: "Water Elemental",
-    sprite: "water-elemental",
+    sprite: "nonliving-water_elemental",
     hp: [56, 82],
     damage: [12, 24],
     speed: 1,
@@ -2043,7 +2043,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "frost-giant",
     name: "Frost Giant",
-    sprite: "frost-giant",
+    sprite: "humanoids-iron_giant",
     hp: [80, 120],
     damage: [16, 32],
     speed: 0.9,
@@ -2059,7 +2059,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "spiked-devil",
     name: "Spiked Devil",
-    sprite: "spiked-devil",
+    sprite: "demons-red_devil",
     hp: [65, 95],
     damage: [14, 28],
     speed: 1.1,
@@ -2091,7 +2091,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "earth-elemental",
     name: "Earth Elemental",
-    sprite: "earth-elemental",
+    sprite: "nonliving-earth_elemental",
     hp: [70, 105],
     damage: [14, 30],
     speed: 0.6,
@@ -2107,7 +2107,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "magma-elemental",
     name: "Magma Elemental",
-    sprite: "magma-elemental",
+    sprite: "nonliving-orb_of_fire",
     hp: [65, 95],
     damage: [14, 30],
     speed: 0.7,
@@ -2123,7 +2123,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "stone-giant",
     name: "Stone Giant",
-    sprite: "stone-giant",
+    sprite: "humanoids-iron_giant",
     hp: [90, 130],
     damage: [18, 36],
     speed: 0.7,
@@ -2139,7 +2139,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "horned-devil",
     name: "Horned Devil",
-    sprite: "horned-devil",
+    sprite: "demons-hellion",
     hp: [80, 115],
     damage: [16, 34],
     speed: 1,
@@ -2155,7 +2155,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "fire-giant",
     name: "Fire Giant",
-    sprite: "fire-giant",
+    sprite: "unique-margery",
     hp: [90, 130],
     damage: [18, 36],
     speed: 0.9,
@@ -2171,7 +2171,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "white-dragon",
     name: "White Dragon",
-    sprite: "white-dragon",
+    sprite: "dragons-ice_dragon",
     hp: [85, 125],
     damage: [16, 34],
     speed: 1.1,
@@ -2187,7 +2187,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "blue-dragon",
     name: "Blue Dragon",
-    sprite: "blue-dragon",
+    sprite: "dragons-storm_dragon",
     hp: [95, 140],
     damage: [18, 38],
     speed: 1.1,
@@ -2203,7 +2203,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "green-dragon",
     name: "Green Dragon",
-    sprite: "green-dragon",
+    sprite: "dragons-swamp_dragon",
     hp: [95, 140],
     damage: [18, 38],
     speed: 1,
@@ -2219,7 +2219,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "abyss-fiend",
     name: "Abyss Fiend",
-    sprite: "abyss-fiend",
+    sprite: "demons-brimstone_fiend",
     hp: [100, 145],
     damage: [20, 40],
     speed: 1.1,
@@ -2235,7 +2235,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "red-dragon",
     name: "Red Dragon",
-    sprite: "red-dragon",
+    sprite: "dragons-golden_dragon",
     hp: [120, 175],
     damage: [22, 44],
     speed: 1,
@@ -2500,7 +2500,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "shrieker",
     name: "Shrieker",
-    sprite: "ghost-moth",
+    sprite: "animals-ghost_moth",
     hp: [5, 10],
     damage: [0, 0],
     speed: 0,
@@ -2516,7 +2516,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "war-drummer",
     name: "War Drummer",
-    sprite: "warmonger",
+    sprite: "humanoids-warmonger",
     hp: [20, 30],
     damage: [4, 8],
     speed: 0.9,
@@ -2551,7 +2551,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "iron-golem",
     name: "Iron Golem",
-    sprite: "iron-golem",
+    sprite: "nonliving-iron_golem",
     hp: [150, 180],
     damage: [12, 20],
     speed: 0.7,
@@ -2568,7 +2568,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "hill-giant-king",
     name: "Hrungnir, Hill Giant Lord",
-    sprite: "hill-giant-king",
+    sprite: "unique-polyphemus",
     hp: [120, 160],
     damage: [20, 40],
     speed: 0.9,
@@ -2585,7 +2585,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "wolf-man",
     name: "Wolf-Man",
-    sprite: "wolf-man",
+    sprite: "unique-grum",
     hp: [100, 130],
     damage: [16, 32],
     speed: 1.3,
@@ -2602,7 +2602,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "frost-giant-king",
     name: "Frost Giant King",
-    sprite: "frost-giant-king",
+    sprite: "humanoids-iron_giant",
     hp: [140, 190],
     damage: [22, 44],
     speed: 0.9,
@@ -2619,7 +2619,7 @@ export const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
     id: "surtur",
     name: "Surtur",
-    sprite: "surtur",
+    sprite: "unique-cerebov",
     hp: [250, 320],
     damage: [30, 60],
     speed: 1,

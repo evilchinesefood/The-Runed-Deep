@@ -7,12 +7,17 @@ const W = 40;
 const H = 30;
 
 function wall(): Tile {
-  return { type: "wall", sprite: "rock", walkable: false, transparent: false };
+  return {
+    type: "wall",
+    sprite: "wall-brick_gray0",
+    walkable: false,
+    transparent: false,
+  };
 }
 function floor(): Tile {
   return {
     type: "floor",
-    sprite: "dark-dgn",
+    sprite: "floor-grey_dirt0",
     walkable: true,
     transparent: true,
   };

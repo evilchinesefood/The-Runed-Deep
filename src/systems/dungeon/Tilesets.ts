@@ -11,17 +11,22 @@ export interface Tileset {
 }
 
 export const TILESETS: Record<string, Tileset> = {
-  mine: { floor: "dark-dgn", wall: "rock", litFloor: "lit-dgn", wallTint: "" },
+  mine: {
+    floor: "floor-grey_dirt0",
+    wall: "wall-brick_gray0",
+    litFloor: "floor-grey_dirt_b_0",
+    wallTint: "",
+  },
   fortress: {
-    floor: "dark-dgn",
-    wall: "rock",
-    litFloor: "lit-dgn",
+    floor: "floor-grey_dirt0",
+    wall: "wall-brick_gray0",
+    litFloor: "floor-grey_dirt_b_0",
     wallTint: "#6688bb",
   },
   castle: {
-    floor: "dark-dgn",
-    wall: "rock",
-    litFloor: "lit-dgn",
+    floor: "floor-grey_dirt0",
+    wall: "wall-brick_gray0",
+    litFloor: "floor-grey_dirt_b_0",
     wallTint: "#bb7755",
   },
 };

@@ -132,7 +132,7 @@ export const TOWN_BUILDINGS: TownBuilding[] = [
     h: 1,
     entranceX: 5,
     entranceY: 14,
-    sprite: "pillar-stone",
+    sprite: "statues-depths_column",
     spriteW: 32,
     spriteH: 32,
   },
@@ -146,7 +146,7 @@ export const TOWN_BUILDINGS: TownBuilding[] = [
     h: 1,
     entranceX: 8,
     entranceY: 20,
-    sprite: "statue",
+    sprite: "statues-statue_ancient_hero",
     spriteW: 32,
     spriteH: 32,
   },
@@ -227,42 +227,49 @@ function tf(sprite: string): Tile {
     case "town-wall":
       return {
         type: "wall",
-        sprite: "town-wall",
+        sprite: "wall-brick_dark_1_0",
         walkable: false,
         transparent: false,
       };
     case "invisible-wall":
       return {
         type: "wall",
-        sprite: "grass",
+        sprite: "floor-grass_full",
         walkable: false,
         transparent: true,
       };
     case "path":
       return {
         type: "path",
-        sprite: "path",
+        sprite: "floor-cobble_blood1",
         walkable: true,
         transparent: true,
       };
     case "water":
       return {
         type: "water",
-        sprite: "water",
+        sprite: "water-deep_water",
         walkable: false,
         transparent: true,
       };
     case "sign":
       return {
         type: "grass",
-        sprite: "sign",
+        sprite: "statues-orcish_idol",
         walkable: true,
         transparent: true,
       };
     case "mine-entrance":
       return {
         type: "stairs-down",
-        sprite: "mine-entrance",
+        sprite: "gateways-stone_stairs_down",
+        walkable: true,
+        transparent: true,
+      };
+    case "grass":
+      return {
+        type: "grass",
+        sprite: "floor-grass_full",
         walkable: true,
         transparent: true,
       };
@@ -700,7 +707,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     )
       tiles[b.entranceY][b.entranceX] = {
         type: "building",
-        sprite: "path",
+        sprite: "floor-cobble_blood1",
         walkable: true,
         transparent: true,
         buildingId: b.id,

@@ -563,56 +563,158 @@
       const STORAGE_KEY = "rd-sprite-slots";
       const SHEETS = ["monsters", "items", "tiles", "effects", "player"];
 
-      const SLOT_TREE = [
-        {
-          cat: "Weapon",
-          slots: ["sword", "axe", "mace", "spear", "dagger", "club", "flail"],
-        },
-        { cat: "Shield", slots: ["wood", "metal"] },
-        { cat: "Helmet", slots: ["leather", "metal"] },
-        { cat: "Body", slots: ["leather", "chain", "plate"] },
-        { cat: "Cloak", slots: [] },
-        { cat: "Gauntlets", slots: [] },
-        { cat: "Belt", slots: [] },
-        { cat: "Boots", slots: [] },
-        { cat: "Ring", slots: [] },
-        { cat: "Amulet", slots: [] },
-        { cat: "Pack", slots: [] },
-        {
-          cat: "Potion",
-          slots: [
-            "heal-minor",
-            "heal-medium",
-            "heal-major",
-            "gain-str",
-            "gain-int",
-            "gain-con",
-            "gain-dex",
-          ],
-        },
-        {
-          cat: "Spellbook",
-          slots: [
-            "levitation",
-            "clairvoyance",
-            "lightning-bolt",
-            "fire-bolt",
-            "resist-fire",
-            "resist-cold",
-            "resist-lightning",
-            "sleep-monster",
-            "slow-monster",
-            "cold-ball",
-            "teleport",
-            "remove-curse",
-            "ball-lightning",
-            "fire-ball",
-            "transmogrify-monster",
-            "time-stop",
-            "warcry",
-          ],
-        },
-      ];
+      var SLOTS = {
+        Weapons: [
+          "club",
+          "dagger",
+          "spear",
+          "mace",
+          "short-sword",
+          "flail",
+          "long-sword",
+          "battle-axe",
+          "two-handed-sword",
+          "elven-long-sword",
+          "elven-dagger",
+          "elven-spear",
+          "elven-mace",
+          "elven-battle-axe",
+          "meteoric-long-sword",
+          "meteoric-battle-axe",
+          "meteoric-flail",
+          "meteoric-two-handed-sword",
+          "blooddrinker",
+          "worldsplitter",
+        ],
+        "Body Armor": [
+          "leather-armor",
+          "studded-leather",
+          "chain-mail",
+          "plate-mail",
+          "elven-chain-mail",
+          "meteoric-plate-mail",
+          "demonhide-armor",
+        ],
+        Shields: [
+          "small-wood-shield",
+          "small-iron-shield",
+          "elven-shield",
+          "meteoric-shield",
+          "aegis-of-the-fallen",
+        ],
+        Helmets: [
+          "leather-cap",
+          "iron-helm",
+          "elven-helmet",
+          "meteoric-helm",
+          "helm-of-true-sight",
+          "helm-of-storms",
+        ],
+        Gauntlets: [
+          "leather-gloves",
+          "iron-gloves",
+          "elven-gloves",
+          "meteoric-gloves",
+          "gauntlets-of-the-forge",
+        ],
+        Boots: [
+          "leather-boots",
+          "iron-boots",
+          "elven-boots",
+          "meteoric-boots",
+          "boots-of-levitation",
+        ],
+        Cloaks: [
+          "cloak",
+          "fine-cloak",
+          "elven-cloak",
+          "meteoric-cloak",
+          "cloak-of-shadows",
+        ],
+        Belts: [
+          "belt",
+          "leather-belt",
+          "elven-belt",
+          "meteoric-belt",
+          "belt-of-the-titan",
+        ],
+        Rings: [
+          "ring",
+          "elven-ring",
+          "meteoric-ring",
+          "ring-of-fortune",
+          "ring-of-the-archmage",
+        ],
+        Amulets: [
+          "amulet",
+          "elven-amulet",
+          "meteoric-amulet",
+          "amulet-fire-ward",
+          "amulet-frost-ward",
+          "amulet-storm-ward",
+          "amulet-soul-ward",
+          "elemental-keystone",
+          "crown-of-ancients",
+        ],
+        Packs: [
+          "small-pack",
+          "large-pack",
+          "elven-pack",
+          "meteoric-pack",
+          "pack-of-holding",
+        ],
+        Potions: [
+          "potion-heal-minor",
+          "potion-heal-medium",
+          "potion-heal-major",
+          "potion-gain-str",
+          "potion-gain-int",
+          "potion-gain-con",
+          "potion-gain-dex",
+        ],
+        Spellbooks: [
+          "book-levitation",
+          "book-clairvoyance",
+          "book-lightning-bolt",
+          "book-fire-bolt",
+          "book-resist-fire",
+          "book-resist-cold",
+          "book-resist-lightning",
+          "book-sleep-monster",
+          "book-slow-monster",
+          "book-cold-ball",
+          "book-teleport",
+          "book-remove-curse",
+          "book-ball-lightning",
+          "book-fire-ball",
+          "book-transmogrify",
+          "book-time-stop",
+          "book-warcry",
+        ],
+        Currency: ["gold-coins"],
+      };
+
+      const UNIQUE_ITEMS = new Set([
+        "blooddrinker",
+        "worldsplitter",
+        "demonhide-armor",
+        "aegis-of-the-fallen",
+        "helm-of-true-sight",
+        "helm-of-storms",
+        "gauntlets-of-the-forge",
+        "boots-of-levitation",
+        "cloak-of-shadows",
+        "belt-of-the-titan",
+        "ring-of-fortune",
+        "ring-of-the-archmage",
+        "amulet-fire-ward",
+        "amulet-frost-ward",
+        "amulet-storm-ward",
+        "amulet-soul-ward",
+        "elemental-keystone",
+        "crown-of-ancients",
+        "pack-of-holding",
+      ]);
 
       let manifest = {};
       let config = {};
@@ -622,19 +724,16 @@
       let browseSearch = "";
 
       /* ========== HELPERS ========== */
-      function slotKey(cat, sub) {
-        let k = cat.toLowerCase();
-        if (sub) k += "-" + sub;
-        return k;
-      }
-
       function allSlotKeys() {
         let keys = [];
-        for (let g of SLOT_TREE) {
-          if (g.slots.length === 0) keys.push(slotKey(g.cat));
-          else for (let s of g.slots) keys.push(slotKey(g.cat, s));
+        for (let cat of Object.keys(SLOTS)) {
+          for (let id of SLOTS[cat]) keys.push(id);
         }
         return keys;
+      }
+
+      function prettyName(id) {
+        return id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
       }
 
       function getPool(key) {
@@ -686,12 +785,11 @@
         let $left = document.getElementById("left");
         $left.textContent = "";
 
-        for (let g of SLOT_TREE) {
-          let keys =
-            g.slots.length === 0
-              ? [slotKey(g.cat)]
-              : g.slots.map((s) => slotKey(g.cat, s));
-          let total = keys.reduce((n, k) => n + (config[k] || []).length, 0);
+        for (let cat of Object.keys(SLOTS)) {
+          let items = SLOTS[cat];
+          let configured = items.filter(
+            (k) => (config[k] || []).length > 0,
+          ).length;
 
           let hdr = document.createElement("div");
           hdr.className = "cat-hdr";
@@ -702,12 +800,12 @@
           hdr.appendChild(arrow);
 
           let name = document.createElement("span");
-          name.textContent = g.cat;
+          name.textContent = cat;
           hdr.appendChild(name);
 
           let badge = document.createElement("span");
-          badge.className = "cat-badge " + (total > 0 ? "ok" : "empty");
-          badge.textContent = total;
+          badge.className = "cat-badge " + (configured > 0 ? "ok" : "empty");
+          badge.textContent = configured + "/" + items.length;
           hdr.appendChild(badge);
 
           $left.appendChild(hdr);
@@ -715,14 +813,9 @@
           let slotsDiv = document.createElement("div");
           slotsDiv.className = "cat-slots";
 
-          if (g.slots.length === 0) {
-            let item = makeSlotItem(g.cat, slotKey(g.cat));
+          for (let id of items) {
+            let item = makeSlotItem(id);
             slotsDiv.appendChild(item);
-          } else {
-            for (let s of g.slots) {
-              let item = makeSlotItem(s, slotKey(g.cat, s));
-              slotsDiv.appendChild(item);
-            }
           }
 
           $left.appendChild(slotsDiv);
@@ -731,21 +824,28 @@
             hdr.classList.toggle("open");
           });
 
-          // Auto-open if active slot is in this group
-          if (activeSlot && keys.includes(activeSlot)) {
+          if (activeSlot && items.includes(activeSlot)) {
             hdr.classList.add("open");
           }
         }
       }
 
-      function makeSlotItem(label, key) {
+      function makeSlotItem(key) {
         let item = document.createElement("div");
         item.className = "slot-item";
         if (key === activeSlot) item.classList.add("active");
 
         let txt = document.createElement("span");
-        txt.textContent = label;
+        txt.textContent = prettyName(key);
         item.appendChild(txt);
+
+        if (UNIQUE_ITEMS.has(key)) {
+          let uBadge = document.createElement("span");
+          uBadge.style.cssText =
+            "color:#f90;font-size:10px;font-weight:600;margin-left:4px";
+          uBadge.textContent = "(U)";
+          item.appendChild(uBadge);
+        }
 
         let count = (config[key] || []).length;
         let badge = document.createElement("span");
@@ -792,7 +892,7 @@
           return;
         }
 
-        $title.textContent = activeSlot;
+        $title.textContent = prettyName(activeSlot);
         let pool = getPool(activeSlot);
         $count.textContent = pool.length + " sprite(s)";
         if ($clearAll)
