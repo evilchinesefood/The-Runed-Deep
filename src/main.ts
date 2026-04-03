@@ -527,6 +527,7 @@ function stepAutoPath(): void {
       return mx <= 1 && my <= 1;
     });
     if (hasAdjacentMonster) {
+      aeMsg("Auto-move stopped — monster nearby!");
       autoPath = [];
       return;
     }
@@ -534,6 +535,14 @@ function stepAutoPath(): void {
     // Stop at locked doors only — closed doors open automatically on move
     const nextTile = floor.tiles[next.y]?.[next.x];
     if (nextTile?.type === "door-locked") {
+      aeMsg("Auto-move stopped — locked door ahead.");
+      autoPath = [];
+      return;
+    }
+
+    // Stop at traps if not immune
+    if (nextTile?.type === "trap" && nextTile.trapRevealed && !heroIsTrapImmune()) {
+      aeMsg("Auto-move stopped — trap ahead!");
       autoPath = [];
       return;
     }
@@ -546,6 +555,7 @@ function stepAutoPath(): void {
         isWorthStoppingFor(i.item),
     );
     if (nextHasValuable) {
+      aeMsg("Auto-move stopped — item on the ground.");
       autoPath = [];
       return;
     }
