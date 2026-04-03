@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sprite Browser — The Runed Deep</title>
+    <link rel="stylesheet" href="css/sprites/monsters.css" />
+    <link rel="stylesheet" href="css/sprites/items.css" />
+    <link rel="stylesheet" href="css/sprites/tiles.css" />
+    <link rel="stylesheet" href="css/sprites/effects.css" />
+    <link rel="stylesheet" href="css/sprites/player.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a1a;
+        color: #d4c9a8;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        padding-bottom: 60px;
+      }
+      ::selection {
+        background: #c9a84c;
+        color: #1a1a1a;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 4px;
+      }
+
+      /* Header */
+      #header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #111;
+        border-bottom: 1px solid #333;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      #header h1 {
+        font-size: 18px;
+        color: #c9a84c;
+        white-space: nowrap;
+      }
+      #search {
+        background: #222;
+        border: 1px solid #444;
+        color: #d4c9a8;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 220px;
+      }
+      #search:focus {
+        outline: none;
+        border-color: #c9a84c;
+      }
+      .hdr-stats {
+        font-size: 12px;
+        color: #888;
+        margin-left: auto;
+        white-space: nowrap;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 8px 16px;
+        background: #151515;
+        border-bottom: 1px solid #292929;
+      }
+      .tab {
+        padding: 6px 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        background: #222;
+        color: #999;
+        border: 1px solid #333;
+        transition: all 0.15s;
+      }
+      .tab:hover {
+        color: #d4c9a8;
+        border-color: #555;
+      }
+      .tab.active {
+        background: #c9a84c;
+        color: #1a1a1a;
+        border-color: #c9a84c;
+        font-weight: 600;
+      }
+
+      /* Subcategory pills */
+      #subcats {
+        display: flex;
+        gap: 4px;
+        padding: 6px 16px;
+        background: #151515;
+        border-bottom: 1px solid #222;
+        flex-wrap: wrap;
+        min-height: 36px;
+      }
+      .pill {
+        padding: 3px 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 11px;
+        background: #1e1e1e;
+        color: #888;
+        border: 1px solid #333;
+        transition: all 0.15s;
+      }
+      .pill:hover {
+        color: #d4c9a8;
+      }
+      .pill.active {
+        background: #3a3520;
+        color: #c9a84c;
+        border-color: #c9a84c;
+      }
+
+      /* Filter row */
+      #filters {
+        display: flex;
+        gap: 4px;
+        padding: 6px 16px;
+        background: #151515;
+        border-bottom: 1px solid #292929;
+        align-items: center;
+      }
+      #filters span {
+        font-size: 12px;
+        color: #666;
+        margin-right: 4px;
+      }
+      .fbtn {
+        padding: 3px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        background: #222;
+        color: #888;
+        border: 1px solid #333;
+      }
+      .fbtn:hover {
+        color: #d4c9a8;
+      }
+      .fbtn.active {
+        background: #2a2a2a;
+        color: #c9a84c;
+        border-color: #c9a84c;
+      }
+
+      /* Grid */
+      #grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 16px;
+        align-content: flex-start;
+        min-height: 300px;
+      }
+      .sprite-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 56px;
+        cursor: pointer;
+        padding: 4px 2px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        transition: border-color 0.15s;
+      }
+      .sprite-card:hover {
+        background: #222;
+      }
+      .sprite-card.used {
+        border-color: #2d6b2d;
+      }
+      .sprite-card.unused {
+        border-color: #444;
+      }
+      .sprite-card.selected {
+        border-color: #4488cc !important;
+        background: #1a2a3a;
+      }
+      .sprite-box {
+        width: 32px;
+        height: 32px;
+        display: inline-block;
+        image-rendering: pixelated;
+      }
+      .sprite-label {
+        font-size: 8px;
+        color: #777;
+        text-align: center;
+        word-break: break-all;
+        line-height: 1.1;
+        margin-top: 2px;
+        max-width: 56px;
+        overflow: hidden;
+        max-height: 20px;
+      }
+
+      /* Detail panel */
+      #detail {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 200;
+        background: #1e1e1e;
+        border: 1px solid #c9a84c;
+        border-radius: 8px;
+        padding: 16px;
+        min-width: 280px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      }
+      #detail.open {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      #detail-sprite {
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        flex-shrink: 0;
+        border: 1px solid #333;
+        background: #111;
+      }
+      #detail-info {
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      #detail-info .lbl {
+        color: #888;
+        font-size: 11px;
+      }
+      #detail-info .val {
+        color: #c9a84c;
+        font-family: monospace;
+      }
+      #detail-close {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        cursor: pointer;
+        color: #888;
+        font-size: 18px;
+      }
+      #detail-close:hover {
+        color: #c9a84c;
+      }
+
+      /* Bottom bar */
+      #bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: #111;
+        border-top: 1px solid #333;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      #bar .count {
+        color: #c9a84c;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .btn {
+        padding: 6px 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+      }
+      .btn-gold {
+        background: #c9a84c;
+        color: #1a1a1a;
+      }
+      .btn-gold:hover {
+        background: #dabb5e;
+      }
+      .btn-dim {
+        background: #333;
+        color: #999;
+      }
+      .btn-dim:hover {
+        background: #444;
+        color: #d4c9a8;
+      }
+      #toast {
+        position: fixed;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #c9a84c;
+        color: #1a1a1a;
+        padding: 6px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        display: none;
+        z-index: 300;
+      }
+
+      /* Empty state */
+      #empty {
+        display: none;
+        padding: 40px;
+        text-align: center;
+        color: #555;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <h1>Sprite Browser</h1>
+      <input id="search" type="text" placeholder="Search sprites..." />
+      <span class="hdr-stats" id="stats"></span>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+    <div id="subcats"></div>
+    <div id="filters">
+      <span>Show:</span>
+      <div class="fbtn active" data-filter="all">All</div>
+      <div class="fbtn" data-filter="used">Used</div>
+      <div class="fbtn" data-filter="unused">Unused</div>
+    </div>
+
+    <div id="grid"></div>
+    <div id="empty">No sprites match your filters.</div>
+
+    <div id="detail">
+      <span id="detail-close">&times;</span>
+      <div id="detail-sprite"></div>
+      <div id="detail-info"></div>
+    </div>
+
+    <div id="bar">
+      <span class="count" id="cart-count">0 selected</span>
+      <button class="btn btn-gold" id="copy-btn">Copy to Clipboard</button>
+      <button class="btn btn-dim" id="clear-btn">Clear All</button>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+      const STORAGE_KEY = "rd-sprite-cart";
+      const SHEETS = ["monsters", "items", "tiles", "effects", "player"];
+      let manifest = {};
+      let cart = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
+      let activeSheet = "monsters";
+      let activeSub = "all";
+      let activeFilter = "all";
+      let searchTerm = "";
+
+      // DOM refs
+      const $grid = document.getElementById("grid");
+      const $tabs = document.getElementById("tabs");
+      const $subcats = document.getElementById("subcats");
+      const $search = document.getElementById("search");
+      const $stats = document.getElementById("stats");
+      const $detail = document.getElementById("detail");
+      const $detailSprite = document.getElementById("detail-sprite");
+      const $detailInfo = document.getElementById("detail-info");
+      const $cartCount = document.getElementById("cart-count");
+      const $empty = document.getElementById("empty");
+      const $toast = document.getElementById("toast");
+
+      function saveCart() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...cart]));
+        $cartCount.textContent = cart.size + " selected";
+      }
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.style.display = "block";
+        setTimeout(() => ($toast.style.display = "none"), 1500);
+      }
+
+      // Build tabs
+      function buildTabs() {
+        $tabs.textContent = "";
+        for (const s of SHEETS) {
+          const t = document.createElement("div");
+          t.className = "tab" + (s === activeSheet ? " active" : "");
+          t.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+          t.dataset.sheet = s;
+          t.addEventListener("click", () => {
+            activeSheet = s;
+            activeSub = "all";
+            buildTabs();
+            buildSubcats();
+            render();
+          });
+          $tabs.appendChild(t);
+        }
+      }
+
+      // Build subcategory pills
+      function buildSubcats() {
+        $subcats.textContent = "";
+        const sheet = manifest[activeSheet];
+        if (!sheet) return;
+        const subs = [...new Set(sheet.sprites.map((s) => s.subfolder))].sort();
+        if (subs.length <= 1) return;
+
+        const all = document.createElement("div");
+        all.className = "pill" + (activeSub === "all" ? " active" : "");
+        all.textContent = "All";
+        all.addEventListener("click", () => {
+          activeSub = "all";
+          buildSubcats();
+          render();
+        });
+        $subcats.appendChild(all);
+
+        for (const sub of subs) {
+          const p = document.createElement("div");
+          p.className = "pill" + (activeSub === sub ? " active" : "");
+          p.textContent = sub;
+          p.addEventListener("click", () => {
+            activeSub = sub;
+            buildSubcats();
+            render();
+          });
+          $subcats.appendChild(p);
+        }
+      }
+
+      // Filter buttons
+      document.getElementById("filters").addEventListener("click", (e) => {
+        if (!e.target.dataset.filter) return;
+        activeFilter = e.target.dataset.filter;
+        document
+          .querySelectorAll(".fbtn")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.filter === activeFilter),
+          );
+        render();
+      });
+
+      // Search
+      $search.addEventListener("input", (e) => {
+        searchTerm = e.target.value.toLowerCase();
+        render();
+      });
+
+      // Render grid
+      function render() {
+        $grid.textContent = "";
+        const sheet = manifest[activeSheet];
+        if (!sheet) return;
+
+        let sprites = sheet.sprites;
+        if (activeSub !== "all")
+          sprites = sprites.filter((s) => s.subfolder === activeSub);
+        if (activeFilter === "used") sprites = sprites.filter((s) => s.used);
+        if (activeFilter === "unused") sprites = sprites.filter((s) => !s.used);
+        if (searchTerm)
+          sprites = sprites.filter((s) =>
+            s.className.toLowerCase().includes(searchTerm),
+          );
+
+        $stats.textContent = sprites.length + " sprites";
+        $empty.style.display = sprites.length === 0 ? "block" : "none";
+
+        const frag = document.createDocumentFragment();
+        for (const sp of sprites) {
+          const card = document.createElement("div");
+          card.className = "sprite-card";
+          if (sp.used) card.classList.add("used");
+          else card.classList.add("unused");
+          if (cart.has(sp.className)) card.classList.add("selected");
+
+          const box = document.createElement("div");
+          box.className = "sprite-box " + sp.className;
+          card.appendChild(box);
+
+          const lbl = document.createElement("div");
+          lbl.className = "sprite-label";
+          lbl.textContent = sp.className;
+          card.appendChild(lbl);
+
+          card.addEventListener("click", (e) => {
+            if (e.shiftKey) {
+              showDetail(sp, sheet);
+            } else {
+              toggleCart(sp.className, card);
+            }
+          });
+          card.addEventListener("dblclick", () => showDetail(sp, sheet));
+
+          frag.appendChild(card);
+        }
+        $grid.appendChild(frag);
+      }
+
+      function toggleCart(name, card) {
+        if (cart.has(name)) {
+          cart.delete(name);
+          card.classList.remove("selected");
+        } else {
+          cart.add(name);
+          card.classList.add("selected");
+        }
+        saveCart();
+      }
+
+      // Detail panel
+      function showDetail(sp, sheet) {
+        $detail.classList.add("open");
+        $detailSprite.style.width = "128px";
+        $detailSprite.style.height = "128px";
+        $detailSprite.style.imageRendering = "pixelated";
+        $detailSprite.style.backgroundImage = "url(" + sheet.png + ")";
+        $detailSprite.style.backgroundSize =
+          sheet.width * 4 + "px " + sheet.height * 4 + "px";
+        $detailSprite.style.backgroundPosition =
+          -sp.x * 4 + "px " + -sp.y * 4 + "px";
+        $detailSprite.style.backgroundRepeat = "no-repeat";
+
+        $detailInfo.textContent = "";
+        const lines = [
+          ["Class", sp.className],
+          ["Sheet", activeSheet],
+          ["Subfolder", sp.subfolder],
+          ["Position", sp.x + ", " + sp.y],
+          ["Used", sp.used ? "Yes" : "No"],
+          ["Selected", cart.has(sp.className) ? "Yes" : "No"],
+        ];
+        for (const [k, v] of lines) {
+          const d = document.createElement("div");
+          const lbl = document.createElement("span");
+          lbl.className = "lbl";
+          lbl.textContent = k + ": ";
+          const val = document.createElement("span");
+          val.className = "val";
+          val.textContent = v;
+          d.appendChild(lbl);
+          d.appendChild(val);
+          $detailInfo.appendChild(d);
+        }
+      }
+
+      document
+        .getElementById("detail-close")
+        .addEventListener("click", () => $detail.classList.remove("open"));
+
+      // Cart actions
+      document.getElementById("copy-btn").addEventListener("click", () => {
+        if (cart.size === 0) {
+          showToast("Nothing selected");
+          return;
+        }
+        navigator.clipboard
+          .writeText([...cart].join(", "))
+          .then(() => showToast("Copied " + cart.size + " sprites"));
+      });
+
+      document.getElementById("clear-btn").addEventListener("click", () => {
+        cart.clear();
+        saveCart();
+        render();
+        showToast("Cart cleared");
+      });
+
+      // Load manifest and boot
+      fetch("sprites-manifest.json")
+        .then((r) => r.json())
+        .then((data) => {
+          manifest = data;
+          buildTabs();
+          buildSubcats();
+          saveCart();
+          render();
+        })
+        .catch((err) => {
+          $grid.textContent = "";
+          const msg = document.createElement("div");
+          msg.style.cssText =
+            "padding:40px;color:#c44;font-size:14px;text-align:center";
+          msg.textContent =
+            "Failed to load sprites-manifest.json: " + err.message;
+          $grid.appendChild(msg);
+        });
+    </script>
+  </body>
+</html>
