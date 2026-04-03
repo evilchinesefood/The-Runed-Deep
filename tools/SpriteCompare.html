@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sprite Compare — Legacy vs DCSS</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #1a1a2e;
+        color: #e0e0e0;
+        padding: 20px;
+      }
+      h1 {
+        color: #c4a35a;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        color: #888;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      .stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .stat {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .stat-matched {
+        background: #1a3a1a;
+        color: #4caf50;
+      }
+      .stat-unresolved {
+        background: #3a1a1a;
+        color: #f44336;
+      }
+      .stat-total {
+        background: #1a2a3a;
+        color: #64b5f6;
+      }
+      .filters {
+        margin-bottom: 16px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .filters label {
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .filters input[type="checkbox"] {
+        margin-right: 4px;
+      }
+      .filters select,
+      .filters input[type="text"] {
+        background: #2a2a4a;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+      .category-header {
+        background: #2a2a4a;
+        padding: 10px 16px;
+        margin: 16px 0 8px;
+        border-radius: 6px;
+        font-size: 16px;
+        color: #c4a35a;
+        cursor: pointer;
+      }
+      .category-header:hover {
+        background: #3a3a5a;
+      }
+      .category-header span {
+        float: right;
+        font-size: 12px;
+        color: #888;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+      }
+      th {
+        text-align: left;
+        padding: 6px 10px;
+        background: #222244;
+        font-size: 12px;
+        color: #999;
+        border-bottom: 1px solid #333;
+      }
+      td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #2a2a3a;
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      tr.matched td {
+        background: #1a2a1a;
+      }
+      tr.unresolved td {
+        background: #2a1a1a;
+      }
+      tr:hover td {
+        background: #2a2a4a !important;
+      }
+      .sprite-cell {
+        width: 40px;
+        text-align: center;
+      }
+      .sprite {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        border: 1px solid #333;
+        border-radius: 2px;
+      }
+      .status-matched {
+        color: #4caf50;
+        font-weight: 600;
+      }
+      .status-unresolved {
+        color: #f44336;
+        font-weight: 600;
+      }
+      .cls-name {
+        font-family: "Consolas", monospace;
+        font-size: 12px;
+      }
+      .new-cls {
+        color: #64b5f6;
+      }
+      .no-match {
+        color: #666;
+        font-style: italic;
+      }
+      .hidden {
+        display: none;
+      }
+      .zoom-preview {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #222244;
+        border: 2px solid #c4a35a;
+        border-radius: 8px;
+        padding: 20px;
+        z-index: 1000;
+        display: none;
+        text-align: center;
+      }
+      .zoom-preview .sprite {
+        width: 128px;
+        height: 128px;
+        border: none;
+      }
+      .zoom-preview .label {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sprite Compare</h1>
+    <p class="subtitle">Legacy game sprites vs new DCSS sprite sheet matches</p>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="filters">
+      <label><input type="checkbox" id="showMatched" checked /> Matched</label>
+      <label
+        ><input type="checkbox" id="showUnresolved" checked /> Unresolved</label
+      >
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="monsters">Monsters</option>
+        <option value="items">Items</option>
+        <option value="tiles">Tiles</option>
+      </select>
+      <input type="text" id="search" placeholder="Search class name..." />
+    </div>
+
+    <div id="content"></div>
+    <div class="overlay" id="overlay"></div>
+    <div class="zoom-preview" id="zoom"></div>
+
+    <script>
+      const MAPPINGS = {
+        monsters: {
+          file: "MappingMonsters.json",
+          legacyCss: "../public/css/sprites/monsters-legacy.css",
+          newCss: "../public/css/sprites/monsters.css",
+          legacyPng: "../public/assets/monsters-legacy.png",
+          newPng: "../public/assets/monsters.png",
+          prefix: "mon/",
+        },
+        items: {
+          file: "MappingItems.json",
+          legacyCss: "../public/css/sprites/items-legacy.css",
+          newCss: "../public/css/sprites/items.css",
+          legacyPng: "../public/assets/items-legacy.png",
+          newPng: "../public/assets/items.png",
+          prefix: "item/",
+        },
+        tiles: {
+          file: "MappingTiles.json",
+          legacyCss: "../public/css/sprites/tiles-legacy.css",
+          newCss: "../public/css/sprites/tiles.css",
+          legacyPng: "../public/assets/tiles-legacy.png",
+          newPng: "../public/assets/tiles.png",
+          prefix: "dngn/",
+        },
+      };
+
+      const CROSS_CATS = {
+        "player/": {
+          newCss: "../public/css/sprites/player.css",
+          newPng: "../public/assets/player.png",
+        },
+        "item/": {
+          newCss: "../public/css/sprites/items.css",
+          newPng: "../public/assets/items.png",
+        },
+        "mon/": {
+          newCss: "../public/css/sprites/monsters.css",
+          newPng: "../public/assets/monsters.png",
+        },
+        "dngn/": {
+          newCss: "../public/css/sprites/tiles.css",
+          newPng: "../public/assets/tiles.png",
+        },
+      };
+
+      function parseCssPositions(cssText) {
+        var m = {};
+        var re =
+          /\.([a-zA-Z0-9_-]+)\s*\{[^}]*background:\s*url\(['"]?([^'")\s]+)['"]?\)\s*(-?\d+)px\s*(-?\d+)px/gm;
+        var match;
+        while ((match = re.exec(cssText)) !== null) {
+          m[match[1]] = {
+            x: parseInt(match[3]),
+            y: parseInt(match[4]),
+            url: match[2],
+          };
+        }
+        var re2 =
+          /\.([a-zA-Z0-9_-]+)\s*\{[^}]*background-size:\s*(\d+)px\s+(\d+)px/gm;
+        while ((match = re2.exec(cssText)) !== null) {
+          if (m[match[1]]) {
+            m[match[1]].sw = parseInt(match[2]);
+            m[match[1]].sh = parseInt(match[3]);
+          }
+        }
+        return m;
+      }
+
+      function dcssPathToClass(dcssPath, expectedPrefix) {
+        var p = dcssPath;
+        if (p.indexOf(expectedPrefix) === 0) p = p.slice(expectedPrefix.length);
+        p = p.replace(".png", "");
+        var parts = p.split("/");
+        var topSub = parts[0];
+        var name = parts[parts.length - 1];
+        return topSub + "-" + name;
+      }
+
+      function detectPrefix(dcssPath) {
+        var prefixes = ["player/", "item/", "mon/", "dngn/"];
+        for (var i = 0; i < prefixes.length; i++) {
+          if (dcssPath.indexOf(prefixes[i]) === 0) return prefixes[i];
+        }
+        return null;
+      }
+
+      function loadText(url) {
+        return fetch(url)
+          .then(function (r) {
+            if (!r.ok) return "";
+            return r.text();
+          })
+          .catch(function () {
+            return "";
+          });
+      }
+
+      function loadJson(url) {
+        return fetch(url)
+          .then(function (r) {
+            return r.json();
+          })
+          .catch(function () {
+            return {};
+          });
+      }
+
+      function init() {
+        var allEntries = [];
+        var cats = Object.keys(MAPPINGS);
+        var pending = cats.length;
+
+        cats.forEach(function (cat) {
+          var cfg = MAPPINGS[cat];
+
+          Promise.all([
+            loadJson(cfg.file),
+            loadText(cfg.legacyCss),
+            loadText(cfg.newCss),
+          ]).then(function (results) {
+            var mapping = results[0];
+            var legacyCssText = results[1];
+            var newCssText = results[2];
+            var legacyPos = parseCssPositions(legacyCssText);
+            var newPos = parseCssPositions(newCssText);
+
+            // Load cross-category CSS
+            var crossPromises = [];
+            var crossKeys = [];
+            Object.keys(CROSS_CATS).forEach(function (pf) {
+              if (pf !== cfg.prefix) {
+                crossKeys.push(pf);
+                crossPromises.push(loadText(CROSS_CATS[pf].newCss));
+              }
+            });
+
+            return Promise.all(crossPromises).then(function (crossResults) {
+              var crossCssCache = {};
+              crossKeys.forEach(function (pf, i) {
+                crossCssCache[pf] = {
+                  pos: parseCssPositions(crossResults[i]),
+                  png: CROSS_CATS[pf].newPng,
+                };
+              });
+
+              Object.keys(mapping).forEach(function (legacyCls) {
+                if (legacyCls.charAt(0) === "_") return;
+                var dcssPath = mapping[legacyCls];
+
+                var entry = {
+                  cat: cat,
+                  legacyCls: legacyCls,
+                  dcssPath: dcssPath,
+                  status: "unresolved",
+                  newCls: null,
+                  legacyPng: cfg.legacyPng,
+                  newPng: null,
+                  legacyX: 0,
+                  legacyY: 0,
+                  legacySW: 0,
+                  legacySH: 0,
+                  newX: 0,
+                  newY: 0,
+                  newSW: 0,
+                  newSH: 0,
+                };
+
+                if (legacyPos[legacyCls]) {
+                  var lp = legacyPos[legacyCls];
+                  entry.legacyX = lp.x;
+                  entry.legacyY = lp.y;
+                  entry.legacySW = lp.sw || 0;
+                  entry.legacySH = lp.sh || 0;
+                }
+
+                var detectedPf = detectPrefix(dcssPath);
+                if (detectedPf && detectedPf === cfg.prefix) {
+                  var newCls = dcssPathToClass(dcssPath, cfg.prefix);
+                  if (newPos[newCls]) {
+                    entry.status = "matched";
+                    entry.newCls = newCls;
+                    entry.newPng = cfg.newPng;
+                    var np = newPos[newCls];
+                    entry.newX = np.x;
+                    entry.newY = np.y;
+                    entry.newSW = np.sw || 0;
+                    entry.newSH = np.sh || 0;
+                  }
+                } else if (detectedPf && crossCssCache[detectedPf]) {
+                  var cc = crossCssCache[detectedPf];
+                  var newCls2 = dcssPathToClass(dcssPath, detectedPf);
+                  if (cc.pos[newCls2]) {
+                    entry.status = "matched";
+                    entry.newCls =
+                      newCls2 + " (cross: " + detectedPf.replace("/", "") + ")";
+                    entry.newPng = cc.png;
+                    var np2 = cc.pos[newCls2];
+                    entry.newX = np2.x;
+                    entry.newY = np2.y;
+                    entry.newSW = np2.sw || 0;
+                    entry.newSH = np2.sh || 0;
+                  }
+                }
+
+                allEntries.push(entry);
+              });
+
+              pending--;
+              if (pending === 0) {
+                render(allEntries);
+                setupFilters(allEntries);
+              }
+            });
+          });
+        });
+      }
+
+      function spriteDiv(png, x, y, sw, sh) {
+        if (!png || (!sw && !sh)) return '<span class="no-match">--</span>';
+        return (
+          '<div class="sprite" style="background:url(\'' +
+          png +
+          "') " +
+          x +
+          "px " +
+          y +
+          "px; background-size:" +
+          sw +
+          "px " +
+          sh +
+          'px;" data-png="' +
+          png +
+          '" data-x="' +
+          x +
+          '" data-y="' +
+          y +
+          '" data-sw="' +
+          sw +
+          '" data-sh="' +
+          sh +
+          '"></div>'
+        );
+      }
+
+      function render(entries) {
+        var matched = entries.filter(function (e) {
+          return e.status === "matched";
+        }).length;
+        var unresolved = entries.filter(function (e) {
+          return e.status === "unresolved";
+        }).length;
+        document.getElementById("stats").innerHTML =
+          '<div class="stat stat-total">Total: ' +
+          entries.length +
+          "</div>" +
+          '<div class="stat stat-matched">Matched: ' +
+          matched +
+          "</div>" +
+          '<div class="stat stat-unresolved">Unresolved: ' +
+          unresolved +
+          "</div>";
+
+        var html = "";
+        var categories = ["monsters", "items", "tiles"];
+        categories.forEach(function (cat) {
+          var catEntries = entries.filter(function (e) {
+            return e.cat === cat;
+          });
+          var catMatched = catEntries.filter(function (e) {
+            return e.status === "matched";
+          }).length;
+          var catUnresolved = catEntries.filter(function (e) {
+            return e.status === "unresolved";
+          }).length;
+
+          html += '<div class="category-group" data-cat="' + cat + '">';
+          html +=
+            '<div class="category-header" onclick="this.nextElementSibling.classList.toggle(\'hidden\')">' +
+            cat.charAt(0).toUpperCase() +
+            cat.slice(1) +
+            " <span>" +
+            catMatched +
+            " matched / " +
+            catUnresolved +
+            " unresolved</span></div>";
+          html += "<table>";
+          html +=
+            '<tr><th>Legacy Class</th><th class="sprite-cell">Old</th><th class="sprite-cell">New</th><th>Status</th><th>New Class</th><th>DCSS Path</th></tr>';
+
+          catEntries.forEach(function (e) {
+            var rowCls = e.status === "matched" ? "matched" : "unresolved";
+            var statusHtml =
+              e.status === "matched"
+                ? '<span class="status-matched">Matched</span>'
+                : '<span class="status-unresolved">Unresolved</span>';
+            var newClsHtml = e.newCls
+              ? '<span class="cls-name new-cls">.' + e.newCls + "</span>"
+              : '<span class="no-match">--</span>';
+            var oldSprite = spriteDiv(
+              e.legacyPng,
+              e.legacyX,
+              e.legacyY,
+              e.legacySW,
+              e.legacySH,
+            );
+            var newSprite =
+              e.status === "matched"
+                ? spriteDiv(e.newPng, e.newX, e.newY, e.newSW, e.newSH)
+                : '<span class="no-match">--</span>';
+
+            html +=
+              '<tr class="' +
+              rowCls +
+              '" data-legacy="' +
+              e.legacyCls +
+              '" data-status="' +
+              e.status +
+              '">';
+            html += '<td class="cls-name">.' + e.legacyCls + "</td>";
+            html += '<td class="sprite-cell">' + oldSprite + "</td>";
+            html += '<td class="sprite-cell">' + newSprite + "</td>";
+            html += "<td>" + statusHtml + "</td>";
+            html += "<td>" + newClsHtml + "</td>";
+            html +=
+              '<td class="cls-name" style="color:#666;font-size:11px">' +
+              e.dcssPath +
+              "</td>";
+            html += "</tr>";
+          });
+
+          html += "</table></div>";
+        });
+
+        document.getElementById("content").innerHTML = html;
+
+        document.querySelectorAll(".sprite").forEach(function (el) {
+          el.style.cursor = "pointer";
+          el.addEventListener("click", function () {
+            var d = el.dataset;
+            var zoom = document.getElementById("zoom");
+            var overlay = document.getElementById("overlay");
+            zoom.innerHTML =
+              '<div class="sprite" style="background:url(\'' +
+              d.png +
+              "') " +
+              parseInt(d.x) * 4 +
+              "px " +
+              parseInt(d.y) * 4 +
+              "px; background-size:" +
+              parseInt(d.sw) * 4 +
+              "px " +
+              parseInt(d.sh) * 4 +
+              'px;"></div>' +
+              '<div class="label">' +
+              d.png.split("/").pop() +
+              "</div>";
+            zoom.style.display = "block";
+            overlay.style.display = "block";
+          });
+        });
+
+        document
+          .getElementById("overlay")
+          .addEventListener("click", function () {
+            document.getElementById("zoom").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+          });
+      }
+
+      function setupFilters(entries) {
+        var applyFilters = function () {
+          var showM = document.getElementById("showMatched").checked;
+          var showU = document.getElementById("showUnresolved").checked;
+          var catF = document.getElementById("categoryFilter").value;
+          var search = document.getElementById("search").value.toLowerCase();
+
+          document.querySelectorAll(".category-group").forEach(function (g) {
+            g.style.display =
+              catF === "all" || g.dataset.cat === catF ? "" : "none";
+          });
+
+          document.querySelectorAll("tr[data-status]").forEach(function (tr) {
+            var vis = true;
+            if (tr.dataset.status === "matched" && !showM) vis = false;
+            if (tr.dataset.status === "unresolved" && !showU) vis = false;
+            if (search && tr.dataset.legacy.indexOf(search) === -1) vis = false;
+            tr.style.display = vis ? "" : "none";
+          });
+        };
+
+        document
+          .getElementById("showMatched")
+          .addEventListener("change", applyFilters);
+        document
+          .getElementById("showUnresolved")
+          .addEventListener("change", applyFilters);
+        document
+          .getElementById("categoryFilter")
+          .addEventListener("change", applyFilters);
+        document
+          .getElementById("search")
+          .addEventListener("input", applyFilters);
+      }
+
+      init();
+    </script>
+  </body>
+</html>
