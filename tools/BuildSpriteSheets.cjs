@@ -199,8 +199,9 @@ async function buildSheet(category, outputName) {
   cssLines.push(`    display: inline-block;`);
   cssLines.push(`    width: ${TILE_SIZE}px;`);
   cssLines.push(`    height: ${TILE_SIZE}px;`);
-  cssLines.push(`    background: url('${assetRef}') no-repeat;`);
+  cssLines.push(`    background-image: url('${assetRef}');`);
   cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+  cssLines.push(`    background-repeat: no-repeat;`);
   cssLines.push(`}`);
 
   let currentSubfolder = null;
@@ -215,8 +216,8 @@ async function buildSheet(category, outputName) {
     }
 
     cssLines.push(`.${s.className} {`);
-    cssLines.push(`    background: url('${assetRef}') -${x}px -${y}px;`);
-    cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+    cssLines.push(`    background-image: url('${assetRef}');`);
+    cssLines.push(`    background-position: -${x}px -${y}px;`);
     cssLines.push(`}`);
   }
 
@@ -343,9 +344,11 @@ async function buildSheet(category, outputName) {
           for (const m of matched) {
             cssLines.push(`.${m.cls} {`);
             cssLines.push(
-              `    background: url('${assetRef}') -${m.pos.x}px -${m.pos.y}px;`,
+              `    background-image: url('${assetRef}');`,
             );
-            cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+            cssLines.push(
+              `    background-position: -${m.pos.x}px -${m.pos.y}px;`,
+            );
             cssLines.push(`}`);
             aliasCount++;
           }
@@ -362,9 +365,11 @@ async function buildSheet(category, outputName) {
             const ny = Math.floor(idx / COLS) * TILE_SIZE;
             cssLines.push(`.${u.cls} {`);
             cssLines.push(
-              `    background: url('${assetRef}') -${nx}px -${ny}px;`,
+              `    background-image: url('${assetRef}');`,
             );
-            cssLines.push(`    background-size: ${sheetW}px ${sheetH}px;`);
+            cssLines.push(
+              `    background-position: -${nx}px -${ny}px;`,
+            );
             cssLines.push(`}`);
             legacyCount++;
           }

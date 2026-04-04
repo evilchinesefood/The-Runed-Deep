@@ -35,23 +35,25 @@ import {
   trackSecretDoorFound,
   trackFloorReached,
   trackFloorCleared,
-  trackRiftComplete,
-  trackCrucibleWave,
 } from "../systems/Achievements";
 // Enchant utils removed — affix checks now use unique abilities only
 import { ITEM_BY_ID } from "../data/items";
 import { TRAP_DATA } from "../data/Traps";
 import { getDisplayName } from "../systems/inventory/display-name";
-import {
-  rollRiftModifiers,
-  getRiftShardReward,
-} from "../systems/rift/RiftModifiers";
 import { generateRiftFloor } from "../systems/rift/RiftGen";
-import { generateCrucibleArena } from "../systems/crucible/CrucibleGen";
 import {
-  spawnWave as crucibleSpawnWave,
-  getWaveReward,
-} from "../systems/crucible/WaveManager";
+  processOpenRiftMenu,
+  processEnterRift,
+  processExitRift as _processExitRift,
+  processRerollRift,
+  processRiftComplete,
+} from "../systems/rift/RiftActions";
+import {
+  processEnterCrucible,
+  processExitCrucible as _processExitCrucible,
+  processCrucibleNextWave,
+} from "../systems/crucible/CrucibleActions";
+import { getModifierFlags } from "../systems/rift/ModifierFlags";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N: { x: 0, y: -1 },
@@ -200,7 +202,7 @@ export function processAction(state: GameState, action: GameAction): GameState {
     case "enterRift":
       return processEnterRift(state);
     case "exitRift":
-      return processExitRift(state);
+      return _processExitRift(state, teleportToTown);
     case "rerollRift":
       return processRerollRift(state);
     case "riftComplete":
@@ -208,11 +210,11 @@ export function processAction(state: GameState, action: GameAction): GameState {
     case "enterCrucible":
       return processEnterCrucible(state);
     case "exitCrucible":
-      return processExitCrucible(state);
+      return _processExitCrucible(state, teleportToTown);
     case "crucibleNextWave":
       return processCrucibleNextWave(state);
     case "crucibleLeave":
-      return processExitCrucible(state);
+      return _processExitCrucible(state, teleportToTown);
     default:
       return state;
   }
@@ -398,6 +400,13 @@ function processMove(state: GameState, direction: Direction): GameState {
   );
 
   if (monsterAtTarget) {
+    if (monsterAtTarget.templateId === "npc") {
+      return addMessage(
+        state,
+        `${monsterAtTarget.name} stands before you.`,
+        "normal",
+      );
+    }
     return playerAttacksMonster(state, monsterAtTarget.id);
   }
 
@@ -516,7 +525,8 @@ function processCastSpell(
   state: GameState,
   action: Extract<GameAction, { type: "castSpell" }>,
 ): GameState {
-  if (hasRiftMod(state, "silence")) {
+  const flags = getModifierFlags(state);
+  if (flags.silence) {
     return addMessage(state, "Silence prevents spellcasting!", "important");
   }
   return castSpell(state, action.spellId, action.direction, action.target);
@@ -599,7 +609,7 @@ function processUseStairs(state: GameState): GameState {
     } else if (heroTile.type === "stairs-up") {
       Sound.stairs();
       if (rift.currentFloor <= 1) {
-        return processExitRift(state);
+        return _processExitRift(state, teleportToTown);
       }
       // Go back up in rift
       const newRift = { ...rift, currentFloor: rift.currentFloor - 1 };
@@ -1209,248 +1219,6 @@ function processSearch(state: GameState): GameState {
     floors: { ...state.floors, [floorKey]: { ...floor, tiles: newTiles } },
     messages,
     turn: state.turn + 1,
-  };
-}
-
-// ── Rift helpers ────────────────────────────────────────────
-
-function hasRiftMod(state: GameState, modId: string): boolean {
-  return state.activeRift?.modifiers.some((m) => m.id === modId) ?? false;
-}
-
-const RIFT_TOTAL_FLOORS = 5;
-
-function processOpenRiftMenu(state: GameState): GameState {
-  if (!state.riftStoneUnlocked) {
-    return addMessage(state, "The Rift Stone is dormant.", "system");
-  }
-  let offering = state.riftOffering;
-  if (!offering) {
-    const seed = Date.now();
-    offering = { seed, modifiers: rollRiftModifiers(seed), rerollCount: 0 };
-  }
-  return { ...state, riftOffering: offering, screen: "rift-menu" };
-}
-
-function processEnterRift(state: GameState): GameState {
-  const offering = state.riftOffering;
-  if (!offering)
-    return addMessage(state, "No rift offering available.", "system");
-
-  const rift: import("./types").RiftState = {
-    seed: offering.seed,
-    modifiers: offering.modifiers,
-    currentFloor: 1,
-    totalFloors: RIFT_TOTAL_FLOORS,
-    shardsEarned: 0,
-  };
-
-  const { floor, playerStart } = generateRiftFloor(rift, state);
-  const riftKey = "rift-1";
-
-  let hero = { ...state.hero, position: playerStart };
-
-  // Enfeebled modifier: halve HP and MP
-  if (rift.modifiers.some((m) => m.id === "enfeebled")) {
-    hero = {
-      ...hero,
-      hp: Math.max(1, Math.floor(hero.maxHp / 2)),
-      mp: Math.floor(hero.maxMp / 2),
-    };
-  }
-
-  return {
-    ...state,
-    activeRift: rift,
-    riftOffering: null,
-    currentDungeon: "rift",
-    currentFloor: 1,
-    returnFloor:
-      state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
-    floors: { ...state.floors, [riftKey]: floor },
-    hero,
-    screen: "game",
-    messages: [
-      ...state.messages,
-      {
-        text: "You step into the Fractured Rift...",
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-function processExitRift(state: GameState): GameState {
-  return {
-    ...teleportToTown({ ...state, currentFloor: state.returnFloor || 1 }),
-    activeRift: null,
-    messages: [
-      ...state.messages,
-      {
-        text: "You escape the rift and return to town.",
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-function processRerollRift(state: GameState): GameState {
-  const offering = state.riftOffering;
-  if (!offering)
-    return addMessage(state, "No rift offering to reroll.", "system");
-
-  const cost = 50;
-  if (state.hero.gold < cost) {
-    return addMessage(
-      state,
-      `Not enough gold. Reroll costs ${cost}g.`,
-      "system",
-    );
-  }
-
-  const newSeed = offering.seed + offering.rerollCount + 1;
-  const newOffering = {
-    seed: newSeed,
-    modifiers: rollRiftModifiers(newSeed),
-    rerollCount: offering.rerollCount + 1,
-  };
-
-  return {
-    ...state,
-    hero: { ...state.hero, gold: state.hero.gold - cost },
-    riftOffering: newOffering,
-    messages: [
-      ...state.messages,
-      {
-        text: "The rift shifts... new modifiers appear.",
-        severity: "system" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-function processRiftComplete(state: GameState): GameState {
-  const rift = state.activeRift;
-  if (!rift) return state;
-
-  const shards = getRiftShardReward(rift.modifiers);
-  const totalDiff = rift.modifiers.reduce((s, m) => s + m.weight, 0);
-  trackRiftComplete(totalDiff);
-  return {
-    ...state,
-    activeRift: { ...rift, shardsEarned: shards },
-    hero: { ...state.hero, runeShards: state.hero.runeShards + shards },
-    screen: "rift-summary",
-    messages: [
-      ...state.messages,
-      {
-        text: `Rift conquered! You earned ${shards} Rune Shards.`,
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-// ── Crucible ────────────────────────────────────────────────
-
-function processEnterCrucible(state: GameState): GameState {
-  const { floor, playerStart } = generateCrucibleArena(Date.now());
-  const crucible: import("./types").CrucibleState = {
-    wave: 0,
-    shardsEarned: 0,
-    goldEarned: 0,
-  };
-
-  return {
-    ...state,
-    activeCrucible: crucible,
-    activeRift: null, // Clear rift state if any
-    currentDungeon: "crucible",
-    currentFloor: 0,
-    returnFloor:
-      state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
-    floors: { ...state.floors, "crucible-0": floor },
-    hero: { ...state.hero, position: playerStart },
-    screen: "game",
-    messages: [
-      ...state.messages,
-      {
-        text: "You enter the Crucible. Prepare for battle!",
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-function processExitCrucible(state: GameState): GameState {
-  const crucible = state.activeCrucible;
-  let bestWave = state.crucibleBestWave ?? 0;
-  if (crucible && crucible.wave > bestWave) bestWave = crucible.wave;
-
-  return {
-    ...teleportToTown({ ...state, currentFloor: state.returnFloor || 1 }),
-    activeCrucible: null,
-    crucibleBestWave: bestWave,
-    messages: [
-      ...state.messages,
-      {
-        text: crucible
-          ? `You leave the Crucible after wave ${crucible.wave}. Earned ${crucible.shardsEarned} shards and ${crucible.goldEarned} gold.`
-          : "You leave the Crucible.",
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
-  };
-}
-
-function processCrucibleNextWave(state: GameState): GameState {
-  const crucible = state.activeCrucible;
-  if (!crucible) return state;
-
-  const nextWave = crucible.wave + 1;
-  const floorKey = "crucible-0";
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-
-  const updatedFloor = crucibleSpawnWave(
-    floor,
-    nextWave,
-    state.hero.position,
-    state.difficulty,
-  );
-
-  const reward = getWaveReward(nextWave);
-  trackCrucibleWave(nextWave);
-  const newCrucible: import("./types").CrucibleState = {
-    wave: nextWave,
-    shardsEarned: crucible.shardsEarned + reward.shards,
-    goldEarned: crucible.goldEarned + reward.gold,
-  };
-
-  return {
-    ...state,
-    activeCrucible: newCrucible,
-    hero: {
-      ...state.hero,
-      runeShards: state.hero.runeShards + reward.shards,
-      gold: state.hero.gold + reward.gold,
-    },
-    floors: { ...state.floors, [floorKey]: updatedFloor },
-    screen: "game",
-    messages: [
-      ...state.messages,
-      {
-        text: `Wave ${nextWave} begins! (+${reward.shards} shards, +${reward.gold}g)`,
-        severity: "important" as const,
-        turn: state.turn,
-      },
-    ],
   };
 }
 

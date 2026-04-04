@@ -16,6 +16,7 @@ import { getMonstersForDepth } from "../../data/monsters";
 import { createMonster } from "./spawning";
 import { xpRequiredForLevel } from "../character/leveling";
 import { ITEM_BY_ID } from "../../data/items";
+import { getModifierFlags } from "../rift/ModifierFlags";
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -180,6 +181,7 @@ function moveToward(
   floorKey: string,
   idx: number,
   target: Vector2,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -187,7 +189,7 @@ function moveToward(
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
   const flying = monster.abilities.includes("flying");
-  const occ = buildOccupied(floor);
+  const occ = occupied ?? buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = Infinity;
@@ -207,6 +209,11 @@ function moveToward(
   }
 
   if (!bestPos) return state;
+  // Update occupied set
+  if (occupied) {
+    occupied.delete(`${x},${y}`);
+    occupied.add(`${bestPos.x},${bestPos.y}`);
+  }
   return updateMonster(state, floorKey, idx, { ...monster, position: bestPos });
 }
 
@@ -216,6 +223,7 @@ function moveAwayFrom(
   floorKey: string,
   idx: number,
   threat: Vector2,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -223,7 +231,7 @@ function moveAwayFrom(
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
   const flying = monster.abilities.includes("flying");
-  const occ = buildOccupied(floor);
+  const occ = occupied ?? buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = -Infinity;
@@ -242,6 +250,11 @@ function moveAwayFrom(
   }
 
   if (!bestPos) return state;
+  // Update occupied set
+  if (occupied) {
+    occupied.delete(`${x},${y}`);
+    occupied.add(`${bestPos.x},${bestPos.y}`);
+  }
   return updateMonster(state, floorKey, idx, { ...monster, position: bestPos });
 }
 
@@ -253,14 +266,16 @@ function moveToRange(
   target: Vector2,
   minDist: number,
   maxDist: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
   const monster = floor.monsters[idx];
   const dist = manhattan(monster.position, target);
 
-  if (dist < minDist) return moveAwayFrom(state, floorKey, idx, target);
-  if (dist > maxDist) return moveToward(state, floorKey, idx, target);
+  if (dist < minDist)
+    return moveAwayFrom(state, floorKey, idx, target, occupied);
+  if (dist > maxDist) return moveToward(state, floorKey, idx, target, occupied);
   return state; // already in range, stay put
 }
 
@@ -726,6 +741,8 @@ function processMelee(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -738,14 +755,14 @@ function processMelee(
     monster.abilities.includes("alert-radius") ||
     monster.abilities.includes("alert-floor")
   ) {
-    state = processAlertAbilities(state, floorKey, idx, monster);
+    state = processAlertAbilities(state, floorKey, idx, monster, detectRange);
   }
 
   // Tick flee timer
   if (monster.fleeing > 0) {
     monster = { ...monster, fleeing: monster.fleeing - 1 };
     let s = updateMonster(state, floorKey, idx, monster);
-    return moveAwayFrom(s, floorKey, idx, hero.position);
+    return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
   }
 
   // Charge ability: rush the hero from 2-4 tiles away in a straight line
@@ -811,8 +828,7 @@ function processMelee(
     return s;
   }
 
-  const inRange =
-    manhattan(monster.position, hero.position) <= getDetectRange(state);
+  const inRange = manhattan(monster.position, hero.position) <= detectRange;
   if (inRange || monster.alerted) {
     // Low HP flee check before moving (only once per monster)
     if (
@@ -826,9 +842,9 @@ function processMelee(
         fleeing: fleeTurns,
         hasFled: true,
       });
-      return moveAwayFrom(s, floorKey, idx, hero.position);
+      return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
     }
-    return moveToward(state, floorKey, idx, hero.position);
+    return moveToward(state, floorKey, idx, hero.position, occupied);
   }
 
   return state;
@@ -838,6 +854,8 @@ function processRanged(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -847,8 +865,7 @@ function processRanged(
   const cDist = chebyshev(monster.position, hero.position);
 
   // Silence rift modifier: suppress cast/summon spells only
-  const silenced =
-    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+  const silenced = getModifierFlags(state).silence;
 
   const rangedAbilities = monster.abilities.filter(
     (a) =>
@@ -875,8 +892,8 @@ function processRanged(
   }
 
   // Close distance to get into firing range
-  if (dist <= getDetectRange(state) || monster.alerted) {
-    return moveToward(state, floorKey, idx, hero.position);
+  if (dist <= detectRange || monster.alerted) {
+    return moveToward(state, floorKey, idx, hero.position, occupied);
   }
 
   return state;
@@ -886,6 +903,8 @@ function processCaster(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -895,8 +914,7 @@ function processCaster(
   const cDist = chebyshev(monster.position, hero.position);
 
   // Silence rift modifier: suppress cast spells only
-  const silenced =
-    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+  const silenced = getModifierFlags(state).silence;
 
   const spellAbilities = silenced
     ? []
@@ -911,15 +929,15 @@ function processCaster(
   if (spellAbilities.length > 0 && los && dist >= 4 && dist <= 8) {
     // 30% chance to move instead of casting (unpredictable)
     if (Math.random() < 0.3) {
-      return moveToRange(state, floorKey, idx, hero.position, 4, 8);
+      return moveToRange(state, floorKey, idx, hero.position, 4, 8, occupied);
     }
     const spell =
       spellAbilities[Math.floor(Math.random() * spellAbilities.length)];
     return monsterRangedAttack(state, monster, spell);
   }
 
-  if (dist <= getDetectRange(state) || monster.alerted) {
-    return moveToRange(state, floorKey, idx, hero.position, 4, 8);
+  if (dist <= detectRange || monster.alerted) {
+    return moveToRange(state, floorKey, idx, hero.position, 4, 8, occupied);
   }
 
   return state;
@@ -929,6 +947,8 @@ function processThief(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -960,7 +980,7 @@ function processThief(
     }
     monster = { ...monster, fleeing: monster.fleeing - 1 };
     let s = updateMonster(state, floorKey, idx, monster);
-    return moveAwayFrom(s, floorKey, idx, hero.position);
+    return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
   }
 
   if (dist <= 1) {
@@ -983,10 +1003,10 @@ function processThief(
   }
 
   if (
-    manhattan(monster.position, hero.position) <= getDetectRange(state) ||
+    manhattan(monster.position, hero.position) <= detectRange ||
     monster.alerted
   ) {
-    return moveToward(state, floorKey, idx, hero.position);
+    return moveToward(state, floorKey, idx, hero.position, occupied);
   }
 
   return state;
@@ -996,6 +1016,8 @@ function processSummoner(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
+  occupied?: Set<string>,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
@@ -1006,8 +1028,7 @@ function processSummoner(
   const los = hasLineOfSight(floor, monster.position, hero.position);
 
   // Silence rift modifier: suppress cast/summon spells only
-  const silenced =
-    state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
+  const silenced = getModifierFlags(state).silence;
 
   // Summon every 4-5 turns
   const summonAbilities = silenced
@@ -1055,8 +1076,8 @@ function processSummoner(
     return monsterAttacksPlayer(state, monster);
   }
 
-  if (dist <= getDetectRange(state) || monster.alerted) {
-    return moveToRange(state, floorKey, idx, hero.position, 5, 8);
+  if (dist <= detectRange || monster.alerted) {
+    return moveToRange(state, floorKey, idx, hero.position, 5, 8, occupied);
   }
 
   return state;
@@ -1068,13 +1089,14 @@ function processStationary(
   state: GameState,
   floorKey: string,
   idx: number,
+  detectRange: number,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
   const monster = floor.monsters[idx];
 
   // Process alert abilities when player is in detection range
-  return processAlertAbilities(state, floorKey, idx, monster);
+  return processAlertAbilities(state, floorKey, idx, monster, detectRange);
 }
 
 /**
@@ -1086,12 +1108,13 @@ function processAlertAbilities(
   floorKey: string,
   idx: number,
   monster: Monster,
+  detectRange?: number,
 ): GameState {
   const floor = state.floors[floorKey];
   if (!floor) return state;
   const hero = state.hero;
   const dist = manhattan(monster.position, hero.position);
-  const detectRange = getDetectRange(state);
+  if (detectRange === undefined) detectRange = getDetectRange(state);
 
   if (dist > detectRange) return state;
   if (!hasLineOfSight(floor, monster.position, hero.position)) return state;
@@ -1158,12 +1181,12 @@ export function processAllMonsterTurns(state: GameState): GameState {
   if (!floor) return state;
 
   let cur = state;
+  const detectRange = getDetectRange(state);
+  const occ = buildOccupied(floor);
 
   // Packhunter rift modifier: when any monster spots the player, alert all within 10 tiles
-  const packhunter =
-    state.activeRift?.modifiers.some((m) => m.id === "packhunter") ?? false;
+  const packhunter = getModifierFlags(state).packhunter;
   if (packhunter) {
-    const detectRange = getDetectRange(state);
     const spotted = floor.monsters.some(
       (m) =>
         m.hp > 0 &&
@@ -1188,12 +1211,24 @@ export function processAllMonsterTurns(state: GameState): GameState {
 
   // Collect IDs before processing (array may change during iteration)
   const monsterIds = floor.monsters.map((m) => m.id);
+  // Build id→index map for O(1) lookup
+  let idxMap = new Map<string, number>();
+  let idxMapLen = -1;
+  const getIdx = (f: Floor, id: string): number => {
+    if (f.monsters.length !== idxMapLen) {
+      idxMap.clear();
+      for (let i = 0; i < f.monsters.length; i++)
+        idxMap.set(f.monsters[i].id, i);
+      idxMapLen = f.monsters.length;
+    }
+    return idxMap.get(id) ?? -1;
+  };
 
   for (const mId of monsterIds) {
     const curFloor = cur.floors[floorKey];
     if (!curFloor) break;
 
-    const idx = curFloor.monsters.findIndex((m) => m.id === mId);
+    const idx = getIdx(curFloor, mId);
     if (idx === -1) continue; // monster died
 
     const monster = curFloor.monsters[idx];
@@ -1202,22 +1237,22 @@ export function processAllMonsterTurns(state: GameState): GameState {
 
     switch (monster.ai) {
       case "melee":
-        cur = processMelee(cur, floorKey, idx);
+        cur = processMelee(cur, floorKey, idx, detectRange, occ);
         break;
       case "ranged":
-        cur = processRanged(cur, floorKey, idx);
+        cur = processRanged(cur, floorKey, idx, detectRange, occ);
         break;
       case "caster":
-        cur = processCaster(cur, floorKey, idx);
+        cur = processCaster(cur, floorKey, idx, detectRange, occ);
         break;
       case "thief":
-        cur = processThief(cur, floorKey, idx);
+        cur = processThief(cur, floorKey, idx, detectRange, occ);
         break;
       case "summoner":
-        cur = processSummoner(cur, floorKey, idx);
+        cur = processSummoner(cur, floorKey, idx, detectRange, occ);
         break;
       case "stationary":
-        cur = processStationary(cur, floorKey, idx);
+        cur = processStationary(cur, floorKey, idx, detectRange);
         break;
     }
 

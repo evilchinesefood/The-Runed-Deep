@@ -1,4 +1,5 @@
 import { createInitialGameState, createHero } from "./core/game-state";
+import { getModifierFlags as _getModifierFlags } from "./systems/rift/ModifierFlags";
 import { GameLoop } from "./core/game-loop";
 import { InputManager } from "./input/input-manager";
 import { MapRenderer } from "./rendering/map-renderer";
@@ -996,9 +997,7 @@ function render(state: GameState): void {
           const isBlinded = state.hero.activeEffects.some(
             (e) => e.id === "blinded",
           );
-          const hasDarkness =
-            state.activeRift?.modifiers.some((m) => m.id === "darkness") ??
-            false;
+          const hasDarkness = _getModifierFlags(state).darkness;
           const fovRadius = isBlinded ? 1 : hasDarkness ? 2 : 4;
           computeFov(
             floor,

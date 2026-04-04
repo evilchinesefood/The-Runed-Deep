@@ -2,7 +2,7 @@
 // Town map — tile-based buildings from JSON templates + config
 // ============================================================
 
-import type { Floor, Tile, Vector2 } from "../../core/types";
+import type { Floor, Monster, Tile, Vector2 } from "../../core/types";
 import {
   TOWN_BUILDINGS_DATA,
   type BuildingTemplate,
@@ -181,6 +181,46 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     }
   }
 
+  // 6b. Create NPC monsters for buildings with npcSprite
+  const npcMonsters: Monster[] = [];
+  for (const bp of TOWN_CONFIG.buildings) {
+    const tmpl = templateMap[bp.id];
+    if (!tmpl) continue;
+    const npcTile = tmpl.tiles[tmpl.npc.y]?.[tmpl.npc.x];
+    if (!npcTile?.npcSprite) continue;
+    const wx = bp.x + tmpl.npc.x;
+    const wy = bp.y + tmpl.npc.y;
+    if (wy >= H || wx >= W) continue;
+    npcMonsters.push({
+      id: `npc-${tmpl.id}`,
+      templateId: "npc",
+      name: tmpl.name,
+      sprite: npcTile.npcSprite,
+      position: { x: wx, y: wy },
+      hp: 99999,
+      maxHp: 99999,
+      damage: [0, 0],
+      speed: 0,
+      xpValue: 0,
+      resistances: {
+        cold: 100,
+        fire: 100,
+        lightning: 100,
+        acid: 100,
+        drain: 100,
+      },
+      ai: "stationary",
+      armor: 9999,
+      abilities: [],
+      sleeping: false,
+      slowed: false,
+      fleeing: 0,
+      hasFled: false,
+      bled: false,
+      alerted: false,
+    });
+  }
+
   // 7. Mine entrance
   const me = TOWN_CONFIG.mineEntrance;
   if (me.y < H && me.x < W) {
@@ -201,7 +241,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     floor: {
       id: "town-0",
       tiles,
-      monsters: [],
+      monsters: npcMonsters,
       items: [],
       decals: [],
       explored,

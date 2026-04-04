@@ -12,13 +12,10 @@ import { getDifficultyConfig } from "../data/difficulty";
 import { ITEM_BY_ID } from "../data/items";
 import { recomputeDerivedStats } from "../systems/character/derived-stats";
 import { getRuneValue } from "../data/Runes";
+import { getModifierFlags } from "../systems/rift/ModifierFlags";
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
-
-function hasRiftModifier(state: GameState, modId: string): boolean {
-  return state.activeRift?.modifiers.some((m) => m.id === modId) ?? false;
-}
 
 const MAX_MESSAGES = 200;
 function pruneMessages(state: GameState): GameState {
@@ -118,7 +115,7 @@ export class GameLoop {
     ) {
       newState = this.processMonsterTurns(newState);
       // Frenzied: monsters get an extra action
-      if (hasRiftModifier(newState, "frenzied")) {
+      if (getModifierFlags(newState).frenzied) {
         newState = this.processMonsterTurns(newState);
       }
     }
@@ -210,7 +207,7 @@ export class GameLoop {
     let messages = [...state.messages];
 
     // ── Cursed Ground: suppress regen, deal poison damage ───
-    const cursedGround = hasRiftModifier(state, "cursed-ground");
+    const cursedGround = getModifierFlags(state).cursedGround;
 
     // ── Regeneration affix (scaled) ─────────────────────────
     const regenHp = equipAffixTotal(

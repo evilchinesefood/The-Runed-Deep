@@ -1,10 +1,31 @@
 import type { Hero, Attributes, Equipment, EquipSlot } from "../../core/types";
 import { ITEM_BY_ID } from "../../data/items";
-import {
-  getEquipAffixTotal,
-  getEquipAffixTotal2,
-} from "../../data/Enchantments";
+import { getAffixValue, getAffixValue2 } from "../../data/Enchantments";
 import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
+
+/** Single-pass scan of all affix totals across equipment */
+function scanAllAffixes(
+  equipment: Record<string, any>,
+  statueUpgrades?: Record<string, number>,
+): { totals: Map<string, number>; totals2: Map<string, number> } {
+  const totals = new Map<string, number>();
+  const totals2 = new Map<string, number>();
+  for (const item of Object.values(equipment)) {
+    if (!item?.specialEnchantments) continue;
+    for (const rawEid of item.specialEnchantments as string[]) {
+      const isCrit = rawEid.endsWith(":critical");
+      const eid = isCrit ? rawEid.replace(":critical", "") : rawEid;
+      const statueBonus = statueUpgrades?.[`affix-${eid}`] ?? 0;
+      const ench =
+        (item.enchantment ?? 0) + (item.blessed ? 1 : 0) + statueBonus;
+      const val = getAffixValue(eid, ench, isCrit);
+      const val2 = getAffixValue2(eid, ench, isCrit);
+      totals.set(eid, (totals.get(eid) || 0) + val);
+      totals2.set(eid, (totals2.get(eid) || 0) + val2);
+    }
+  }
+  return { totals, totals2 };
+}
 
 export function computeMaxHp(constitution: number, level: number): number {
   const base = 10 + Math.floor(constitution / 5);
@@ -55,6 +76,11 @@ export function recomputeDerivedStats(
   const eq = hero.equipment;
   const su = statueUpgrades ?? hero.statueUpgrades ?? {};
 
+  // ── Single-pass affix scan ───────────────────────────────
+  const { totals: ax, totals2: ax2 } = scanAllAffixes(eq, su);
+  const af = (id: string) => Math.round(ax.get(id) || 0);
+  const af2 = (id: string) => Math.round(ax2.get(id) || 0);
+
   // ── Statue base stat bonuses ─────────────────────────────
   const statStr = (su["stat-str"] ?? 0) * 5;
   const statInt = (su["stat-int"] ?? 0) * 5;
@@ -62,19 +88,11 @@ export function recomputeDerivedStats(
   const statDex = (su["stat-dex"] ?? 0) * 5;
 
   // ── Scaled affix attribute bonuses ────────────────────────
-  const soulDrainAll = Math.round(getEquipAffixTotal(eq, "soul-drain", su));
-  const bonusStr =
-    Math.round(getEquipAffixTotal(eq, "might", su)) + soulDrainAll + statStr;
-  const bonusInt =
-    Math.round(getEquipAffixTotal(eq, "brilliance", su)) +
-    soulDrainAll +
-    statInt;
-  const bonusCon =
-    Math.round(getEquipAffixTotal(eq, "fortitude", su)) +
-    soulDrainAll +
-    statCon;
-  const bonusDex =
-    Math.round(getEquipAffixTotal(eq, "grace", su)) + soulDrainAll + statDex;
+  const soulDrainAll = af("soul-drain");
+  const bonusStr = af("might") + soulDrainAll + statStr;
+  const bonusInt = af("brilliance") + soulDrainAll + statInt;
+  const bonusCon = af("fortitude") + soulDrainAll + statCon;
+  const bonusDex = af("grace") + soulDrainAll + statDex;
 
   // ── Unique item attribute bonuses ─────────────────────────
   let uStr = 0,
@@ -103,20 +121,18 @@ export function recomputeDerivedStats(
   // ── Max HP/MP with Vitality and Arcane Well bonuses ───────
   let maxHp = computeMaxHp(effCon, hero.level);
   let maxMp = computeMaxMp(effInt, hero.level);
-  maxHp += Math.round(getEquipAffixTotal(eq, "vitality", su));
-  maxMp += Math.round(getEquipAffixTotal(eq, "arcane-well", su));
+  maxHp += af("vitality");
+  maxMp += af("arcane-well");
   // Statue resource bonuses
   maxHp += (su["resource-hp"] ?? 0) * 3;
   maxMp += (su["resource-mp"] ?? 0) * 3;
   // Soul Drain: reduce max HP (secondary value)
-  const soulDrainHpPenalty = Math.round(
-    getEquipAffixTotal2(eq, "soul-drain", su),
-  );
+  const soulDrainHpPenalty = af2("soul-drain");
   if (soulDrainHpPenalty > 0) maxHp = Math.max(10, maxHp - soulDrainHpPenalty);
 
   // ── Armor value + Hardened affix ──────────────────────────
   let armorValue = computeTotalArmorValue(effDex, eq);
-  armorValue += Math.round(getEquipAffixTotal(eq, "hardened", su));
+  armorValue += af("hardened");
   // Statue combat bonuses
   armorValue += (su["combat-armor"] ?? 0) * 1;
 
@@ -182,27 +198,19 @@ export function recomputeDerivedStats(
     equipAccuracyBonus =
       (weapon.properties["accuracy"] ?? 0) + weapon.enchantment;
   }
-  equipDamageBonus += Math.round(getEquipAffixTotal(eq, "sharpness", su));
+  equipDamageBonus += af("sharpness");
   // Statue combat damage bonus
   equipDamageBonus += (su["combat-damage"] ?? 0) * 1;
   // Might/Strength bonus adds to melee damage (1 per 5 bonus Str)
   equipDamageBonus += Math.floor((bonusStr + uStr) / 5);
 
   // ── Magic Resistance (scaled, capped at 40% per affix) ───
-  const magicResistBonus = Math.round(
-    getEquipAffixTotal(eq, "magic-resist", su),
-  );
+  const magicResistBonus = af("magic-resist");
 
   // ── Elemental Touched resist bonuses ──────────────────────
-  const fireResistBonus = Math.round(
-    getEquipAffixTotal2(eq, "fire-touched", su),
-  );
-  const coldResistBonus = Math.round(
-    getEquipAffixTotal2(eq, "frost-touched", su),
-  );
-  const lightningResistBonus = Math.round(
-    getEquipAffixTotal2(eq, "storm-touched", su),
-  );
+  const fireResistBonus = af2("fire-touched");
+  const coldResistBonus = af2("frost-touched");
+  const lightningResistBonus = af2("storm-touched");
 
   // ── Unique item elemental resistances ─────────────────────
   let uniqueResist = { cold: 0, fire: 0, lightning: 0, acid: 0, drain: 0 };

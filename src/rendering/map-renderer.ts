@@ -586,15 +586,44 @@ export class MapRenderer {
   ): void {
     if (state.currentDungeon !== "town") {
       if (this.buildingLabels.length > 0) {
-        for (const el of this.buildingLabels) el.remove();
-        this.buildingLabels = [];
+        for (const el of this.buildingLabels) el.style.display = "none";
       }
       this._labelCamX = -1;
       this._labelCamY = -1;
+      this._prevFloorKey = "";
       return;
     }
 
     const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+
+    // Camera only moved — reposition existing labels via transform
+    if (
+      this._prevFloorKey === floorKey &&
+      this.buildingLabels.length > 0 &&
+      (this._labelCamX !== cameraX || this._labelCamY !== cameraY)
+    ) {
+      this._labelCamX = cameraX;
+      this._labelCamY = cameraY;
+      const positions = MapRenderer.getLabelPositions();
+      const vpW = VIEWPORT_TILES_X * TILE_SIZE;
+      const vpH = VIEWPORT_TILES_Y * TILE_SIZE;
+      for (let i = 0; i < this.buildingLabels.length; i++) {
+        const lp = positions[i];
+        const el = this.buildingLabels[i];
+        const screenX = (lp.x - cameraX) * TILE_SIZE + TILE_SIZE / 2;
+        const screenY = (lp.y - cameraY) * TILE_SIZE;
+        const visible =
+          screenX >= -100 &&
+          screenX <= vpW + 100 &&
+          screenY >= -30 &&
+          screenY <= vpH + 30;
+        el.style.display = visible ? "" : "none";
+        el.style.transform = `translate(${screenX}px, ${screenY}px) translateX(-50%)`;
+      }
+      return;
+    }
+
+    // Same camera, same floor, labels exist — nothing to do
     if (
       this._labelCamX === cameraX &&
       this._labelCamY === cameraY &&
@@ -602,6 +631,8 @@ export class MapRenderer {
       this.buildingLabels.length > 0
     )
       return;
+
+    // Floor changed or first render — recreate labels
     this._labelCamX = cameraX;
     this._labelCamY = cameraY;
     this._prevFloorKey = floorKey;
@@ -615,17 +646,19 @@ export class MapRenderer {
     for (const lp of MapRenderer.getLabelPositions()) {
       const screenX = (lp.x - cameraX) * TILE_SIZE + TILE_SIZE / 2;
       const screenY = (lp.y - cameraY) * TILE_SIZE;
-
-      if (screenX < -100 || screenX > vpW + 100) continue;
-      if (screenY < -30 || screenY > vpH + 30) continue;
+      const visible =
+        screenX >= -100 &&
+        screenX <= vpW + 100 &&
+        screenY >= -30 &&
+        screenY <= vpH + 30;
 
       const div = document.createElement("div");
       div.textContent = lp.name;
       div.style.cssText = `
         position:absolute;
-        left:${screenX}px;
-        top:${screenY}px;
-        transform:translateX(-50%);
+        left:0;
+        top:0;
+        transform:translate(${screenX}px, ${screenY}px) translateX(-50%);
         font-size:10px;
         color:#ffd700;
         text-shadow:1px 1px 2px #000, -1px -1px 2px #000;
@@ -633,6 +666,7 @@ export class MapRenderer {
         pointer-events:none;
         z-index:5;
         font-family:serif;
+        display:${visible ? "" : "none"};
       `;
       this.mapContainer.appendChild(div);
       this.buildingLabels.push(div);

@@ -21,6 +21,7 @@ import { getDifficultyConfig } from "../../data/difficulty";
 import { MONSTER_BY_ID } from "../../data/monsters";
 import { getDisplayName } from "../inventory/display-name";
 import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
+import { getModifierFlags } from "../rift/ModifierFlags";
 
 /** Sum a rune effect value across all equipped items */
 function sumRuneEffect(equipment: any, effect: string): number {
@@ -36,6 +37,25 @@ function sumRuneEffect(equipment: any, effect: string): number {
     }
   }
   return total;
+}
+
+/** Build a cache of all rune effect totals for equipped items */
+function buildRuneCache(equipment: any): Record<string, number> {
+  const cache: Record<string, number> = {};
+  for (const item of Object.values(equipment)) {
+    if (!item || !(item as any).sockets) continue;
+    const it = item as any;
+    const effEnch = it.enchantment + (it.blessed ? 1 : 0);
+    for (const runeId of it.sockets) {
+      if (!runeId) continue;
+      const rune = RUNE_BY_ID[runeId];
+      if (rune) {
+        cache[rune.effect] =
+          (cache[rune.effect] || 0) + getRuneValue(runeId, effEnch);
+      }
+    }
+  }
+  return cache;
 }
 
 /** Check if any equipped item has a specific rune */
@@ -252,8 +272,11 @@ export function playerAttacksMonster(
   const rawDamage = calcPlayerDamage(state.hero);
   let damage = applyArmor(Math.max(1, rawDamage), monster.armor);
 
+  // Build rune cache once for this attack
+  const rc = buildRuneCache(state.hero.equipment);
+
   // Glass Cannon rift modifier: 2x player damage
-  if (state.activeRift?.modifiers.some((m) => m.id === "glass-cannon")) {
+  if (getModifierFlags(state).glassCannon) {
     damage = damage * 2;
   }
 
@@ -266,7 +289,7 @@ export function playerAttacksMonster(
   if (berserkBonus > 0) damage = Math.round(damage * (1 + berserkBonus / 100));
 
   // Rune: Flame — add fire damage
-  const flameDmg = sumRuneEffect(state.hero.equipment, "fire-damage");
+  const flameDmg = rc["fire-damage"] || 0;
   if (flameDmg > 0) {
     const bonus = Math.max(1, Math.round((damage * flameDmg) / 10));
     damage += bonus;
@@ -278,7 +301,7 @@ export function playerAttacksMonster(
   }
 
   // Rune: Frost — cold damage + chance to slow
-  const frostDmg = sumRuneEffect(state.hero.equipment, "cold-damage-slow");
+  const frostDmg = rc["cold-damage-slow"] || 0;
   if (frostDmg > 0) {
     const bonus = Math.max(1, Math.round((damage * frostDmg) / 10));
     damage += bonus;
@@ -311,7 +334,7 @@ export function playerAttacksMonster(
   }
 
   // Rune: Precision — crit chance bonus
-  const critBonus = sumRuneEffect(state.hero.equipment, "crit-chance");
+  const critBonus = rc["crit-chance"] || 0;
   if (critBonus > 0 && Math.random() * 100 < critBonus) {
     damage = Math.round(damage * 1.5);
     messages.push({
@@ -453,7 +476,7 @@ export function playerAttacksMonster(
     }
     // Rune: Siphon — restore MP on kill
     let siphonMp = 0;
-    const siphonVal = sumRuneEffect(state.hero.equipment, "mp-per-kill");
+    const siphonVal = rc["mp-per-kill"] || 0;
     if (siphonVal > 0) {
       siphonMp = Math.round(siphonVal);
       messages.push({
@@ -465,7 +488,7 @@ export function playerAttacksMonster(
 
     // Rune: Conversion — heal % of overkill damage
     let convHeal = 0;
-    const convPct = sumRuneEffect(state.hero.equipment, "overkill-heal");
+    const convPct = rc["overkill-heal"] || 0;
     if (convPct > 0 && newHp < 0) {
       convHeal = Math.max(1, Math.round((Math.abs(newHp) * convPct) / 100));
       messages.push({
@@ -747,8 +770,11 @@ export function monsterAttacksPlayer(
     return applyMessages(state, messages);
   }
 
+  // Build rune cache once for this defense
+  const rc = buildRuneCache(state.hero.equipment);
+
   // Rune: Phantom — dodge chance
-  const phantomDodge = sumRuneEffect(state.hero.equipment, "dodge");
+  const phantomDodge = rc["dodge"] || 0;
   if (phantomDodge > 0 && Math.random() * 100 < phantomDodge) {
     messages.push({
       text: `${state.hero.name} phases through the ${monster.name}'s attack! (Phantom rune)`,
@@ -777,7 +803,7 @@ export function monsterAttacksPlayer(
   let damage = applyArmor(rawDamage, state.hero.armorValue);
 
   // Glass Cannon rift modifier: 2x damage taken
-  if (state.activeRift?.modifiers.some((m) => m.id === "glass-cannon")) {
+  if (getModifierFlags(state).glassCannon) {
     damage = damage * 2;
   }
 
@@ -850,7 +876,7 @@ export function monsterAttacksPlayer(
     "thorns",
     state.statueUpgrades,
   );
-  totalThornsPct += sumRuneEffect(state.hero.equipment, "reflect-damage");
+  totalThornsPct += rc["reflect-damage"] || 0;
   // Aegis of the Fallen: 30% reflect
   for (const eq of Object.values(state.hero.equipment)) {
     if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "aegis-power")
