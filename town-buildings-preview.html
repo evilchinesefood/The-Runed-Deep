@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Town Buildings Preview - The Runed Deep</title>
+<link rel="stylesheet" href="public/css/sprites/tiles.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #c8b888;
+    font-family: 'Courier New', monospace;
+    padding: 24px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #e8d8a0;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #887850;
+    margin-bottom: 32px;
+    font-size: 14px;
+  }
+  .building {
+    background: #12121a;
+    border: 1px solid #2a2a3a;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 24px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .building-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .building-name {
+    font-size: 18px;
+    color: #e8d8a0;
+    font-weight: bold;
+  }
+  .building-meta {
+    font-size: 12px;
+    color: #666;
+  }
+  .building-flavor {
+    font-size: 13px;
+    color: #887850;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+  .building-id {
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 12px;
+    font-family: monospace;
+  }
+  .grid {
+    display: inline-grid;
+    gap: 1px;
+    background: #1a1a25;
+    border: 2px solid #2a2a3a;
+    padding: 2px;
+  }
+  .tile {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    image-rendering: pixelated;
+  }
+  .tile.entrance {
+    outline: 2px solid #44cc44;
+    outline-offset: -2px;
+    z-index: 1;
+  }
+  .tile.npc {
+    outline: 2px solid #cc8844;
+    outline-offset: -2px;
+    z-index: 1;
+  }
+  .tile.entrance.npc {
+    outline-color: #cccc44;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #888;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border: 2px solid;
+    display: inline-block;
+  }
+  .legend-swatch.entrance { border-color: #44cc44; }
+  .legend-swatch.npc { border-color: #cc8844; }
+</style>
+</head>
+<body>
+<h1>Town Building Templates</h1>
+<p class="subtitle">Tile-based interior layouts for The Runed Deep</p>
+<div id="buildings"></div>
+<script>
+function renderBuildings(data) {
+  const container = document.getElementById('buildings');
+
+  data.forEach(b => {
+    const section = document.createElement('div');
+    section.className = 'building';
+
+    const header = document.createElement('div');
+    header.className = 'building-header';
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'building-name';
+    nameSpan.textContent = b.name;
+    const metaSpan = document.createElement('span');
+    metaSpan.className = 'building-meta';
+    metaSpan.textContent = b.width + 'x' + b.height;
+    header.appendChild(nameSpan);
+    header.appendChild(metaSpan);
+    section.appendChild(header);
+
+    const flavor = document.createElement('div');
+    flavor.className = 'building-flavor';
+    flavor.textContent = b.flavor;
+    section.appendChild(flavor);
+
+    const idLine = document.createElement('div');
+    idLine.className = 'building-id';
+    idLine.textContent = 'id: ' + b.id + '  |  entrance: (' + b.entrance.x + ',' + b.entrance.y + ')  |  npc: (' + b.npc.x + ',' + b.npc.y + ')';
+    section.appendChild(idLine);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(' + b.width + ', 32px)';
+
+    b.tiles.forEach(function(row, y) {
+      row.forEach(function(t, x) {
+        const tile = document.createElement('div');
+        tile.className = 'tile ' + t.sprite;
+        if (x === b.entrance.x && y === b.entrance.y) tile.classList.add('entrance');
+        if (x === b.npc.x && y === b.npc.y) tile.classList.add('npc');
+        tile.title = t.sprite + ' (' + t.type + ')';
+        grid.appendChild(tile);
+      });
+    });
+
+    section.appendChild(grid);
+
+    const legend = document.createElement('div');
+    legend.className = 'legend';
+
+    const entrLeg = document.createElement('div');
+    entrLeg.className = 'legend-item';
+    const entrSwatch = document.createElement('span');
+    entrSwatch.className = 'legend-swatch entrance';
+    entrLeg.appendChild(entrSwatch);
+    entrLeg.appendChild(document.createTextNode(' Entrance'));
+    legend.appendChild(entrLeg);
+
+    const npcLeg = document.createElement('div');
+    npcLeg.className = 'legend-item';
+    const npcSwatch = document.createElement('span');
+    npcSwatch.className = 'legend-swatch npc';
+    npcLeg.appendChild(npcSwatch);
+    npcLeg.appendChild(document.createTextNode(' NPC'));
+    legend.appendChild(npcLeg);
+
+    section.appendChild(legend);
+    container.appendChild(section);
+  });
+}
+
+fetch('public/town-buildings.json')
+  .then(function(r) { return r.json(); })
+  .then(renderBuildings)
+  .catch(function(e) {
+    document.getElementById('buildings').textContent = 'Error loading buildings: ' + e.message;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dungeon Theme Preview — The Runed Deep</title>
+    <link rel="stylesheet" href="css/sprites/tiles.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a1a;
+        color: #d4c9a8;
+        font-family: "Courier New", monospace;
+        padding: 24px;
+      }
+      h1 {
+        text-align: center;
+        color: #f0e6c8;
+        margin-bottom: 32px;
+        font-size: 28px;
+        letter-spacing: 2px;
+      }
+      .themes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        justify-content: center;
+      }
+      .theme-section {
+        background: #222;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 16px;
+      }
+      .theme-header {
+        margin-bottom: 12px;
+      }
+      .theme-name {
+        font-size: 20px;
+        color: #f0e6c8;
+      }
+      .theme-depth {
+        font-size: 13px;
+        color: #888;
+        margin-top: 2px;
+      }
+      .room-grid {
+        display: grid;
+        gap: 0;
+      }
+      .room-grid > div {
+        width: 32px;
+        height: 32px;
+      }
+      .tile-ref {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #666;
+        max-width: 384px;
+        line-height: 1.5;
+      }
+      .tile-ref span {
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dungeon Theme Preview</h1>
+    <div class="themes" id="themes"></div>
+
+    <script>
+      var THEMES = [
+        {
+          id: "mine",
+          name: "Mine",
+          depthMin: 1,
+          depthMax: 5,
+          walls: [
+            "wall-stone2_brown0",
+            "wall-stone2_brown1",
+            "wall-stone2_brown2",
+            "wall-stone2_brown3",
+            "wall-stone_gray0",
+            "wall-stone_gray1",
+            "wall-stone_gray2",
+            "wall-stone_gray3",
+          ],
+          floors: [
+            "floor-pebble_brown0",
+            "floor-pebble_brown1",
+            "floor-pebble_brown2",
+            "floor-pebble_brown3",
+            "floor-grey_dirt0",
+            "floor-grey_dirt1",
+            "floor-grey_dirt2",
+            "floor-grey_dirt3",
+          ],
+          doorClosed: ["doors-closed_door"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "statues-depths_column",
+            "statues-crumbled_column_1",
+            "statues-crumbled_column_2",
+          ],
+        },
+        {
+          id: "lair",
+          name: "Lair",
+          depthMin: 6,
+          depthMax: 10,
+          walls: [
+            "wall-brick_brown0",
+            "wall-brick_brown1",
+            "wall-brick_brown2",
+            "wall-brick_brown3",
+            "wall-brick_brown4",
+            "wall-brick_brown5",
+          ],
+          floors: [
+            "floor-lair0",
+            "floor-lair1",
+            "floor-lair2",
+            "floor-lair3",
+            "floor-dirt0",
+            "floor-dirt1",
+            "floor-dirt2",
+          ],
+          doorClosed: ["doors-closed_door"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "plants-bloom_plant_01",
+            "plants-bloom_plant_02",
+            "plants-magic_mushroom_01",
+            "plants-magic_mushroom_02",
+            "decor-flower_patch_0",
+            "decor-flower_patch_1",
+          ],
+        },
+        {
+          id: "crypt",
+          name: "Crypt",
+          depthMin: 11,
+          depthMax: 15,
+          walls: [
+            "wall-stone_dark0",
+            "wall-stone_dark1",
+            "wall-stone_dark2",
+            "wall-stone_dark3",
+            "wall-cobalt_stone01",
+            "wall-cobalt_stone02",
+            "wall-cobalt_stone03",
+            "wall-cobalt_stone04",
+          ],
+          floors: [
+            "floor-crypt_domino_1a",
+            "floor-crypt_domino_1b",
+            "floor-crypt_domino_2a",
+            "floor-crypt_domino_3a",
+            "floor-green_bones01",
+            "floor-green_bones02",
+            "floor-green_bones03",
+            "floor-green_bones04",
+          ],
+          doorClosed: ["doors-closed_door_crypt"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "statues-statue_demonic_bust",
+            "statues-crumbled_column_3",
+            "statues-crumbled_column_4",
+            "decor-blood_fountain",
+            "altars-ashenzari",
+          ],
+        },
+        {
+          id: "fortress",
+          name: "Fortress",
+          depthMin: 16,
+          depthMax: 20,
+          walls: [
+            "wall-brick_gray0",
+            "wall-brick_gray1",
+            "wall-brick_gray2",
+            "wall-brick_gray3",
+            "wall-sandstone_wall0",
+            "wall-sandstone_wall1",
+            "wall-sandstone_wall2",
+            "wall-sandstone_wall3",
+          ],
+          floors: [
+            "floor-sandstone_floor0",
+            "floor-sandstone_floor1",
+            "floor-sandstone_floor2",
+            "floor-sandstone_floor3",
+            "floor-rect_gray0",
+            "floor-rect_gray1",
+            "floor-rect_gray2",
+            "floor-rect_gray3",
+          ],
+          doorClosed: ["doors-closed_door"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "statues-depths_column",
+            "statues-statue_ancient_hero",
+            "statues-statue_archer",
+            "altars-ecumenical",
+          ],
+        },
+        {
+          id: "ice",
+          name: "Ice",
+          depthMin: 21,
+          depthMax: 25,
+          walls: [
+            "wall-ice_block0",
+            "wall-ice_block1",
+            "wall-ice_block2",
+            "wall-ice_block3",
+            "wall-icy_stone0",
+            "wall-icy_stone1",
+            "wall-icy_stone2",
+            "wall-icy_stone3",
+          ],
+          floors: [
+            "floor-ice0",
+            "floor-ice1",
+            "floor-ice2",
+            "floor-ice3",
+            "floor-frozen0",
+            "floor-frozen1",
+            "floor-frozen2",
+            "floor-frozen3",
+          ],
+          doorClosed: ["doors-closed_door"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "statues-crumbled_column_5",
+            "statues-crumbled_column_6",
+            "decor-blue_fountain",
+            "decor-dry_fountain",
+          ],
+        },
+        {
+          id: "castle",
+          name: "Castle",
+          depthMin: 26,
+          depthMax: 30,
+          walls: [
+            "wall-marble_wall1",
+            "wall-marble_wall2",
+            "wall-marble_wall3",
+            "wall-marble_wall4",
+            "wall-vault_stone00",
+            "wall-vault_stone01",
+            "wall-vault_stone02",
+            "wall-vault_stone03",
+          ],
+          floors: [
+            "floor-white_marble0",
+            "floor-white_marble1",
+            "floor-white_marble2",
+            "floor-white_marble3",
+            "floor-metal_silver0",
+            "floor-metal_silver1",
+            "floor-metal_silver2",
+            "floor-metal_silver3",
+          ],
+          doorClosed: ["doors-closed_door"],
+          stairsUp: ["gateways-stone_stairs_up"],
+          stairsDown: ["gateways-stone_stairs_down"],
+          decor: [
+            "statues-statue_angel",
+            "statues-statue_ancient_hero",
+            "statues-metal_statue",
+            "decor-sparkling_fountain",
+            "altars-elyvilon",
+          ],
+        },
+      ];
+
+      function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function renderRoom(container, theme) {
+        var W = 12,
+          H = 8;
+        var grid = document.createElement("div");
+        grid.className = "room-grid";
+        grid.style.gridTemplateColumns = "repeat(" + W + ", 32px)";
+
+        // Precompute special positions
+        // Door: middle of right wall
+        var doorX = W - 1,
+          doorY = Math.floor(H / 2);
+        // Stairs up: top-left interior
+        var suX = 1,
+          suY = 1;
+        // Stairs down: bottom-right interior
+        var sdX = W - 2,
+          sdY = H - 2;
+        // Decor: 3 scattered interior positions
+        var decorPositions = [
+          { x: 3, y: 3 },
+          { x: 7, y: 2 },
+          { x: 5, y: 5 },
+        ];
+        var decorSet = {};
+        for (var d = 0; d < decorPositions.length; d++) {
+          decorSet[decorPositions[d].x + "," + decorPositions[d].y] = true;
+        }
+
+        for (var y = 0; y < H; y++) {
+          for (var x = 0; x < W; x++) {
+            var cell = document.createElement("div");
+            var key = x + "," + y;
+            var isWall =
+              y === 0 || y === H - 1 || x === 0 || x === W - 1;
+
+            if (x === doorX && y === doorY) {
+              cell.className = pick(theme.doorClosed);
+            } else if (x === suX && y === suY) {
+              cell.className = pick(theme.stairsUp);
+            } else if (x === sdX && y === sdY) {
+              cell.className = pick(theme.stairsDown);
+            } else if (!isWall && decorSet[key]) {
+              cell.className = pick(theme.decor);
+            } else if (isWall) {
+              cell.className = pick(theme.walls);
+            } else {
+              cell.className = pick(theme.floors);
+            }
+
+            grid.appendChild(cell);
+          }
+        }
+
+        container.appendChild(grid);
+      }
+
+      function buildPage() {
+        var root = document.getElementById("themes");
+
+        for (var i = 0; i < THEMES.length; i++) {
+          var t = THEMES[i];
+          var section = document.createElement("div");
+          section.className = "theme-section";
+
+          var header = document.createElement("div");
+          header.className = "theme-header";
+
+          var name = document.createElement("div");
+          name.className = "theme-name";
+          name.textContent = t.name;
+
+          var depth = document.createElement("div");
+          depth.className = "theme-depth";
+          depth.textContent =
+            "Depths " + t.depthMin + " – " + t.depthMax;
+
+          header.appendChild(name);
+          header.appendChild(depth);
+          section.appendChild(header);
+
+          renderRoom(section, t);
+
+          // Reference info
+          var ref = document.createElement("div");
+          ref.className = "tile-ref";
+
+          var wLabel = document.createElement("span");
+          wLabel.textContent = "Walls: ";
+          ref.appendChild(wLabel);
+          ref.appendChild(document.createTextNode(t.walls.join(", ")));
+          ref.appendChild(document.createElement("br"));
+
+          var fLabel = document.createElement("span");
+          fLabel.textContent = "Floors: ";
+          ref.appendChild(fLabel);
+          ref.appendChild(document.createTextNode(t.floors.join(", ")));
+
+          section.appendChild(ref);
+          root.appendChild(section);
+        }
+      }
+
+      buildPage();
+    </script>
+  </body>
+</html>
