@@ -84,29 +84,29 @@ const SPELL_LEARN_ORDER: string[] = [
   // Level 2:
   'heal-minor-wounds',
   // Level 3:
-  'light',
+  'return',
   // Level 4:
-  'detect-objects',
+  'light',
   // Level 5:
   'shield',
   // Level 6:
-  'phase-door',
+  'detect-objects',
   // Level 7:
-  'magic-arrow',
+  'phase-door',
   // Level 8:
-  'cold-bolt',
+  'magic-arrow',
   // Level 9:
-  'detect-monsters',
+  'cold-bolt',
   // Level 10:
-  'detect-traps',
+  'detect-monsters',
   // Level 11:
-  'neutralize-poison',
+  'detect-traps',
   // Level 12:
-  'heal-medium-wounds',
+  'neutralize-poison',
   // Level 13:
-  'clairvoyance',
+  'heal-medium-wounds',
   // Level 14:
-  'rune-of-return',
+  'clairvoyance',
   // Level 15:
   'heal-major-wounds',
   // Level 16:

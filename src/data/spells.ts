@@ -260,8 +260,8 @@ export const SPELLS: SpellDef[] = [
     description: 'Allows you to float above the ground, avoiding traps.',
   },
   {
-    id: 'rune-of-return',
-    name: 'Rune of Return',
+    id: 'return',
+    name: 'Return',
     category: 'movement',
     level: 3,
     manaCost: 3,

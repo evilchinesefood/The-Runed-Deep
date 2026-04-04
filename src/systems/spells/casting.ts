@@ -218,7 +218,7 @@ function resolveSpellEffect(
         hero: { ...state.hero, activeEffects: newEffects },
       };
     }
-    case "rune-of-return": {
+    case "return": {
       if (state.currentDungeon === "town") {
         return addMsg(state, "You are already in town.", "system");
       }
