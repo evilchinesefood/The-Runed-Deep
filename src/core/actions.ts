@@ -705,7 +705,7 @@ export function teleportToTown(state: GameState): GameState {
     currentFloor: 0,
     returnFloor: state.currentFloor,
     floors,
-    hero: { ...state.hero, position: { ...TOWN_START_RETURN } },
+    hero: { ...state.hero, position: TOWN_START_RETURN() },
     town: { ...state.town, shopInventories, deepestFloor: deepest },
     messages: [
       ...state.messages,

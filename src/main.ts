@@ -52,6 +52,7 @@ import { createRiftSummaryScreen } from "./ui/RiftSummaryScreen";
 import { createCrucibleMenuScreen } from "./ui/CrucibleMenuScreen";
 import { createCrucibleBetweenScreen } from "./ui/CrucibleSummaryScreen";
 import { loadSpritePools } from "./systems/items/SpritePool";
+import { loadTownConfig } from "./systems/town/TownConfigLoader";
 
 injectTheme();
 setOnUnlockCallback(showAchievementToast);
@@ -950,8 +951,8 @@ function addScreenCleanup(fn: () => void): void {
   screenCleanups.push(fn);
 }
 
-// Load sprite pools before first render
-await loadSpritePools();
+// Load sprite pools and town config before first render
+await Promise.all([loadSpritePools(), loadTownConfig()]);
 
 // Initial render
 render(gameLoop.getState());
@@ -1099,7 +1100,7 @@ function switchScreen(state: GameState): void {
 
           // Generate town and start player near temple
           const { floor: townFloor } = generateTownMap();
-          hero.position = { ...TOWN_START_INITIAL };
+          hero.position = TOWN_START_INITIAL();
 
           // Initialize shop inventories
           const shopIds = [
@@ -1439,7 +1440,7 @@ function switchScreen(state: GameState): void {
           };
           gameLoop.setState({
             ...ngState,
-            hero: { ...ngState.hero, position: { ...TOWN_START_INITIAL } },
+            hero: { ...ngState.hero, position: TOWN_START_INITIAL() },
           });
         },
         () => {
@@ -1503,7 +1504,7 @@ function switchScreen(state: GameState): void {
             ...s.hero,
             hp: s.hero.maxHp,
             mp: s.hero.maxMp,
-            position: { ...TOWN_START_RETURN },
+            position: TOWN_START_RETURN(),
             activeEffects: [],
           },
           town: { ...s.town, shopInventories, deepestFloor: deepest },
@@ -1631,7 +1632,7 @@ function switchScreen(state: GameState): void {
                 ...s.hero,
                 hp: s.hero.maxHp,
                 mp: s.hero.maxMp,
-                position: { ...TOWN_START_RETURN },
+                position: TOWN_START_RETURN(),
                 activeEffects: [],
               },
               messages: [

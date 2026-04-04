@@ -7,10 +7,8 @@ import {
   TOWN_BUILDINGS_DATA,
   type BuildingTemplate,
 } from "../../data/TownBuildingData";
-import { TOWN_CONFIG } from "../../data/TownConfigData";
-
-const W = TOWN_CONFIG.width;
-const H = TOWN_CONFIG.height;
+import { getTownConfig } from "./TownConfigLoader";
+import { pickItemSprite } from "../items/SpritePool";
 
 // Build a lookup of building templates by id
 const templateMap: Record<string, BuildingTemplate> = {};
@@ -25,14 +23,15 @@ export const BUILDING_FLAVORS: Record<
 for (const t of TOWN_BUILDINGS_DATA)
   BUILDING_FLAVORS[t.id] = { name: t.name, flavor: t.flavor };
 
-export const TOWN_START_INITIAL: Vector2 = {
-  x: TOWN_CONFIG.playerSpawn.x,
-  y: TOWN_CONFIG.playerSpawn.y,
-};
-export const TOWN_START_RETURN: Vector2 = {
-  x: TOWN_CONFIG.playerReturnSpawn.x,
-  y: TOWN_CONFIG.playerReturnSpawn.y,
-};
+export function TOWN_START_INITIAL(): Vector2 {
+  const cfg = getTownConfig();
+  return { x: cfg.playerSpawn.x, y: cfg.playerSpawn.y };
+}
+
+export function TOWN_START_RETURN(): Vector2 {
+  const cfg = getTownConfig();
+  return { x: cfg.playerReturnSpawn.x, y: cfg.playerReturnSpawn.y };
+}
 
 // ── Feature sprite helpers ─────────────────────────────────
 
@@ -48,6 +47,10 @@ const FEATURE_SPRITES: Record<string, string> = {
 // ── Generator ──────────────────────────────────────────────
 
 export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
+  const cfg = getTownConfig();
+  const W = cfg.width;
+  const H = cfg.height;
+
   // 1. Fill with grass
   const tiles: Tile[][] = Array.from({ length: H }, () =>
     Array.from(
@@ -62,7 +65,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   );
 
   // 2. Paint water
-  for (const w of TOWN_CONFIG.water) {
+  for (const w of cfg.water) {
     if (w.y < H && w.x < W)
       tiles[w.y][w.x] = {
         type: "water",
@@ -73,7 +76,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 3. Paint decorations (flowers, moss, plants — walkable grass)
-  for (const d of TOWN_CONFIG.decoration) {
+  for (const d of cfg.decoration) {
     if (d.y < H && d.x < W)
       tiles[d.y][d.x] = {
         type: "grass",
@@ -84,7 +87,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 4. Paint trees (not walkable, but transparent)
-  for (const t of TOWN_CONFIG.trees) {
+  for (const t of cfg.trees) {
     if (t.y < H && t.x < W)
       tiles[t.y][t.x] = {
         type: "wall",
@@ -95,7 +98,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 5. Paint features
-  for (const f of TOWN_CONFIG.features) {
+  for (const f of cfg.features) {
     const sprite = FEATURE_SPRITES[f.type] ?? "floor-grass_full";
     const fw = f.w ?? 1;
     const fh = f.h ?? 1;
@@ -115,7 +118,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 6. Stamp buildings from templates at config positions
-  for (const bp of TOWN_CONFIG.buildings) {
+  for (const bp of cfg.buildings) {
     const tmpl = templateMap[bp.id];
     if (!tmpl) continue;
 
@@ -179,11 +182,30 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
         buildingId: tmpl.id,
       };
     }
+
+    // Multi-layer sprites for special features (rift stone, statue)
+    if (bp.id === "rift-stone" || bp.id === "statue-of-fortune") {
+      const layers = pickItemSprite(bp.id, false);
+      if (layers.length > 0) {
+        const cx = bp.x + 1;
+        const cy = bp.y + 1;
+        if (cy < H && cx < W) {
+          tiles[cy][cx] = {
+            type: "building",
+            sprite: layers[0],
+            walkable: true,
+            transparent: true,
+            buildingId: bp.id,
+            spriteLayers: layers.length > 1 ? layers : undefined,
+          };
+        }
+      }
+    }
   }
 
   // 6b. Create NPC monsters for buildings with npcSprite
   const npcMonsters: Monster[] = [];
-  for (const bp of TOWN_CONFIG.buildings) {
+  for (const bp of cfg.buildings) {
     const tmpl = templateMap[bp.id];
     if (!tmpl) continue;
     const npcTile = tmpl.tiles[tmpl.npc.y]?.[tmpl.npc.x];
@@ -222,7 +244,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 7. Mine entrance
-  const me = TOWN_CONFIG.mineEntrance;
+  const me = cfg.mineEntrance;
   if (me.y < H && me.x < W) {
     tiles[me.y][me.x] = {
       type: "stairs-down",
@@ -250,6 +272,6 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       width: W,
       height: H,
     },
-    playerStart: TOWN_START_INITIAL,
+    playerStart: TOWN_START_INITIAL(),
   };
 }

@@ -228,6 +228,7 @@ export interface Tile {
   trapRevealed?: boolean;
   buildingId?: string;
   rotate?: number;
+  spriteLayers?: string[]; // multi-layer sprite classes for stacked rendering
 }
 
 export interface PlacedItem {

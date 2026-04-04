@@ -376,7 +376,10 @@ export class MapRenderer {
                       : "floor-grey_dirt0";
               fo = opacity;
               if (tile.type !== "building" || tile.walkable) {
-                gc = tile.sprite;
+                gc =
+                  tile.spriteLayers && tile.spriteLayers.length > 1
+                    ? tile.spriteLayers.join("|")
+                    : tile.sprite;
                 gd = "block";
                 go = opacity;
                 if (tile.type === "trap" && tile.trapRevealed) gtrap = true;
