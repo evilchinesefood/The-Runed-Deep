@@ -1,0 +1,2513 @@
+{
+  "weapon-sword": [],
+  "worldsplitter": [
+    {
+      "layers": [
+        "weapon-triple_sword3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "blooddrinker": [
+    {
+      "layers": [
+        "weapon-spwpn_sword_of_power"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-two-handed-sword": [
+    {
+      "layers": [
+        "weapon-spwpn_sword_of_zonguldrok"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-unrand_zealot_sword"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_flaming_death"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-demon_blade"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-demon_blade3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_wyrmbane"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_plutonium"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_katana"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "dagger": [
+    {
+      "layers": [
+        "weapon-dagger"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-dagger2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-rapier1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-quickblade1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-quickblade3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-quickblade2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_gyre"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-dagger": [
+    {
+      "layers": [
+        "weapon-short_sword3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_sword_of_cerebov"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-dagger3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_chilly_death"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_knife_of_accuracy"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_morg"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_spriggans_knife"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "club": [
+    {
+      "layers": [
+        "weapon-club"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-giant_club"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-giant_club2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-giant_club3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-giant_spiked_club"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-giant_spiked_club2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-giant_spiked_club3"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "meteoric-flail": [
+    {
+      "layers": [
+        "weapon-dire_flail2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-dire_flail3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-flail3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_sceptre_of_torment"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-sacred_scourge"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-demon_whip"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-demon_whip2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-demon_whip3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "flail": [
+    {
+      "layers": [
+        "weapon-dire_flail1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-flail1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-flail2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-xmas-scythe"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_spellbinder"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_snakebite"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-bullwhip"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-bullwhip2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-bullwhip3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "mace": [
+    {
+      "layers": [
+        "weapon-mace_large1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-mace1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-mace2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-hammer1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-hammer2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-hammer3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-eveningstar1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-eveningstar2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-morningstar1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-mace": [
+    {
+      "layers": [
+        "weapon-mace_large2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-mace_large3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-mace3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_dark_maul"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-spwpn_mace_of_variability"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-morningstar3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-eveningstar3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-morningstar2"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "spear": [
+    {
+      "layers": [
+        "weapon-spear1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-spear2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-quarterstaff"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-partisan1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-partisan2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-partisan3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-glaive1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-lajatang1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-trident1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-battle-axe": [
+    {
+      "layers": [
+        "weapon-spwpn_demon_axe"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_holy_axe"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_axe_of_woe"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-war_axe3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-hand_axe3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_lochaber_axe"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-battle_axe3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "battle-axe": [
+    {
+      "layers": [
+        "weapon-battle_axe1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-battle_axe2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-broad_axe1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-broad_axe2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_woodcutters_axe"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-war_axe1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-war_axe2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-hand_axe1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-battle-axe": [
+    {
+      "layers": [
+        "weapon-broad_axe3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-executioner_axe1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-executioner_axe2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-executioner_axe3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_arga"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_frostbite"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_wrath_of_trog"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-hand_axe2"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-long-sword": [
+    {
+      "layers": [
+        "weapon-triple_sword"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-triple_sword2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-greatsword3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-blessed_blade"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-falchion3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-scimitar3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-spwpn_vampires_tooth"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_arc_blade"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-long-sword": [
+    {
+      "layers": [
+        "weapon-spwpn_singing_sword"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-long_sword3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_throatcutter"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-urand_leech"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-scimitar2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-rapier3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-april_staff1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-scythe1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-scythe2"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "long-sword": [
+    {
+      "layers": [
+        "weapon-greatsword1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-greatsword2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-long_sword1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-long_sword2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-falchion2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-falchion1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-demon_blade2"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "two-handed-sword": [
+    {
+      "layers": [
+        "weapon-double_sword2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-double_sword3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-double_sword"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-halberd1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-halberd3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-halberd2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-bardiche3"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "short-sword": [
+    {
+      "layers": [
+        "weapon-short_sword2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-short_sword1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-scimitar1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-rapier2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-bardiche1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-bardiche2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_cutlass"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-spear": [
+    {
+      "layers": [
+        "weapon-spear3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_crystal_spear"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-quarterstaff3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-spwpn_glaive_of_prune"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_majin"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-spwpn_wucad_mu"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "weapon-glaive2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-glaive3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-lajatang2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-trident2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_botono"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "leather-armor": [
+    {
+      "layers": [
+        "armour-animal_skin1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-animal_skin2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-animal_skin3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_lear"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-troll_leather_armour_art"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "studded-leather": [
+    {
+      "layers": [
+        "armour-leather_armour1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-leather_armour2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-leather_armour3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_kryias"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "chain-mail": [
+    {
+      "layers": [
+        "armour-ring_mail1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-ring_mail2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-ring_mail3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_night"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-chain-mail": [
+    {
+      "layers": [
+        "armour-chain_mail1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-chain_mail2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-chain_mail3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-ice_dragon_armour"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "plate-mail": [
+    {
+      "layers": [
+        "armour-plate1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-plate2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-plate3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-golden_dragon_armour"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "meteoric-plate-mail": [
+    {
+      "layers": [
+        "armour-crystal_plate"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-crystal_plate2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-crystal_plate3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-shadow_dragon_armour"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-shadow_dragon_armour_art"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "demonhide-armor": [
+    {
+      "layers": [
+        "armour-fire_dragon_armour"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "gold-coins": [
+    {
+      "layers": [
+        "gold-01"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "gold-02"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "gold-03"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "gold-04"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-heal-minor": [
+    {
+      "layers": [
+        "potion-ruby"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-heal-medium": [
+    {
+      "layers": [
+        "potion-magenta"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-heal-major": [
+    {
+      "layers": [
+        "potion-dark"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-gain-str": [
+    {
+      "layers": [
+        "potion-golden",
+        "potion-i-gain-strength"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-gain-int": [
+    {
+      "layers": [
+        "potion-golden",
+        "potion-i-gain-intelligence"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-gain-con": [
+    {
+      "layers": [
+        "potion-golden",
+        "potion-i-heal-wounds"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "potion-gain-dex": [
+    {
+      "layers": [
+        "potion-golden",
+        "potion-i-gain-dexterity"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-levitation": [
+    {
+      "layers": [
+        "book-cloth",
+        "armour-i-flying"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-clairvoyance": [
+    {
+      "layers": [
+        "book-turquoise",
+        "armour-i-see-invis"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-lightning-bolt": [
+    {
+      "layers": [
+        "book-light_blue",
+        "wand-i-lightning"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-fire-bolt": [
+    {
+      "layers": [
+        "book-bronze",
+        "armour-i-fire"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-resist-fire": [
+    {
+      "layers": [
+        "book-copper",
+        "armour-i-fire-res"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-resist-cold": [
+    {
+      "layers": [
+        "book-dark_blue",
+        "armour-i-cold-res"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-resist-lightning": [
+    {
+      "layers": [
+        "book-cyan",
+        "armour-i-magic-res"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-sleep-monster": [
+    {
+      "layers": [
+        "book-silver",
+        "weapon-i-sleep"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-slow-monster": [
+    {
+      "layers": [
+        "book-light_brown",
+        "potion-i-slowing"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-cold-ball": [
+    {
+      "layers": [
+        "book-thin",
+        "armour-i-glass"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-teleport": [
+    {
+      "layers": [
+        "book-plaid",
+        "ring-i-teleport"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-remove-curse": [
+    {
+      "layers": [
+        "book-book_of_the_dead",
+        "scroll-i-curse_armour"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-ball-lightning": [
+    {
+      "layers": [
+        "book-metal_cyan",
+        "wand-i-light"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-fire-ball": [
+    {
+      "layers": [
+        "book-leather",
+        "ring-fire"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-transmogrify": [
+    {
+      "layers": [
+        "book-buckle",
+        "potion-i-attraction"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-time-stop": [
+    {
+      "layers": [
+        "book-white",
+        "armour-i-running"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "book-warcry": [
+    {
+      "layers": [
+        "book-yellow"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "small-pack": [
+    {
+      "layers": [
+        "armour-orb"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_gong"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "misc-misc_sack_inert"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "talisman-rimehorn"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "large-pack": [
+    {
+      "layers": [
+        "armour-orb_randart1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "misc-misc_sack"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "misc-misc_tremorstones"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "talisman-medusa"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-pack": [
+    {
+      "layers": [
+        "armour-orb_randart2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_dispater"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "talisman-snake"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "talisman-hive"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-pack": [
+    {
+      "layers": [
+        "armour-orb_randart3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_charlatan"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "talisman-spore"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "talisman-sphinx"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "pack-of-holding": [
+    {
+      "layers": [
+        "armour-orb_randart4"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_battle"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "amulet": [
+    {
+      "layers": [
+        "amulet-amethyst"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-beryl"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-blue"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-bone"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-azure"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-cabochon"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-cameo"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-amulet": [
+    {
+      "layers": [
+        "amulet-copper"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-diamond"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-drop"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-emerald"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-filigree"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-fluorescent"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-garnet"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "meteoric-amulet": [
+    {
+      "layers": [
+        "amulet-jade"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-jasper"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-knot"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-skull"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-lapis_lazuli"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "amulet-cluster"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "amulet-brass"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elemental-keystone": [
+    {
+      "layers": [
+        "amulet-urand_dreamshard"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "amulet-soul-ward": [
+    {
+      "layers": [
+        "amulet-urand_elemental_vulnerability"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "amulet-storm-ward": [
+    {
+      "layers": [
+        "amulet-urand_air"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "amulet-frost-ward": [
+    {
+      "layers": [
+        "amulet-urand_cekugob"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "amulet-fire-ward": [
+    {
+      "layers": [
+        "amulet-urand_hermit_pendant"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "ring": [
+    {
+      "layers": [
+        "ring-gold"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-glass"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-granite"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-gold_red"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-gold_blue"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-copper"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-urand_octoring"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-wooden"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-zircon"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-plain_red"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-plain_yellow"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-ring": [
+    {
+      "layers": [
+        "ring-agate"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-bronze-flower"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-clay"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-bronze"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-flower"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-diamond"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-opal"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-pearl"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-pink"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-ruby"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "ring-of-fortune": [
+    {
+      "layers": [
+        "ring-brass"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "ring-of-the-archmage": [
+    {
+      "layers": [
+        "ring-four-colour"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-ring": [
+    {
+      "layers": [
+        "ring-eye"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-double"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-anvil"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-green"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-gold_green"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-ice"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-snake"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-urand_tortoise"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-plain_black"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-red-blue"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "ring-moonstone"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "belt": [
+    {
+      "layers": [
+        "armour-scarf1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-scarf2_1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "talisman-dragon"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "leather-belt": [
+    {
+      "layers": [
+        "armour-scarf2_2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-scarf2_3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "talisman-dragon"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-belt": [
+    {
+      "layers": [
+        "armour-urand_scarf_invisibility"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-scarf3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-urand_punk"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "belt-of-the-titan": [
+    {
+      "layers": [
+        "misc-misc_tambourine"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-belt": [
+    {
+      "layers": [
+        "weapon-sling1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-sling2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "weapon-sling3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "cloak-of-shadows": [
+    {
+      "layers": [
+        "armour-urand_clouds"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-cloak": [
+    {
+      "layers": [
+        "armour-urand_fungal_fisticloak"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_ratskin_cloak"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_folly"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_starlight"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_vines"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_dragonskin"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-cloak": [
+    {
+      "layers": [
+        "armour-cloak4"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_thief"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_alchemist"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_flash"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_victor"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "fine-cloak": [
+    {
+      "layers": [
+        "armour-cloak3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-barding2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-barding3"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "cloak": [
+    {
+      "layers": [
+        "armour-cloak1_leather"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-cloak2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-barding1"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "leather-boots": [
+    {
+      "layers": [
+        "armour-boots1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-april_boots1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_assassin"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-boots_ego1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-boots": [
+    {
+      "layers": [
+        "armour-boots_art2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-boots_ego2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-boots_art1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "iron-boots": [
+    {
+      "layers": [
+        "armour-urand_slippers"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-boots2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-april_boots2"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "boots-of-levitation": [
+    {
+      "layers": [
+        "armour-urand_seven_league_boots"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-boots": [
+    {
+      "layers": [
+        "armour-urand_mountain"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_spider"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "leather-gloves": [
+    {
+      "layers": [
+        "armour-glove1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_delatra"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "iron-gloves": [
+    {
+      "layers": [
+        "armour-glove4"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_fencer"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_war"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "elven-gloves": [
+    {
+      "layers": [
+        "armour-glove3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-glove2"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-gloves": [
+    {
+      "layers": [
+        "armour-glove5"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_gadgeteer"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "gauntlets-of-the-forge": [
+    {
+      "layers": [
+        "armour-urand_power_gloves"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "leather-cap": [
+    {
+      "layers": [
+        "armour-elven_leather_helm"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet_ego4"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-hat_archer"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-hat_archer2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-hat_explorer2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-hat1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-april_hat2"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "iron-helm": [
+    {
+      "layers": [
+        "armour-helmet1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet4"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet5"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-helmet2"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-helmet": [
+    {
+      "layers": [
+        "armour-helmet_ego1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet_art2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-helmet_ego3"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-april_hat1"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-hat_wiglaf"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-wizard_hat"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_hood_assassin"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "helm-of-storms": [
+    {
+      "layers": [
+        "armour-helmet_art3"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "helm-of-true-sight": [
+    {
+      "layers": [
+        "armour-helmet_art1"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "meteoric-helm": [
+    {
+      "layers": [
+        "armour-helmet_ego2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-santa_hat"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-cap_jester"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_high_council"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-urand_dragonmask"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_eternal_torment"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_dyrovepreva"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "small-wood-shield": [
+    {
+      "layers": [
+        "armour-buckler1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-buckler2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-kite_shield_dd"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "small-iron-shield": [
+    {
+      "layers": [
+        "armour-kite_shield_dd_scion"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-buckler_spriggan"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-buckler3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_bullseye"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "elven-shield": [
+    {
+      "layers": [
+        "armour-kite_shield_donald"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-kite_shield1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-kite_shield2"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-tower_shield_dd_dk"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_resistance"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "meteoric-shield": [
+    {
+      "layers": [
+        "armour-tower_shield2"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-kite_shield3"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-tower_shield_louise"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-tower_shield1"
+      ],
+      "uniqueOnly": false
+    },
+    {
+      "layers": [
+        "armour-urand_lightning_scales"
+      ],
+      "uniqueOnly": true
+    },
+    {
+      "layers": [
+        "armour-tower_shield3"
+      ],
+      "uniqueOnly": true
+    }
+  ],
+  "aegis-of-the-fallen": [
+    {
+      "layers": [
+        "armour-urand_storm_queen"
+      ],
+      "uniqueOnly": false
+    }
+  ],
+  "crown-of-ancients": [
+    {
+      "layers": [
+        "armour-urand_crown_of_vainglory"
+      ],
+      "uniqueOnly": false
+    }
+  ]
+}

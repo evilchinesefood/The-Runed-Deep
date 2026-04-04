@@ -48,6 +48,7 @@ import { showAchievementToast } from "./ui/AchievementToast";
 import { createAchievementsScreen } from "./ui/AchievementsScreen";
 import { createRiftMenuScreen } from "./ui/RiftMenuScreen";
 import { createRiftSummaryScreen } from "./ui/RiftSummaryScreen";
+import { loadSpritePools } from "./systems/items/SpritePool";
 
 injectTheme();
 setOnUnlockCallback(showAchievementToast);
@@ -938,6 +939,9 @@ const screenCleanups: (() => void)[] = [];
 function addScreenCleanup(fn: () => void): void {
   screenCleanups.push(fn);
 }
+
+// Load sprite pools before first render
+await loadSpritePools();
 
 // Initial render
 render(gameLoop.getState());

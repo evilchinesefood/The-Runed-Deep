@@ -153,6 +153,7 @@ export interface Item {
   enchantment: number; // +/- modifier
   properties: Record<string, number>;
   contents?: Item[]; // for containers
+  spriteLayers?: string[]; // multi-layer sprite classes for stacked rendering
   specialEnchantments?: string[]; // e.g. ['vampiric', 'might', 'regeneration']
   markedForSale?: boolean;
 }

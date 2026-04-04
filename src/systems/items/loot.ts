@@ -13,6 +13,7 @@ import {
   getEquipAffixTotal,
   AFFIX_BY_ID,
 } from "../../data/Enchantments";
+import { pickItemSprite } from "./SpritePool";
 
 let nextItemId = Date.now();
 
@@ -199,8 +200,10 @@ export function createItemFromTemplate(
   if (enchantment > 0) name = `${template.name} +${enchantment}`;
   else if (enchantment < 0) name = `${template.name} ${enchantment}`;
 
-  // All items use their template sprite — glow differentiates enchanted/cursed
-  const sprite = template.sprite;
+  // Pick sprite from pool; fall back to template sprite
+  const isUnique = !!template.unique;
+  const spriteLayers = pickItemSprite(template.id, isUnique);
+  const sprite = spriteLayers.length > 0 ? spriteLayers[0] : template.sprite;
 
   const base: Item = {
     id,
@@ -208,6 +211,7 @@ export function createItemFromTemplate(
     name,
     category: template.category,
     sprite,
+    spriteLayers: spriteLayers.length > 0 ? spriteLayers : undefined,
     weight: template.weight,
     bulk: Math.floor(template.weight / 5),
     value: Math.max(1, template.value + enchantment * 20),
@@ -218,7 +222,6 @@ export function createItemFromTemplate(
   };
 
   const isTier = !!ITEM_BY_ID[template.id]?.materialTier;
-  const isUnique = !!template.unique;
   const isWeapon = template.category === "weapon";
   const isArmor = [
     "armor",
@@ -323,12 +326,15 @@ export function createGoldDrop(
     }
     amount = Math.round(amount * (1 + goldBonus) * fortuneUniqueMult);
   }
+  const goldLayers = pickItemSprite("gold-coins", false);
+  const goldSprite = goldLayers.length > 0 ? goldLayers[0] : "coins-gold";
   return {
     id: `item-${nextItemId++}`,
     templateId: "gold-coins",
     name: `${amount} Gold`,
     category: "currency",
-    sprite: "coins-gold",
+    sprite: goldSprite,
+    spriteLayers: goldLayers.length > 0 ? goldLayers : undefined,
     weight: amount * 5,
     bulk: amount,
     value: amount,
