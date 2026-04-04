@@ -102,7 +102,8 @@
         },
         {
           "sprite": "floor-sand8",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-human"
         },
         {
           "sprite": "floor-sand2",
@@ -274,7 +275,8 @@
         },
         {
           "sprite": "floor-sand8",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-human2"
         },
         {
           "sprite": "floor-sand6",
@@ -426,7 +428,8 @@
         },
         {
           "sprite": "floor-sand4",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-human3"
         },
         {
           "sprite": "floor-sand7",
@@ -582,7 +585,8 @@
         },
         {
           "sprite": "floor-sand6",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-imperial_myrmidon"
         },
         {
           "sprite": "floor-sand5",
@@ -782,7 +786,8 @@
         },
         {
           "sprite": "floor-sand1",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-ironbound_beastmaster"
         },
         {
           "sprite": "floor-sand2",
@@ -930,7 +935,8 @@
         },
         {
           "sprite": "floor-sand1",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-ironbound_preserver"
         },
         {
           "sprite": "floor-sand8",
@@ -1128,7 +1134,8 @@
         },
         {
           "sprite": "vaults-arcane_conduit_2",
-          "type": "decor"
+          "type": "decor",
+          "npcSprite": "humanoids-killer_klown_blue"
         },
         {
           "sprite": "floor-sand4",
@@ -1276,7 +1283,8 @@
         },
         {
           "sprite": "floor-sand6",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-killer_klown_green"
         },
         {
           "sprite": "floor-sand2",
@@ -1482,7 +1490,8 @@
         },
         {
           "sprite": "floor-sand5",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-human"
         },
         {
           "sprite": "floor-sand6",
