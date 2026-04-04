@@ -324,7 +324,7 @@ export class GameLoop {
     hero = { ...hero, activeEffects: remaining };
     const hasResistExpiry = expired.some((e) => e.id.startsWith("resist-"));
     if (hasResistExpiry) {
-      hero = recomputeDerivedStats(hero);
+      hero = recomputeDerivedStats(hero, state.statueUpgrades);
     }
 
     return { ...state, hero, messages };

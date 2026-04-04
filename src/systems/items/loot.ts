@@ -18,6 +18,11 @@ import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
 
 let nextItemId = Date.now();
 
+/** Generate a unique item ID using the shared counter */
+export function generateItemId(): string {
+  return `item-${nextItemId++}`;
+}
+
 /** Pick suffix from the rarest affix (lowest weight). Ties go to first in list. */
 function getAffixSuffix(enchantments: string[]): string {
   let bestId = enchantments[0].replace(":critical", "");

@@ -75,7 +75,6 @@ export function createHero(
     equipAccuracyBonus: 0,
     runeShards: 0,
     essence: 0,
-    statueUpgrades: {},
   };
 }
 

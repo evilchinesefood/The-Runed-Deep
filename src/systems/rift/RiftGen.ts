@@ -6,8 +6,16 @@ import type {
   Vector2,
 } from "../../core/types";
 import { generateFloor } from "../dungeon/generator";
+import { generateItemId } from "../items/loot";
 
-const RIFT_TILESETS = ["mine", "fortress", "castle"] as const;
+const RIFT_TILESETS = [
+  "mine",
+  "fortress",
+  "castle",
+  "lair",
+  "crypt",
+  "ice",
+] as const;
 const ELEMENTS = ["fire", "cold", "lightning"] as const;
 
 function hasRiftMod(rift: RiftState, id: string): boolean {
@@ -59,6 +67,17 @@ export function generateRiftFloor(
 
   // ── swarm: double spawns, halve XP ─────────────────────
   if (hasRiftMod(rift, "swarm")) {
+    // Collect all walkable tiles for fallback placement
+    const walkable: Vector2[] = [];
+    for (let y = 0; y < floor.height; y++) {
+      for (let x = 0; x < floor.width; x++) {
+        if (floor.tiles[y][x].walkable) walkable.push({ x, y });
+      }
+    }
+    const occupied = new Set(
+      floor.monsters.map((m) => `${m.position.x},${m.position.y}`),
+    );
+
     const clones = floor.monsters.map((m) => {
       const off = [
         { x: 1, y: 0 },
@@ -66,21 +85,34 @@ export function generateRiftFloor(
         { x: 0, y: 1 },
         { x: 0, y: -1 },
       ];
-      let pos: Vector2 = m.position;
+      let pos: Vector2 | null = null;
       for (const d of off) {
         const nx = m.position.x + d.x;
         const ny = m.position.y + d.y;
+        const key = `${nx},${ny}`;
         if (
           ny >= 0 &&
           ny < floor.height &&
           nx >= 0 &&
           nx < floor.width &&
-          floor.tiles[ny][nx].walkable
+          floor.tiles[ny][nx].walkable &&
+          !occupied.has(key)
         ) {
           pos = { x: nx, y: ny };
           break;
         }
       }
+      // Fallback: pick random walkable tile not already occupied
+      if (!pos && walkable.length > 0) {
+        const free = walkable.filter((t) => !occupied.has(`${t.x},${t.y}`));
+        if (free.length > 0) {
+          pos = free[Math.floor(rand() * free.length)];
+        } else {
+          pos = walkable[Math.floor(rand() * walkable.length)];
+        }
+      }
+      if (!pos) pos = { ...m.position };
+      occupied.add(`${pos.x},${pos.y}`);
       return {
         ...m,
         id: m.id + "-sw",
@@ -102,9 +134,8 @@ export function generateRiftFloor(
 
   // ── abundance: double items ─────────────────────────────
   if (hasRiftMod(rift, "abundance")) {
-    let nextId = Date.now();
     const dupes: PlacedItem[] = floor.items.map((pi) => ({
-      item: { ...pi.item, id: `rift-dup-${nextId++}` },
+      item: { ...pi.item, id: generateItemId() },
       position: { ...pi.position },
     }));
     floor = { ...floor, items: [...floor.items, ...dupes] };

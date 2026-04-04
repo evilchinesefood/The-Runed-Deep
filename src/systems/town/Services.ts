@@ -96,7 +96,10 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
       spendGold(
         {
           ...state,
-          hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+          hero: recomputeDerivedStats(
+            { ...state.hero, inventory: inv },
+            state.statueUpgrades,
+          ),
         },
         cost,
       ),
@@ -117,10 +120,13 @@ export function templeRemoveCurse(state: GameState, itemId: string): GameState {
       spendGold(
         {
           ...state,
-          hero: recomputeDerivedStats({
-            ...state.hero,
-            equipment: { ...eq, [slot]: blessed },
-          }),
+          hero: recomputeDerivedStats(
+            {
+              ...state.hero,
+              equipment: { ...eq, [slot]: blessed },
+            },
+            state.statueUpgrades,
+          ),
         },
         cost,
       ),
@@ -189,7 +195,10 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
       spendGold(
         {
           ...state,
-          hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+          hero: recomputeDerivedStats(
+            { ...state.hero, inventory: inv },
+            state.statueUpgrades,
+          ),
         },
         cost,
       ),
@@ -215,10 +224,13 @@ export function sageEnchantItem(state: GameState, itemId: string): GameState {
       spendGold(
         {
           ...state,
-          hero: recomputeDerivedStats({
-            ...state.hero,
-            equipment: { ...eq, [slot]: enhanced },
-          }),
+          hero: recomputeDerivedStats(
+            {
+              ...state.hero,
+              equipment: { ...eq, [slot]: enhanced },
+            },
+            state.statueUpgrades,
+          ),
         },
         cost,
       ),
@@ -424,7 +436,10 @@ function applyItemUpdate(
     );
     return {
       ...state,
-      hero: recomputeDerivedStats({ ...state.hero, inventory: inv }),
+      hero: recomputeDerivedStats(
+        { ...state.hero, inventory: inv },
+        state.statueUpgrades,
+      ),
     };
   }
   const eq = state.hero.equipment;
@@ -433,10 +448,13 @@ function applyItemUpdate(
   if (slot) {
     return {
       ...state,
-      hero: recomputeDerivedStats({
-        ...state.hero,
-        equipment: { ...eq, [slot]: updated },
-      }),
+      hero: recomputeDerivedStats(
+        {
+          ...state.hero,
+          equipment: { ...eq, [slot]: updated },
+        },
+        state.statueUpgrades,
+      ),
     };
   }
   return state;

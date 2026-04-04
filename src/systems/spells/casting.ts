@@ -761,7 +761,10 @@ function resolveResist(state: GameState, spell: SpellDef): GameState {
 
   return {
     ...addMsg(state, msg, "important"),
-    hero: recomputeDerivedStats({ ...hero, activeEffects: newEffects }),
+    hero: recomputeDerivedStats(
+      { ...hero, activeEffects: newEffects },
+      state.statueUpgrades,
+    ),
   };
 }
 

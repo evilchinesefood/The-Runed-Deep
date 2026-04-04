@@ -4,13 +4,13 @@
 
 import type { GameState, Item } from "../../core/types";
 import { AFFIXES } from "../../data/Enchantments";
+import { ITEM_BY_ID } from "../../data/items";
 
 // ── Essence calculation ──────────────────────────────────────
 
 export function calcEssence(item: Item): number {
-  const tpl = item.templateId;
-  const isUnique =
-    tpl.startsWith("unique-") || (item.properties?.["unique"] ? true : false);
+  const tplData = ITEM_BY_ID[item.templateId];
+  const isUnique = !!tplData?.unique;
   let val = isUnique ? 10 : 1;
   if (!isUnique && item.enchantment > 0) val += item.enchantment;
   if (item.specialEnchantments) val += item.specialEnchantments.length;
@@ -170,13 +170,11 @@ export function purchaseUpgrade(
   const cost = upgradeCost(count);
   if (state.hero.essence < cost) return state;
   const newUpgrades = { ...state.statueUpgrades, [upgradeId]: count + 1 };
-  const heroUpgrades = { ...state.hero.statueUpgrades, [upgradeId]: count + 1 };
   return {
     ...state,
     hero: {
       ...state.hero,
       essence: state.hero.essence - cost,
-      statueUpgrades: heroUpgrades,
     },
     statueUpgrades: newUpgrades,
   };

@@ -53,7 +53,7 @@ export const SHOP_DEFS: Record<string, ShopDef> = {
   "magic-shop": {
     id: "magic-shop",
     name: "Magic Shop",
-    categories: ["spellbook", "staff"],
+    categories: ["spellbook"],
     buyMult: 1.2,
     sellOnCat: 0.55,
     sellOffCat: 0.25,

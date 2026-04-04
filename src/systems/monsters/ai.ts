@@ -581,7 +581,10 @@ export function processMonsterAbility(
           const cur = s.hero.attributes[attr];
           if (cur > 10) {
             const attrs = { ...s.hero.attributes, [attr]: cur - 1 };
-            let hero = recomputeDerivedStats({ ...s.hero, attributes: attrs });
+            let hero = recomputeDerivedStats(
+              { ...s.hero, attributes: attrs },
+              s.statueUpgrades,
+            );
             s = { ...s, hero };
             s = addMsg(s, `${monster.name} drains your ${attr}!`, "important");
           }
@@ -595,11 +598,14 @@ export function processMonsterAbility(
         if (Math.random() < 0.15 * (1 - drainResist)) {
           const newLevel = Math.max(1, s.hero.level - 1);
           const newXp = xpRequiredForLevel(newLevel, s.difficulty) || 0;
-          let hero = recomputeDerivedStats({
-            ...s.hero,
-            level: newLevel,
-            xp: newXp,
-          });
+          let hero = recomputeDerivedStats(
+            {
+              ...s.hero,
+              level: newLevel,
+              xp: newXp,
+            },
+            s.statueUpgrades,
+          );
           s = { ...s, hero };
           s = addMsg(
             s,
@@ -840,19 +846,18 @@ function processRanged(
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
-  // Silence rift modifier: suppress spell/ranged, fall back to melee approach
+  // Silence rift modifier: suppress cast/summon spells only
   const silenced =
     state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
 
-  const rangedAbilities = silenced
-    ? []
-    : monster.abilities.filter(
-        (a) =>
-          a.startsWith("cast-") ||
-          a.startsWith("throw-") ||
-          a.startsWith("tail-") ||
-          a.startsWith("breath-"),
-      );
+  const rangedAbilities = monster.abilities.filter(
+    (a) =>
+      (a.startsWith("cast-") ? !silenced : true) &&
+      (a.startsWith("cast-") ||
+        a.startsWith("throw-") ||
+        a.startsWith("tail-") ||
+        a.startsWith("breath-")),
+  );
 
   const hasRanged = rangedAbilities.length > 0;
   const los = hasLineOfSight(floor, monster.position, hero.position);
@@ -889,7 +894,7 @@ function processCaster(
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
-  // Silence rift modifier: suppress spells, fall back to melee approach
+  // Silence rift modifier: suppress cast spells only
   const silenced =
     state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
 
@@ -1000,7 +1005,7 @@ function processSummoner(
   const cDist = chebyshev(monster.position, hero.position);
   const los = hasLineOfSight(floor, monster.position, hero.position);
 
-  // Silence rift modifier: suppress summons and spells
+  // Silence rift modifier: suppress cast/summon spells only
   const silenced =
     state.activeRift?.modifiers.some((m) => m.id === "silence") ?? false;
 
@@ -1012,10 +1017,10 @@ function processSummoner(
     const ability =
       summonAbilities[Math.floor(Math.random() * summonAbilities.length)];
     let s = spawnNearSummoner(state, floorKey, idx, ability);
-    // Also try a ranged attack this turn
+    // Also try a ranged attack this turn (throw/breath still work under silence)
     const rangedAbilities = monster.abilities.filter(
       (a) =>
-        a.startsWith("cast-") ||
+        (!silenced && a.startsWith("cast-")) ||
         a.startsWith("throw-") ||
         a.startsWith("breath-"),
     );
@@ -1033,14 +1038,12 @@ function processSummoner(
   }
 
   // Ranged attack if in range and LOS
-  const rangedAbilities = silenced
-    ? []
-    : monster.abilities.filter(
-        (a) =>
-          a.startsWith("cast-") ||
-          a.startsWith("throw-") ||
-          a.startsWith("breath-"),
-      );
+  const rangedAbilities = monster.abilities.filter(
+    (a) =>
+      (!silenced && a.startsWith("cast-")) ||
+      a.startsWith("throw-") ||
+      a.startsWith("breath-"),
+  );
   if (rangedAbilities.length > 0 && los && dist <= 8) {
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];

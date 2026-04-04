@@ -232,21 +232,31 @@ export function loadGame(slot: number = 1): GameState | null {
 
     // Migration: add statue/essence fields
     if (state.hero.essence === undefined) (state.hero as any).essence = 0;
-    if (state.hero.statueUpgrades === undefined)
-      (state.hero as any).statueUpgrades = {};
     if ((state as any).statueUpgrades === undefined)
       (state as any).statueUpgrades = {};
+    // Merge hero-level statueUpgrades into state-level (fix dual ownership)
+    if ((state.hero as any).statueUpgrades) {
+      const heroSU = (state.hero as any).statueUpgrades as Record<
+        string,
+        number
+      >;
+      const stateSU = (state as any).statueUpgrades as Record<string, number>;
+      for (const [k, v] of Object.entries(heroSU)) {
+        if ((stateSU[k] ?? 0) < v) stateSU[k] = v;
+      }
+      delete (state.hero as any).statueUpgrades;
+    }
     if ((state as any).itemsSacrificed === undefined)
       (state as any).itemsSacrificed = 0;
 
     // Migration: 0-indexed floors → 1-indexed
     const has0Key = Object.keys(state.floors).some(
-      (k) => k.endsWith("-0") && k !== "town-0",
+      (k) => k.endsWith("-0") && k !== "town-0" && k !== "crucible-0",
     );
     if (has0Key) {
       const newFloors: typeof state.floors = {};
       for (const [key, floor] of Object.entries(state.floors)) {
-        if (key === "town-0") {
+        if (key === "town-0" || key === "crucible-0") {
           newFloors[key] = floor;
           continue;
         }

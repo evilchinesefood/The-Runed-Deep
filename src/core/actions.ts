@@ -148,11 +148,14 @@ export function processAction(state: GameState, action: GameAction): GameState {
         return addMessage(
           {
             ...state,
-            hero: recomputeDerivedStats({
-              ...state.hero,
-              inventory: inv,
-              mp: state.hero.mp - MP_COST,
-            }),
+            hero: recomputeDerivedStats(
+              {
+                ...state.hero,
+                inventory: inv,
+                mp: state.hero.mp - MP_COST,
+              },
+              state.statueUpgrades,
+            ),
           },
           `The curse is lifted! ${blessed.name} is now blessed.`,
           "important",
@@ -170,11 +173,14 @@ export function processAction(state: GameState, action: GameAction): GameState {
         return addMessage(
           {
             ...state,
-            hero: recomputeDerivedStats({
-              ...state.hero,
-              equipment: { ...eq, [slot]: blessed },
-              mp: state.hero.mp - MP_COST,
-            }),
+            hero: recomputeDerivedStats(
+              {
+                ...state.hero,
+                equipment: { ...eq, [slot]: blessed },
+                mp: state.hero.mp - MP_COST,
+              },
+              state.statueUpgrades,
+            ),
           },
           `The curse is lifted! ${blessed.name} is now blessed.`,
           "important",
@@ -446,8 +452,8 @@ function processMove(state: GameState, direction: Direction): GameState {
       items: currentFloor.items.filter(
         (i) =>
           !(
-            i.position.x === newPos.x &&
-            i.position.y === newPos.y &&
+            Math.abs(i.position.x - newPos.x) <= 1 &&
+            Math.abs(i.position.y - newPos.y) <= 1 &&
             i.item.category === "currency"
           ),
       ),
@@ -1259,6 +1265,8 @@ function processEnterRift(state: GameState): GameState {
     riftOffering: null,
     currentDungeon: "rift",
     currentFloor: 1,
+    returnFloor:
+      state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
     floors: { ...state.floors, [riftKey]: floor },
     hero,
     screen: "game",

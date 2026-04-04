@@ -1407,6 +1407,7 @@ function switchScreen(state: GameState): void {
             true,
             true,
             nextDifficulty,
+            ngCount,
           );
 
           const ngState: GameState = {
@@ -1437,8 +1438,10 @@ function switchScreen(state: GameState): void {
             ],
             town: { ...s.town, shopInventories: {}, deepestFloor: 1 },
           };
-          ngState.hero.position = { x: 12, y: 17 };
-          gameLoop.setState(ngState);
+          gameLoop.setState({
+            ...ngState,
+            hero: { ...ngState.hero, position: { ...TOWN_START_INITIAL } },
+          });
         },
         () => {
           const freshState = createInitialGameState();

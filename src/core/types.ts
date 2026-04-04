@@ -117,7 +117,7 @@ export interface Hero {
   equipAccuracyBonus: number;
   runeShards: number;
   essence: number;
-  statueUpgrades: Record<string, number>; // upgrade_id → purchase count
+  statueUpgrades?: Record<string, number>; // deprecated — use GameState.statueUpgrades
 }
 
 // ============================================================

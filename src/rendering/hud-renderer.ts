@@ -429,8 +429,6 @@ export class HudRenderer {
     }
 
     this._prevMsgCount = messages.length;
-    // Force repaint — some browsers don't update overflow containers on append
-    void this.messagesEl.offsetHeight;
     if (!this.landscape)
       this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   }

@@ -48,9 +48,12 @@ export function computeTotalArmorValue(
   return ac;
 }
 
-export function recomputeDerivedStats(hero: Hero): Hero {
+export function recomputeDerivedStats(
+  hero: Hero,
+  statueUpgrades?: Record<string, number>,
+): Hero {
   const eq = hero.equipment;
-  const su = hero.statueUpgrades ?? {};
+  const su = statueUpgrades ?? hero.statueUpgrades ?? {};
 
   // ── Statue base stat bonuses ─────────────────────────────
   const statStr = (su["stat-str"] ?? 0) * 5;
