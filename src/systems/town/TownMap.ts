@@ -86,22 +86,6 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       };
   }
 
-  // 3b. Paint custom tiles from builder (walkable ground tiles)
-  for (const t of (cfg as any).tiles || []) {
-    if (t.y < H && t.x < W) {
-      const isWall = t.sprite.startsWith("wall-");
-      const isWater = t.sprite.startsWith("water-");
-      const isTree = t.sprite.startsWith("trees-");
-      tiles[t.y][t.x] = {
-        type: isWall ? "wall" : isWater ? "water" : isTree ? "wall" : "grass",
-        sprite: t.sprite,
-        walkable: !isWall && !isWater && !isTree,
-        transparent: !isWall,
-        spriteLayers: t.overlay ? [t.sprite, t.overlay] : undefined,
-      };
-    }
-  }
-
   // 4. Paint trees (not walkable, but transparent)
   for (const t of cfg.trees || []) {
     if (t.y < H && t.x < W)
@@ -133,9 +117,25 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     }
   }
 
+  // 5b. Paint custom tiles from builder (overrides all terrain)
+  for (const t of (cfg as any).tiles || []) {
+    if (t.y < H && t.x < W) {
+      const isWall = t.sprite.startsWith("wall-");
+      const isWater = t.sprite.startsWith("water-");
+      const isTree = t.sprite.startsWith("trees-");
+      tiles[t.y][t.x] = {
+        type: isWall ? "wall" : isWater ? "water" : isTree ? "wall" : "grass",
+        sprite: t.sprite,
+        walkable: !isWall && !isWater && !isTree,
+        transparent: !isWall,
+        spriteLayers: t.overlay ? [t.sprite, t.overlay] : undefined,
+      };
+    }
+  }
+
   // 6. Stamp buildings from templates at config positions
   for (const bp of cfg.buildings) {
-    const tmpl = templateMap[bp.id];
+    const tmpl = templateMap[(bp.templateId || bp.id)];
     if (!tmpl) continue;
 
     for (let row = 0; row < tmpl.height; row++) {
@@ -200,8 +200,8 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     }
 
     // Multi-layer sprites for special features (rift stone, statue)
-    if (bp.id === "rift-stone" || bp.id === "statue-of-fortune") {
-      const layers = pickItemSprite(bp.id, false);
+    if ((bp.templateId || bp.id) === "rift-stone" || (bp.templateId || bp.id) === "statue-of-fortune") {
+      const layers = pickItemSprite((bp.templateId || bp.id), false);
       if (layers.length > 0) {
         const cx = bp.x + 1;
         const cy = bp.y + 1;
@@ -211,7 +211,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
             sprite: layers[0],
             walkable: true,
             transparent: true,
-            buildingId: bp.id,
+            buildingId: (bp.templateId || bp.id),
             spriteLayers: layers.length > 1 ? layers : undefined,
           };
         }
@@ -222,7 +222,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   // 6b. Create NPC monsters for buildings with npcSprite
   const npcMonsters: Monster[] = [];
   for (const bp of cfg.buildings) {
-    const tmpl = templateMap[bp.id];
+    const tmpl = templateMap[(bp.templateId || bp.id)];
     if (!tmpl) continue;
     const npcTile = tmpl.tiles[tmpl.npc.y]?.[tmpl.npc.x];
     if (!npcTile?.npcSprite) continue;
@@ -259,15 +259,25 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
     });
   }
 
-  // 7. Mine entrance
+  // 7. Mine entrance (supports single point, array, or object with numeric keys)
+  let minePoints: { x: number; y: number }[] = [];
   const me = cfg.mineEntrance;
-  if (me.y < H && me.x < W) {
-    tiles[me.y][me.x] = {
-      type: "stairs-down",
-      sprite: "gateways-stone_stairs_down",
-      walkable: true,
-      transparent: true,
-    };
+  if (Array.isArray(me)) {
+    minePoints = me;
+  } else if (me && typeof me === "object" && me.x !== undefined) {
+    minePoints = [me as { x: number; y: number }];
+  } else if (me && typeof me === "object") {
+    minePoints = Object.values(me) as { x: number; y: number }[];
+  }
+  for (const mp of minePoints) {
+    if (mp && mp.y < H && mp.x < W) {
+      tiles[mp.y][mp.x] = {
+        type: "stairs-down",
+        sprite: "gateways-stone_stairs_down",
+        walkable: true,
+        transparent: true,
+      };
+    }
   }
 
   // All tiles pre-explored, visible, and lit in town
