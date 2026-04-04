@@ -170,7 +170,7 @@ export function generateTestFloor(): {
     name: "Long Sword +2",
     enchantment: 2,
     identified: true,
-    sprite: "sword-enchanted",
+    sprite: "",
   };
   items.push({ item: enchSword, position: { x: 4, y: 12 } });
 
@@ -181,7 +181,7 @@ export function generateTestFloor(): {
     enchantment: -1,
     cursed: true,
     identified: false,
-    sprite: "metal-armour-cursed",
+    sprite: "",
   };
   items.push({ item: cursedArmor, position: { x: 4, y: 13 } });
 
@@ -191,7 +191,7 @@ export function generateTestFloor(): {
     name: "Ring +1",
     enchantment: 1,
     identified: false,
-    sprite: "ring-enchanted",
+    sprite: "",
   };
   items.push({ item: enchRing, position: { x: 4, y: 14 } });
 
