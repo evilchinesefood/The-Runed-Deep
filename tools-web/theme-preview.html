@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dungeon Theme Preview — The Runed Deep</title>
     <link rel="stylesheet" href="../css/sprites/tiles.css" />
+    <link rel="stylesheet" href="../css/sprites/monsters.css" />
     <style>
       * {
         margin: 0;
@@ -65,6 +66,49 @@
       }
       .tile-ref span {
         color: #888;
+      }
+      .monsters-section {
+        margin-top: 14px;
+        border-top: 1px solid #333;
+        padding-top: 10px;
+      }
+      .monsters-label {
+        font-size: 13px;
+        color: #b8a87a;
+        margin-bottom: 8px;
+      }
+      .monsters-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .monster-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 48px;
+      }
+      .monster-card .sprite-wrap {
+        width: 32px;
+        height: 32px;
+        border: 2px solid #555;
+        border-radius: 3px;
+        background: #181818;
+      }
+      .monster-card.boss .sprite-wrap {
+        border-color: #d48a1e;
+        box-shadow: 0 0 4px #d48a1e88;
+      }
+      .monster-card .monster-name {
+        font-size: 9px;
+        color: #888;
+        text-align: center;
+        margin-top: 2px;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+      .monster-card.boss .monster-name {
+        color: #d48a1e;
       }
     </style>
   </head>
@@ -286,6 +330,1357 @@
         },
       ];
 
+      var MONSTERS = [
+        {
+          id: "giant-rat",
+          name: "Giant Rat",
+          sprite: "animals-quokka",
+          minFloor: 1,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "kobold",
+          name: "Kobold",
+          sprite: "humanoids-kobold",
+          minFloor: 1,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "large-snake",
+          name: "Large Snake",
+          sprite: "animals-water_moccasin",
+          minFloor: 2,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "giant-red-ant",
+          name: "Giant Red Ant",
+          sprite: "undead-pharaoh_ant",
+          minFloor: 3,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "giant-bat",
+          name: "Giant Bat",
+          sprite: "animals-bat",
+          minFloor: 3,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "wild-dog",
+          name: "Wild Dog",
+          sprite: "animals-jackal",
+          minFloor: 4,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "skeleton",
+          name: "Skeleton",
+          sprite: "skeletons-skeleton_humanoid_small",
+          minFloor: 5,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "giant-trapdoor-spider",
+          name: "Giant Trapdoor Spider",
+          sprite: "animals-jumping_spider",
+          minFloor: 5,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "quokka",
+          name: "Quokka",
+          sprite: "animals-quokka",
+          minFloor: 1,
+          maxFloor: 3,
+          boss: false,
+        },
+        {
+          id: "adder",
+          name: "Adder",
+          sprite: "animals-adder",
+          minFloor: 1,
+          maxFloor: 4,
+          boss: false,
+        },
+        {
+          id: "giant-cockroach",
+          name: "Giant Cockroach",
+          sprite: "animals-giant_cockroach",
+          minFloor: 1,
+          maxFloor: 4,
+          boss: false,
+        },
+        {
+          id: "frilled-lizard",
+          name: "Frilled Lizard",
+          sprite: "animals-frilled_lizard",
+          minFloor: 1,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "fungus",
+          name: "Fungus",
+          sprite: "fungi_plants-fungus1",
+          minFloor: 1,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "killer-bee",
+          name: "Killer Bee",
+          sprite: "animals-killer_bee",
+          minFloor: 2,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "ribbon-worm",
+          name: "Ribbon Worm",
+          sprite: "animals-ribbon_worm",
+          minFloor: 2,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "bombardier-beetle",
+          name: "Bombardier Beetle",
+          sprite: "animals-bombardier_beetle",
+          minFloor: 3,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "jackal",
+          name: "Jackal",
+          sprite: "animals-jackal",
+          minFloor: 1,
+          maxFloor: 3,
+          boss: false,
+        },
+        {
+          id: "bullfrog",
+          name: "Bullfrog",
+          sprite: "animals-bullfrog",
+          minFloor: 2,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "scorpion",
+          name: "Scorpion",
+          sprite: "animals-scorpion",
+          minFloor: 3,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "wandering-mushroom",
+          name: "Wandering Mushroom",
+          sprite: "fungi_plants-wandering_mushroom",
+          minFloor: 3,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "hound",
+          name: "Hound",
+          sprite: "animals-hound",
+          minFloor: 4,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "goliath-beetle",
+          name: "Goliath Beetle",
+          sprite: "animals-goliath_beetle",
+          minFloor: 4,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "wolf-spider",
+          name: "Wolf Spider",
+          sprite: "animals-wolf_spider",
+          minFloor: 4,
+          maxFloor: 5,
+          boss: false,
+        },
+        {
+          id: "viper",
+          name: "Viper",
+          sprite: "animals-adder",
+          minFloor: 6,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "hobgoblin",
+          name: "Hobgoblin",
+          sprite: "vault-deformed_human",
+          minFloor: 6,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "shadow",
+          name: "Shadow",
+          sprite: "undead-shadow_wraith",
+          minFloor: 6,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "carrion-creeper",
+          name: "Carrion Creeper",
+          sprite: "animals-brain_worm",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "goblin",
+          name: "Goblin",
+          sprite: "vault-deformed_orc",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "giant-scorpion",
+          name: "Giant Scorpion",
+          sprite: "animals-scorpion",
+          minFloor: 8,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "walking-corpse",
+          name: "Walking Corpse",
+          sprite: "undead-zombie_human",
+          minFloor: 9,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "huge-lizard",
+          name: "Huge Lizard",
+          sprite: "animals-iguana",
+          minFloor: 9,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "green-slime",
+          name: "Red Slime",
+          sprite: "amorphous-jelly",
+          minFloor: 10,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "zombie-kobold",
+          name: "Zombie Kobold",
+          sprite: "undead-zombie_kobold",
+          minFloor: 6,
+          maxFloor: 9,
+          boss: false,
+        },
+        {
+          id: "gnoll",
+          name: "Gnoll",
+          sprite: "humanoids-gnoll",
+          minFloor: 6,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "orc",
+          name: "Orc",
+          sprite: "humanoids-orc",
+          minFloor: 6,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "wight",
+          name: "Wight",
+          sprite: "undead-wight",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "ghoul",
+          name: "Ghoul",
+          sprite: "undead-ghoul",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "orc-warrior",
+          name: "Orc Warrior",
+          sprite: "humanoids-orc_warrior",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "gnoll-sergeant",
+          name: "Gnoll Sergeant",
+          sprite: "humanoids-gnoll_sergeant",
+          minFloor: 8,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "mummy",
+          name: "Mummy",
+          sprite: "undead-mummy",
+          minFloor: 8,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "wraith",
+          name: "Wraith",
+          sprite: "undead-wraith",
+          minFloor: 8,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "orc-priest",
+          name: "Orc Priest",
+          sprite: "humanoids-orc_priest",
+          minFloor: 8,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "skeletal-warrior",
+          name: "Skeletal Warrior",
+          sprite: "undead-skeletal_warrior",
+          minFloor: 9,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "deep-elf-archer",
+          name: "Deep Elf Archer",
+          sprite: "humanoids-deep_elf_archer",
+          minFloor: 9,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "acid-blob",
+          name: "Acid Blob",
+          sprite: "amorphous-acid_blob",
+          minFloor: 9,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "hornet",
+          name: "Hornet",
+          sprite: "animals-hornet",
+          minFloor: 7,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "emperor-scorpion",
+          name: "Emperor Scorpion",
+          sprite: "animals-emperor_scorpion",
+          minFloor: 10,
+          maxFloor: 10,
+          boss: false,
+        },
+        {
+          id: "huge-ogre",
+          name: "Huge Ogre",
+          sprite: "unique-snorg",
+          minFloor: 11,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "gray-wolf",
+          name: "Gray Wolf",
+          sprite: "animals-wolf",
+          minFloor: 11,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "bandit",
+          name: "Bandit",
+          sprite: "unique-edmund",
+          minFloor: 11,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "smirking-sneak-thief",
+          name: "Smirking Sneak Thief",
+          sprite: "unique-maurice",
+          minFloor: 12,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "white-wolf",
+          name: "White Wolf",
+          sprite: "animals-wolf",
+          minFloor: 13,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "barrow-wight",
+          name: "Barrow Wight",
+          sprite: "undead-wight",
+          minFloor: 13,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "brown-bear",
+          name: "Brown Bear",
+          sprite: "animals-black_bear",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "animated-wooden-statue",
+          name: "Animated Wooden Statue",
+          sprite: "statues-training_dummy",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "cave-bear",
+          name: "Cave Bear",
+          sprite: "animals-polar_bear",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "troll",
+          name: "Troll",
+          sprite: "humanoids-troll",
+          minFloor: 11,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "yak",
+          name: "Yak",
+          sprite: "animals-yak",
+          minFloor: 11,
+          maxFloor: 14,
+          boss: false,
+        },
+        {
+          id: "centaur",
+          name: "Centaur",
+          sprite: "demihumanoids-centaur",
+          minFloor: 11,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "ogre-mage",
+          name: "Ogre Mage",
+          sprite: "humanoids-ogre_mage",
+          minFloor: 12,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "wolf",
+          name: "Wolf",
+          sprite: "animals-wolf",
+          minFloor: 11,
+          maxFloor: 13,
+          boss: false,
+        },
+        {
+          id: "two-headed-ogre",
+          name: "Two-Headed Ogre",
+          sprite: "humanoids-two_headed_ogre",
+          minFloor: 12,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "death-yak",
+          name: "Death Yak",
+          sprite: "animals-death_yak",
+          minFloor: 13,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "centaur-warrior",
+          name: "Centaur Warrior",
+          sprite: "demihumanoids-centaur_warrior",
+          minFloor: 13,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "harpy",
+          name: "Harpy",
+          sprite: "demihumanoids-harpy",
+          minFloor: 12,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "black-bear",
+          name: "Black Bear",
+          sprite: "animals-black_bear",
+          minFloor: 11,
+          maxFloor: 13,
+          boss: false,
+        },
+        {
+          id: "oklob-sapling",
+          name: "Oklob Sapling",
+          sprite: "fungi_plants-oklob_sapling",
+          minFloor: 12,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "warg",
+          name: "Warg",
+          sprite: "animals-warg",
+          minFloor: 13,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "deep-elf-knight",
+          name: "Deep Elf Knight",
+          sprite: "humanoids-deep_elf_knight",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "polar-bear",
+          name: "Polar Bear",
+          sprite: "animals-polar_bear",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "cyclops",
+          name: "Cyclops",
+          sprite: "humanoids-cyclops",
+          minFloor: 14,
+          maxFloor: 15,
+          boss: false,
+        },
+        {
+          id: "gelatinous-glob",
+          name: "Gelatinous Glob",
+          sprite: "amorphous-azure_jelly",
+          minFloor: 16,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "animated-bronze-statue",
+          name: "Animated Bronze Statue",
+          sprite: "statues-statue_base",
+          minFloor: 16,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "evil-warrior",
+          name: "Evil Warrior",
+          sprite: "unique-donald",
+          minFloor: 17,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "dark-wraith",
+          name: "Dark Wraith",
+          sprite: "undead-shadow_wraith",
+          minFloor: 18,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "gruesome-troll",
+          name: "Gruesome Troll",
+          sprite: "unique-snorg",
+          minFloor: 18,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "manticore",
+          name: "Manticore",
+          sprite: "animals-catoblepas",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "wizard",
+          name: "Wizard",
+          sprite: "unique-fannar",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "animated-iron-statue",
+          name: "Animated Iron Statue",
+          sprite: "nonliving-iron_golem",
+          minFloor: 20,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "necromancer",
+          name: "Necromancer",
+          sprite: "unique-josephine",
+          minFloor: 20,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "vault-guard",
+          name: "Vault Guard",
+          sprite: "humanoids-vault_guard",
+          minFloor: 16,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "gargoyle",
+          name: "Gargoyle",
+          sprite: "nonliving-gargoyle",
+          minFloor: 16,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "orc-knight",
+          name: "Orc Knight",
+          sprite: "humanoids-orc_knight",
+          minFloor: 17,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "deep-troll",
+          name: "Deep Troll",
+          sprite: "humanoids-deep_troll",
+          minFloor: 18,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "iron-imp",
+          name: "Iron Imp",
+          sprite: "demons-iron_imp",
+          minFloor: 16,
+          maxFloor: 19,
+          boss: false,
+        },
+        {
+          id: "crystal-guardian",
+          name: "Crystal Guardian",
+          sprite: "nonliving-crystal_guardian",
+          minFloor: 17,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "hell-knight",
+          name: "Hell Knight",
+          sprite: "humanoids-hell_knight",
+          minFloor: 18,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "flesh-golem",
+          name: "Flesh Golem",
+          sprite: "nonliving-flesh_golem",
+          minFloor: 17,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "deep-elf-sorcerer",
+          name: "Deep Elf Sorcerer",
+          sprite: "humanoids-deep_elf_sorcerer",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "war-gargoyle",
+          name: "War Gargoyle",
+          sprite: "nonliving-war_gargoyle",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "iron-troll",
+          name: "Iron Troll",
+          sprite: "humanoids-iron_troll",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "orc-warlord",
+          name: "Orc Warlord",
+          sprite: "humanoids-orc_warlord",
+          minFloor: 18,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "death-knight",
+          name: "Death Knight",
+          sprite: "humanoids-death_knight",
+          minFloor: 19,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "electric-golem",
+          name: "Electric Golem",
+          sprite: "nonliving-electric_golem",
+          minFloor: 20,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "ettin",
+          name: "Ettin",
+          sprite: "humanoids-ettin",
+          minFloor: 17,
+          maxFloor: 20,
+          boss: false,
+        },
+        {
+          id: "eerie-ghost",
+          name: "Eerie Ghost",
+          sprite: "undead-ghost",
+          minFloor: 21,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "spectre",
+          name: "Spectre",
+          sprite: "undead-phantom",
+          minFloor: 21,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "vampire",
+          name: "Vampire",
+          sprite: "undead-vampire",
+          minFloor: 21,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "animated-marble-statue",
+          name: "Animated Marble Statue",
+          sprite: "nonliving-crystal_guardian",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "rat-man",
+          name: "Rat-Man",
+          sprite: "vault-deformed_human",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "bull-man",
+          name: "Bull-Man",
+          sprite: "demihumanoids-minotaur",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "hill-giant",
+          name: "Hill Giant",
+          sprite: "unique-polyphemus",
+          minFloor: 23,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "ice-devil",
+          name: "Ice Devil",
+          sprite: "demons-ice_devil",
+          minFloor: 24,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "wind-elemental",
+          name: "Wind Elemental",
+          sprite: "nonliving-air_elemental",
+          minFloor: 24,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "dust-elemental",
+          name: "Dust Elemental",
+          sprite: "nonliving-earth_elemental",
+          minFloor: 25,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "hellion",
+          name: "Hellion",
+          sprite: "demons-hellion",
+          minFloor: 21,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "smoke-demon",
+          name: "Smoke Demon",
+          sprite: "demons-smoke_demon",
+          minFloor: 21,
+          maxFloor: 24,
+          boss: false,
+        },
+        {
+          id: "wyvern",
+          name: "Wyvern",
+          sprite: "dragons-wyvern",
+          minFloor: 21,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "soul-eater",
+          name: "Soul Eater",
+          sprite: "demons-soul_eater",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "lindwurm",
+          name: "Lindwurm",
+          sprite: "dragons-lindwurm",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "tormentor",
+          name: "Tormentor",
+          sprite: "demons-tormentor",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "shining-eye",
+          name: "Shining Eye",
+          sprite: "eyes-shining_eye",
+          minFloor: 21,
+          maxFloor: 24,
+          boss: false,
+        },
+        {
+          id: "freezing-wraith",
+          name: "Freezing Wraith",
+          sprite: "undead-freezing_wraith",
+          minFloor: 23,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "shadow-demon",
+          name: "Shadow Demon",
+          sprite: "demons-shadow_demon",
+          minFloor: 23,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "rime-drake",
+          name: "Rime Drake",
+          sprite: "dragons-rime_drake",
+          minFloor: 21,
+          maxFloor: 24,
+          boss: false,
+        },
+        {
+          id: "reaper",
+          name: "Reaper",
+          sprite: "demons-reaper",
+          minFloor: 24,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "eye-of-devastation",
+          name: "Eye of Devastation",
+          sprite: "eyes-eye_of_devastation",
+          minFloor: 23,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "naga-warrior",
+          name: "Naga Warrior",
+          sprite: "demihumanoids-naga_warrior",
+          minFloor: 22,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "death-drake",
+          name: "Death Drake",
+          sprite: "dragons-death_drake",
+          minFloor: 23,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "vampire-knight",
+          name: "Vampire Knight",
+          sprite: "undead-vampire_knight",
+          minFloor: 24,
+          maxFloor: 25,
+          boss: false,
+        },
+        {
+          id: "two-headed-giant",
+          name: "Two-Headed Giant",
+          sprite: "player-giaggostuono",
+          minFloor: 26,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "fire-elemental",
+          name: "Fire Elemental",
+          sprite: "nonliving-fire_elemental",
+          minFloor: 26,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "water-elemental",
+          name: "Water Elemental",
+          sprite: "nonliving-water_elemental",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "frost-giant",
+          name: "Frost Giant",
+          sprite: "humanoids-iron_giant",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "spiked-devil",
+          name: "Spiked Devil",
+          sprite: "demons-red_devil",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "ice-elemental",
+          name: "Ice Elemental",
+          sprite: "nonliving-living_spell_ice",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "earth-elemental",
+          name: "Earth Elemental",
+          sprite: "nonliving-earth_elemental",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "magma-elemental",
+          name: "Magma Elemental",
+          sprite: "nonliving-orb_of_fire",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "stone-giant",
+          name: "Stone Giant",
+          sprite: "humanoids-iron_giant",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "horned-devil",
+          name: "Horned Devil",
+          sprite: "demons-hellion",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "fire-giant",
+          name: "Fire Giant",
+          sprite: "unique-margery",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "white-dragon",
+          name: "White Dragon",
+          sprite: "dragons-ice_dragon",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "blue-dragon",
+          name: "Blue Dragon",
+          sprite: "dragons-storm_dragon",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "green-dragon",
+          name: "Green Dragon",
+          sprite: "dragons-swamp_dragon",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "abyss-fiend",
+          name: "Abyss Fiend",
+          sprite: "demons-brimstone_fiend",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "red-dragon",
+          name: "Red Dragon",
+          sprite: "dragons-golden_dragon",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "ancient-lich",
+          name: "Ancient Lich",
+          sprite: "undead-ancient_lich",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "titan",
+          name: "Titan",
+          sprite: "humanoids-titan",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "golden-dragon",
+          name: "Golden Dragon",
+          sprite: "dragons-golden_dragon",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "seraph",
+          name: "Seraph",
+          sprite: "holy-seraph",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "brimstone-fiend",
+          name: "Brimstone Fiend",
+          sprite: "demons-brimstone_fiend",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "ice-fiend",
+          name: "Ice Fiend",
+          sprite: "demons-ice_fiend",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "executioner",
+          name: "Executioner",
+          sprite: "demons-executioner",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "hell-sentinel",
+          name: "Hell Sentinel",
+          sprite: "demons-hell_sentinel",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "storm-dragon",
+          name: "Storm Dragon",
+          sprite: "dragons-storm_dragon",
+          minFloor: 28,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "lich",
+          name: "Lich",
+          sprite: "undead-lich",
+          minFloor: 26,
+          maxFloor: 29,
+          boss: false,
+        },
+        {
+          id: "iron-dragon",
+          name: "Iron Dragon",
+          sprite: "dragons-iron_dragon",
+          minFloor: 29,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "balrug",
+          name: "Balrug",
+          sprite: "demons-balrug",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "bone-dragon",
+          name: "Bone Dragon",
+          sprite: "undead-bone_dragon",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "shadow-dragon",
+          name: "Shadow Dragon",
+          sprite: "dragons-shadow_dragon",
+          minFloor: 27,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "blizzard-demon",
+          name: "Blizzard Demon",
+          sprite: "demons-blizzard_demon",
+          minFloor: 26,
+          maxFloor: 29,
+          boss: false,
+        },
+        {
+          id: "shrieker",
+          name: "Shrieker",
+          sprite: "animals-ghost_moth",
+          minFloor: 3,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "war-drummer",
+          name: "War Drummer",
+          sprite: "humanoids-warmonger",
+          minFloor: 11,
+          maxFloor: 30,
+          boss: false,
+        },
+        {
+          id: "queen-ant",
+          name: "Queen Ant",
+          sprite: "animals-queen_bee",
+          minFloor: 5,
+          maxFloor: 5,
+          boss: true,
+        },
+        {
+          id: "iron-golem",
+          name: "Iron Golem",
+          sprite: "nonliving-iron_golem",
+          minFloor: 10,
+          maxFloor: 10,
+          boss: true,
+        },
+        {
+          id: "hill-giant-king",
+          name: "Hrungnir, Hill Giant Lord",
+          sprite: "unique-polyphemus",
+          minFloor: 15,
+          maxFloor: 15,
+          boss: true,
+        },
+        {
+          id: "wolf-man",
+          name: "Wolf-Man",
+          sprite: "unique-grum",
+          minFloor: 20,
+          maxFloor: 20,
+          boss: true,
+        },
+        {
+          id: "frost-giant-king",
+          name: "Frost Giant King",
+          sprite: "humanoids-iron_giant",
+          minFloor: 25,
+          maxFloor: 25,
+          boss: true,
+        },
+        {
+          id: "surtur",
+          name: "Surtur",
+          sprite: "unique-cerebov",
+          minFloor: 30,
+          maxFloor: 30,
+          boss: true,
+        },
+      ];
+
+      function getMonstersForTheme(themeMin, themeMax) {
+        return MONSTERS.filter(function (m) {
+          return m.minFloor <= themeMax && m.maxFloor >= themeMin;
+        }).sort(function (a, b) {
+          if (a.boss !== b.boss) return a.boss ? 1 : -1;
+          return a.minFloor - b.minFloor;
+        });
+      }
+
+      function renderMonsters(container, themeMin, themeMax) {
+        var monsters = getMonstersForTheme(themeMin, themeMax);
+        if (!monsters.length) return;
+
+        var section = document.createElement("div");
+        section.className = "monsters-section";
+
+        var regular = monsters.filter(function (m) {
+          return !m.boss;
+        });
+        var bosses = monsters.filter(function (m) {
+          return m.boss;
+        });
+
+        var label = document.createElement("div");
+        label.className = "monsters-label";
+        label.textContent =
+          "Monsters (Floors " + themeMin + "-" + themeMax + "):";
+        section.appendChild(label);
+
+        var grid = document.createElement("div");
+        grid.className = "monsters-grid";
+        for (var i = 0; i < regular.length; i++) {
+          grid.appendChild(makeMonsterCard(regular[i]));
+        }
+        section.appendChild(grid);
+
+        if (bosses.length) {
+          var bLabel = document.createElement("div");
+          bLabel.className = "monsters-label";
+          bLabel.style.marginTop = "10px";
+          bLabel.textContent = "Boss:";
+          section.appendChild(bLabel);
+
+          var bGrid = document.createElement("div");
+          bGrid.className = "monsters-grid";
+          for (var j = 0; j < bosses.length; j++) {
+            bGrid.appendChild(makeMonsterCard(bosses[j]));
+          }
+          section.appendChild(bGrid);
+        }
+
+        container.appendChild(section);
+      }
+
+      function makeMonsterCard(m) {
+        var card = document.createElement("div");
+        card.className = "monster-card" + (m.boss ? " boss" : "");
+
+        var wrap = document.createElement("div");
+        wrap.className = "sprite-wrap";
+
+        var sprite = document.createElement("div");
+        sprite.className = m.sprite;
+        sprite.style.width = "32px";
+        sprite.style.height = "32px";
+        wrap.appendChild(sprite);
+
+        var name = document.createElement("div");
+        name.className = "monster-name";
+        name.textContent = m.name;
+
+        card.appendChild(wrap);
+        card.appendChild(name);
+        return card;
+      }
+
       function pick(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
       }
@@ -322,8 +1717,7 @@
           for (var x = 0; x < W; x++) {
             var cell = document.createElement("div");
             var key = x + "," + y;
-            var isWall =
-              y === 0 || y === H - 1 || x === 0 || x === W - 1;
+            var isWall = y === 0 || y === H - 1 || x === 0 || x === W - 1;
 
             if (x === doorX && y === doorY) {
               cell.className = pick(theme.doorClosed);
@@ -363,14 +1757,14 @@
 
           var depth = document.createElement("div");
           depth.className = "theme-depth";
-          depth.textContent =
-            "Depths " + t.depthMin + " – " + t.depthMax;
+          depth.textContent = "Depths " + t.depthMin + " – " + t.depthMax;
 
           header.appendChild(name);
           header.appendChild(depth);
           section.appendChild(header);
 
           renderRoom(section, t);
+          renderMonsters(section, t.depthMin, t.depthMax);
 
           // Reference info
           var ref = document.createElement("div");
