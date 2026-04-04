@@ -57,7 +57,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       { length: W },
       (): Tile => ({
         type: "grass",
-        sprite: "floor-grass_full",
+        sprite: "floor-grass0",
         walkable: true,
         transparent: true,
       }),
@@ -75,33 +75,31 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       };
   }
 
-  // 3. Paint decorations (flowers, moss, plants — grass base with overlay)
+  // 3. Paint decorations (flowers, moss, plants — rendered as overlay on grass)
   for (const d of cfg.decoration || []) {
     if (d.y < H && d.x < W)
       tiles[d.y][d.x] = {
         type: "grass",
-        sprite: "floor-grass0",
+        sprite: d.sprite,
         walkable: true,
         transparent: true,
-        spriteLayers: ["floor-grass0", d.sprite],
       };
   }
 
-  // 4. Paint trees (not walkable, but transparent — grass base layer)
+  // 4. Paint trees (not walkable, but transparent — rendered as overlay on grass)
   for (const t of cfg.trees || []) {
     if (t.y < H && t.x < W)
       tiles[t.y][t.x] = {
         type: "wall",
-        sprite: "floor-grass0",
+        sprite: t.sprite,
         walkable: false,
         transparent: true,
-        spriteLayers: ["floor-grass0", t.sprite],
       };
   }
 
-  // 5. Paint features (grass base layer)
+  // 5. Paint features (rendered as overlay on grass)
   for (const f of cfg.features || []) {
-    const sprite = FEATURE_SPRITES[f.type] ?? "floor-grass_full";
+    const sprite = FEATURE_SPRITES[f.type] ?? "floor-grass0";
     const fw = f.w ?? 1;
     const fh = f.h ?? 1;
     for (let dy = 0; dy < fh; dy++) {
@@ -111,10 +109,9 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
         if (fy < H && fx < W)
           tiles[fy][fx] = {
             type: "grass",
-            sprite: "floor-grass0",
+            sprite: sprite,
             walkable: true,
             transparent: true,
-            spriteLayers: ["floor-grass0", sprite],
           };
       }
     }
@@ -126,19 +123,12 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       const isWall = t.sprite.startsWith("wall-");
       const isWater = t.sprite.startsWith("water-");
       const isTree = t.sprite.startsWith("trees-");
-      const isDecor = t.sprite.startsWith("statues-") || t.sprite.startsWith("decor-") ||
-        t.sprite.startsWith("altars-") || t.sprite.startsWith("plants-") ||
-        t.sprite.startsWith("shops-");
-      const needsGrassBase = isTree || isDecor;
-      const layers = needsGrassBase
-        ? ["floor-grass0", t.sprite, ...(t.overlay ? [t.overlay] : [])]
-        : t.overlay ? [t.sprite, t.overlay] : undefined;
       tiles[t.y][t.x] = {
         type: isWall ? "wall" : isWater ? "water" : isTree ? "wall" : "grass",
-        sprite: needsGrassBase ? "floor-grass0" : t.sprite,
+        sprite: t.sprite,
         walkable: !isWall && !isWater && !isTree,
         transparent: !isWall,
-        spriteLayers: layers,
+        spriteLayers: t.overlay ? [t.sprite, t.overlay] : undefined,
       };
     }
   }
