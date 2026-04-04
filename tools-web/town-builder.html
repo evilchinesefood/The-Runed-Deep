@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Town Builder — The Runed Deep</title>
     <link rel="stylesheet" href="../css/sprites/tiles.css" />
+    <link rel="stylesheet" href="../css/sprites/monsters.css" />
+    <link rel="stylesheet" href="../css/sprites/items.css" />
+    <link rel="stylesheet" href="../css/sprites/effects.css" />
+    <link rel="stylesheet" href="../css/sprites/player.css" />
+    <link rel="stylesheet" href="../css/sprites/buildings.css" />
     <style>
       * {
         margin: 0;
@@ -130,6 +135,86 @@
         overflow: auto;
         position: relative;
         cursor: crosshair;
+      }
+
+      /* Map container (DOM-based rendering) */
+      #map {
+        position: relative;
+        background: #2d4a1e;
+        image-rendering: pixelated;
+      }
+      #map .cell {
+        position: absolute;
+        overflow: hidden;
+      }
+      #map .cell .tile {
+        display: block;
+        width: 32px;
+        height: 32px;
+      }
+      #map.show-grid .cell {
+        outline: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      /* Building overlays */
+      .building-overlay {
+        position: absolute;
+        border: 1.5px solid #c9a84c;
+        background: rgba(201, 168, 76, 0.15);
+        z-index: 10;
+        pointer-events: none;
+      }
+      .building-overlay.selected {
+        border-width: 2.5px;
+        border-color: #e0c068;
+        background: rgba(201, 168, 76, 0.35);
+      }
+      .building-label {
+        position: absolute;
+        z-index: 20;
+        background: #000c;
+        color: #c9a84c;
+        font-size: 10px;
+        padding: 1px 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        border: 1px solid #555;
+        border-radius: 2px;
+        transform: translate(-50%, -100%);
+        margin-top: -2px;
+      }
+
+      /* Marker overlays */
+      .marker-overlay {
+        position: absolute;
+        z-index: 15;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #fff;
+        font-size: 11px;
+        pointer-events: none;
+      }
+      .marker-mine {
+        background: rgba(231, 76, 60, 0.6);
+      }
+      .marker-spawn {
+        background: rgba(76, 175, 80, 0.6);
+      }
+
+      /* Hover preview */
+      #hover-preview {
+        position: absolute;
+        z-index: 30;
+        pointer-events: none;
+        opacity: 0.5;
+        display: none;
+      }
+      #hover-preview .tile {
+        display: block;
+        width: 32px;
+        height: 32px;
       }
 
       /* Tile palette */
@@ -285,6 +370,27 @@
         display: flex;
         gap: 16px;
       }
+
+      /* Toast notification */
+      .toast {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--gold);
+        color: #111;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: bold;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
@@ -293,7 +399,41 @@
       <div class="topbar-group">
         <button id="btn-zoom">Zoom: 16px</button>
         <div class="topbar-sep"></div>
+        <label
+          style="
+            color: var(--text2);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+          "
+        >
+          <input type="checkbox" id="chk-grid" /> Grid
+        </label>
+        <label
+          style="
+            color: var(--text2);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+          "
+        >
+          <input type="checkbox" id="chk-labels" checked /> Labels
+        </label>
+        <div class="topbar-sep"></div>
+        <button id="btn-save">Save Progress</button>
         <button id="btn-download-config">Download Config</button>
+        <button id="btn-load-file">Load from File</button>
+        <button id="btn-reset">Reset</button>
+        <input
+          type="file"
+          id="file-input"
+          accept=".json"
+          style="display: none"
+        />
       </div>
     </div>
 
@@ -320,9 +460,10 @@
         </div>
       </div>
 
-      <!-- Center: Canvas -->
+      <!-- Center: DOM-based map -->
       <div id="center">
-        <canvas id="map-canvas"></canvas>
+        <div id="map"></div>
+        <div id="hover-preview"><div class="tile"></div></div>
       </div>
 
       <!-- Right Panel -->
@@ -360,120 +501,25 @@
           </button>
         </div>
         <div class="prop-group">
+          <label>Selected Tile</label>
+          <div
+            id="selected-tile-preview"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-top: 4px;
+            "
+          >
+            <span style="font-size: 11px; color: var(--text2)">None</span>
+          </div>
+        </div>
+        <div class="prop-group">
           <label>Keyboard Shortcuts</label>
           <div style="font-size: 11px; color: var(--text2); line-height: 1.6">
             <div><b>Right-click</b> — Erase tile</div>
             <div><b>Click+drag</b> — Paint sweep</div>
             <div><b>Ctrl+Z</b> — Undo</div>
-          </div>
-        </div>
-        <div class="prop-group">
-          <label>Legend</label>
-          <div style="font-size: 11px; line-height: 1.8">
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #2d4a1e;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Grass
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #8d6e3a;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Sand/Path
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #2a6fa8;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Water
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #1a4a7a;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Deep Water
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #2d6b2d;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Trees/Plants
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #888;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Walls/Vaults
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #6a4a2a;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Doors
-            </div>
-            <div>
-              <span
-                style="
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  background: #d4a840;
-                  border: 1px solid #444;
-                  vertical-align: middle;
-                "
-              ></span>
-              Decor/Statues
-            </div>
           </div>
         </div>
       </div>
@@ -483,6 +529,7 @@
       <span id="status-msg">Ready</span>
       <span id="status-pos"></span>
     </div>
+    <div id="toast" class="toast"></div>
 
     <script>
       (function () {
@@ -490,7 +537,8 @@
 
         /* ── Config ── */
         const TOWN_W = 45,
-          TOWN_H = 60;
+          TOWN_H = 60,
+          TILE = 32;
         let cellSize = 16;
 
         /* ── State ── */
@@ -507,12 +555,20 @@
         let painting = false;
         let undoStack = [];
         const MAX_UNDO = 30;
-        let leftTab = "tiles"; // 'tiles' | 'buildings'
+        let leftTab = "tiles";
+        let showGrid = false;
+        let showLabels = true;
 
-        /* ── DOM ── */
+        /* ── DOM cache ── */
         const $ = (s) => document.querySelector(s);
-        const canvas = $("#map-canvas");
-        const ctx = canvas.getContext("2d");
+        const mapEl = $("#map");
+        // cellEls[y][x] = DOM element or null
+        let cellEls = [];
+        // Overlay elements
+        let buildingOverlays = [];
+        let labelOverlays = [];
+        let markerEls = { mine: null, spawn: null };
+        let hoverEl = $("#hover-preview");
 
         /* ── Tile categories ── */
         const categories = [
@@ -542,42 +598,16 @@
         ];
         let activeCategory = "All";
 
-        /* ── Color map for canvas ── */
-        function spriteColor(cls) {
-          if (!cls) return "#2d4a1e"; // grass
-          if (cls.startsWith("floor-grass")) return "#3a6a28";
-          if (
-            cls.startsWith("floor-sand") ||
-            cls.startsWith("floor-pebble") ||
-            cls.startsWith("floor-dirt")
-          )
-            return "#8d6e3a";
-          if (cls.startsWith("floor-acidic")) return "#5a8a2a";
-          if (cls.startsWith("floor-ice") || cls.startsWith("floor-frozen"))
-            return "#8ab8d8";
-          if (cls.startsWith("floor-")) return "#6a5a3a";
-          if (cls.startsWith("water-deep")) return "#1a4a7a";
-          if (cls.startsWith("water-")) return "#2a6fa8";
-          if (cls.startsWith("trees-") || cls.startsWith("plants-"))
-            return "#2d6b2d";
-          if (cls.startsWith("wall-") || cls.startsWith("vaults-"))
-            return "#888";
-          if (cls.startsWith("doors-")) return "#6a4a2a";
-          if (cls.startsWith("statues-")) return "#999";
-          if (cls.startsWith("altars-")) return "#9a6ad4";
-          if (cls.startsWith("shops-")) return "#d4a840";
-          if (cls.startsWith("traps-")) return "#d44040";
-          if (cls.startsWith("gateways-")) return "#40a0d4";
-          if (cls.startsWith("decor-")) return "#d4a840";
-          return "#555";
-        }
-
         /* ── Init ── */
         async function init() {
-          // Init empty grid
+          // Init empty grid + cellEls
           for (let y = 0; y < TOWN_H; y++) {
             grid[y] = [];
-            for (let x = 0; x < TOWN_W; x++) grid[y][x] = null;
+            cellEls[y] = [];
+            for (let x = 0; x < TOWN_W; x++) {
+              grid[y][x] = null;
+              cellEls[y][x] = null;
+            }
           }
 
           // Load manifest
@@ -598,15 +628,14 @@
             allBuildings = [];
           }
 
-          // Load existing config
-          await loadConfig();
+          // Load data: localStorage first, then config
+          let loaded = loadAutoSave();
+          if (!loaded) await loadConfig();
 
           buildTilePalette();
           buildCategoryTabs();
           buildBuildingPalette();
-          loadAutoSave();
-          sizeCanvas();
-          render();
+          renderFull();
           wireEvents();
           updatePositions();
           status(
@@ -622,41 +651,34 @@
           try {
             let r = await fetch("../town-config.json");
             let cfg = await r.json();
-            // Import water
             if (cfg.water)
-              for (let w of cfg.water) {
+              for (let w of cfg.water)
                 if (w.x >= 0 && w.x < TOWN_W && w.y >= 0 && w.y < TOWN_H)
                   grid[w.y][w.x] = "water-shallow_water";
-              }
-            // Import trees (use actual sprite if available)
             if (cfg.trees)
-              for (let t of cfg.trees) {
+              for (let t of cfg.trees)
                 if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
                   grid[t.y][t.x] = t.sprite || "trees-tree1";
-              }
-            // Import decorations
             if (cfg.decoration)
-              for (let d of cfg.decoration) {
+              for (let d of cfg.decoration)
                 if (d.x >= 0 && d.x < TOWN_W && d.y >= 0 && d.y < TOWN_H)
                   grid[d.y][d.x] = d.sprite || "floor-grass_flowers0";
-              }
-            // Import features
             if (cfg.features)
               for (let f of cfg.features) {
-                let fw = f.w || 1, fh = f.h || 1;
-                for (let dy = 0; dy < fh; dy++) {
+                let fw = f.w || 1,
+                  fh = f.h || 1;
+                for (let dy = 0; dy < fh; dy++)
                   for (let dx = 0; dx < fw; dx++) {
-                    let fx = f.x + dx, fy = f.y + dy;
+                    let fx = f.x + dx,
+                      fy = f.y + dy;
                     if (fx >= 0 && fx < TOWN_W && fy >= 0 && fy < TOWN_H)
                       grid[fy][fx] = "decor-sparkling_fountain";
                   }
-                }
               }
-            // Import paths
             if (cfg.paths)
               for (let p of cfg.paths) {
                 if (p.points) {
-                  for (let pt of p.points) {
+                  for (let pt of p.points)
                     if (
                       pt[0] >= 0 &&
                       pt[0] < TOWN_W &&
@@ -664,22 +686,17 @@
                       pt[1] < TOWN_H
                     )
                       grid[pt[1]][pt[0]] = "floor-sand5";
-                  }
                 } else if (p.x !== undefined) {
                   if (p.x >= 0 && p.x < TOWN_W && p.y >= 0 && p.y < TOWN_H)
                     grid[p.y][p.x] = "floor-sand5";
                 }
               }
-            // Import painted tiles (new format)
             if (cfg.tiles)
-              for (let t of cfg.tiles) {
+              for (let t of cfg.tiles)
                 if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
                   grid[t.y][t.x] = t.sprite;
-              }
-            // Positions
             if (cfg.mineEntrance) minePos = cfg.mineEntrance;
             if (cfg.playerSpawn) spawnPos = cfg.playerSpawn;
-            // Buildings
             if (cfg.buildings)
               placedBuildings = cfg.buildings.map((b) => ({
                 templateId: b.templateId || b.id,
@@ -692,102 +709,155 @@
           }
         }
 
-        /* ── Canvas ── */
-        function sizeCanvas() {
-          canvas.width = TOWN_W * cellSize;
-          canvas.height = TOWN_H * cellSize;
-          canvas.style.imageRendering = "pixelated";
-        }
+        /* ── DOM-based rendering ── */
+        function renderFull() {
+          let s = cellSize === 16 ? 0.5 : 1;
+          let cp = TILE * s;
+          mapEl.style.width = TOWN_W * cp + "px";
+          mapEl.style.height = TOWN_H * cp + "px";
 
-        function render() {
-          let w = TOWN_W,
-            h = TOWN_H,
-            cs = cellSize;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Clear everything
+          while (mapEl.firstChild) mapEl.removeChild(mapEl.firstChild);
 
-          // Draw grid cells
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              let s = grid[y][x];
-              ctx.fillStyle = spriteColor(s);
-              ctx.fillRect(x * cs, y * cs, cs, cs);
-              // Tree dot
-              if (s && (s.startsWith("trees-") || s.startsWith("plants-"))) {
-                ctx.fillStyle = "#1a3a12";
-                let r = Math.max(2, cs / 6);
-                ctx.beginPath();
-                ctx.arc(x * cs + cs / 2, y * cs + cs / 2, r, 0, Math.PI * 2);
-                ctx.fill();
-              }
+          let frag = document.createDocumentFragment();
+
+          // Create all cells
+          for (let y = 0; y < TOWN_H; y++) {
+            for (let x = 0; x < TOWN_W; x++) {
+              let sprite = grid[y][x];
+              let cell = document.createElement("div");
+              cell.className = "cell";
+              cell.style.cssText =
+                "left:" +
+                x * cp +
+                "px;top:" +
+                y * cp +
+                "px;width:" +
+                cp +
+                "px;height:" +
+                cp +
+                "px;";
+              let t = document.createElement("div");
+              t.className = "tile " + (sprite || "floor-grass0");
+              t.style.cssText =
+                "transform:scale(" + s + ");transform-origin:top left;";
+              cell.appendChild(t);
+              frag.appendChild(cell);
+              cellEls[y][x] = cell;
             }
           }
 
-          // Grid lines (subtle)
-          ctx.strokeStyle = "rgba(255,255,255,0.04)";
-          ctx.lineWidth = 0.5;
-          for (let x = 0; x <= w; x++) {
-            ctx.beginPath();
-            ctx.moveTo(x * cs, 0);
-            ctx.lineTo(x * cs, h * cs);
-            ctx.stroke();
-          }
-          for (let y = 0; y <= h; y++) {
-            ctx.beginPath();
-            ctx.moveTo(0, y * cs);
-            ctx.lineTo(w * cs, y * cs);
-            ctx.stroke();
-          }
+          mapEl.appendChild(frag);
 
-          // Placed buildings
+          // Render overlays
+          renderOverlays();
+        }
+
+        function renderCell(x, y) {
+          let s = cellSize === 16 ? 0.5 : 1;
+          let cell = cellEls[y][x];
+          if (!cell) return;
+          let t = cell.firstChild;
+          let sprite = grid[y][x];
+          t.className = "tile " + (sprite || "floor-grass0");
+          t.style.cssText =
+            "transform:scale(" + s + ");transform-origin:top left;";
+        }
+
+        function renderOverlays() {
+          let s = cellSize === 16 ? 0.5 : 1;
+          let cp = TILE * s;
+
+          // Remove old overlays
+          buildingOverlays.forEach((el) => el.remove());
+          labelOverlays.forEach((el) => el.remove());
+          if (markerEls.mine) markerEls.mine.remove();
+          if (markerEls.spawn) markerEls.spawn.remove();
+          buildingOverlays = [];
+          labelOverlays = [];
+          markerEls = { mine: null, spawn: null };
+
+          let tpl = {};
+          for (let b of allBuildings) tpl[b.id] = b;
+
+          // Building overlays + labels
           placedBuildings.forEach((p, i) => {
-            let tmpl = allBuildings.find((b) => b.id === p.templateId);
+            let tmpl = tpl[p.templateId];
             if (!tmpl) return;
-            let bx = p.x * cs,
-              by = p.y * cs,
-              bw = tmpl.width * cs,
-              bh = tmpl.height * cs;
-            ctx.fillStyle =
-              i === selectedPlacedIdx
-                ? "rgba(201,168,76,0.35)"
-                : "rgba(201,168,76,0.15)";
-            ctx.fillRect(bx, by, bw, bh);
-            ctx.strokeStyle = i === selectedPlacedIdx ? "#e0c068" : "#c9a84c";
-            ctx.lineWidth = i === selectedPlacedIdx ? 2.5 : 1.5;
-            ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
-            // Label
-            ctx.fillStyle = "#c9a84c";
-            ctx.font = (cs < 24 ? "9" : "11") + "px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            let name =
-              tmpl.name.length > 14 ? tmpl.name.slice(0, 12) + ".." : tmpl.name;
-            ctx.fillText(name, bx + bw / 2, by + bh / 2);
+            let bx = p.x * cp,
+              by = p.y * cp,
+              bw = tmpl.width * cp,
+              bh = tmpl.height * cp;
+
+            let ov = document.createElement("div");
+            ov.className =
+              "building-overlay" + (i === selectedPlacedIdx ? " selected" : "");
+            ov.style.cssText =
+              "left:" +
+              bx +
+              "px;top:" +
+              by +
+              "px;width:" +
+              bw +
+              "px;height:" +
+              bh +
+              "px;";
+            mapEl.appendChild(ov);
+            buildingOverlays.push(ov);
+
+            if (showLabels) {
+              let lbl = document.createElement("div");
+              lbl.className = "building-label";
+              lbl.textContent = tmpl.name;
+              lbl.style.left = bx + bw / 2 + "px";
+              lbl.style.top = by + "px";
+              mapEl.appendChild(lbl);
+              labelOverlays.push(lbl);
+            }
           });
 
-          // Mine entrance
+          // Mine marker
           if (minePos) {
-            ctx.fillStyle = "rgba(231,76,60,0.6)";
-            ctx.fillRect(minePos.x * cs, minePos.y * cs, cs, cs);
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold " + (cs < 24 ? "8" : "11") + "px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("M", minePos.x * cs + cs / 2, minePos.y * cs + cs / 2);
+            let m = document.createElement("div");
+            m.className = "marker-overlay marker-mine";
+            m.style.cssText =
+              "left:" +
+              minePos.x * cp +
+              "px;top:" +
+              minePos.y * cp +
+              "px;width:" +
+              cp +
+              "px;height:" +
+              cp +
+              "px;" +
+              "font-size:" +
+              (cp < 24 ? "8" : "11") +
+              "px;";
+            m.textContent = "M";
+            mapEl.appendChild(m);
+            markerEls.mine = m;
           }
 
-          // Player spawn
+          // Spawn marker
           if (spawnPos) {
-            ctx.fillStyle = "rgba(76,175,80,0.6)";
-            ctx.fillRect(spawnPos.x * cs, spawnPos.y * cs, cs, cs);
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold " + (cs < 24 ? "8" : "11") + "px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(
-              "P",
-              spawnPos.x * cs + cs / 2,
-              spawnPos.y * cs + cs / 2,
-            );
+            let m = document.createElement("div");
+            m.className = "marker-overlay marker-spawn";
+            m.style.cssText =
+              "left:" +
+              spawnPos.x * cp +
+              "px;top:" +
+              spawnPos.y * cp +
+              "px;width:" +
+              cp +
+              "px;height:" +
+              cp +
+              "px;" +
+              "font-size:" +
+              (cp < 24 ? "8" : "11") +
+              "px;";
+            m.textContent = "P";
+            mapEl.appendChild(m);
+            markerEls.spawn = m;
           }
         }
 
@@ -829,12 +899,13 @@
               );
               if (selectedTile === s.className) {
                 selectedTile = null;
+                updateSelectedTilePreview();
                 return;
               }
               selectedTile = s.className;
               d.classList.add("selected");
-              // Switch to paint tool
               setTool("paint");
+              updateSelectedTilePreview();
               status("Tile: " + s.className);
             });
             pg.appendChild(d);
@@ -855,12 +926,32 @@
               let showCat = !folders || folders.includes(folder);
               let showFilter = !filter || filter(el.dataset.name);
               let showSearch = !search || name.includes(search);
-              // If filter is set but folders match, we further apply the filter
               if (folders && filter)
                 showCat = folders.includes(folder) && filter(el.dataset.name);
               else if (folders) showCat = folders.includes(folder);
               el.style.display = showCat && showSearch ? "" : "none";
             });
+        }
+
+        function updateSelectedTilePreview() {
+          let wrap = $("#selected-tile-preview");
+          wrap.textContent = "";
+          if (!selectedTile) {
+            let sp = document.createElement("span");
+            sp.style.cssText = "font-size:11px;color:var(--text2)";
+            sp.textContent = "None";
+            wrap.appendChild(sp);
+            return;
+          }
+          let t = document.createElement("div");
+          t.className = "tile " + selectedTile;
+          t.style.cssText = "flex-shrink:0;";
+          wrap.appendChild(t);
+          let sp = document.createElement("span");
+          sp.style.cssText =
+            "font-size:11px;color:var(--text2);word-break:break-all";
+          sp.textContent = selectedTile;
+          wrap.appendChild(sp);
         }
 
         /* ── Building Palette ── */
@@ -903,7 +994,6 @@
 
         /* ── Undo ── */
         function pushUndo() {
-          // Store grid + buildings + positions
           undoStack.push({
             grid: grid.map((r) => [...r]),
             buildings: JSON.parse(JSON.stringify(placedBuildings)),
@@ -920,27 +1010,30 @@
           placedBuildings = s.buildings;
           minePos = s.mine;
           spawnPos = s.spawn;
-          render();
+          renderFull();
           updatePositions();
           autoSave();
+          status("Undo (" + undoStack.length + " left)");
         }
 
-        /* ── Canvas interaction ── */
-        function canvasToGrid(e) {
-          let rect = canvas.getBoundingClientRect();
-          let sx = (e.clientX - rect.left) * (canvas.width / rect.width);
-          let sy = (e.clientY - rect.top) * (canvas.height / rect.height);
-          let gx = Math.floor(sx / cellSize);
-          let gy = Math.floor(sy / cellSize);
+        /* ── Map interaction ── */
+        function mapToGrid(e) {
+          let rect = mapEl.getBoundingClientRect();
+          let scale = cellSize === 16 ? 0.5 : 1;
+          let cp = TILE * scale;
+          let mx = e.clientX - rect.left + $("#center").scrollLeft;
+          let my = e.clientY - rect.top + $("#center").scrollTop;
+          let gx = Math.floor(mx / cp);
+          let gy = Math.floor(my / cp);
           return {
             x: Math.max(0, Math.min(TOWN_W - 1, gx)),
             y: Math.max(0, Math.min(TOWN_H - 1, gy)),
           };
         }
 
-        function onCanvasDown(e) {
+        function onMapDown(e) {
           e.preventDefault();
-          let { x, y } = canvasToGrid(e);
+          let { x, y } = mapToGrid(e);
 
           // Right-click = erase
           if (e.button === 2) {
@@ -977,37 +1070,55 @@
               x,
               y,
             });
-            render();
+            renderOverlays();
             autoSave();
             status("Placed: " + selectedBuildingTemplate.name);
           } else if (activeTool === "mine") {
             pushUndo();
             minePos = { x, y };
-            render();
+            renderOverlays();
             updatePositions();
             autoSave();
           } else if (activeTool === "spawn") {
             pushUndo();
             spawnPos = { x, y };
-            render();
+            renderOverlays();
             updatePositions();
             autoSave();
           }
 
           // Check if clicked on a building (for selection)
-          if (activeTool === "place" || activeTool === "paint") {
+          if (activeTool === "place") {
             let idx = findBuildingAt(x, y);
-            if (idx >= 0 && activeTool !== "paint") {
+            if (idx >= 0) {
               selectedPlacedIdx = idx;
-              render();
+              renderOverlays();
               updateSelection();
             }
           }
         }
 
-        function onCanvasMove(e) {
-          let { x, y } = canvasToGrid(e);
-          $("#status-pos").textContent = `(${x}, ${y})`;
+        function onMapMove(e) {
+          let { x, y } = mapToGrid(e);
+          $("#status-pos").textContent = "(" + x + ", " + y + ")";
+
+          // Hover preview
+          if (activeTool === "paint" && selectedTile && !painting) {
+            let scale = cellSize === 16 ? 0.5 : 1;
+            let cp = TILE * scale;
+            hoverEl.style.display = "";
+            hoverEl.style.left = x * cp + "px";
+            hoverEl.style.top = y * cp + "px";
+            hoverEl.style.width = cp + "px";
+            hoverEl.style.height = cp + "px";
+            let t = hoverEl.firstChild;
+            t.className = "tile " + selectedTile;
+            t.style.cssText =
+              "transform:scale(" + scale + ");transform-origin:top left;";
+          } else {
+            hoverEl.style.display = "none";
+          }
+
           if (!painting) return;
           if (activeTool === "paint" && selectedTile) {
             grid[y][x] = selectedTile;
@@ -1018,29 +1129,15 @@
           }
         }
 
-        function onCanvasUp() {
+        function onMapUp() {
           if (painting) {
             painting = false;
             autoSave();
           }
         }
 
-        function renderCell(x, y) {
-          let cs = cellSize;
-          ctx.fillStyle = spriteColor(grid[y][x]);
-          ctx.fillRect(x * cs, y * cs, cs, cs);
-          let s = grid[y][x];
-          if (s && (s.startsWith("trees-") || s.startsWith("plants-"))) {
-            ctx.fillStyle = "#1a3a12";
-            let r = Math.max(2, cs / 6);
-            ctx.beginPath();
-            ctx.arc(x * cs + cs / 2, y * cs + cs / 2, r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          // Subtle grid
-          ctx.strokeStyle = "rgba(255,255,255,0.04)";
-          ctx.lineWidth = 0.5;
-          ctx.strokeRect(x * cs, y * cs, cs, cs);
+        function onMapLeave() {
+          hoverEl.style.display = "none";
         }
 
         function findBuildingAt(gx, gy) {
@@ -1062,10 +1159,10 @@
         /* ── UI updates ── */
         function updatePositions() {
           $("#pos-mine").textContent = minePos
-            ? `(${minePos.x}, ${minePos.y})`
+            ? "(" + minePos.x + ", " + minePos.y + ")"
             : "—";
           $("#pos-spawn").textContent = spawnPos
-            ? `(${spawnPos.x}, ${spawnPos.y})`
+            ? "(" + spawnPos.x + ", " + spawnPos.y + ")"
             : "—";
         }
 
@@ -1092,12 +1189,9 @@
         /* ── Export ── */
         function downloadConfig() {
           let tiles = [];
-          for (let y = 0; y < TOWN_H; y++) {
-            for (let x = 0; x < TOWN_W; x++) {
+          for (let y = 0; y < TOWN_H; y++)
+            for (let x = 0; x < TOWN_W; x++)
               if (grid[y][x]) tiles.push({ x, y, sprite: grid[y][x] });
-            }
-          }
-          // Also export legacy arrays for backward compatibility
           let water = [],
             trees = [],
             paths = [];
@@ -1107,7 +1201,7 @@
               t.sprite.startsWith("trees-") ||
               t.sprite.startsWith("plants-")
             )
-              trees.push({ x: t.x, y: t.y });
+              trees.push({ x: t.x, y: t.y, sprite: t.sprite });
             else if (
               t.sprite.startsWith("floor-sand") ||
               t.sprite.startsWith("floor-pebble") ||
@@ -1147,16 +1241,13 @@
           );
         }
 
-        /* ── Auto-save ── */
+        /* ── Save / Load ── */
         function autoSave() {
           try {
-            // Compress grid: only store non-null cells
             let tiles = [];
-            for (let y = 0; y < TOWN_H; y++) {
-              for (let x = 0; x < TOWN_W; x++) {
+            for (let y = 0; y < TOWN_H; y++)
+              for (let x = 0; x < TOWN_W; x++)
                 if (grid[y][x]) tiles.push({ x, y, s: grid[y][x] });
-              }
-            }
             localStorage.setItem(
               "tb2-state",
               JSON.stringify({
@@ -1172,26 +1263,123 @@
         function loadAutoSave() {
           try {
             let raw = localStorage.getItem("tb2-state");
-            if (!raw) return;
+            if (!raw) return false;
             let s = JSON.parse(raw);
-            // Only load if we don't already have data from config
-            let hasData = false;
-            for (let y = 0; y < TOWN_H && !hasData; y++) {
-              for (let x = 0; x < TOWN_W && !hasData; x++) {
-                if (grid[y][x]) hasData = true;
-              }
-            }
-            if (hasData) return; // config took priority
-            if (s.tiles) {
-              for (let t of s.tiles) {
-                if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
-                  grid[t.y][t.x] = t.s;
-              }
-            }
+            if (!s.tiles || !s.tiles.length) return false;
+            for (let t of s.tiles)
+              if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
+                grid[t.y][t.x] = t.s;
             if (s.buildings) placedBuildings = s.buildings;
             if (s.mine) minePos = s.mine;
             if (s.spawn) spawnPos = s.spawn;
-          } catch (e) {}
+            status("Loaded from auto-save");
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function manualSave() {
+          autoSave();
+          toast("Progress saved");
+        }
+
+        function loadFromFile() {
+          $("#file-input").click();
+        }
+
+        function handleFileLoad(e) {
+          let file = e.target.files[0];
+          if (!file) return;
+          let reader = new FileReader();
+          reader.onload = function (ev) {
+            try {
+              let cfg = JSON.parse(ev.target.result);
+              // Reset grid
+              for (let y = 0; y < TOWN_H; y++)
+                for (let x = 0; x < TOWN_W; x++) grid[y][x] = null;
+              placedBuildings = [];
+              minePos = null;
+              spawnPos = null;
+              // Load tiles
+              if (cfg.tiles)
+                for (let t of cfg.tiles)
+                  if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
+                    grid[t.y][t.x] = t.sprite;
+              // Fallback: load from legacy arrays
+              if (cfg.water)
+                for (let w of cfg.water)
+                  if (w.x >= 0 && w.x < TOWN_W && w.y >= 0 && w.y < TOWN_H)
+                    grid[w.y][w.x] = grid[w.y][w.x] || "water-shallow_water";
+              if (cfg.trees)
+                for (let t of cfg.trees)
+                  if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
+                    grid[t.y][t.x] =
+                      grid[t.y][t.x] || t.sprite || "trees-tree1";
+              if (cfg.decoration)
+                for (let d of cfg.decoration)
+                  if (d.x >= 0 && d.x < TOWN_W && d.y >= 0 && d.y < TOWN_H)
+                    grid[d.y][d.x] =
+                      grid[d.y][d.x] || d.sprite || "floor-grass_flowers0";
+              if (cfg.paths)
+                for (let p of cfg.paths) {
+                  if (p.points)
+                    for (let pt of p.points)
+                      if (
+                        pt[0] >= 0 &&
+                        pt[0] < TOWN_W &&
+                        pt[1] >= 0 &&
+                        pt[1] < TOWN_H
+                      )
+                        grid[pt[1]][pt[0]] =
+                          grid[pt[1]][pt[0]] || "floor-sand5";
+                }
+              if (cfg.mineEntrance) minePos = cfg.mineEntrance;
+              if (cfg.playerSpawn) spawnPos = cfg.playerSpawn;
+              if (cfg.buildings)
+                placedBuildings = cfg.buildings.map((b) => ({
+                  templateId: b.templateId || b.id,
+                  x: b.x,
+                  y: b.y,
+                }));
+              undoStack = [];
+              renderFull();
+              updatePositions();
+              autoSave();
+              toast("Loaded from file");
+              status("Loaded config from file");
+            } catch (err) {
+              status("Error loading file: " + err.message);
+            }
+          };
+          reader.readAsText(file);
+          // Reset input so same file can be loaded again
+          e.target.value = "";
+        }
+
+        async function resetToConfig() {
+          if (
+            !confirm("Reset to town-config.json? Unsaved changes will be lost.")
+          )
+            return;
+          localStorage.removeItem("tb2-state");
+          for (let y = 0; y < TOWN_H; y++)
+            for (let x = 0; x < TOWN_W; x++) grid[y][x] = null;
+          placedBuildings = [];
+          minePos = null;
+          spawnPos = null;
+          undoStack = [];
+          await loadConfig();
+          renderFull();
+          updatePositions();
+          toast("Reset to town-config.json");
+        }
+
+        function toast(msg) {
+          let el = $("#toast");
+          el.textContent = msg;
+          el.classList.add("show");
+          setTimeout(() => el.classList.remove("show"), 2000);
         }
 
         function status(msg) {
@@ -1200,11 +1388,12 @@
 
         /* ── Events ── */
         function wireEvents() {
-          // Canvas
-          canvas.addEventListener("mousedown", onCanvasDown);
-          canvas.addEventListener("mousemove", onCanvasMove);
-          canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-          document.addEventListener("mouseup", onCanvasUp);
+          // Map interactions
+          mapEl.addEventListener("mousedown", onMapDown);
+          mapEl.addEventListener("mousemove", onMapMove);
+          mapEl.addEventListener("mouseleave", onMapLeave);
+          mapEl.addEventListener("contextmenu", (e) => e.preventDefault());
+          document.addEventListener("mouseup", onMapUp);
 
           // Keyboard
           document.addEventListener("keydown", (e) => {
@@ -1228,7 +1417,7 @@
               pushUndo();
               placedBuildings.splice(selectedPlacedIdx, 1);
               selectedPlacedIdx = -1;
-              render();
+              renderOverlays();
               updateSelection();
               autoSave();
             }
@@ -1238,12 +1427,27 @@
           $("#btn-zoom").addEventListener("click", () => {
             cellSize = cellSize === 16 ? 32 : 16;
             $("#btn-zoom").textContent = "Zoom: " + cellSize + "px";
-            sizeCanvas();
-            render();
+            renderFull();
           });
 
-          // Download
+          // Grid toggle
+          $("#chk-grid").addEventListener("change", () => {
+            showGrid = $("#chk-grid").checked;
+            mapEl.classList.toggle("show-grid", showGrid);
+          });
+
+          // Labels toggle
+          $("#chk-labels").addEventListener("change", () => {
+            showLabels = $("#chk-labels").checked;
+            renderOverlays();
+          });
+
+          // Save/Load buttons
+          $("#btn-save").addEventListener("click", manualSave);
           $("#btn-download-config").addEventListener("click", downloadConfig);
+          $("#btn-load-file").addEventListener("click", loadFromFile);
+          $("#file-input").addEventListener("change", handleFileLoad);
+          $("#btn-reset").addEventListener("click", resetToConfig);
 
           // Left panel tabs
           $("#tab-tiles").addEventListener("click", () => {
