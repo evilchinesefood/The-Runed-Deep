@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { Floor, Tile, Vector2 } from "../../core/types";
-import { getThemeById, pickVariant } from "../../data/DungeonThemes";
+import { DUNGEON_THEMES, pickVariant } from "../../data/DungeonThemes";
 
 function seededRandom(seed: number): () => number {
   let s = seed;
@@ -53,7 +53,7 @@ export function generateCrucibleArena(seed?: number): {
   playerStart: Vector2;
 } {
   const rand = seededRandom(seed ?? Date.now());
-  const theme = getThemeById("castle");
+  const theme = DUNGEON_THEMES[Math.floor(rand() * DUNGEON_THEMES.length)];
 
   const w = 20 + Math.floor(rand() * 11); // 20-30
   const h = 20 + Math.floor(rand() * 11);
