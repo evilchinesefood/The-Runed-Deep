@@ -628,11 +628,29 @@
                 if (w.x >= 0 && w.x < TOWN_W && w.y >= 0 && w.y < TOWN_H)
                   grid[w.y][w.x] = "water-shallow_water";
               }
-            // Import trees
+            // Import trees (use actual sprite if available)
             if (cfg.trees)
               for (let t of cfg.trees) {
                 if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
-                  grid[t.y][t.x] = "trees-tree1";
+                  grid[t.y][t.x] = t.sprite || "trees-tree1";
+              }
+            // Import decorations
+            if (cfg.decoration)
+              for (let d of cfg.decoration) {
+                if (d.x >= 0 && d.x < TOWN_W && d.y >= 0 && d.y < TOWN_H)
+                  grid[d.y][d.x] = d.sprite || "floor-grass_flowers0";
+              }
+            // Import features
+            if (cfg.features)
+              for (let f of cfg.features) {
+                let fw = f.w || 1, fh = f.h || 1;
+                for (let dy = 0; dy < fh; dy++) {
+                  for (let dx = 0; dx < fw; dx++) {
+                    let fx = f.x + dx, fy = f.y + dy;
+                    if (fx >= 0 && fx < TOWN_W && fy >= 0 && fy < TOWN_H)
+                      grid[fy][fx] = "decor-sparkling_fountain";
+                  }
+                }
               }
             // Import paths
             if (cfg.paths)
