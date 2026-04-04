@@ -802,6 +802,8 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         equipDamageBonus: 0,
         equipAccuracyBonus: 0,
         runeShards: 0,
+        essence: 0,
+        statueUpgrades: {},
       },
       currentFloor: 1,
       currentDungeon: "mine",
@@ -849,6 +851,8 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       activeCrucible: null,
       crucibleBestWave: 0,
       runeForgeMaxSockets: 2,
+      statueUpgrades: {},
+      itemsSacrificed: 0,
     };
     gameLoop.setState(testState);
   }

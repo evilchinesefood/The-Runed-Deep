@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Town Builder — The Runed Deep</title>
+<link rel="stylesheet" href="../css/sprites/tiles.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#1a1a1a;--bg2:#222;--bg3:#2a2a2a;--gold:#c9a84c;--gold2:#e0c068;--border:#444;--text:#ddd;--text2:#999;--green:#4caf50;--orange:#ff9800;--red:#e74c3c;--panel:280px}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+button{background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:13px}
+button:hover{border-color:var(--gold);color:var(--gold)}
+button.active{background:var(--gold);color:#111;border-color:var(--gold2)}
+input,select,textarea{background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:13px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+label{color:var(--text2);font-size:12px}
+
+/* Top Bar */
+#topbar{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+#topbar h1{font-size:16px;color:var(--gold);margin-right:12px;white-space:nowrap}
+.topbar-group{display:flex;align-items:center;gap:6px}
+.topbar-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+
+/* Layout */
+#app{display:flex;flex:1;overflow:hidden}
+.panel{width:var(--panel);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.panel.right{border-right:none;border-left:1px solid var(--border)}
+.panel h3{padding:8px 10px;font-size:13px;color:var(--gold);border-bottom:1px solid var(--border);flex-shrink:0}
+#center{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:16px}
+
+/* Palette */
+#palette-search{margin:6px 8px;width:calc(100% - 16px)}
+#palette-tabs{display:flex;flex-wrap:wrap;gap:2px;padding:4px 6px;flex-shrink:0}
+#palette-tabs button{padding:2px 6px;font-size:11px;border-radius:3px}
+#palette-grid{flex:1;overflow-y:auto;padding:6px;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start}
+.palette-tile{width:34px;height:34px;border:1px solid transparent;border-radius:2px;cursor:pointer;position:relative;flex-shrink:0}
+.palette-tile:hover{border-color:var(--gold)}
+.palette-tile.selected{border-color:var(--gold);box-shadow:0 0 6px var(--gold)}
+.palette-tile .tile{display:block}
+.palette-tile[title]:hover::after{content:attr(title);position:absolute;bottom:-20px;left:0;background:#000;color:#fff;font-size:10px;padding:1px 4px;border-radius:2px;white-space:nowrap;z-index:10;pointer-events:none}
+
+/* Building Grid */
+#grid-wrap{display:inline-block;position:relative}
+.grid-row{display:flex}
+.grid-cell{width:32px;height:32px;border:1px dotted #333;cursor:crosshair;position:relative}
+.grid-cell:hover{outline:2px solid var(--gold)}
+.grid-cell .tile{display:block;pointer-events:none}
+.grid-cell.entrance::after{content:'E';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(76,175,80,.45);color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.grid-cell.npc::after{content:'N';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,152,0,.45);color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.grid-cell .hover-preview{position:absolute;top:0;left:0;opacity:.4;pointer-events:none;z-index:1}
+
+/* Right Panel */
+.prop-group{padding:8px 10px;border-bottom:1px solid var(--border)}
+.prop-group label{display:block;margin-bottom:2px}
+.prop-group input,.prop-group textarea{width:100%;margin-bottom:6px}
+.prop-group textarea{height:48px;resize:vertical}
+.marker-btns{display:flex;gap:4px;flex-wrap:wrap}
+.marker-btns button{font-size:11px;padding:3px 8px}
+.marker-btns button.entrance-mode{background:var(--green);color:#fff;border-color:var(--green)}
+.marker-btns button.npc-mode{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* Town Layout Mode */
+#town-grid-wrap{display:inline-block;position:relative}
+.town-cell{width:16px;height:16px;border:1px solid rgba(255,255,255,.03);cursor:crosshair;position:relative}
+.town-cell:hover{outline:1px solid var(--gold)}
+.town-cell.path{background:#8d6e3a}
+.town-cell.water-cell{background:#2a6fa8}
+.town-cell.tree-cell{background:#2d6b2d}
+.town-cell.mine-entrance::after{content:'M';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(231,76,60,.6);color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.town-cell.player-spawn::after{content:'P';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(76,175,80,.6);color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.town-building{position:absolute;border:2px solid var(--gold);background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);text-align:center;overflow:hidden;cursor:move;pointer-events:all;z-index:5}
+.town-building:hover{background:rgba(201,168,76,.3)}
+.town-building.selected{border-color:var(--gold2);box-shadow:0 0 8px var(--gold)}
+
+/* Building Palette (town mode) */
+.building-thumb{padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.building-thumb:hover{background:var(--bg3)}
+.building-thumb.selected{background:var(--gold);color:#111}
+.building-thumb-name{font-size:12px}
+.building-thumb-size{font-size:10px;color:var(--text2)}
+
+/* Town tools */
+#town-tools{display:flex;flex-wrap:wrap;gap:3px;padding:6px 8px}
+#town-tools button{font-size:11px;padding:3px 7px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* Status bar */
+#statusbar{padding:4px 12px;background:var(--bg2);border-top:1px solid var(--border);font-size:11px;color:var(--text2);flex-shrink:0;display:flex;gap:16px}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <h1>Town Builder</h1>
+  <div class="topbar-group">
+    <button id="mode-building" class="active">Building Editor</button>
+    <button id="mode-town">Town Layout</button>
+  </div>
+  <div class="topbar-sep"></div>
+  <div id="building-controls" class="topbar-group">
+    <select id="building-select"><option value="">— Load Building —</option></select>
+    <button id="btn-new">New</button>
+    <button id="btn-load-all">Load All</button>
+    <button id="btn-save">Save Building</button>
+    <button id="btn-delete">Delete</button>
+    <button id="btn-download-all">Download All</button>
+    <div class="topbar-sep"></div>
+    <label>W</label><input id="grid-w" type="number" min="1" max="50" value="7" style="width:48px">
+    <label>H</label><input id="grid-h" type="number" min="1" max="50" value="5" style="width:48px">
+  </div>
+  <div id="town-controls" class="topbar-group" style="display:none">
+    <label>W</label><input id="town-w" type="number" min="10" max="100" value="45" style="width:48px">
+    <label>H</label><input id="town-h" type="number" min="10" max="100" value="60" style="width:48px">
+    <button id="btn-resize-town">Resize</button>
+    <div class="topbar-sep"></div>
+    <button id="btn-download-config">Download Config</button>
+  </div>
+</div>
+
+<div id="app">
+  <!-- Left Panel -->
+  <div class="panel" id="left-panel">
+    <!-- Building Editor: Tile Palette -->
+    <div id="palette-panel">
+      <h3>Tile Palette</h3>
+      <input type="text" id="palette-search" placeholder="Search tiles...">
+      <div id="palette-tabs"></div>
+      <div id="palette-grid"></div>
+    </div>
+    <!-- Town Layout: Building Palette -->
+    <div id="building-palette-panel" style="display:none">
+      <h3>Buildings</h3>
+      <div id="building-palette" style="flex:1;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- Center -->
+  <div id="center">
+    <div id="building-editor-view">
+      <div id="grid-wrap"></div>
+    </div>
+    <div id="town-layout-view" style="display:none">
+      <div id="town-grid-wrap"></div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="panel right" id="right-panel">
+    <!-- Building Editor Props -->
+    <div id="building-props">
+      <h3>Building Properties</h3>
+      <div class="prop-group">
+        <label>ID</label>
+        <input id="prop-id" type="text" placeholder="building-id">
+        <label>Name</label>
+        <input id="prop-name" type="text" placeholder="Building Name">
+        <label>Flavor Text</label>
+        <textarea id="prop-flavor" placeholder="A description..."></textarea>
+      </div>
+      <div class="prop-group">
+        <label>Markers</label>
+        <div class="marker-btns">
+          <button id="btn-entrance">Set Entrance</button>
+          <button id="btn-npc">Set NPC</button>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text2)">
+          <div>Entrance: <span id="marker-entrance">—</span></div>
+          <div>NPC: <span id="marker-npc">—</span></div>
+        </div>
+      </div>
+      <div class="prop-group">
+        <label>Keyboard Shortcuts</label>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">
+          <div><b>Ctrl+Z</b> — Undo</div>
+          <div><b>Right-click</b> — Erase tile</div>
+          <div><b>Click+drag</b> — Paint sweep</div>
+          <div><b>Esc</b> — Cancel marker mode</div>
+        </div>
+      </div>
+    </div>
+    <!-- Town Layout Props -->
+    <div id="town-props" style="display:none">
+      <h3>Town Properties</h3>
+      <div class="prop-group">
+        <label>Tools</label>
+        <div id="town-tools">
+          <button class="active" data-tool="place">Place Building</button>
+          <button data-tool="path">Path</button>
+          <button data-tool="water">Water</button>
+          <button data-tool="tree">Tree</button>
+          <button data-tool="scatter">Scatter Grass</button>
+          <button data-tool="mine">Mine Entrance</button>
+          <button data-tool="spawn">Player Spawn</button>
+          <button data-tool="erase">Erase</button>
+        </div>
+      </div>
+      <div class="prop-group">
+        <label>Positions</label>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">
+          <div>Mine: <span id="town-mine-pos">—</span></div>
+          <div>Spawn: <span id="town-spawn-pos">—</span></div>
+        </div>
+      </div>
+      <div class="prop-group">
+        <label>Selected Building</label>
+        <div id="town-selected-info" style="font-size:11px;color:var(--text2)">None</div>
+        <button id="btn-remove-placed" style="margin-top:4px;font-size:11px;display:none">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="statusbar">
+  <span id="status-msg">Ready</span>
+  <span id="status-pos"></span>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── State ── */
+let manifest = null;
+let tileSprites = [];
+let allBuildings = [];
+let currentBuilding = null;
+let selectedTile = null;
+let markerMode = null; // 'entrance' | 'npc' | null
+let painting = false;
+let undoStack = [];
+const MAX_UNDO = 20;
+let mode = 'building'; // 'building' | 'town'
+
+/* Town state */
+let townW = 45, townH = 60;
+let townGrid = []; // [row][col] = {type:'grass'|'path'|'water'|'tree'}
+let placedBuildings = []; // [{id, x, y, building}]
+let townTool = 'place';
+let selectedPlacedIdx = -1;
+let selectedBuildingTemplate = null;
+let minePos = null, spawnPos = null;
+let townPainting = false;
+
+/* ── DOM refs ── */
+const $ = s => document.querySelector(s);
+const gridWrap = $('#grid-wrap');
+const paletteGrid = $('#palette-grid');
+const paletteTabs = $('#palette-tabs');
+const searchInput = $('#palette-search');
+const buildingSelect = $('#building-select');
+
+/* ── Categories ── */
+const categories = [
+  {key:'All',folders:null},
+  {key:'Walls',folders:['wall','vaults']},
+  {key:'Floors',folders:['floor']},
+  {key:'Doors',folders:['doors']},
+  {key:'Decor',folders:['decor','altars','gateways','traps']},
+  {key:'Statues',folders:['statues']},
+  {key:'Water',folders:['water']},
+  {key:'Plants',folders:['plants','trees']},
+  {key:'Shops',folders:['shops']}
+];
+let activeCategory = 'All';
+
+/* ── Init ── */
+async function init(){
+  try{
+    let r = await fetch('../sprites-manifest.json');
+    manifest = await r.json();
+    tileSprites = manifest.tiles.sprites;
+  }catch(e){
+    try{
+      let r = await fetch('../sprites-manifest.json');
+      manifest = await r.json();
+      tileSprites = manifest.tiles.sprites;
+    }catch(e2){
+      status('Failed to load sprites manifest');
+      return;
+    }
+  }
+  buildPalette();
+  buildCategoryTabs();
+  await loadAllBuildings();
+  await loadTownConfig();
+  loadAutoSave();
+  wireEvents();
+  if(!currentBuilding) newBuilding();
+  status('Ready — '+tileSprites.length+' tiles loaded');
+}
+
+/* ── Sprite Manifest & Palette ── */
+function buildCategoryTabs(){
+  paletteTabs.textContent = '';
+  categories.forEach(c=>{
+    let b = document.createElement('button');
+    b.textContent = c.key;
+    if(c.key===activeCategory) b.classList.add('active');
+    b.addEventListener('click',()=>{
+      activeCategory = c.key;
+      paletteTabs.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      filterPalette();
+    });
+    paletteTabs.appendChild(b);
+  });
+}
+
+function buildPalette(){
+  paletteGrid.textContent = '';
+  tileSprites.forEach(s=>{
+    let d = document.createElement('div');
+    d.className = 'palette-tile';
+    d.dataset.name = s.className;
+    d.dataset.folder = s.subfolder;
+    d.title = s.className;
+    let t = document.createElement('div');
+    t.className = 'tile ' + s.className;
+    d.appendChild(t);
+    d.addEventListener('click',()=>selectTile(s.className, d));
+    paletteGrid.appendChild(d);
+  });
+  filterPalette();
+}
+
+function filterPalette(){
+  let search = searchInput.value.toLowerCase();
+  let cat = categories.find(c=>c.key===activeCategory);
+  let folders = cat ? cat.folders : null;
+  paletteGrid.querySelectorAll('.palette-tile').forEach(el=>{
+    let name = el.dataset.name.toLowerCase();
+    let folder = el.dataset.folder;
+    let showCat = !folders || folders.includes(folder);
+    let showSearch = !search || name.includes(search);
+    el.style.display = (showCat && showSearch) ? '' : 'none';
+  });
+}
+
+function selectTile(className, el){
+  paletteGrid.querySelectorAll('.palette-tile').forEach(x=>x.classList.remove('selected'));
+  if(selectedTile === className){
+    selectedTile = null;
+    return;
+  }
+  selectedTile = className;
+  if(el) el.classList.add('selected');
+  markerMode = null;
+  updateMarkerButtons();
+}
+
+/* ── Building Data ── */
+async function loadAllBuildings(){
+  try{
+    let r = await fetch('../town-buildings.json');
+    allBuildings = await r.json();
+  }catch(e){
+    try{
+      let r = await fetch('../town-buildings.json');
+      allBuildings = await r.json();
+    }catch(e2){
+      allBuildings = [];
+    }
+  }
+  populateBuildingSelect();
+}
+
+async function loadTownConfig(){
+  try{
+    let r = await fetch('../town-config.json');
+    let cfg = await r.json();
+    townW = cfg.width || 45;
+    townH = cfg.height || 60;
+    $('#town-w').value = townW;
+    $('#town-h').value = townH;
+    initTownGrid();
+    // Import water
+    if(cfg.water){
+      for(let w of cfg.water){
+        if(w.x>=0 && w.x<townW && w.y>=0 && w.y<townH) townGrid[w.y][w.x] = {type:'water'};
+      }
+    }
+    // Import trees
+    if(cfg.trees){
+      for(let t of cfg.trees){
+        if(t.x>=0 && t.x<townW && t.y>=0 && t.y<townH) townGrid[t.y][t.x] = {type:'tree'};
+      }
+    }
+    // Import decoration as grass (they're on grass tiles)
+    // Import features
+    if(cfg.features){
+      for(let f of cfg.features){
+        if(f.x>=0 && f.x<townW && f.y>=0 && f.y<townH){
+          // Mark feature cells based on size
+          let fw = f.w || 1, fh = f.h || 1;
+          for(let dy=0;dy<fh;dy++){
+            for(let dx=0;dx<fw;dx++){
+              let fx=f.x+dx, fy=f.y+dy;
+              if(fx<townW && fy<townH) townGrid[fy][fx] = {type:'path'};
+            }
+          }
+        }
+      }
+    }
+    // Import paths
+    if(cfg.paths){
+      for(let p of cfg.paths){
+        for(let pt of p.points){
+          if(pt[0]>=0 && pt[0]<townW && pt[1]>=0 && pt[1]<townH)
+            townGrid[pt[1]][pt[0]] = {type:'path'};
+        }
+      }
+    }
+    // Import spawn positions
+    if(cfg.mineEntrance) minePos = cfg.mineEntrance;
+    if(cfg.playerSpawn) spawnPos = cfg.playerSpawn;
+    // Import placed buildings
+    if(cfg.buildings && cfg.buildings.length > 0){
+      placedBuildings = cfg.buildings.map(function(b){
+        let tmpl = allBuildings.find(function(t){ return t.id === b.templateId; });
+        return tmpl ? {id:b.templateId, x:b.x, y:b.y, building:tmpl} : null;
+      }).filter(Boolean);
+    }
+    status('Loaded town config: ' + townW + 'x' + townH);
+  }catch(e){
+    status('No town config found, starting blank');
+  }
+}
+
+function populateBuildingSelect(){
+  buildingSelect.textContent = '';
+  let opt = document.createElement('option');
+  opt.value = '';
+  opt.textContent = '— Load Building —';
+  buildingSelect.appendChild(opt);
+  allBuildings.forEach((b,i)=>{
+    let o = document.createElement('option');
+    o.value = i;
+    o.textContent = b.name + ' (' + b.id + ')';
+    buildingSelect.appendChild(o);
+  });
+}
+
+function newBuilding(){
+  let w = parseInt($('#grid-w').value)||7;
+  let h = parseInt($('#grid-h').value)||5;
+  currentBuilding = {
+    id:'new-building',
+    name:'New Building',
+    flavor:'',
+    width:w, height:h,
+    tiles: makeEmptyTiles(w,h),
+    entrance:null, npc:null
+  };
+  undoStack = [];
+  renderBuildingEditor();
+  updateProps();
+}
+
+function makeEmptyTiles(w,h){
+  let t = [];
+  for(let y=0;y<h;y++){
+    let row = [];
+    for(let x=0;x<w;x++) row.push(null);
+    t.push(row);
+  }
+  return t;
+}
+
+function loadBuilding(idx){
+  if(idx===''||idx===undefined) return;
+  let b = allBuildings[parseInt(idx)];
+  if(!b) return;
+  currentBuilding = JSON.parse(JSON.stringify(b));
+  $('#grid-w').value = b.width;
+  $('#grid-h').value = b.height;
+  undoStack = [];
+  renderBuildingEditor();
+  updateProps();
+  status('Loaded: '+b.name);
+}
+
+function deleteBuilding(){
+  if(!currentBuilding) return;
+  let idx = allBuildings.findIndex(b=>b.id===currentBuilding.id);
+  if(idx===-1){status('Building not in collection');return;}
+  if(!confirm('Delete "'+currentBuilding.name+'"?')) return;
+  allBuildings.splice(idx,1);
+  populateBuildingSelect();
+  newBuilding();
+  status('Deleted');
+}
+
+function saveBuilding(){
+  if(!currentBuilding) return;
+  currentBuilding.id = $('#prop-id').value || currentBuilding.id;
+  currentBuilding.name = $('#prop-name').value || currentBuilding.name;
+  currentBuilding.flavor = $('#prop-flavor').value || '';
+  let idx = allBuildings.findIndex(b=>b.id===currentBuilding.id);
+  let data = JSON.parse(JSON.stringify(currentBuilding));
+  if(idx>=0) allBuildings[idx]=data;
+  else allBuildings.push(data);
+  populateBuildingSelect();
+  autoSave();
+  status('Saved: '+currentBuilding.name);
+}
+
+function downloadAll(){
+  let blob = new Blob([JSON.stringify(allBuildings,null,2)],{type:'application/json'});
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'town-buildings.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ── Undo ── */
+function pushUndo(){
+  undoStack.push(JSON.stringify(currentBuilding.tiles));
+  if(undoStack.length>MAX_UNDO) undoStack.shift();
+}
+
+function undo(){
+  if(!undoStack.length) return;
+  currentBuilding.tiles = JSON.parse(undoStack.pop());
+  renderGrid();
+  autoSave();
+}
+
+/* ── Grid Rendering ── */
+function renderBuildingEditor(){
+  renderGrid();
+}
+
+function renderGrid(){
+  if(!currentBuilding) return;
+  gridWrap.textContent = '';
+  let {width:w,height:h,tiles} = currentBuilding;
+  for(let y=0;y<h;y++){
+    let row = document.createElement('div');
+    row.className = 'grid-row';
+    for(let x=0;x<w;x++){
+      let cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+      let t = tiles[y]&&tiles[y][x];
+      if(t){
+        let sp = document.createElement('div');
+        sp.className = 'tile '+t.sprite;
+        cell.appendChild(sp);
+      }
+      if(currentBuilding.entrance && currentBuilding.entrance.x===x && currentBuilding.entrance.y===y)
+        cell.classList.add('entrance');
+      if(currentBuilding.npc && currentBuilding.npc.x===x && currentBuilding.npc.y===y)
+        cell.classList.add('npc');
+      // Events
+      cell.addEventListener('mousedown',e=>onCellDown(e,x,y));
+      cell.addEventListener('mouseenter',e=>onCellEnter(e,x,y));
+      cell.addEventListener('mouseleave',e=>onCellLeave(e,x,y));
+      cell.addEventListener('contextmenu',e=>{e.preventDefault();eraseTile(x,y);});
+      row.appendChild(cell);
+    }
+    gridWrap.appendChild(row);
+  }
+}
+
+function getCell(x,y){
+  return gridWrap.querySelector(`.grid-cell[data-x="${x}"][data-y="${y}"]`);
+}
+
+/* ── Paint ── */
+function onCellDown(e,x,y){
+  e.preventDefault();
+  if(e.button===2) return; // handled by contextmenu
+  if(markerMode==='entrance'){
+    currentBuilding.entrance = {x,y};
+    markerMode = null;
+    updateMarkerButtons();
+    renderGrid();
+    autoSave();
+    return;
+  }
+  if(markerMode==='npc'){
+    currentBuilding.npc = {x,y};
+    markerMode = null;
+    updateMarkerButtons();
+    renderGrid();
+    autoSave();
+    return;
+  }
+  if(!selectedTile) return;
+  pushUndo();
+  painting = true;
+  paintTile(x,y);
+}
+
+function onCellEnter(e,x,y){
+  if(painting && selectedTile){
+    paintTile(x,y);
+  }
+  // Hover preview
+  if(selectedTile && !painting){
+    let cell = getCell(x,y);
+    if(cell){
+      let existing = cell.querySelector('.hover-preview');
+      if(!existing){
+        let p = document.createElement('div');
+        p.className = 'tile hover-preview '+selectedTile;
+        cell.appendChild(p);
+      }
+    }
+  }
+  $('#status-pos').textContent = `(${x}, ${y})`;
+}
+
+function onCellLeave(e,x,y){
+  let cell = getCell(x,y);
+  if(cell){
+    let p = cell.querySelector('.hover-preview');
+    if(p) p.remove();
+  }
+}
+
+function paintTile(x,y){
+  if(!currentBuilding||!selectedTile) return;
+  let type = inferType(selectedTile);
+  currentBuilding.tiles[y][x] = {sprite:selectedTile, type};
+  // Update cell DOM
+  let cell = getCell(x,y);
+  if(!cell) return;
+  let old = cell.querySelector('.tile:not(.hover-preview)');
+  if(old) old.remove();
+  let sp = document.createElement('div');
+  sp.className = 'tile '+selectedTile;
+  cell.insertBefore(sp, cell.firstChild);
+}
+
+function eraseTile(x,y){
+  if(!currentBuilding) return;
+  pushUndo();
+  currentBuilding.tiles[y][x] = null;
+  let cell = getCell(x,y);
+  if(cell){
+    let old = cell.querySelector('.tile:not(.hover-preview)');
+    if(old) old.remove();
+  }
+  autoSave();
+}
+
+function inferType(className){
+  if(className.startsWith('wall-')||className.startsWith('vaults-')) return 'wall';
+  if(className.startsWith('floor-')) return 'floor';
+  if(className.startsWith('doors-')) return 'door';
+  if(className.startsWith('water-')) return 'water';
+  if(className.startsWith('plants-')||className.startsWith('trees-')) return 'plant';
+  return 'decor';
+}
+
+/* ── Resize ── */
+function resizeGrid(){
+  if(!currentBuilding) return;
+  let nw = parseInt($('#grid-w').value)||7;
+  let nh = parseInt($('#grid-h').value)||5;
+  pushUndo();
+  let oldT = currentBuilding.tiles;
+  let newT = makeEmptyTiles(nw,nh);
+  for(let y=0;y<Math.min(nh,oldT.length);y++){
+    for(let x=0;x<Math.min(nw,(oldT[y]||[]).length);x++){
+      newT[y][x] = oldT[y][x];
+    }
+  }
+  currentBuilding.tiles = newT;
+  currentBuilding.width = nw;
+  currentBuilding.height = nh;
+  renderGrid();
+  autoSave();
+}
+
+/* ── Props ── */
+function updateProps(){
+  if(!currentBuilding) return;
+  $('#prop-id').value = currentBuilding.id||'';
+  $('#prop-name').value = currentBuilding.name||'';
+  $('#prop-flavor').value = currentBuilding.flavor||'';
+  let e = currentBuilding.entrance;
+  $('#marker-entrance').textContent = e ? `(${e.x}, ${e.y})` : '—';
+  let n = currentBuilding.npc;
+  $('#marker-npc').textContent = n ? `(${n.x}, ${n.y})` : '—';
+}
+
+function updateMarkerButtons(){
+  let eb = $('#btn-entrance');
+  let nb = $('#btn-npc');
+  eb.classList.toggle('entrance-mode', markerMode==='entrance');
+  nb.classList.toggle('npc-mode', markerMode==='npc');
+  updateProps();
+}
+
+/* ── Auto-save ── */
+function autoSave(){
+  try{
+    localStorage.setItem('tb-buildings', JSON.stringify(allBuildings));
+    if(currentBuilding) localStorage.setItem('tb-current', JSON.stringify(currentBuilding));
+    localStorage.setItem('tb-mode', mode);
+    if(mode==='town'){
+      localStorage.setItem('tb-town',JSON.stringify({
+        w:townW,h:townH,grid:townGrid,placed:placedBuildings.map(p=>({id:p.id,x:p.x,y:p.y})),
+        mine:minePos,spawn:spawnPos
+      }));
+    }
+  }catch(e){}
+}
+
+function loadAutoSave(){
+  try{
+    let b = localStorage.getItem('tb-buildings');
+    if(b){
+      let parsed = JSON.parse(b);
+      if(parsed.length) allBuildings = parsed;
+      populateBuildingSelect();
+    }
+    let c = localStorage.getItem('tb-current');
+    if(c){
+      currentBuilding = JSON.parse(c);
+      $('#grid-w').value = currentBuilding.width;
+      $('#grid-h').value = currentBuilding.height;
+      renderBuildingEditor();
+      updateProps();
+    }
+    // Only load town from localStorage if we didn't already load from config
+    let hasConfig = townGrid.length > 0 && townGrid.some(function(row){
+      return row.some(function(c){ return c && c.type !== 'grass'; });
+    });
+    if(!hasConfig){
+      let t = localStorage.getItem('tb-town');
+      if(t){
+        let td = JSON.parse(t);
+        townW = td.w; townH = td.h;
+        townGrid = td.grid||[];
+        minePos = td.mine; spawnPos = td.spawn;
+        placedBuildings = (td.placed||[]).map(p=>{
+          let bld = allBuildings.find(b=>b.id===p.id);
+          return bld ? {id:p.id,x:p.x,y:p.y,building:bld} : null;
+        }).filter(Boolean);
+        $('#town-w').value = townW;
+        $('#town-h').value = townH;
+      }
+    }
+  }catch(e){}
+}
+
+/* ── Status ── */
+function status(msg){
+  $('#status-msg').textContent = msg;
+}
+
+/* ── Events ── */
+function wireEvents(){
+  document.addEventListener('mouseup',()=>{
+    if(painting){ painting=false; autoSave(); }
+    if(townPainting){ townPainting=false; autoSave(); }
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey && e.key==='z'){e.preventDefault();undo();}
+    if(e.key==='Escape'){markerMode=null;updateMarkerButtons();}
+  });
+
+  searchInput.addEventListener('input', filterPalette);
+  buildingSelect.addEventListener('change',e=>loadBuilding(e.target.value));
+  $('#btn-new').addEventListener('click', newBuilding);
+  $('#btn-load-all').addEventListener('click', loadAllBuildings);
+  $('#btn-save').addEventListener('click', saveBuilding);
+  $('#btn-delete').addEventListener('click', deleteBuilding);
+  $('#btn-download-all').addEventListener('click', downloadAll);
+
+  $('#grid-w').addEventListener('change', resizeGrid);
+  $('#grid-h').addEventListener('change', resizeGrid);
+
+  $('#btn-entrance').addEventListener('click',()=>{
+    markerMode = markerMode==='entrance' ? null : 'entrance';
+    updateMarkerButtons();
+    status(markerMode ? 'Click a cell to set entrance' : 'Cancelled');
+  });
+  $('#btn-npc').addEventListener('click',()=>{
+    markerMode = markerMode==='npc' ? null : 'npc';
+    updateMarkerButtons();
+    status(markerMode ? 'Click a cell to set NPC position' : 'Cancelled');
+  });
+
+  // Prop inputs auto-update
+  ['prop-id','prop-name','prop-flavor'].forEach(id=>{
+    $('#'+id).addEventListener('input',()=>{
+      if(!currentBuilding) return;
+      currentBuilding.id = $('#prop-id').value;
+      currentBuilding.name = $('#prop-name').value;
+      currentBuilding.flavor = $('#prop-flavor').value;
+      autoSave();
+    });
+  });
+
+  // Mode toggle
+  $('#mode-building').addEventListener('click',()=>switchMode('building'));
+  $('#mode-town').addEventListener('click',()=>switchMode('town'));
+
+  // Town controls
+  $('#btn-resize-town').addEventListener('click', resizeTown);
+  $('#btn-download-config').addEventListener('click', downloadTownConfig);
+  document.querySelectorAll('#town-tools button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('#town-tools button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      townTool = b.dataset.tool;
+      selectedPlacedIdx = -1;
+      updateTownSelection();
+    });
+  });
+  $('#btn-remove-placed').addEventListener('click',()=>{
+    if(selectedPlacedIdx>=0){
+      placedBuildings.splice(selectedPlacedIdx,1);
+      selectedPlacedIdx = -1;
+      renderTownGrid();
+      updateTownSelection();
+      autoSave();
+    }
+  });
+}
+
+/* ── Mode Switching ── */
+function switchMode(m){
+  mode = m;
+  $('#mode-building').classList.toggle('active', m==='building');
+  $('#mode-town').classList.toggle('active', m==='town');
+  $('#building-controls').style.display = m==='building' ? '' : 'none';
+  $('#town-controls').style.display = m==='town' ? '' : 'none';
+  $('#building-editor-view').style.display = m==='building' ? '' : 'none';
+  $('#town-layout-view').style.display = m==='town' ? '' : 'none';
+  $('#palette-panel').style.display = m==='building' ? '' : 'none';
+  $('#building-palette-panel').style.display = m==='town' ? '' : 'none';
+  $('#building-props').style.display = m==='building' ? '' : 'none';
+  $('#town-props').style.display = m==='town' ? '' : 'none';
+  if(m==='town'){
+    buildBuildingPalette();
+    if(!townGrid.length) initTownGrid();
+    renderTownGrid();
+    updateTownPositions();
+  }
+  autoSave();
+}
+
+/* ══════════════════════════════════════════
+   TOWN LAYOUT MODE
+   ══════════════════════════════════════════ */
+
+function initTownGrid(){
+  townGrid = [];
+  for(let y=0;y<townH;y++){
+    let row = [];
+    for(let x=0;x<townW;x++) row.push({type:'grass'});
+    townGrid.push(row);
+  }
+}
+
+function resizeTown(){
+  let nw = parseInt($('#town-w').value)||45;
+  let nh = parseInt($('#town-h').value)||60;
+  let old = townGrid;
+  townW = nw; townH = nh;
+  initTownGrid();
+  for(let y=0;y<Math.min(nh,old.length);y++){
+    for(let x=0;x<Math.min(nw,(old[y]||[]).length);x++){
+      townGrid[y][x] = old[y][x];
+    }
+  }
+  renderTownGrid();
+  autoSave();
+}
+
+function buildBuildingPalette(){
+  let pal = $('#building-palette');
+  pal.textContent = '';
+  allBuildings.forEach((b,i)=>{
+    let d = document.createElement('div');
+    d.className = 'building-thumb';
+    if(selectedBuildingTemplate && selectedBuildingTemplate.id===b.id) d.classList.add('selected');
+    let n = document.createElement('span');
+    n.className = 'building-thumb-name';
+    n.textContent = b.name;
+    let s = document.createElement('span');
+    s.className = 'building-thumb-size';
+    s.textContent = b.width+'x'+b.height;
+    d.appendChild(n);
+    d.appendChild(s);
+    d.addEventListener('click',()=>{
+      selectedBuildingTemplate = b;
+      townTool = 'place';
+      document.querySelectorAll('#town-tools button').forEach(x=>x.classList.remove('active'));
+      document.querySelector('#town-tools button[data-tool="place"]').classList.add('active');
+      pal.querySelectorAll('.building-thumb').forEach(x=>x.classList.remove('selected'));
+      d.classList.add('selected');
+      status('Click on map to place: '+b.name);
+    });
+    pal.appendChild(d);
+  });
+}
+
+function renderTownGrid(){
+  let wrap = $('#town-grid-wrap');
+  wrap.textContent = '';
+  // Grid cells
+  let gridEl = document.createElement('div');
+  gridEl.style.position = 'relative';
+  gridEl.style.width = (townW*16)+'px';
+  gridEl.style.height = (townH*16)+'px';
+
+  for(let y=0;y<townH;y++){
+    let row = document.createElement('div');
+    row.style.display = 'flex';
+    for(let x=0;x<townW;x++){
+      let cell = document.createElement('div');
+      cell.className = 'town-cell';
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+      let t = townGrid[y]&&townGrid[y][x];
+      if(t){
+        if(t.type==='path') cell.classList.add('path');
+        else if(t.type==='water') cell.classList.add('water-cell');
+        else if(t.type==='tree') cell.classList.add('tree-cell');
+        else cell.style.background = '#2d4a1e'; // grass
+      } else {
+        cell.style.background = '#2d4a1e';
+      }
+      if(minePos && minePos.x===x && minePos.y===y) cell.classList.add('mine-entrance');
+      if(spawnPos && spawnPos.x===x && spawnPos.y===y) cell.classList.add('player-spawn');
+
+      cell.addEventListener('mousedown',e=>{e.preventDefault();onTownCellDown(x,y);});
+      cell.addEventListener('mouseenter',()=>{
+        if(townPainting) onTownCellPaint(x,y);
+        $('#status-pos').textContent = `(${x}, ${y})`;
+      });
+      row.appendChild(cell);
+    }
+    gridEl.appendChild(row);
+  }
+
+  // Placed buildings overlay
+  placedBuildings.forEach((p,i)=>{
+    let el = document.createElement('div');
+    el.className = 'town-building';
+    if(i===selectedPlacedIdx) el.classList.add('selected');
+    el.style.left = (p.x*16)+'px';
+    el.style.top = (p.y*16)+'px';
+    el.style.width = (p.building.width*16)+'px';
+    el.style.height = (p.building.height*16)+'px';
+    el.textContent = p.building.name;
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      selectedPlacedIdx = i;
+      renderTownGrid();
+      updateTownSelection();
+    });
+    // Drag to move
+    let dragging = false, startX, startY, origX, origY;
+    el.addEventListener('mousedown',e=>{
+      if(townTool!=='place') return;
+      e.stopPropagation();
+      dragging = true;
+      startX = e.clientX; startY = e.clientY;
+      origX = p.x; origY = p.y;
+      let onMove = ev=>{
+        let dx = Math.round((ev.clientX-startX)/16);
+        let dy = Math.round((ev.clientY-startY)/16);
+        p.x = Math.max(0,Math.min(townW-p.building.width, origX+dx));
+        p.y = Math.max(0,Math.min(townH-p.building.height, origY+dy));
+        el.style.left = (p.x*16)+'px';
+        el.style.top = (p.y*16)+'px';
+      };
+      let onUp = ()=>{
+        dragging = false;
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+        autoSave();
+      };
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    });
+    gridEl.appendChild(el);
+  });
+
+  wrap.appendChild(gridEl);
+}
+
+function onTownCellDown(x,y){
+  if(townTool==='place' && selectedBuildingTemplate){
+    placedBuildings.push({
+      id:selectedBuildingTemplate.id,
+      x, y,
+      building:selectedBuildingTemplate
+    });
+    renderTownGrid();
+    autoSave();
+    status('Placed: '+selectedBuildingTemplate.name);
+    return;
+  }
+  if(townTool==='mine'){
+    minePos = {x,y};
+    renderTownGrid();
+    updateTownPositions();
+    autoSave();
+    return;
+  }
+  if(townTool==='spawn'){
+    spawnPos = {x,y};
+    renderTownGrid();
+    updateTownPositions();
+    autoSave();
+    return;
+  }
+  townPainting = true;
+  onTownCellPaint(x,y);
+}
+
+function onTownCellPaint(x,y){
+  if(!townGrid[y]||!townGrid[y][x]) return;
+  let t = townTool;
+  if(t==='path') townGrid[y][x] = {type:'path'};
+  else if(t==='water') townGrid[y][x] = {type:'water'};
+  else if(t==='tree') townGrid[y][x] = {type:'tree'};
+  else if(t==='scatter') townGrid[y][x] = {type:'grass'};
+  else if(t==='erase') townGrid[y][x] = {type:'grass'};
+  else return;
+  // Update just that cell's appearance
+  let wrap = $('#town-grid-wrap');
+  let cell = wrap.querySelector(`.town-cell[data-x="${x}"][data-y="${y}"]`);
+  if(cell){
+    cell.className = 'town-cell';
+    cell.style.background = '';
+    let ty = townGrid[y][x].type;
+    if(ty==='path') cell.classList.add('path');
+    else if(ty==='water') cell.classList.add('water-cell');
+    else if(ty==='tree') cell.classList.add('tree-cell');
+    else cell.style.background = '#2d4a1e';
+  }
+}
+
+function updateTownPositions(){
+  $('#town-mine-pos').textContent = minePos ? `(${minePos.x}, ${minePos.y})` : '—';
+  $('#town-spawn-pos').textContent = spawnPos ? `(${spawnPos.x}, ${spawnPos.y})` : '—';
+}
+
+function updateTownSelection(){
+  let info = $('#town-selected-info');
+  let btn = $('#btn-remove-placed');
+  if(selectedPlacedIdx>=0 && placedBuildings[selectedPlacedIdx]){
+    let p = placedBuildings[selectedPlacedIdx];
+    info.textContent = p.building.name+' at ('+p.x+','+p.y+')';
+    btn.style.display = '';
+  } else {
+    info.textContent = 'None';
+    btn.style.display = 'none';
+  }
+}
+
+function downloadTownConfig(){
+  let config = {
+    width: townW,
+    height: townH,
+    buildings: placedBuildings.map(p=>({id:p.id, x:p.x, y:p.y})),
+    paths: [],
+    water: [],
+    trees: [],
+    mineEntrance: minePos,
+    playerSpawn: spawnPos
+  };
+  // Extract feature positions from grid
+  for(let y=0;y<townH;y++){
+    for(let x=0;x<townW;x++){
+      let t = townGrid[y]&&townGrid[y][x];
+      if(!t) continue;
+      if(t.type==='path') config.paths.push({x,y});
+      else if(t.type==='water') config.water.push({x,y});
+      else if(t.type==='tree') config.trees.push({x,y});
+    }
+  }
+  let blob = new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'town-config.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ── Boot ── */
+init();
+})();
+</script>
+</body>
+</html>

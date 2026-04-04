@@ -118,6 +118,7 @@ export function createCharacterInfoScreen(
   panel.appendChild(statLine("Experience", xpStr));
   panel.appendChild(statLine("Gold", `\u0024${h.gold}`, "#fc4"));
   panel.appendChild(statLine("Rune Shards", `\u25C6${h.runeShards}`, "#a6f"));
+  panel.appendChild(statLine("Essence", `\u2726${h.essence}`, "#4f8"));
   panel.appendChild(statLine("Turn", state.turn));
 
   // ── Attributes ──────────────────────────────────────────

@@ -230,6 +230,15 @@ export function loadGame(slot: number = 1): GameState | null {
     if ((state as any).runeForgeMaxSockets === undefined)
       (state as any).runeForgeMaxSockets = 2;
 
+    // Migration: add statue/essence fields
+    if (state.hero.essence === undefined) (state.hero as any).essence = 0;
+    if (state.hero.statueUpgrades === undefined)
+      (state.hero as any).statueUpgrades = {};
+    if ((state as any).statueUpgrades === undefined)
+      (state as any).statueUpgrades = {};
+    if ((state as any).itemsSacrificed === undefined)
+      (state as any).itemsSacrificed = 0;
+
     // Migration: 0-indexed floors → 1-indexed
     const has0Key = Object.keys(state.floors).some(
       (k) => k.endsWith("-0") && k !== "town-0",

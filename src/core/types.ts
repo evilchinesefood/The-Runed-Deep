@@ -116,6 +116,8 @@ export interface Hero {
   equipDamageBonus: number;
   equipAccuracyBonus: number;
   runeShards: number;
+  essence: number;
+  statueUpgrades: Record<string, number>; // upgrade_id → purchase count
 }
 
 // ============================================================
@@ -341,6 +343,8 @@ export interface GameState {
   activeCrucible: CrucibleState | null;
   crucibleBestWave: number;
   runeForgeMaxSockets: 2 | 3;
+  statueUpgrades: Record<string, number>; // upgrade_id → purchase count
+  itemsSacrificed: number;
 }
 
 // ============================================================

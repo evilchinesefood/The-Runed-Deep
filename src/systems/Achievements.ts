@@ -118,6 +118,75 @@ export const ACHIEVEMENTS: Achievement[] = [
     description: "Spend 5,000 gold at shops",
     icon: "💰",
   },
+  // Rifts
+  {
+    id: "rift-walker",
+    name: "Rift Walker",
+    description: "Complete your first Fractured Rift",
+    icon: "🌀",
+  },
+  {
+    id: "rift-master",
+    name: "Rift Master",
+    description: "Clear a rift with total difficulty >= 5",
+    icon: "🌀",
+  },
+  {
+    id: "rift-runner",
+    name: "Rift Runner",
+    description: "Clear 10 total rifts",
+    icon: "🌀",
+  },
+  {
+    id: "rift-champion",
+    name: "Rift Champion",
+    description: "Clear 25 total rifts",
+    icon: "🌀",
+  },
+  {
+    id: "rift-conqueror",
+    name: "Rift Conqueror",
+    description: "Clear 50 total rifts",
+    icon: "🌀",
+  },
+  // Crucible
+  {
+    id: "crucible-initiate",
+    name: "Crucible Initiate",
+    description: "Reach Crucible wave 10",
+    icon: "🏟",
+  },
+  {
+    id: "crucible-veteran",
+    name: "Crucible Veteran",
+    description: "Reach Crucible wave 20",
+    icon: "🏟",
+  },
+  {
+    id: "crucible-legend",
+    name: "Crucible Legend",
+    description: "Reach Crucible wave 30",
+    icon: "🏟",
+  },
+  // Statue & Runes
+  {
+    id: "devoted",
+    name: "Devoted",
+    description: "Sacrifice 50 items at the Statue",
+    icon: "✧",
+  },
+  {
+    id: "runesmith",
+    name: "Runesmith",
+    description: "Inscribe your first rune",
+    icon: "◆",
+  },
+  {
+    id: "fully-socketed",
+    name: "Fully Socketed",
+    description: "Fill all 3 sockets on an item",
+    icon: "◆",
+  },
 ];
 
 export const ACHIEVEMENT_BY_ID: Record<string, Achievement> =
@@ -133,6 +202,8 @@ export interface AchievementState {
     secretDoorsFound: number;
     goldSpentAtShops: number;
     floorDamageTaken: Record<string, number>;
+    riftsCleared: number;
+    itemsSacrificed: number;
   };
 }
 
@@ -149,6 +220,8 @@ export function loadAchievements(): AchievementState {
       secretDoorsFound: 0,
       goldSpentAtShops: 0,
       floorDamageTaken: {},
+      riftsCleared: 0,
+      itemsSacrificed: 0,
     },
   };
 }
@@ -274,6 +347,38 @@ export function trackFloorCleared(
 
 export function trackNewGamePlus(): void {
   unlock("new-beginnings");
+}
+
+export function trackRiftComplete(totalDifficulty: number): void {
+  achState.stats.riftsCleared = (achState.stats.riftsCleared ?? 0) + 1;
+  saveAchievements(achState);
+  unlock("rift-walker");
+  if (totalDifficulty >= 5) unlock("rift-master");
+  if (achState.stats.riftsCleared >= 10) unlock("rift-runner");
+  if (achState.stats.riftsCleared >= 25) unlock("rift-champion");
+  if (achState.stats.riftsCleared >= 50) unlock("rift-conqueror");
+}
+
+export function trackCrucibleWave(wave: number): void {
+  if (wave >= 10) unlock("crucible-initiate");
+  if (wave >= 20) unlock("crucible-veteran");
+  if (wave >= 30) unlock("crucible-legend");
+}
+
+export function trackSacrifice(): void {
+  achState.stats.itemsSacrificed = (achState.stats.itemsSacrificed ?? 0) + 1;
+  saveAchievements(achState);
+  if (achState.stats.itemsSacrificed >= 50) unlock("devoted");
+}
+
+export function trackRuneInscribe(): void {
+  unlock("runesmith");
+}
+
+export function trackSocketsFilled(sockets: (string | null)[]): void {
+  if (sockets && sockets.length >= 3 && sockets.every((s) => s !== null)) {
+    unlock("fully-socketed");
+  }
 }
 
 export function trackFloorExplored(

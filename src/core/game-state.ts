@@ -74,6 +74,8 @@ export function createHero(
     equipDamageBonus: 0,
     equipAccuracyBonus: 0,
     runeShards: 0,
+    essence: 0,
+    statueUpgrades: {},
   };
 }
 
@@ -111,5 +113,7 @@ export function createInitialGameState(
     activeCrucible: null,
     crucibleBestWave: 0,
     runeForgeMaxSockets: 2,
+    statueUpgrades: {},
+    itemsSacrificed: 0,
   };
 }

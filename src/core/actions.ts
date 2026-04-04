@@ -35,6 +35,8 @@ import {
   trackSecretDoorFound,
   trackFloorReached,
   trackFloorCleared,
+  trackRiftComplete,
+  trackCrucibleWave,
 } from "../systems/Achievements";
 // Enchant utils removed — affix checks now use unique abilities only
 import { ITEM_BY_ID } from "../data/items";
@@ -1327,6 +1329,8 @@ function processRiftComplete(state: GameState): GameState {
   if (!rift) return state;
 
   const shards = getRiftShardReward(rift.modifiers);
+  const totalDiff = rift.modifiers.reduce((s, m) => s + m.weight, 0);
+  trackRiftComplete(totalDiff);
   return {
     ...state,
     activeRift: { ...rift, shardsEarned: shards },
@@ -1359,7 +1363,8 @@ function processEnterCrucible(state: GameState): GameState {
     activeRift: null, // Clear rift state if any
     currentDungeon: "crucible",
     currentFloor: 0,
-    returnFloor: state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
+    returnFloor:
+      state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
     floors: { ...state.floors, "crucible-0": floor },
     hero: { ...state.hero, position: playerStart },
     screen: "game",
@@ -1413,6 +1418,7 @@ function processCrucibleNextWave(state: GameState): GameState {
   );
 
   const reward = getWaveReward(nextWave);
+  trackCrucibleWave(nextWave);
   const newCrucible: import("./types").CrucibleState = {
     wave: nextWave,
     shardsEarned: crucible.shardsEarned + reward.shards,

@@ -50,15 +50,24 @@ export function computeTotalArmorValue(
 
 export function recomputeDerivedStats(hero: Hero): Hero {
   const eq = hero.equipment;
+  const su = hero.statueUpgrades ?? {};
+
+  // ── Statue base stat bonuses ─────────────────────────────
+  const statStr = (su["stat-str"] ?? 0) * 5;
+  const statInt = (su["stat-int"] ?? 0) * 5;
+  const statCon = (su["stat-con"] ?? 0) * 5;
+  const statDex = (su["stat-dex"] ?? 0) * 5;
 
   // ── Scaled affix attribute bonuses ────────────────────────
   const soulDrainAll = Math.round(getEquipAffixTotal(eq, "soul-drain"));
-  const bonusStr = Math.round(getEquipAffixTotal(eq, "might")) + soulDrainAll;
+  const bonusStr =
+    Math.round(getEquipAffixTotal(eq, "might")) + soulDrainAll + statStr;
   const bonusInt =
-    Math.round(getEquipAffixTotal(eq, "brilliance")) + soulDrainAll;
+    Math.round(getEquipAffixTotal(eq, "brilliance")) + soulDrainAll + statInt;
   const bonusCon =
-    Math.round(getEquipAffixTotal(eq, "fortitude")) + soulDrainAll;
-  const bonusDex = Math.round(getEquipAffixTotal(eq, "grace")) + soulDrainAll;
+    Math.round(getEquipAffixTotal(eq, "fortitude")) + soulDrainAll + statCon;
+  const bonusDex =
+    Math.round(getEquipAffixTotal(eq, "grace")) + soulDrainAll + statDex;
 
   // ── Unique item attribute bonuses ─────────────────────────
   let uStr = 0,
@@ -89,6 +98,9 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   let maxMp = computeMaxMp(effInt, hero.level);
   maxHp += Math.round(getEquipAffixTotal(eq, "vitality"));
   maxMp += Math.round(getEquipAffixTotal(eq, "arcane-well"));
+  // Statue resource bonuses
+  maxHp += (su["resource-hp"] ?? 0) * 3;
+  maxMp += (su["resource-mp"] ?? 0) * 3;
   // Soul Drain: reduce max HP (secondary value)
   const soulDrainHpPenalty = Math.round(getEquipAffixTotal2(eq, "soul-drain"));
   if (soulDrainHpPenalty > 0) maxHp = Math.max(10, maxHp - soulDrainHpPenalty);
@@ -96,6 +108,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   // ── Armor value + Hardened affix ──────────────────────────
   let armorValue = computeTotalArmorValue(effDex, eq);
   armorValue += Math.round(getEquipAffixTotal(eq, "hardened"));
+  // Statue combat bonuses
+  armorValue += (su["combat-armor"] ?? 0) * 1;
 
   // Unique armor bonuses
   for (const slot of Object.values(eq)) {
@@ -160,6 +174,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
       (weapon.properties["accuracy"] ?? 0) + weapon.enchantment;
   }
   equipDamageBonus += Math.round(getEquipAffixTotal(eq, "sharpness"));
+  // Statue combat damage bonus
+  equipDamageBonus += (su["combat-damage"] ?? 0) * 1;
   // Might/Strength bonus adds to melee damage (1 per 5 bonus Str)
   equipDamageBonus += Math.floor((bonusStr + uStr) / 5);
 
@@ -210,6 +226,11 @@ export function recomputeDerivedStats(hero: Hero): Hero {
     if (eff.id === "resist-lightning") spellResist.lightning += 50;
   }
 
+  // Statue resistance bonuses
+  const statueFire = (su["resist-fire"] ?? 0) * 2;
+  const statueCold = (su["resist-cold"] ?? 0) * 2;
+  const statueLightning = (su["resist-lightning"] ?? 0) * 2;
+
   // Use createDefaultResistances base (0 for all) + all bonuses
   const rr = Math.round(runeResistBonus);
   const resistances = {
@@ -219,7 +240,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
         coldResistBonus +
         uniqueResist.cold +
         spellResist.cold +
-        rr,
+        rr +
+        statueCold,
     ),
     fire: Math.min(
       100,
@@ -227,7 +249,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
         fireResistBonus +
         uniqueResist.fire +
         spellResist.fire +
-        rr,
+        rr +
+        statueFire,
     ),
     lightning: Math.min(
       100,
@@ -235,7 +258,8 @@ export function recomputeDerivedStats(hero: Hero): Hero {
         lightningResistBonus +
         uniqueResist.lightning +
         spellResist.lightning +
-        rr,
+        rr +
+        statueLightning,
     ),
     acid: Math.min(100, magicResistBonus + uniqueResist.acid + rr),
     drain: Math.min(100, magicResistBonus + uniqueResist.drain + rr),
