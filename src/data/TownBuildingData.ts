@@ -1233,7 +1233,10 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
           "type": "floor",
           "overlay": "vaults-bedevilled_crystal_abyss_0"
         },
-        null,
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
         {
           "sprite": "floor-sand4",
           "type": "floor",
@@ -1326,8 +1329,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
   },
   {
     "id": "sage",
-    "name": "The Blacksmith",
-    "flavor": "The ring of hammer on steel echoes endlessly.",
+    "name": "The Sage",
+    "flavor": "Ancient wisdom whispers from dusty tomes.",
     "facing": "north",
     "width": 5,
     "height": 5,
@@ -1821,7 +1824,12 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         }
       ]
     ],
-    "entrance": [],
+    "entrance": [
+      {
+        "x": 1,
+        "y": 1
+      }
+    ],
     "npc": {
       "x": 1,
       "y": 1
@@ -1974,7 +1982,7 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         {
           "sprite": "floor-grass_full",
           "type": "floor",
-          "overlay": "gateways-abyssal_stair"
+          "overlay": "gateways-crucible_exit"
         },
         {
           "sprite": "floor-grass_full",

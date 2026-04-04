@@ -8,7 +8,6 @@ import {
   type BuildingTemplate,
 } from "../../data/TownBuildingData";
 import { getTownConfig } from "./TownConfigLoader";
-import { pickItemSprite } from "../items/SpritePool";
 
 // Build a lookup of building templates by id
 const templateMap: Record<string, BuildingTemplate> = {};
@@ -140,7 +139,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
 
   // 6. Stamp buildings from templates at config positions
   for (const bp of cfg.buildings) {
-    const tmpl = templateMap[(bp.templateId || bp.id)];
+    const tmpl = templateMap[(bp.templateId || bp.id)!];
     if (!tmpl) continue;
 
     for (let row = 0; row < tmpl.height; row++) {
@@ -213,31 +212,13 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       }
     }
 
-    // Multi-layer sprites for special features (rift stone, statue)
-    if ((bp.templateId || bp.id) === "rift-stone" || (bp.templateId || bp.id) === "statue-of-fortune") {
-      const layers = pickItemSprite((bp.templateId || bp.id), false);
-      if (layers.length > 0) {
-        const cx = bp.x + 1;
-        const cy = bp.y + 1;
-        if (cy < H && cx < W) {
-          tiles[cy][cx] = {
-            type: "building",
-            sprite: layers[0],
-            walkable: true,
-            transparent: true,
-            buildingId: (bp.templateId || bp.id),
-            spriteLayers: layers.length > 1 ? layers : undefined,
-          };
-        }
-      }
-    }
   }
 
   // 6b. Create NPC monsters for buildings with npcSprite
   const npcMonsters: Monster[] = [];
   for (const bp of cfg.buildings) {
-    const tmpl = templateMap[(bp.templateId || bp.id)];
-    if (!tmpl) continue;
+    const tmpl = templateMap[(bp.templateId || bp.id)!];
+    if (!tmpl || !tmpl.npc) continue;
     const npcTile = tmpl.tiles[tmpl.npc.y]?.[tmpl.npc.x];
     if (!npcTile?.npcSprite) continue;
     const wx = bp.x + tmpl.npc.x;

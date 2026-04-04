@@ -1228,7 +1228,10 @@
           "type": "floor",
           "overlay": "vaults-bedevilled_crystal_abyss_0"
         },
-        null,
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
         {
           "sprite": "floor-sand4",
           "type": "floor",
@@ -1321,8 +1324,8 @@
   },
   {
     "id": "sage",
-    "name": "The Blacksmith",
-    "flavor": "The ring of hammer on steel echoes endlessly.",
+    "name": "The Sage",
+    "flavor": "Ancient wisdom whispers from dusty tomes.",
     "facing": "north",
     "width": 5,
     "height": 5,
@@ -1816,7 +1819,7 @@
         }
       ]
     ],
-    "entrance": [],
+    "entrance": [{"x": 1, "y": 1}],
     "npc": {
       "x": 1,
       "y": 1
@@ -1969,7 +1972,7 @@
         {
           "sprite": "floor-grass_full",
           "type": "floor",
-          "overlay": "gateways-abyssal_stair"
+          "overlay": "gateways-crucible_exit"
         },
         {
           "sprite": "floor-grass_full",
@@ -2047,12 +2050,7 @@
         }
       ]
     ],
-    "entrance": [
-      {
-        "x": 3,
-        "y": 2
-      }
-    ],
+    "entrance": [{"x": 3, "y": 2}],
     "npc": {
       "x": 3,
       "y": 2

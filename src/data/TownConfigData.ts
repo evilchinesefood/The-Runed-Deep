@@ -1,6 +1,6 @@
 import type { Vector2 } from '../core/types';
 
-export interface TownConfig { width: number; height: number; buildings: { templateId?: string; id?: string; x: number; y: number }[]; mineEntrance: Vector2 | Vector2[]; playerSpawn: Vector2; playerReturnSpawn?: Vector2; paths: any[]; water: { x: number; y: number }[]; trees: { x: number; y: number; sprite: string }[]; features: any[]; decoration: { x: number; y: number; sprite: string }[]; tiles?: { x: number; y: number; sprite: string; overlay?: string }[]; }
+export interface TownConfig { width: number; height: number; buildings: { templateId?: string; id?: string; x: number; y: number }[]; mineEntrance: Vector2 | Vector2[]; playerSpawn: Vector2; playerReturnSpawn?: Vector2; paths: any[]; water: { x: number; y: number }[]; trees: { x: number; y: number; sprite: string }[]; features?: any[]; decoration?: { x: number; y: number; sprite: string }[]; tiles?: { x: number; y: number; sprite: string; overlay?: string }[]; }
 
 export const TOWN_CONFIG: TownConfig = {
   "width": 45,

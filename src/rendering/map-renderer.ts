@@ -584,13 +584,18 @@ export class MapRenderer {
     const tmplMap: Record<string, (typeof TOWN_BUILDINGS_DATA)[0]> = {};
     for (const t of TOWN_BUILDINGS_DATA) tmplMap[t.id] = t;
     MapRenderer._labelPositions = TOWN_CONFIG.buildings.map((bp) => {
-      const tmpl = tmplMap[bp.id];
-      if (!tmpl) return { x: bp.x, y: bp.y, name: bp.id };
-      const info = BUILDING_FLAVORS[bp.id];
+      const bid = (bp.templateId || bp.id)!;
+      const tmpl = tmplMap[bid];
+      if (!tmpl) return { x: bp.x, y: bp.y, name: bid };
+      const info = BUILDING_FLAVORS[bid];
+      // Position label at center-top of building
+      const ent = Array.isArray(tmpl.entrance) ? tmpl.entrance[0] : tmpl.entrance;
+      const lx = ent ? bp.x + ent.x : bp.x + Math.floor(tmpl.width / 2);
+      const ly = ent ? bp.y + ent.y - 1 : bp.y - 1;
       return {
-        x: bp.x + tmpl.entrance.x,
-        y: bp.y + tmpl.entrance.y - 1,
-        name: info?.name ?? bp.id,
+        x: lx,
+        y: ly,
+        name: info?.name ?? bid,
       };
     });
     return MapRenderer._labelPositions;
