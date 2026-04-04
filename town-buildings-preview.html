@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Town Buildings Preview - The Runed Deep</title>
-<link rel="stylesheet" href="public/css/sprites/tiles.css">
+<link rel="stylesheet" href="css/sprites/tiles.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -186,7 +186,7 @@ function renderBuildings(data) {
   });
 }
 
-fetch('public/town-buildings.json')
+fetch('town-buildings.json')
   .then(function(r) { return r.json(); })
   .then(renderBuildings)
   .catch(function(e) {
