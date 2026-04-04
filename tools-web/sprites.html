@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sprite Browser — The Runed Deep</title>
-    <link rel="stylesheet" href="css/sprites/monsters.css" />
-    <link rel="stylesheet" href="css/sprites/items.css" />
-    <link rel="stylesheet" href="css/sprites/tiles.css" />
-    <link rel="stylesheet" href="css/sprites/effects.css" />
-    <link rel="stylesheet" href="css/sprites/player.css" />
+    <link rel="stylesheet" href="../css/sprites/monsters.css" />
+    <link rel="stylesheet" href="../css/sprites/items.css" />
+    <link rel="stylesheet" href="../css/sprites/tiles.css" />
+    <link rel="stylesheet" href="../css/sprites/effects.css" />
+    <link rel="stylesheet" href="../css/sprites/player.css" />
     <style>
       * {
         margin: 0;
@@ -589,7 +589,7 @@
       });
 
       // Load manifest and boot
-      fetch("sprites-manifest.json")
+      fetch("../sprites-manifest.json")
         .then((r) => r.json())
         .then((data) => {
           manifest = data;

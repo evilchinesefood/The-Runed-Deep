@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Runed Deep — Dev Tools</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a1a; color: #ccc; font-family: 'Segoe UI', sans-serif; padding: 40px; }
+h1 { color: #c9a84c; margin-bottom: 8px; font-size: 28px; }
+.subtitle { color: #888; margin-bottom: 32px; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.card { background: #222; border: 1px solid #333; border-radius: 6px; padding: 20px; transition: border-color 0.15s; }
+.card:hover { border-color: #c9a84c; }
+.card a { text-decoration: none; }
+.card h2 { color: #c9a84c; font-size: 16px; margin-bottom: 6px; }
+.card p { color: #888; font-size: 13px; line-height: 1.4; }
+.card .tag { display: inline-block; background: #333; color: #aaa; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>The Runed Deep — Dev Tools</h1>
+<p class="subtitle">Visual editors and browsers for game development</p>
+<div class="grid">
+
+<div class="card"><a href="sprites.html">
+  <h2>Sprite Browser</h2>
+  <p>Browse all 6,476 DCSS sprites. Filter by category, search by name, see used vs unused. Multi-select cart with clipboard copy.</p>
+  <span class="tag">Sprites</span>
+</a></div>
+
+<div class="card"><a href="sprites-slots.html">
+  <h2>Sprite Slots</h2>
+  <p>Assign sprite pools to item templates. Pick sprites for weapons, armor, potions, spellbooks. Supports multi-layer sprites and unique-only flags.</p>
+  <span class="tag">Items</span>
+</a></div>
+
+<div class="card"><a href="theme-preview.html">
+  <h2>Dungeon Theme Preview</h2>
+  <p>Preview all 6 dungeon themes with sample rooms. Mine, Lair, Crypt, Fortress, Ice, Castle — each with wall/floor/door variants.</p>
+  <span class="tag">Dungeons</span>
+</a></div>
+
+<div class="card"><a href="town-buildings-preview.html">
+  <h2>Town Buildings Preview</h2>
+  <p>View all 11 town building templates. Shows entrance markers, NPC positions, and interior decorations.</p>
+  <span class="tag">Town</span>
+</a></div>
+
+<div class="card"><a href="town-layout-preview.html">
+  <h2>Town Layout Preview</h2>
+  <p>Full 45x60 town map with buildings, water, trees, and decorations. Zoom toggle, building labels, spawn markers.</p>
+  <span class="tag">Town</span>
+</a></div>
+
+<div class="card"><a href="town-builder.html">
+  <h2>Town Builder</h2>
+  <p>Visual editor for building templates and town layout. Paint tiles, place buildings, set paths and features.</p>
+  <span class="tag">Town</span> <span class="tag">Editor</span>
+</a></div>
+
+</div>
+</body>
+</html>

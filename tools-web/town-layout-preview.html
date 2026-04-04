@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Town Layout Preview - The Runed Deep</title>
-    <link rel="stylesheet" href="css/sprites/tiles.css" />
+    <link rel="stylesheet" href="../css/sprites/tiles.css" />
     <style>
       * {
         margin: 0;
@@ -175,8 +175,8 @@
 
       async function init() {
         [bldgs, cfg] = await Promise.all([
-          fetch("town-buildings.json").then((r) => r.json()),
-          fetch("town-config.json").then((r) => r.json()),
+          fetch("../town-buildings.json").then((r) => r.json()),
+          fetch("../town-config.json").then((r) => r.json()),
         ]);
         buildGrid();
         render();

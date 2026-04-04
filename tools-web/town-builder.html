@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Town Builder — The Runed Deep</title>
-<link rel="stylesheet" href="css/sprites/tiles.css">
+<link rel="stylesheet" href="../css/sprites/tiles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#1a1a1a;--bg2:#222;--bg3:#2a2a2a;--gold:#c9a84c;--gold2:#e0c068;--border:#444;--text:#ddd;--text2:#999;--green:#4caf50;--orange:#ff9800;--red:#e74c3c;--panel:280px}
@@ -271,12 +271,12 @@ let activeCategory = 'All';
 /* ── Init ── */
 async function init(){
   try{
-    let r = await fetch('sprites-manifest.json');
+    let r = await fetch('../sprites-manifest.json');
     manifest = await r.json();
     tileSprites = manifest.tiles.sprites;
   }catch(e){
     try{
-      let r = await fetch('sprites-manifest.json');
+      let r = await fetch('../sprites-manifest.json');
       manifest = await r.json();
       tileSprites = manifest.tiles.sprites;
     }catch(e2){
@@ -355,11 +355,11 @@ function selectTile(className, el){
 /* ── Building Data ── */
 async function loadAllBuildings(){
   try{
-    let r = await fetch('town-buildings.json');
+    let r = await fetch('../town-buildings.json');
     allBuildings = await r.json();
   }catch(e){
     try{
-      let r = await fetch('town-buildings.json');
+      let r = await fetch('../town-buildings.json');
       allBuildings = await r.json();
     }catch(e2){
       allBuildings = [];
