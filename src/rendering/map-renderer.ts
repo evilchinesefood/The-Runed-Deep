@@ -400,6 +400,13 @@ export class MapRenderer {
               gd = "block";
               go = opacity;
               gtr = tile.rotate ? `rotate(${tile.rotate}deg)` : "";
+            } else if (tile.spriteLayers && tile.spriteLayers.length > 1) {
+              // Multi-layer tile (e.g. floor + decor overlay from building)
+              fc = tile.spriteLayers[0];
+              fo = opacity;
+              gc = tile.spriteLayers.slice(1).join("|");
+              gd = "block";
+              go = opacity;
             } else {
               fc = floorSprite;
               fo = opacity;
