@@ -287,6 +287,7 @@ async function init(){
   buildPalette();
   buildCategoryTabs();
   await loadAllBuildings();
+  await loadTownConfig();
   loadAutoSave();
   wireEvents();
   if(!currentBuilding) newBuilding();
@@ -366,6 +367,68 @@ async function loadAllBuildings(){
     }
   }
   populateBuildingSelect();
+}
+
+async function loadTownConfig(){
+  try{
+    let r = await fetch('../town-config.json');
+    let cfg = await r.json();
+    townW = cfg.width || 45;
+    townH = cfg.height || 60;
+    $('#town-w').value = townW;
+    $('#town-h').value = townH;
+    initTownGrid();
+    // Import water
+    if(cfg.water){
+      for(let w of cfg.water){
+        if(w.x>=0 && w.x<townW && w.y>=0 && w.y<townH) townGrid[w.y][w.x] = {type:'water'};
+      }
+    }
+    // Import trees
+    if(cfg.trees){
+      for(let t of cfg.trees){
+        if(t.x>=0 && t.x<townW && t.y>=0 && t.y<townH) townGrid[t.y][t.x] = {type:'tree'};
+      }
+    }
+    // Import decoration as grass (they're on grass tiles)
+    // Import features
+    if(cfg.features){
+      for(let f of cfg.features){
+        if(f.x>=0 && f.x<townW && f.y>=0 && f.y<townH){
+          // Mark feature cells based on size
+          let fw = f.w || 1, fh = f.h || 1;
+          for(let dy=0;dy<fh;dy++){
+            for(let dx=0;dx<fw;dx++){
+              let fx=f.x+dx, fy=f.y+dy;
+              if(fx<townW && fy<townH) townGrid[fy][fx] = {type:'path'};
+            }
+          }
+        }
+      }
+    }
+    // Import paths
+    if(cfg.paths){
+      for(let p of cfg.paths){
+        for(let pt of p.points){
+          if(pt[0]>=0 && pt[0]<townW && pt[1]>=0 && pt[1]<townH)
+            townGrid[pt[1]][pt[0]] = {type:'path'};
+        }
+      }
+    }
+    // Import spawn positions
+    if(cfg.mineEntrance) minePos = cfg.mineEntrance;
+    if(cfg.playerSpawn) spawnPos = cfg.playerSpawn;
+    // Import placed buildings
+    if(cfg.buildings && cfg.buildings.length > 0){
+      placedBuildings = cfg.buildings.map(function(b){
+        let tmpl = allBuildings.find(function(t){ return t.id === b.templateId; });
+        return tmpl ? {id:b.templateId, x:b.x, y:b.y, building:tmpl} : null;
+      }).filter(Boolean);
+    }
+    status('Loaded town config: ' + townW + 'x' + townH);
+  }catch(e){
+    status('No town config found, starting blank');
+  }
 }
 
 function populateBuildingSelect(){
