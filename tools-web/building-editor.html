@@ -379,6 +379,13 @@
           <textarea id="prop-flavor" placeholder="A description..."></textarea>
         </div>
         <div class="prop-group">
+          <label>Paint Mode</label>
+          <div class="marker-btns">
+            <button id="btn-layer-mode">Layer Mode</button>
+          </div>
+          <div id="layer-banner" style="display:none;background:#332b00;border:1px solid #c9a84c;color:#fc4;padding:4px 8px;font-size:11px;margin-top:4px;border-radius:3px;">LAYER MODE — paint overlays on existing tiles. Right-click removes overlay. Esc to exit.</div>
+        </div>
+        <div class="prop-group">
           <label>Markers</label>
           <div class="marker-btns">
             <button id="btn-entrance">Set Entrance</button>
@@ -417,6 +424,7 @@
         let selectedTile = null;
         let markerMode = null;
         let painting = false;
+        let layerMode = false;
         let undoStack = [];
         const MAX_UNDO = 20;
 
@@ -652,7 +660,19 @@
               if (t) {
                 let sp = document.createElement("div");
                 sp.className = "tile " + t.sprite;
+                sp.style.position = "absolute";
+                sp.style.top = "0";
+                sp.style.left = "0";
                 cell.appendChild(sp);
+                if (t.overlay) {
+                  let ov = document.createElement("div");
+                  ov.className = "tile " + t.overlay;
+                  ov.style.position = "absolute";
+                  ov.style.top = "0";
+                  ov.style.left = "0";
+                  ov.style.zIndex = "1";
+                  cell.appendChild(ov);
+                }
               }
               const entrances = Array.isArray(currentBuilding.entrance)
                 ? currentBuilding.entrance
@@ -741,20 +761,33 @@
 
         function paintTile(x, y) {
           if (!currentBuilding || !selectedTile) return;
-          let type = inferType(selectedTile);
-          currentBuilding.tiles[y][x] = { sprite: selectedTile, type };
-          let cell = getCell(x, y);
-          if (!cell) return;
-          let old = cell.querySelector(".tile:not(.hover-preview)");
-          if (old) old.remove();
-          let sp = document.createElement("div");
-          sp.className = "tile " + selectedTile;
-          cell.insertBefore(sp, cell.firstChild);
+          if (layerMode) {
+            let existing = currentBuilding.tiles[y]?.[x];
+            if (!existing) return; // need a base tile first
+            if (existing.overlay) return; // already has overlay
+            existing.overlay = selectedTile;
+            renderGrid();
+          } else {
+            let type = inferType(selectedTile);
+            currentBuilding.tiles[y][x] = { sprite: selectedTile, type };
+            let cell = getCell(x, y);
+            if (!cell) return;
+            let old = cell.querySelector(".tile:not(.hover-preview)");
+            if (old) old.remove();
+            let sp = document.createElement("div");
+            sp.className = "tile " + selectedTile;
+            cell.insertBefore(sp, cell.firstChild);
+          }
         }
 
         function eraseTile(x, y) {
           if (!currentBuilding) return;
           pushUndo();
+          if (layerMode) {
+            let t = currentBuilding.tiles[y]?.[x];
+            if (t && t.overlay) { delete t.overlay; renderGrid(); autoSave(); return; }
+            return;
+          }
           currentBuilding.tiles[y][x] = null;
           let cell = getCell(x, y);
           if (cell) {
@@ -867,6 +900,14 @@
             if (e.key === "Escape") {
               markerMode = null;
               updateMarkerButtons();
+              if (layerMode) {
+                layerMode = false;
+                $("#btn-layer-mode").style.background = "";
+                $("#btn-layer-mode").style.color = "";
+                $("#btn-layer-mode").style.borderColor = "";
+                $("#layer-banner").style.display = "none";
+                status("Layer mode OFF");
+              }
             }
           });
 
@@ -881,6 +922,15 @@
           $("#btn-download-all").addEventListener("click", downloadAll);
           $("#grid-w").addEventListener("change", resizeGrid);
           $("#grid-h").addEventListener("change", resizeGrid);
+
+          $("#btn-layer-mode").addEventListener("click", () => {
+            layerMode = !layerMode;
+            $("#btn-layer-mode").style.background = layerMode ? "#554400" : "";
+            $("#btn-layer-mode").style.color = layerMode ? "#fc4" : "";
+            $("#btn-layer-mode").style.borderColor = layerMode ? "#c9a84c" : "";
+            $("#layer-banner").style.display = layerMode ? "block" : "none";
+            status(layerMode ? "Layer mode ON — paint overlays on existing tiles" : "Layer mode OFF");
+          });
 
           $("#btn-entrance").addEventListener("click", () => {
             markerMode = markerMode === "entrance" ? null : "entrance";
