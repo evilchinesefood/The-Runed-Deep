@@ -56,6 +56,11 @@
       "id": "statue-of-fortune",
       "x": 29,
       "y": 32
+    },
+    {
+      "id": "crucible",
+      "x": 5,
+      "y": 40
     }
   ],
   "mineEntrance": {

@@ -30,6 +30,7 @@ export const TOWN_CONFIG: TownConfig = {
     { id: "temple", x: 16, y: 32 },
     { id: "rift-stone", x: 5, y: 31 },
     { id: "statue-of-fortune", x: 29, y: 32 },
+    { id: "crucible", x: 5, y: 40 },
   ],
   mineEntrance: { x: 22, y: 2 },
   playerSpawn: { x: 22, y: 28 },

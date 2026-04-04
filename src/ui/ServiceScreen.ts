@@ -19,8 +19,8 @@ import { buildStatue } from "./services/StatueScreen";
 
 const BUILDING_NAMES: Record<string, string> = {
   temple: "Temple of Odin",
-  sage: "The Sage",
-  bank: "The Blacksmith",
+  sage: "The Blacksmith",
+  blacksmith: "The Enchanter",
   inn: "The Resting Stag — Your Stash",
   "rune-forge": "The Rune Forge",
   "rift-stone": "Rift Stone",
@@ -87,10 +87,10 @@ export function createServiceScreen(
         content = buildTemple(state, handleUpdate);
         break;
       case "sage":
-        content = buildSage(state, handleUpdate);
-        break;
-      case "bank":
         content = buildBlacksmith(state, handleUpdate);
+        break;
+      case "blacksmith":
+        content = buildSage(state, handleUpdate);
         break;
       case "inn":
         content = buildStash(state, handleUpdate);
