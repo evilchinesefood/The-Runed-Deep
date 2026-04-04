@@ -732,18 +732,24 @@ function loadAutoSave(){
       renderBuildingEditor();
       updateProps();
     }
-    let t = localStorage.getItem('tb-town');
-    if(t){
-      let td = JSON.parse(t);
-      townW = td.w; townH = td.h;
-      townGrid = td.grid||[];
-      minePos = td.mine; spawnPos = td.spawn;
-      placedBuildings = (td.placed||[]).map(p=>{
-        let bld = allBuildings.find(b=>b.id===p.id);
-        return bld ? {id:p.id,x:p.x,y:p.y,building:bld} : null;
-      }).filter(Boolean);
-      $('#town-w').value = townW;
-      $('#town-h').value = townH;
+    // Only load town from localStorage if we didn't already load from config
+    let hasConfig = townGrid.length > 0 && townGrid.some(function(row){
+      return row.some(function(c){ return c && c.type !== 'grass'; });
+    });
+    if(!hasConfig){
+      let t = localStorage.getItem('tb-town');
+      if(t){
+        let td = JSON.parse(t);
+        townW = td.w; townH = td.h;
+        townGrid = td.grid||[];
+        minePos = td.mine; spawnPos = td.spawn;
+        placedBuildings = (td.placed||[]).map(p=>{
+          let bld = allBuildings.find(b=>b.id===p.id);
+          return bld ? {id:p.id,x:p.x,y:p.y,building:bld} : null;
+        }).filter(Boolean);
+        $('#town-w').value = townW;
+        $('#town-h').value = townH;
+      }
     }
   }catch(e){}
 }
