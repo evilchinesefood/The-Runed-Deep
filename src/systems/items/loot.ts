@@ -82,13 +82,15 @@ export function generateLoot(
   ngPlus: number = 0,
   equipment?: Record<string, any>,
   isBoss: boolean = false,
+  statueUpgrades?: Record<string, number>,
 ): Item | null {
   // Bosses always drop loot
   if (!isBoss) {
     // Fortune affix: boost drop chance
     let fortuneDropBonus = 0;
     if (equipment) {
-      fortuneDropBonus = getEquipAffixTotal(equipment, "fortune") / 100;
+      fortuneDropBonus =
+        getEquipAffixTotal(equipment, "fortune", statueUpgrades) / 100;
       // fortune-power unique: +25% drop rate
       for (const eq of Object.values(equipment)) {
         if (
@@ -106,7 +108,7 @@ export function generateLoot(
 
     // 20% chance of gold instead of an item
     if (Math.random() < 0.2) {
-      return createGoldDrop(depth, equipment);
+      return createGoldDrop(depth, equipment, statueUpgrades);
     }
   }
 
@@ -324,11 +326,13 @@ export function createItemFromTemplate(
 export function createGoldDrop(
   depth: number,
   equipment?: Record<string, any>,
+  statueUpgrades?: Record<string, number>,
 ): Item {
   let amount = Math.floor(Math.random() * (10 + depth * 5)) + 1;
   // Fortune affix: bonus gold %
   if (equipment) {
-    const goldBonus = getEquipAffixTotal(equipment, "fortune") / 100;
+    const goldBonus =
+      getEquipAffixTotal(equipment, "fortune", statueUpgrades) / 100;
     // fortune-power unique: double gold
     let fortuneUniqueMult = 1;
     for (const eq of Object.values(equipment)) {

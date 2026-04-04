@@ -1,5 +1,5 @@
-import type { Item } from '../../core/types';
-import { ITEM_BY_ID } from '../../data/items';
+import type { Item } from "../../core/types";
+import { ITEM_BY_ID } from "../../data/items";
 
 /** Returns the name shown to the player. Always shows full name. */
 export function getDisplayName(item: Item): string {
@@ -11,23 +11,33 @@ export function getDisplaySprite(item: Item): string {
   return item.sprite;
 }
 
+/** Returns all sprite layers for an item (for multi-layer rendering). */
+export function getDisplaySpriteLayers(item: Item): string[] {
+  return item.spriteLayers && item.spriteLayers.length > 0
+    ? item.spriteLayers
+    : item.sprite
+      ? [item.sprite]
+      : [];
+}
+
 /** Returns the name color for an item. */
 /** Item color: orange=unique, red=cursed, purple=blessed, blue=enchanted, white=plain */
 export function itemNameColor(item: Item): string {
   const tpl = ITEM_BY_ID[item.templateId];
-  if (tpl?.unique) return '#f90';
-  if (item.cursed) return '#f44';
-  if (item.blessed) return '#c8f';
-  if (item.enchantment > 0) return '#4af';
-  return '#fff';
+  if (tpl?.unique) return "#f90";
+  if (item.cursed) return "#f44";
+  if (item.blessed) return "#c8f";
+  if (item.enchantment > 0) return "#4af";
+  return "#fff";
 }
 
 /** Returns a CSS filter string for enchanted/cursed/blessed glow. */
 export function getItemGlow(item: Item): string {
   const tpl = ITEM_BY_ID[item.templateId];
-  if (tpl?.unique) return 'drop-shadow(0 0 2px rgba(255, 153, 0, 0.9))';
-  if (item.cursed) return 'drop-shadow(0 0 2px rgba(255, 50, 50, 0.9))';
-  if (item.blessed) return 'drop-shadow(0 0 2px rgba(200, 140, 255, 0.9))';
-  if (item.enchantment > 0) return 'drop-shadow(0 0 2px rgba(70, 130, 255, 0.9))';
-  return '';
+  if (tpl?.unique) return "drop-shadow(0 0 2px rgba(255, 153, 0, 0.9))";
+  if (item.cursed) return "drop-shadow(0 0 2px rgba(255, 50, 50, 0.9))";
+  if (item.blessed) return "drop-shadow(0 0 2px rgba(200, 140, 255, 0.9))";
+  if (item.enchantment > 0)
+    return "drop-shadow(0 0 2px rgba(70, 130, 255, 0.9))";
+  return "";
 }

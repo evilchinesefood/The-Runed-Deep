@@ -102,7 +102,11 @@ export class GameLoop {
     // Swiftness: chance-based extra action (skip monster turn)
     const swiftPct = Math.min(
       75,
-      equipAffixTotal(newState.hero.equipment, "swiftness"),
+      equipAffixTotal(
+        newState.hero.equipment,
+        "swiftness",
+        newState.statueUpgrades,
+      ),
     );
     const skipMonsters =
       timeStopped || (swiftPct > 0 && Math.random() * 100 < swiftPct);
@@ -209,7 +213,11 @@ export class GameLoop {
     const cursedGround = hasRiftModifier(state, "cursed-ground");
 
     // ── Regeneration affix (scaled) ─────────────────────────
-    const regenHp = equipAffixTotal(hero.equipment, "regeneration");
+    const regenHp = equipAffixTotal(
+      hero.equipment,
+      "regeneration",
+      state.statueUpgrades,
+    );
     if (
       regenHp > 0 &&
       state.turn % 2 === 0 &&
@@ -247,7 +255,13 @@ export class GameLoop {
     ) {
       const mpRegen = Math.max(
         1,
-        Math.round(equipAffixTotal2(hero.equipment, "arcane-mastery")),
+        Math.round(
+          equipAffixTotal2(
+            hero.equipment,
+            "arcane-mastery",
+            state.statueUpgrades,
+          ),
+        ),
       );
       hero = { ...hero, mp: Math.min(hero.maxMp, hero.mp + mpRegen) };
     }

@@ -47,9 +47,13 @@ function hasRune(equipment: any, runeId: string): boolean {
   return false;
 }
 
-function fortuneXp(baseXp: number, equipment: any): number {
+function fortuneXp(
+  baseXp: number,
+  equipment: any,
+  statueUpgrades?: Record<string, number>,
+): number {
   let xp = baseXp;
-  const pct = equipAffixTotal2(equipment, "fortune");
+  const pct = equipAffixTotal2(equipment, "fortune", statueUpgrades);
   if (pct > 0) xp = Math.round(xp * (1 + pct / 100));
   for (const eq of Object.values(equipment)) {
     if (
@@ -61,7 +65,7 @@ function fortuneXp(baseXp: number, equipment: any): number {
     }
   }
   // Leech: reduce XP gained (secondary value = % reduction)
-  const leechPenalty = equipAffixTotal2(equipment, "leech");
+  const leechPenalty = equipAffixTotal2(equipment, "leech", statueUpgrades);
   if (leechPenalty > 0)
     xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
   return xp;
@@ -254,7 +258,11 @@ export function playerAttacksMonster(
   }
 
   // Berserk Fury: bonus melee damage (primary value = % increase)
-  const berserkBonus = equipAffixTotal(state.hero.equipment, "berserk-fury");
+  const berserkBonus = equipAffixTotal(
+    state.hero.equipment,
+    "berserk-fury",
+    state.statueUpgrades,
+  );
   if (berserkBonus > 0) damage = Math.round(damage * (1 + berserkBonus / 100));
 
   // Rune: Flame — add fire damage
@@ -328,7 +336,7 @@ export function playerAttacksMonster(
 
   // Blood Price: lose HP per hit (secondary value)
   const bloodCost = Math.round(
-    equipAffixTotal2(state.hero.equipment, "blood-price"),
+    equipAffixTotal2(state.hero.equipment, "blood-price", state.statueUpgrades),
   );
   if (bloodCost > 0 && damage > 0) {
     const newHeroHp = Math.max(1, state.hero.hp - bloodCost);
@@ -341,7 +349,11 @@ export function playerAttacksMonster(
   }
 
   // Leech: heal % of damage dealt (primary value)
-  const leechPct = equipAffixTotal(state.hero.equipment, "leech");
+  const leechPct = equipAffixTotal(
+    state.hero.equipment,
+    "leech",
+    state.statueUpgrades,
+  );
   if (leechPct > 0 && damage > 0) {
     const heal = Math.max(1, Math.floor((damage * leechPct) / 100));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
@@ -350,7 +362,9 @@ export function playerAttacksMonster(
 
   // Vampiric — scaled heal % from affix
   if (hasEnchant(state.hero.equipment, "vampiric") && damage > 0) {
-    const pct = equipAffixTotal(state.hero.equipment, "vampiric") / 100;
+    const pct =
+      equipAffixTotal(state.hero.equipment, "vampiric", state.statueUpgrades) /
+      100;
     const healMult = getDifficultyConfig(state.difficulty).healingMult;
     const heal = Math.max(1, Math.floor(damage * pct * healMult));
     const healedHp = Math.min(state.hero.maxHp, state.hero.hp + heal);
@@ -401,6 +415,7 @@ export function playerAttacksMonster(
       state.ngPlusCount,
       state.hero.equipment,
       isBoss,
+      state.statueUpgrades,
     );
     let newItems = [...floor.items];
     if (loot) {
@@ -464,7 +479,13 @@ export function playerAttacksMonster(
       ...applyMessages(state, messages),
       hero: {
         ...state.hero,
-        xp: state.hero.xp + fortuneXp(monster.xpValue, state.hero.equipment),
+        xp:
+          state.hero.xp +
+          fortuneXp(
+            monster.xpValue,
+            state.hero.equipment,
+            state.statueUpgrades,
+          ),
         runeShards: state.hero.runeShards + shardReward,
         mp: Math.min(state.hero.maxMp, state.hero.mp + siphonMp),
         hp: Math.min(state.hero.maxHp, state.hero.hp + convHeal),
@@ -575,7 +596,9 @@ function worldsplitterAoe(
         ...result,
         hero: {
           ...result.hero,
-          xp: result.hero.xp + fortuneXp(cm.xpValue, hero.equipment),
+          xp:
+            result.hero.xp +
+            fortuneXp(cm.xpValue, hero.equipment, state.statueUpgrades),
         },
         floors: {
           ...result.floors,
@@ -660,7 +683,9 @@ function runeSplashDamage(
         ...result,
         hero: {
           ...result.hero,
-          xp: result.hero.xp + fortuneXp(cm.xpValue, hero.equipment),
+          xp:
+            result.hero.xp +
+            fortuneXp(cm.xpValue, hero.equipment, state.statueUpgrades),
         },
         floors: {
           ...result.floors,
@@ -734,7 +759,11 @@ export function monsterAttacksPlayer(
   }
 
   // Evasion — chance to dodge
-  const evasionPct = equipAffixTotal(state.hero.equipment, "evasion");
+  const evasionPct = equipAffixTotal(
+    state.hero.equipment,
+    "evasion",
+    state.statueUpgrades,
+  );
   if (evasionPct > 0 && Math.random() * 100 < evasionPct) {
     messages.push({
       text: `${state.hero.name} dodges the ${monster.name}'s attack!`,
@@ -753,7 +782,11 @@ export function monsterAttacksPlayer(
   }
 
   // Berserk Fury: take more damage (secondary value = % increase)
-  const berserkPenalty = equipAffixTotal2(state.hero.equipment, "berserk-fury");
+  const berserkPenalty = equipAffixTotal2(
+    state.hero.equipment,
+    "berserk-fury",
+    state.statueUpgrades,
+  );
   if (berserkPenalty > 0)
     damage = Math.round(damage * (1 + berserkPenalty / 100));
 
@@ -812,7 +845,11 @@ export function monsterAttacksPlayer(
 
   // Reflect damage (Thorns affix + unique abilities + rune)
   let monsterKilledByThorns = false;
-  let totalThornsPct = equipAffixTotal(state.hero.equipment, "thorns");
+  let totalThornsPct = equipAffixTotal(
+    state.hero.equipment,
+    "thorns",
+    state.statueUpgrades,
+  );
   totalThornsPct += sumRuneEffect(state.hero.equipment, "reflect-damage");
   // Aegis of the Fallen: 30% reflect
   for (const eq of Object.values(state.hero.equipment)) {
@@ -844,6 +881,7 @@ export function monsterAttacksPlayer(
             result.ngPlusCount,
             result.hero.equipment,
             thornsBoss,
+            state.statueUpgrades,
           );
           let newItems = [...floor2.items];
           const thornsMsgs: Message[] = [
@@ -880,7 +918,11 @@ export function monsterAttacksPlayer(
               ...result.hero,
               xp:
                 result.hero.xp +
-                fortuneXp(monster.xpValue, result.hero.equipment),
+                fortuneXp(
+                  monster.xpValue,
+                  result.hero.equipment,
+                  state.statueUpgrades,
+                ),
             },
             floors: { ...result.floors, [floorKey2]: newFloor2 },
             messages: [...result.messages, ...thornsMsgs],

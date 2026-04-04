@@ -3,6 +3,7 @@ import { ITEM_BY_ID } from "../data/items";
 import {
   getDisplayName,
   getDisplaySprite,
+  getDisplaySpriteLayers,
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
@@ -19,6 +20,45 @@ import {
   createButton,
   el,
 } from "./Theme";
+
+function renderSpriteLayers(
+  container: HTMLElement,
+  item: Item,
+  size = 32,
+): void {
+  const layers = getDisplaySpriteLayers(item);
+  const glow = getItemGlow(item);
+  if (layers.length <= 1) {
+    const s = el("div", { width: `${size}px`, height: `${size}px` });
+    if (size !== 32) {
+      s.style.transform = `scale(${size / 32})`;
+      s.style.transformOrigin = "top left";
+      s.style.width = "32px";
+      s.style.height = "32px";
+    }
+    s.className = getDisplaySprite(item);
+    if (glow) s.style.filter = glow;
+    container.appendChild(s);
+  } else {
+    container.style.position = "relative";
+    for (const cls of layers) {
+      const layer = el("div", {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "32px",
+        height: "32px",
+      });
+      if (size !== 32) {
+        layer.style.transform = `scale(${size / 32})`;
+        layer.style.transformOrigin = "top left";
+      }
+      layer.className = cls;
+      if (glow) layer.style.filter = glow;
+      container.appendChild(layer);
+    }
+  }
+}
 
 function sectionHeader(text: string): HTMLElement {
   return el(
@@ -104,17 +144,15 @@ function createEquipSlot(
   });
 
   if (item) {
-    const sprite = el("div", {
+    const spriteWrap = el("div", {
       width: "32px",
       height: "32px",
       position: "absolute",
       top: "0",
       left: "0",
     });
-    sprite.className = getDisplaySprite(item);
-    const eqGlow = getItemGlow(item);
-    if (eqGlow) sprite.style.filter = eqGlow;
-    container.appendChild(sprite);
+    renderSpriteLayers(spriteWrap, item);
+    container.appendChild(spriteWrap);
     container.addEventListener("click", onUnequip);
     container.addEventListener("mouseenter", () => {
       container.style.borderColor = "#c90";
@@ -285,16 +323,7 @@ export function createInventoryScreen(
       overflow: "hidden",
     });
     if (item) {
-      const sprite = el("div", {
-        width: "32px",
-        height: "32px",
-        transform: "scale(0.75)",
-        transformOrigin: "top left",
-      });
-      sprite.className = getDisplaySprite(item);
-      const glow = getItemGlow(item);
-      if (glow) sprite.style.filter = glow;
-      spriteWrap.appendChild(sprite);
+      renderSpriteLayers(spriteWrap, item, 24);
     }
     row.appendChild(spriteWrap);
 
@@ -672,14 +701,29 @@ export function createInventoryScreen(
         flexShrink: "0",
         position: "relative",
       });
-      const spriteDiv = el("div", {
-        width: "32px",
-        height: "32px",
-      });
-      spriteDiv.className = getDisplaySprite(item) + " inventory-item";
-      const invGlow = getItemGlow(item);
-      if (invGlow) spriteDiv.style.filter = invGlow;
-      spriteWrap.appendChild(spriteDiv);
+      const layers = getDisplaySpriteLayers(item);
+      if (layers.length <= 1) {
+        const spriteDiv = el("div", { width: "32px", height: "32px" });
+        spriteDiv.className = (layers[0] || "") + " inventory-item";
+        const invGlow = getItemGlow(item);
+        if (invGlow) spriteDiv.style.filter = invGlow;
+        spriteWrap.appendChild(spriteDiv);
+      } else {
+        spriteWrap.style.position = "relative";
+        const invGlow = getItemGlow(item);
+        for (const cls of layers) {
+          const layerDiv = el("div", {
+            position: "absolute",
+            top: "0",
+            left: "0",
+            width: "32px",
+            height: "32px",
+          });
+          layerDiv.className = cls + " inventory-item";
+          if (invGlow) layerDiv.style.filter = invGlow;
+          spriteWrap.appendChild(layerDiv);
+        }
+      }
       if (count > 1) {
         const badge = el(
           "span",

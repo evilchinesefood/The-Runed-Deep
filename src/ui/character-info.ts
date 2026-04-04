@@ -124,14 +124,19 @@ export function createCharacterInfoScreen(
   // ── Attributes ──────────────────────────────────────────
   panel.appendChild(sectionHeader("Attributes"));
 
-  const soulDrainAll = Math.round(equipAffixTotal(h.equipment, "soul-drain"));
+  const su = state.statueUpgrades;
+  const soulDrainAll = Math.round(
+    equipAffixTotal(h.equipment, "soul-drain", su),
+  );
   const attrBonuses: Record<string, number> = {
-    strength: Math.round(equipAffixTotal(h.equipment, "might")) + soulDrainAll,
+    strength:
+      Math.round(equipAffixTotal(h.equipment, "might", su)) + soulDrainAll,
     intelligence:
-      Math.round(equipAffixTotal(h.equipment, "brilliance")) + soulDrainAll,
+      Math.round(equipAffixTotal(h.equipment, "brilliance", su)) + soulDrainAll,
     constitution:
-      Math.round(equipAffixTotal(h.equipment, "fortitude")) + soulDrainAll,
-    dexterity: Math.round(equipAffixTotal(h.equipment, "grace")) + soulDrainAll,
+      Math.round(equipAffixTotal(h.equipment, "fortitude", su)) + soulDrainAll,
+    dexterity:
+      Math.round(equipAffixTotal(h.equipment, "grace", su)) + soulDrainAll,
   };
 
   for (const slot of Object.values(h.equipment)) {
@@ -246,9 +251,9 @@ export function createCharacterInfoScreen(
   const bonusLines: [string, string, string][] = [];
 
   for (const affix of AFFIXES) {
-    const v = Math.round(equipAffixTotal(h.equipment, affix.id));
+    const v = Math.round(equipAffixTotal(h.equipment, affix.id, su));
     if (v <= 0) continue;
-    const v2 = Math.round(equipAffixTotal2(h.equipment, affix.id));
+    const v2 = Math.round(equipAffixTotal2(h.equipment, affix.id, su));
 
     let display: string;
     if (affix.base2 !== undefined && v2 > 0) {
@@ -301,27 +306,29 @@ export function createCharacterInfoScreen(
 
   const effInt = h.attributes.intelligence + (attrBonuses.intelligence ?? 0);
   const intMult = Math.round((1 + effInt / 100) * 100);
-  const spellPower = Math.round(equipAffixTotal(h.equipment, "spell-power"));
-  const darkPact = Math.round(equipAffixTotal(h.equipment, "dark-pact"));
+  const spellPower = Math.round(
+    equipAffixTotal(h.equipment, "spell-power", su),
+  );
+  const darkPact = Math.round(equipAffixTotal(h.equipment, "dark-pact", su));
   let spellMult = intMult;
   if (spellPower > 0)
     spellMult = Math.round(spellMult * (1 + spellPower / 100));
   if (darkPact > 0) spellMult = Math.round(spellMult * (1 + darkPact / 100));
   panel.appendChild(statLine("Spell Power", `${spellMult}%`, "#48f"));
 
-  const evasion = Math.round(equipAffixTotal(h.equipment, "evasion"));
+  const evasion = Math.round(equipAffixTotal(h.equipment, "evasion", su));
   if (evasion > 0)
     panel.appendChild(statLine("Dodge Chance", `${evasion}%`, "#adf"));
 
   const swiftness = Math.min(
     75,
-    Math.round(equipAffixTotal(h.equipment, "swiftness")),
+    Math.round(equipAffixTotal(h.equipment, "swiftness", su)),
   );
   if (swiftness > 0)
     panel.appendChild(statLine("Extra Action", `${swiftness}%`, "#fc4"));
 
   const arcaneMastery = Math.round(
-    equipAffixTotal(h.equipment, "arcane-mastery"),
+    equipAffixTotal(h.equipment, "arcane-mastery", su),
   );
   let mpReduction = arcaneMastery;
   for (const slot of Object.values(h.equipment)) {
@@ -332,7 +339,9 @@ export function createCharacterInfoScreen(
       break;
     }
   }
-  const darkPactCost = Math.round(equipAffixTotal2(h.equipment, "dark-pact"));
+  const darkPactCost = Math.round(
+    equipAffixTotal2(h.equipment, "dark-pact", su),
+  );
   if (mpReduction > 0 || darkPactCost > 0) {
     const costMult =
       (1 - Math.min(mpReduction, 75) / 100) * (1 + darkPactCost / 100);
@@ -347,25 +356,27 @@ export function createCharacterInfoScreen(
     );
   }
 
-  const regenHp = Math.round(equipAffixTotal(h.equipment, "regeneration"));
+  const regenHp = Math.round(equipAffixTotal(h.equipment, "regeneration", su));
   if (regenHp > 0)
     panel.appendChild(statLine("HP Regen", `+${regenHp} / 2 turns`, "#4f4"));
-  const regenMp = Math.round(equipAffixTotal2(h.equipment, "arcane-mastery"));
+  const regenMp = Math.round(
+    equipAffixTotal2(h.equipment, "arcane-mastery", su),
+  );
   if (regenMp > 0)
     panel.appendChild(statLine("MP Regen", `+${regenMp} / 3 turns`, "#a6f"));
 
-  const goldBonus = Math.round(equipAffixTotal(h.equipment, "fortune"));
-  const xpBonus = Math.round(equipAffixTotal2(h.equipment, "fortune"));
+  const goldBonus = Math.round(equipAffixTotal(h.equipment, "fortune", su));
+  const xpBonus = Math.round(equipAffixTotal2(h.equipment, "fortune", su));
   if (goldBonus > 0)
     panel.appendChild(statLine("Gold Bonus", `+${goldBonus}%`, "#fd4"));
   if (xpBonus > 0)
     panel.appendChild(statLine("XP Bonus", `+${xpBonus}%`, "#fd4"));
 
-  const vampiric = Math.round(equipAffixTotal(h.equipment, "vampiric"));
+  const vampiric = Math.round(equipAffixTotal(h.equipment, "vampiric", su));
   if (vampiric > 0)
     panel.appendChild(statLine("Life Steal", `${vampiric}%`, "#f44"));
 
-  const thorns = Math.round(equipAffixTotal(h.equipment, "thorns"));
+  const thorns = Math.round(equipAffixTotal(h.equipment, "thorns", su));
   if (thorns > 0)
     panel.appendChild(statLine("Thorns", `${thorns}% reflected`, "#f84"));
 

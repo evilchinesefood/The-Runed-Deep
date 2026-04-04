@@ -20,7 +20,12 @@ export function enchantMult(equipment: Equipment, id: string): number {
 }
 
 /** Get total scaled affix value across all equipped items */
-export function equipAffixTotal(equipment: Equipment, affixId: string): number {
+export function equipAffixTotal(
+  equipment: Equipment,
+  affixId: string,
+  statueUpgrades?: Record<string, number>,
+): number {
+  const statueBonus = statueUpgrades?.[`affix-${affixId}`] ?? 0;
   let total = 0;
   for (const item of Object.values(equipment)) {
     if (!item?.specialEnchantments) continue;
@@ -28,7 +33,8 @@ export function equipAffixTotal(equipment: Equipment, affixId: string): number {
     const isCrit = enchants.includes(`${affixId}:critical`);
     const has = isCrit || enchants.includes(affixId);
     if (has) {
-      const ench = (item.enchantment ?? 0) + (item.blessed ? 1 : 0);
+      const ench =
+        (item.enchantment ?? 0) + (item.blessed ? 1 : 0) + statueBonus;
       total += getAffixValue(affixId, ench, isCrit);
     }
   }
@@ -36,7 +42,12 @@ export function equipAffixTotal(equipment: Equipment, affixId: string): number {
 }
 
 /** Get total secondary scaled value across all equipped items */
-export function equipAffixTotal2(equipment: Equipment, affixId: string): number {
+export function equipAffixTotal2(
+  equipment: Equipment,
+  affixId: string,
+  statueUpgrades?: Record<string, number>,
+): number {
+  const statueBonus = statueUpgrades?.[`affix-${affixId}`] ?? 0;
   let total = 0;
   for (const item of Object.values(equipment)) {
     if (!item?.specialEnchantments) continue;
@@ -44,7 +55,8 @@ export function equipAffixTotal2(equipment: Equipment, affixId: string): number 
     const isCrit = enchants.includes(`${affixId}:critical`);
     const has = isCrit || enchants.includes(affixId);
     if (has) {
-      const ench = (item.enchantment ?? 0) + (item.blessed ? 1 : 0);
+      const ench =
+        (item.enchantment ?? 0) + (item.blessed ? 1 : 0) + statueBonus;
       total += getAffixValue2(affixId, ench, isCrit);
     }
   }

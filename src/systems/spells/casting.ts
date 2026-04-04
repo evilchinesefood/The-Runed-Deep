@@ -27,9 +27,13 @@ import { ITEM_BY_ID } from "../../data/items";
 import { recomputeDerivedStats } from "../character/derived-stats";
 import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
 
-function fortuneXp(baseXp: number, equipment: any): number {
+function fortuneXp(
+  baseXp: number,
+  equipment: any,
+  statueUpgrades?: Record<string, number>,
+): number {
   let xp = baseXp;
-  const pct = equipAffixTotal2(equipment, "fortune");
+  const pct = equipAffixTotal2(equipment, "fortune", statueUpgrades);
   if (pct > 0) xp = Math.round(xp * (1 + pct / 100));
   for (const eq of Object.values(equipment)) {
     if (
@@ -40,7 +44,7 @@ function fortuneXp(baseXp: number, equipment: any): number {
       break;
     }
   }
-  const leechPenalty = equipAffixTotal2(equipment, "leech");
+  const leechPenalty = equipAffixTotal2(equipment, "leech", statueUpgrades);
   if (leechPenalty > 0)
     xp = Math.max(1, Math.round(xp * (1 - leechPenalty / 100)));
   return xp;
@@ -68,13 +72,21 @@ export function castSpell(
   }
 
   // Arcane Mastery: reduce MP cost + Ring of the Archmage unique
-  let costReduction = equipAffixTotal(state.hero.equipment, "arcane-mastery");
+  let costReduction = equipAffixTotal(
+    state.hero.equipment,
+    "arcane-mastery",
+    state.statueUpgrades,
+  );
   for (const eq of Object.values(state.hero.equipment)) {
     if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "archmage-power")
       costReduction += 25;
   }
   // Dark Pact: increase MP cost (secondary value = % increase)
-  const darkPactPenalty = equipAffixTotal2(state.hero.equipment, "dark-pact");
+  const darkPactPenalty = equipAffixTotal2(
+    state.hero.equipment,
+    "dark-pact",
+    state.statueUpgrades,
+  );
   const costMult =
     (1 - Math.min(costReduction, 75) / 100) * (1 + darkPactPenalty / 100);
   const cost = Math.max(1, Math.round(spell.manaCost * costMult));
@@ -533,8 +545,10 @@ function applySpellDamageToMonster(
 
   // INT scaling — effective INT includes equipment bonuses
   const eq = state.hero.equipment;
-  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain"));
-  const bonusInt = Math.round(equipAffixTotal(eq, "brilliance")) + soulDrainAll;
+  const su = state.statueUpgrades;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain", su));
+  const bonusInt =
+    Math.round(equipAffixTotal(eq, "brilliance", su)) + soulDrainAll;
   let uInt = 0;
   for (const slot of Object.values(eq)) {
     if (!slot) continue;
@@ -547,22 +561,22 @@ function applySpellDamageToMonster(
   damage = Math.round(damage * (1 + effInt / 100));
 
   // Spell Power affix (scaled)
-  const spellPower = equipAffixTotal(state.hero.equipment, "spell-power");
+  const spellPower = equipAffixTotal(state.hero.equipment, "spell-power", su);
   if (spellPower > 0) damage = Math.round(damage * (1 + spellPower / 100));
 
   // Dark Pact: bonus spell damage (primary value)
-  const darkPactDmg = equipAffixTotal(state.hero.equipment, "dark-pact");
+  const darkPactDmg = equipAffixTotal(state.hero.equipment, "dark-pact", su);
   if (darkPactDmg > 0) damage = Math.round(damage * (1 + darkPactDmg / 100));
 
   // Elemental Touched affix bonuses (primary = damage %)
   if (element === "fire") {
-    const bonus = equipAffixTotal(state.hero.equipment, "fire-touched");
+    const bonus = equipAffixTotal(state.hero.equipment, "fire-touched", su);
     if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
   } else if (element === "cold") {
-    const bonus = equipAffixTotal(state.hero.equipment, "frost-touched");
+    const bonus = equipAffixTotal(state.hero.equipment, "frost-touched", su);
     if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
   } else if (element === "lightning") {
-    const bonus = equipAffixTotal(state.hero.equipment, "storm-touched");
+    const bonus = equipAffixTotal(state.hero.equipment, "storm-touched", su);
     if (bonus > 0) damage = Math.round(damage * (1 + bonus / 100));
   }
 
@@ -621,7 +635,13 @@ function applySpellDamageToMonster(
       hero: {
         ...state.hero,
         mp: state.hero.mp,
-        xp: state.hero.xp + fortuneXp(monster.xpValue, state.hero.equipment),
+        xp:
+          state.hero.xp +
+          fortuneXp(
+            monster.xpValue,
+            state.hero.equipment,
+            state.statueUpgrades,
+          ),
       },
       floors: { ...state.floors, [floorKey]: newFloor },
     };
@@ -677,8 +697,10 @@ function resolveHeal(
 
   // INT scaling for healing
   const eq = hero.equipment;
-  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain"));
-  const bonusInt = Math.round(equipAffixTotal(eq, "brilliance")) + soulDrainAll;
+  const su2 = state.statueUpgrades;
+  const soulDrainAll = Math.round(equipAffixTotal(eq, "soul-drain", su2));
+  const bonusInt =
+    Math.round(equipAffixTotal(eq, "brilliance", su2)) + soulDrainAll;
   let uInt = 0;
   for (const slot of Object.values(eq)) {
     if (!slot) continue;

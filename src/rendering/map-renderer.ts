@@ -7,9 +7,10 @@ import {
 import { getDungeonForFloor, getTileset } from "../systems/dungeon/Tilesets";
 import { getThemeForDepth } from "../data/DungeonThemes";
 import {
-  getDisplaySprite,
+  getDisplaySpriteLayers,
   getItemGlow,
 } from "../systems/inventory/display-name";
+import { pickItemSprite } from "../systems/items/SpritePool";
 import { ITEM_BY_ID } from "../data/items";
 
 const TILE_SIZE = 32;
@@ -117,6 +118,25 @@ export class MapRenderer {
 
     this.initTileGrid();
     this.setupTooltipEvents();
+  }
+
+  /** Set ground cell class — supports multi-layer sprites joined by '|'. */
+  private setGroundClass(ground: HTMLElement, gc: string): void {
+    while (ground.firstChild) ground.removeChild(ground.firstChild);
+    if (gc.indexOf("|") === -1) {
+      ground.className = gc;
+      ground.style.position = "";
+    } else {
+      ground.className = "";
+      ground.style.position = "relative";
+      for (const cls of gc.split("|")) {
+        const layer = document.createElement("div");
+        layer.className = cls;
+        layer.style.cssText =
+          "position:absolute;top:0;left:0;width:32px;height:32px;";
+        ground.appendChild(layer);
+      }
+    }
   }
 
   private initTileGrid(): void {
@@ -378,11 +398,16 @@ export class MapRenderer {
             if (visible || isLit) {
               const itemsHere = itemsAt.get(key);
               if (itemsHere && itemsHere.length > 1) {
-                gc = "gold-25";
+                const pileLayers = pickItemSprite("treasure-pile", false);
+                gc =
+                  pileLayers.length > 1
+                    ? pileLayers.join("|")
+                    : pileLayers[0] || "gold-25";
                 gd = "block";
                 go = "1";
               } else if (itemsHere && itemsHere.length === 1) {
-                gc = getDisplaySprite(itemsHere[0].item);
+                const layers = getDisplaySpriteLayers(itemsHere[0].item);
+                gc = layers.length > 1 ? layers.join("|") : layers[0] || "";
                 gd = "block";
                 go = "1";
                 const glow = getItemGlow(itemsHere[0].item);
@@ -444,7 +469,7 @@ export class MapRenderer {
           cell.floor.style.filter = ff;
           cell.floor.style.backgroundColor = fbc;
           cell.floor.style.backgroundBlendMode = fbm;
-          cell.ground.className = gc;
+          this.setGroundClass(cell.ground, gc);
           cell.ground.style.display = gd;
           cell.ground.style.opacity = go;
           cell.ground.style.transform = gtr;
@@ -484,7 +509,7 @@ export class MapRenderer {
             p.fbm = fbm;
           }
           if (p.gc !== gc) {
-            cell.ground.className = gc;
+            this.setGroundClass(cell.ground, gc);
             p.gc = gc;
           }
           if (p.gd !== gd) {

@@ -20,6 +20,7 @@ import {
 import {
   getDisplayName,
   getDisplaySprite,
+  getDisplaySpriteLayers,
   getItemGlow,
   itemNameColor,
 } from "../systems/inventory/display-name";
@@ -193,13 +194,25 @@ function itemRow(
     flexShrink: "0",
     position: "relative",
   });
-  const sp = spriteEl(getDisplaySprite(item));
-  sp.style.position = "absolute";
-  sp.style.top = "0";
-  sp.style.left = "0";
+  const layers = getDisplaySpriteLayers(item);
   const glow = getItemGlow(item);
-  if (glow) sp.style.filter = glow;
-  spriteWrap.appendChild(sp);
+  if (layers.length <= 1) {
+    const sp = spriteEl(layers[0] || getDisplaySprite(item));
+    sp.style.position = "absolute";
+    sp.style.top = "0";
+    sp.style.left = "0";
+    if (glow) sp.style.filter = glow;
+    spriteWrap.appendChild(sp);
+  } else {
+    for (const cls of layers) {
+      const sp = spriteEl(cls);
+      sp.style.position = "absolute";
+      sp.style.top = "0";
+      sp.style.left = "0";
+      if (glow) sp.style.filter = glow;
+      spriteWrap.appendChild(sp);
+    }
+  }
   if (count > 1) {
     const badge = el(
       "span",
