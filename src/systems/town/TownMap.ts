@@ -184,19 +184,23 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       }
     }
 
-    // Place entrance tile (type "building" with buildingId for interaction)
-    const ex = bp.x + tmpl.entrance.x;
-    const ey = bp.y + tmpl.entrance.y;
-    if (ey < H && ex < W) {
-      tiles[ey][ex] = {
-        type: "building",
-        sprite:
-          tmpl.tiles[tmpl.entrance.y]?.[tmpl.entrance.x]?.sprite ??
-          "floor-cobble_blood1",
-        walkable: true,
-        transparent: true,
-        buildingId: tmpl.id,
-      };
+    // Place entrance tiles (type "building" with buildingId for interaction)
+    const entranceList = Array.isArray(tmpl.entrance)
+      ? tmpl.entrance
+      : tmpl.entrance ? [tmpl.entrance] : [];
+    for (const ent of entranceList) {
+      const ex = bp.x + ent.x;
+      const ey = bp.y + ent.y;
+      if (ey < H && ex < W) {
+        tiles[ey][ex] = {
+          type: "building",
+          sprite:
+            tmpl.tiles[ent.y]?.[ent.x]?.sprite ?? "floor-sand1",
+          walkable: true,
+          transparent: true,
+          buildingId: tmpl.id,
+        };
+      }
     }
 
     // Multi-layer sprites for special features (rift stone, statue)

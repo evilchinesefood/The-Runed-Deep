@@ -554,7 +554,7 @@
             width: w,
             height: h,
             tiles: makeEmptyTiles(w, h),
-            entrance: null,
+            entrance: [],
             npc: null,
           };
           undoStack = [];
@@ -654,11 +654,10 @@
                 sp.className = "tile " + t.sprite;
                 cell.appendChild(sp);
               }
-              if (
-                currentBuilding.entrance &&
-                currentBuilding.entrance.x === x &&
-                currentBuilding.entrance.y === y
-              )
+              const entrances = Array.isArray(currentBuilding.entrance)
+                ? currentBuilding.entrance
+                : currentBuilding.entrance ? [currentBuilding.entrance] : [];
+              if (entrances.some(e => e.x === x && e.y === y))
                 cell.classList.add("entrance");
               if (
                 currentBuilding.npc &&
@@ -689,9 +688,15 @@
           e.preventDefault();
           if (e.button === 2) return;
           if (markerMode === "entrance") {
-            currentBuilding.entrance = { x, y };
-            markerMode = null;
-            updateMarkerButtons();
+            if (!Array.isArray(currentBuilding.entrance))
+              currentBuilding.entrance = currentBuilding.entrance ? [currentBuilding.entrance] : [];
+            const idx = currentBuilding.entrance.findIndex(e => e.x === x && e.y === y);
+            if (idx >= 0) {
+              currentBuilding.entrance.splice(idx, 1);
+            } else {
+              currentBuilding.entrance.push({ x, y });
+            }
+            updateProps();
             renderGrid();
             autoSave();
             return;
@@ -794,8 +799,12 @@
           $("#prop-id").value = currentBuilding.id || "";
           $("#prop-name").value = currentBuilding.name || "";
           $("#prop-flavor").value = currentBuilding.flavor || "";
-          let e = currentBuilding.entrance;
-          $("#marker-entrance").textContent = e ? `(${e.x}, ${e.y})` : "—";
+          const entrances = Array.isArray(currentBuilding.entrance)
+            ? currentBuilding.entrance
+            : currentBuilding.entrance ? [currentBuilding.entrance] : [];
+          $("#marker-entrance").textContent = entrances.length > 0
+            ? entrances.map(e => `(${e.x},${e.y})`).join(" ")
+            : "—";
           let n = currentBuilding.npc;
           $("#marker-npc").textContent = n ? `(${n.x}, ${n.y})` : "—";
         }
