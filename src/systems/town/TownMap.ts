@@ -147,6 +147,8 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
         const ty = bp.y + row;
         if (ty >= H || tx >= W) continue;
 
+        const overlay = (td as any).overlay;
+        const layers = overlay ? [td.sprite, overlay] : undefined;
         switch (td.type) {
           case "wall":
             tiles[ty][tx] = {
@@ -154,6 +156,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
               sprite: td.sprite,
               walkable: false,
               transparent: false,
+              spriteLayers: layers,
             };
             break;
           case "floor":
@@ -162,6 +165,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
               sprite: td.sprite,
               walkable: true,
               transparent: true,
+              spriteLayers: layers,
             };
             break;
           case "door":
@@ -178,6 +182,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
               sprite: td.sprite,
               walkable: true,
               transparent: true,
+              spriteLayers: layers,
             };
             break;
         }
