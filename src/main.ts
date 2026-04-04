@@ -48,6 +48,8 @@ import { showAchievementToast } from "./ui/AchievementToast";
 import { createAchievementsScreen } from "./ui/AchievementsScreen";
 import { createRiftMenuScreen } from "./ui/RiftMenuScreen";
 import { createRiftSummaryScreen } from "./ui/RiftSummaryScreen";
+import { createCrucibleMenuScreen } from "./ui/CrucibleMenuScreen";
+import { createCrucibleBetweenScreen } from "./ui/CrucibleSummaryScreen";
 import { loadSpritePools } from "./systems/items/SpritePool";
 
 injectTheme();
@@ -844,6 +846,8 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       riftStoneUnlocked: false,
       riftOffering: null,
       activeRift: null,
+      activeCrucible: null,
+      crucibleBestWave: 0,
     };
     gameLoop.setState(testState);
   }
@@ -1557,6 +1561,94 @@ function switchScreen(state: GameState): void {
       );
       addScreenCleanup(riftSumScreen.cleanup);
       root.replaceChildren(riftSumScreen);
+      break;
+    }
+
+    case "crucible-menu": {
+      input.setEnabled(false);
+      const crucMenuScreen = createCrucibleMenuScreen(
+        gameLoop.getState(),
+        (action) => {
+          gameLoop.handleAction(action);
+        },
+        () => gameLoop.handleAction({ type: "setScreen", screen: "game" }),
+      );
+      addScreenCleanup(crucMenuScreen.cleanup);
+      root.replaceChildren(crucMenuScreen);
+      break;
+    }
+
+    case "crucible-summary": {
+      input.setEnabled(false);
+      const cState = gameLoop.getState();
+      const crucible = cState.activeCrucible;
+      const isDead = cState.hero.hp <= 0;
+      const crucSumScreen = createCrucibleBetweenScreen(
+        crucible?.wave ?? 0,
+        crucible?.shardsEarned ?? 0,
+        crucible?.goldEarned ?? 0,
+        isDead,
+        () => {
+          gameLoop.handleAction({ type: "crucibleNextWave" });
+        },
+        () => {
+          if (isDead) {
+            // Respawn in town with full HP
+            const s = gameLoop.getState();
+            const { floor: townFloor } = generateTownMap();
+            const regenFloor = s.returnFloor || 1;
+            const regenDungeon = getDungeonForFloor(regenFloor);
+            const { floor: newDungeonFloor } = generateFloor(
+              regenDungeon,
+              regenFloor,
+              Date.now(),
+              true,
+              true,
+              s.difficulty,
+              (s as any).ngPlusCount ?? 0,
+            );
+            const floors: Record<string, Floor> = {
+              ...s.floors,
+              "town-0": townFloor,
+              [`${regenDungeon}-${regenFloor}`]: newDungeonFloor,
+            };
+            const respawned: GameState = {
+              ...s,
+              screen: "game",
+              currentDungeon: "town",
+              currentFloor: 0,
+              returnFloor: regenFloor,
+              floors,
+              activeCrucible: null,
+              hero: {
+                ...s.hero,
+                hp: s.hero.maxHp,
+                mp: s.hero.maxMp,
+                position: { ...TOWN_START_RETURN },
+                activeEffects: [],
+              },
+              messages: [
+                {
+                  text: `${s.hero.name} awakens in town, battered but alive.`,
+                  severity: "important" as const,
+                  turn: s.turn,
+                },
+                {
+                  text: `Crucible rewards kept: ${crucible?.shardsEarned ?? 0} shards, ${crucible?.goldEarned ?? 0} gold.`,
+                  severity: "system" as const,
+                  turn: s.turn,
+                },
+              ],
+            } as GameState;
+            gameLoop.setState(respawned);
+            saveGame(respawned, 1);
+          } else {
+            gameLoop.handleAction({ type: "crucibleLeave" });
+          }
+        },
+      );
+      addScreenCleanup(crucSumScreen.cleanup);
+      root.replaceChildren(crucSumScreen);
       break;
     }
 

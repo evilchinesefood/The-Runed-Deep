@@ -45,6 +45,11 @@ import {
   getRiftShardReward,
 } from "../systems/rift/RiftModifiers";
 import { generateRiftFloor } from "../systems/rift/RiftGen";
+import { generateCrucibleArena } from "../systems/crucible/CrucibleGen";
+import {
+  spawnWave as crucibleSpawnWave,
+  getWaveReward,
+} from "../systems/crucible/WaveManager";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
   N: { x: 0, y: -1 },
@@ -192,6 +197,14 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processRerollRift(state);
     case "riftComplete":
       return processRiftComplete(state);
+    case "enterCrucible":
+      return processEnterCrucible(state);
+    case "exitCrucible":
+      return processExitCrucible(state);
+    case "crucibleNextWave":
+      return processCrucibleNextWave(state);
+    case "crucibleLeave":
+      return processExitCrucible(state);
     default:
       return state;
   }
@@ -1323,6 +1336,125 @@ function processRiftComplete(state: GameState): GameState {
       ...state.messages,
       {
         text: `Rift conquered! You earned ${shards} Rune Shards.`,
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+// ── Crucible ────────────────────────────────────────────────
+
+function processEnterCrucible(state: GameState): GameState {
+  const { floor, playerStart } = generateCrucibleArena(Date.now());
+  const crucible: import("./types").CrucibleState = {
+    wave: 0,
+    shardsEarned: 0,
+    goldEarned: 0,
+  };
+
+  return {
+    ...state,
+    activeCrucible: crucible,
+    activeRift: null, // Clear rift state if any
+    currentDungeon: "crucible",
+    currentFloor: 0,
+    returnFloor: state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
+    floors: { ...state.floors, "crucible-0": floor },
+    hero: { ...state.hero, position: playerStart },
+    screen: "game",
+    messages: [
+      ...state.messages,
+      {
+        text: "You enter the Crucible. Prepare for battle!",
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+function processExitCrucible(state: GameState): GameState {
+  const crucible = state.activeCrucible;
+  let bestWave = state.crucibleBestWave ?? 0;
+  if (crucible && crucible.wave > bestWave) bestWave = crucible.wave;
+
+  return {
+    ...teleportToTown({ ...state, currentFloor: state.returnFloor || 1 }),
+    activeCrucible: null,
+    crucibleBestWave: bestWave,
+    messages: [
+      ...state.messages,
+      {
+        text: crucible
+          ? `You leave the Crucible after wave ${crucible.wave}. Earned ${crucible.shardsEarned} shards and ${crucible.goldEarned} gold.`
+          : "You leave the Crucible.",
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+function processCrucibleNextWave(state: GameState): GameState {
+  const crucible = state.activeCrucible;
+  if (!crucible) return state;
+
+  const nextWave = crucible.wave + 1;
+  const floorKey = "crucible-0";
+  const floor = state.floors[floorKey];
+  if (!floor) return state;
+
+  const updatedFloor = crucibleSpawnWave(
+    floor,
+    nextWave,
+    state.hero.position,
+    state.difficulty,
+  );
+
+  const reward = getWaveReward(nextWave);
+  const newCrucible: import("./types").CrucibleState = {
+    wave: nextWave,
+    shardsEarned: crucible.shardsEarned + reward.shards,
+    goldEarned: crucible.goldEarned + reward.gold,
+  };
+
+  return {
+    ...state,
+    activeCrucible: newCrucible,
+    hero: {
+      ...state.hero,
+      runeShards: state.hero.runeShards + reward.shards,
+      gold: state.hero.gold + reward.gold,
+    },
+    floors: { ...state.floors, [floorKey]: updatedFloor },
+    screen: "game",
+    messages: [
+      ...state.messages,
+      {
+        text: `Wave ${nextWave} begins! (+${reward.shards} shards, +${reward.gold}g)`,
+        severity: "important" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+export function processCrucibleWaveCleared(state: GameState): GameState {
+  const crucible = state.activeCrucible;
+  if (!crucible) return state;
+
+  let bestWave = state.crucibleBestWave ?? 0;
+  if (crucible.wave > bestWave) bestWave = crucible.wave;
+
+  return {
+    ...state,
+    crucibleBestWave: bestWave,
+    screen: "crucible-summary",
+    messages: [
+      ...state.messages,
+      {
+        text: `Wave ${crucible.wave} cleared!`,
         severity: "important" as const,
         turn: state.turn,
       },

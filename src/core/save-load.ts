@@ -5,6 +5,8 @@ import { getDungeonForFloor } from "../systems/dungeon/Tilesets";
 import { generateTownMap } from "../systems/town/TownMap";
 import { generateFloor } from "../systems/dungeon/generator";
 import { generateRiftFloor } from "../systems/rift/RiftGen";
+import { generateCrucibleArena } from "../systems/crucible/CrucibleGen";
+import { spawnWave } from "../systems/crucible/WaveManager";
 
 const SAVE_KEY_PREFIX = "rd-save-";
 const MAX_SLOTS = 3;
@@ -39,6 +41,8 @@ function pruneSaveState(state: GameState): GameState {
   } else if (state.currentDungeon === "rift" && state.activeRift) {
     // In rift: keep current rift floor only (rift floors regenerate)
     keep.add(`rift-${state.activeRift.currentFloor}`);
+  } else if (state.currentDungeon === "crucible" && state.activeCrucible) {
+    keep.add("crucible-0");
   } else {
     // In dungeon: keep current floor + previous floor
     const cf = state.currentFloor;
@@ -216,6 +220,12 @@ export function loadGame(slot: number = 1): GameState | null {
     if ((state as any).activeRift === undefined)
       (state as any).activeRift = null;
 
+    // Migration: add crucible fields
+    if ((state as any).activeCrucible === undefined)
+      (state as any).activeCrucible = null;
+    if ((state as any).crucibleBestWave === undefined)
+      (state as any).crucibleBestWave = 0;
+
     // Migration: 0-indexed floors → 1-indexed
     const has0Key = Object.keys(state.floors).some(
       (k) => k.endsWith("-0") && k !== "town-0",
@@ -270,6 +280,13 @@ export function loadGame(slot: number = 1): GameState | null {
           state,
         );
         state.floors[currentKey] = riftFloor;
+        state.hero.position = playerStart;
+      } else if (state.currentDungeon === "crucible" && state.activeCrucible) {
+        const { floor: crucFloor, playerStart } = generateCrucibleArena();
+        // Respawn current wave monsters so wave isn't auto-completed
+        const wave = state.activeCrucible.wave || 1;
+        const populated = spawnWave(crucFloor, wave, playerStart);
+        state.floors["crucible-0"] = populated;
         state.hero.position = playerStart;
       } else {
         const { floor: newFloor } = generateFloor(

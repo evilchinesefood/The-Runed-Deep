@@ -60,6 +60,7 @@ const BUILDING_NAMES: Record<string, string> = {
   "rune-forge": "The Rune Forge",
   "rift-stone": "Rift Stone",
   "statue-of-fortune": "Statue of Fortune",
+  crucible: "The Crucible",
 };
 
 function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
@@ -1183,6 +1184,29 @@ export function createServiceScreen(
           });
           content.appendChild(riftBtn);
         }
+        break;
+      }
+      case "crucible": {
+        content = createPanel("Services");
+        content.appendChild(
+          el(
+            "div",
+            {
+              color: "#c9a84c",
+              padding: "12px",
+              textAlign: "center",
+              fontStyle: "italic",
+            },
+            "A battle-scarred arena where warriors test their mettle against endless waves of enemies.",
+          ),
+        );
+        const crucBtn = createButton("Enter the Crucible");
+        crucBtn.style.cssText +=
+          "display:block;width:100%;padding:12px;font-size:14px;margin-top:12px;";
+        crucBtn.addEventListener("click", () => {
+          onUpdate({ ...state, screen: "crucible-menu" });
+        });
+        content.appendChild(crucBtn);
         break;
       }
       case "statue-of-fortune":

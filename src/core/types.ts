@@ -25,7 +25,9 @@ export type Screen =
   | "death"
   | "achievements"
   | "rift-menu"
-  | "rift-summary";
+  | "rift-summary"
+  | "crucible-menu"
+  | "crucible-summary";
 
 export type Difficulty =
   | "normal"
@@ -251,7 +253,8 @@ export type DungeonId =
   | "ice"
   | "castle"
   | "town"
-  | "rift";
+  | "rift"
+  | "crucible";
 
 // ============================================================
 // Fractured Rift
@@ -276,6 +279,16 @@ export interface RiftState {
   currentFloor: number;
   totalFloors: number;
   shardsEarned: number;
+}
+
+// ============================================================
+// Crucible
+// ============================================================
+
+export interface CrucibleState {
+  wave: number;
+  shardsEarned: number;
+  goldEarned: number;
 }
 
 // ============================================================
@@ -324,6 +337,8 @@ export interface GameState {
   riftStoneUnlocked: boolean;
   riftOffering: RiftOffering | null;
   activeRift: RiftState | null;
+  activeCrucible: CrucibleState | null;
+  crucibleBestWave: number;
 }
 
 // ============================================================
@@ -361,4 +376,8 @@ export type GameAction =
   | { type: "exitRift" }
   | { type: "rerollRift" }
   | { type: "openRiftMenu" }
-  | { type: "riftComplete" };
+  | { type: "riftComplete" }
+  | { type: "enterCrucible" }
+  | { type: "exitCrucible" }
+  | { type: "crucibleNextWave" }
+  | { type: "crucibleLeave" };

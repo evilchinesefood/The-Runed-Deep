@@ -1,5 +1,5 @@
 import type { GameState, GameAction } from "./types";
-import { processAction } from "./actions";
+import { processAction, processCrucibleWaveCleared } from "./actions";
 import { processAllMonsterTurns } from "../systems/monsters/ai";
 import { checkAndApplyLevelUps } from "../systems/character/leveling";
 import { Sound } from "../systems/Sound";
@@ -95,7 +95,32 @@ export class GameLoop {
       if (newState.activeRift) {
         newState = { ...newState, activeRift: null };
       }
-      newState = { ...newState, screen: "death" };
+      // Crucible death: keep rewards, show summary
+      if (newState.currentDungeon === "crucible" && newState.activeCrucible) {
+        let bestWave = newState.crucibleBestWave ?? 0;
+        if (newState.activeCrucible.wave > bestWave)
+          bestWave = newState.activeCrucible.wave;
+        newState = {
+          ...newState,
+          crucibleBestWave: bestWave,
+          screen: "crucible-summary",
+        };
+      } else {
+        newState = { ...newState, screen: "death" };
+      }
+    }
+
+    // 5b. Crucible wave cleared check
+    if (
+      newState.screen === "game" &&
+      newState.currentDungeon === "crucible" &&
+      newState.activeCrucible &&
+      newState.activeCrucible.wave > 0
+    ) {
+      const cFloor = newState.floors["crucible-0"];
+      if (cFloor && cFloor.monsters.length > 0 && cFloor.monsters.every((m) => m.hp <= 0)) {
+        newState = processCrucibleWaveCleared(newState);
+      }
     }
 
     // 6. Update state and render

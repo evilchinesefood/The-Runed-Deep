@@ -108,5 +108,7 @@ export function createInitialGameState(
     riftStoneUnlocked: false,
     riftOffering: null,
     activeRift: null,
+    activeCrucible: null,
+    crucibleBestWave: 0,
   };
 }
