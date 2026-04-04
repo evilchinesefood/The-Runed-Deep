@@ -378,7 +378,7 @@ export class MapRenderer {
             if (visible || isLit) {
               const itemsHere = itemsAt.get(key);
               if (itemsHere && itemsHere.length > 1) {
-                gc = "treasure-pile";
+                gc = "gold-25";
                 gd = "block";
                 go = "1";
               } else if (itemsHere && itemsHere.length === 1) {
