@@ -654,7 +654,7 @@
             if (cfg.water)
               for (let w of cfg.water)
                 if (w.x >= 0 && w.x < TOWN_W && w.y >= 0 && w.y < TOWN_H)
-                  grid[w.y][w.x] = "water-shallow_water";
+                  grid[w.y][w.x] = "water-deep_water";
             if (cfg.trees)
               for (let t of cfg.trees)
                 if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
@@ -1310,7 +1310,7 @@
               if (cfg.water)
                 for (let w of cfg.water)
                   if (w.x >= 0 && w.x < TOWN_W && w.y >= 0 && w.y < TOWN_H)
-                    grid[w.y][w.x] = grid[w.y][w.x] || "water-shallow_water";
+                    grid[w.y][w.x] = grid[w.y][w.x] || "water-deep_water";
               if (cfg.trees)
                 for (let t of cfg.trees)
                   if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
