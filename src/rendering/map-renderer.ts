@@ -362,7 +362,7 @@ export class MapRenderer {
             if (isOverlayTile) {
               fc =
                 tile.type === "building" || inTown
-                  ? "floor-grass_full"
+                  ? "floor-grass0"
                   : isLit && theme
                     ? theme.litFloors[
                         Math.abs(worldX * 31 + worldY * 37) %
@@ -385,7 +385,7 @@ export class MapRenderer {
                 if (tile.type === "trap" && tile.trapRevealed) gtrap = true;
               }
             } else if (tile.sprite === "wall-brick_dark_1_0") {
-              fc = "floor-grass_full";
+              fc = "floor-grass0";
               fo = opacity;
               gc = tile.sprite;
               gd = "block";

@@ -75,29 +75,31 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       };
   }
 
-  // 3. Paint decorations (flowers, moss, plants — walkable grass)
+  // 3. Paint decorations (flowers, moss, plants — grass base with overlay)
   for (const d of cfg.decoration || []) {
     if (d.y < H && d.x < W)
       tiles[d.y][d.x] = {
         type: "grass",
-        sprite: d.sprite,
+        sprite: "floor-grass0",
         walkable: true,
         transparent: true,
+        spriteLayers: ["floor-grass0", d.sprite],
       };
   }
 
-  // 4. Paint trees (not walkable, but transparent)
+  // 4. Paint trees (not walkable, but transparent — grass base layer)
   for (const t of cfg.trees || []) {
     if (t.y < H && t.x < W)
       tiles[t.y][t.x] = {
         type: "wall",
-        sprite: t.sprite,
+        sprite: "floor-grass0",
         walkable: false,
         transparent: true,
+        spriteLayers: ["floor-grass0", t.sprite],
       };
   }
 
-  // 5. Paint features
+  // 5. Paint features (grass base layer)
   for (const f of cfg.features || []) {
     const sprite = FEATURE_SPRITES[f.type] ?? "floor-grass_full";
     const fw = f.w ?? 1;
@@ -109,9 +111,10 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
         if (fy < H && fx < W)
           tiles[fy][fx] = {
             type: "grass",
-            sprite,
+            sprite: "floor-grass0",
             walkable: true,
             transparent: true,
+            spriteLayers: ["floor-grass0", sprite],
           };
       }
     }
@@ -123,12 +126,19 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       const isWall = t.sprite.startsWith("wall-");
       const isWater = t.sprite.startsWith("water-");
       const isTree = t.sprite.startsWith("trees-");
+      const isDecor = t.sprite.startsWith("statues-") || t.sprite.startsWith("decor-") ||
+        t.sprite.startsWith("altars-") || t.sprite.startsWith("plants-") ||
+        t.sprite.startsWith("shops-");
+      const needsGrassBase = isTree || isDecor;
+      const layers = needsGrassBase
+        ? ["floor-grass0", t.sprite, ...(t.overlay ? [t.overlay] : [])]
+        : t.overlay ? [t.sprite, t.overlay] : undefined;
       tiles[t.y][t.x] = {
         type: isWall ? "wall" : isWater ? "water" : isTree ? "wall" : "grass",
-        sprite: t.sprite,
+        sprite: needsGrassBase ? "floor-grass0" : t.sprite,
         walkable: !isWall && !isWater && !isTree,
         transparent: !isWall,
-        spriteLayers: t.overlay ? [t.sprite, t.overlay] : undefined,
+        spriteLayers: layers,
       };
     }
   }
