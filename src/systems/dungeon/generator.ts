@@ -42,12 +42,20 @@ import {
 } from "./Tilesets";
 export { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
 
+import {
+  type DungeonTheme,
+  getThemeForDepth,
+  pickVariant,
+} from "../../data/DungeonThemes";
+
 let activeTileset: Tileset = TILESETS["mine"];
+let activeTheme: DungeonTheme = getThemeForDepth(1);
+let themeRand: () => number = Math.random;
 
 function createWallTile(): Tile {
   return {
     type: "wall",
-    sprite: activeTileset.wall,
+    sprite: pickVariant(activeTheme.walls, themeRand),
     walkable: false,
     transparent: false,
   };
@@ -56,7 +64,7 @@ function createWallTile(): Tile {
 function createFloorTile(): Tile {
   return {
     type: "floor",
-    sprite: activeTileset.floor,
+    sprite: pickVariant(activeTheme.floors, themeRand),
     walkable: true,
     transparent: true,
   };
@@ -65,7 +73,7 @@ function createFloorTile(): Tile {
 function createDoorTile(): Tile {
   return {
     type: "door-closed",
-    sprite: "doors-closed_door",
+    sprite: pickVariant(activeTheme.doorClosed, themeRand),
     walkable: false,
     transparent: false,
   };
@@ -74,7 +82,7 @@ function createDoorTile(): Tile {
 function createLockedDoorTile(): Tile {
   return {
     type: "door-locked",
-    sprite: "doors-closed_door",
+    sprite: pickVariant(activeTheme.doorClosed, themeRand),
     walkable: false,
     transparent: false,
   };
@@ -83,7 +91,7 @@ function createLockedDoorTile(): Tile {
 function createSecretDoorTile(): Tile {
   return {
     type: "door-secret",
-    sprite: activeTileset.wall,
+    sprite: pickVariant(activeTheme.walls, themeRand),
     walkable: false,
     transparent: false,
   };
@@ -94,8 +102,8 @@ function createStairsTile(direction: "up" | "down"): Tile {
     type: direction === "up" ? "stairs-up" : "stairs-down",
     sprite:
       direction === "up"
-        ? "gateways-stone_stairs_up"
-        : "gateways-stone_stairs_down",
+        ? pickVariant(activeTheme.stairsUp, themeRand)
+        : pickVariant(activeTheme.stairsDown, themeRand),
     walkable: true,
     transparent: true,
   };
@@ -107,7 +115,7 @@ const TRAP_TYPES = SHARED_TRAP_TYPES;
 function createTrapTile(trapType: string): Tile {
   return {
     type: "trap",
-    sprite: activeTileset.floor, // looks like floor until revealed
+    sprite: pickVariant(activeTheme.floors, themeRand), // looks like floor until revealed
     walkable: true,
     transparent: true,
     trapType,
@@ -179,8 +187,10 @@ function generateFloorAttempt(
   ngPlus: number = 0,
 ): { floor: Floor; playerStart: Vector2 } | null {
   activeTileset = getTileset(getDungeonForFloor(floorNum));
+  activeTheme = getThemeForDepth(floorNum);
 
   const rand = seededRandom(seed + floorNum * 1000);
+  themeRand = rand;
   const randInt = (min: number, max: number) =>
     Math.floor(rand() * (max - min + 1)) + min;
 
@@ -958,7 +968,7 @@ function ensureConnectivity(floor: Floor): void {
   for (const wt of waterTiles) {
     floor.tiles[wt.y][wt.x] = {
       type: "floor",
-      sprite: activeTileset.floor,
+      sprite: pickVariant(activeTheme.floors, themeRand),
       walkable: true,
       transparent: true,
     };

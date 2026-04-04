@@ -11,6 +11,7 @@ import {
   generateFloor,
   getDungeonForFloor,
 } from "../systems/dungeon/generator";
+import { getThemeForDepth } from "../data/DungeonThemes";
 import { playerAttacksMonster } from "../systems/combat/combat";
 import { castSpell } from "../systems/spells/casting";
 import { saveGame } from "./save-load";
@@ -292,11 +293,12 @@ function processMove(state: GameState, direction: Direction): GameState {
 
   // Bump into closed door → open it
   if (tile.type === "door-closed") {
+    const doorTheme = getThemeForDepth(state.currentFloor);
     const newTiles = [...floor.tiles];
     newTiles[newPos.y] = [...newTiles[newPos.y]];
     newTiles[newPos.y][newPos.x] = {
       type: "door-open",
-      sprite: "doors-open_door",
+      sprite: doorTheme.doorOpen[0],
       walkable: true,
       transparent: true,
     };
@@ -320,11 +322,12 @@ function processMove(state: GameState, direction: Direction): GameState {
   if (tile.type === "door-locked") {
     const strCheck = Math.random() * 100 < state.hero.attributes.strength;
     if (strCheck) {
+      const lockTheme = getThemeForDepth(state.currentFloor);
       const newTiles = [...floor.tiles];
       newTiles[newPos.y] = [...newTiles[newPos.y]];
       newTiles[newPos.y][newPos.x] = {
         type: "door-open",
-        sprite: "doors-open_door",
+        sprite: lockTheme.doorOpen[0],
         walkable: true,
         transparent: true,
       };
@@ -1117,13 +1120,14 @@ function processSearch(state: GameState): GameState {
 
       // Reveal secret doors
       if (tile.type === "door-secret") {
+        const secretTheme = getThemeForDepth(state.currentFloor);
         if (!clonedRows.has(y)) {
           newTiles[y] = [...newTiles[y]];
           clonedRows.add(y);
         }
         newTiles[y][x] = {
           type: "door-closed",
-          sprite: "doors-closed_door",
+          sprite: secretTheme.doorClosed[0],
           walkable: false,
           transparent: false,
         };

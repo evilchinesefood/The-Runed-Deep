@@ -5,6 +5,7 @@ import {
   hideItemTooltip,
 } from "../ui/item-tooltip";
 import { getDungeonForFloor, getTileset } from "../systems/dungeon/Tilesets";
+import { getThemeForDepth } from "../data/DungeonThemes";
 import {
   getDisplaySprite,
   getItemGlow,
@@ -235,6 +236,10 @@ export class MapRenderer {
       state.currentDungeon !== "town"
         ? getTileset(getDungeonForFloor(state.currentFloor))
         : null;
+    const theme =
+      state.currentDungeon !== "town"
+        ? getThemeForDepth(state.currentFloor)
+        : null;
 
     // Build spatial lookup maps (O(1) per tile instead of O(n))
     const tk = (x: number, y: number) => `${x},${y}`;
@@ -314,7 +319,11 @@ export class MapRenderer {
             const key = tk(worldX, worldY);
             const hasBlood = decalSet.has(key);
             const floorSprite =
-              isLit && isFloorLike ? "floor-grey_dirt_b_0" : tile.sprite;
+              isLit && isFloorLike && theme
+                ? theme.litFloors[
+                    Math.abs(worldX * 31 + worldY * 37) % theme.litFloors.length
+                  ]
+                : tile.sprite;
 
             const isOverlayTile =
               tile.type === "stairs-up" ||
@@ -331,9 +340,17 @@ export class MapRenderer {
               fc =
                 tile.type === "building" || inTown
                   ? "floor-grass_full"
-                  : isLit
-                    ? "floor-grey_dirt_b_0"
-                    : "floor-grey_dirt0";
+                  : isLit && theme
+                    ? theme.litFloors[
+                        Math.abs(worldX * 31 + worldY * 37) %
+                          theme.litFloors.length
+                      ]
+                    : theme
+                      ? theme.floors[
+                          Math.abs(worldX * 31 + worldY * 37) %
+                            theme.floors.length
+                        ]
+                      : "floor-grey_dirt0";
               fo = opacity;
               if (tile.type !== "building" || tile.walkable) {
                 gc = tile.sprite;

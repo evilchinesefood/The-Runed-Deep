@@ -243,7 +243,15 @@ export interface Floor {
   height: number;
 }
 
-export type DungeonId = "mine" | "fortress" | "castle" | "town" | "rift";
+export type DungeonId =
+  | "mine"
+  | "lair"
+  | "crypt"
+  | "fortress"
+  | "ice"
+  | "castle"
+  | "town"
+  | "rift";
 
 // ============================================================
 // Fractured Rift

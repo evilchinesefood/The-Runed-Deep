@@ -15,19 +15,36 @@ import { createMonster } from "../monsters/spawning";
 import { getItemsForDepth, ALL_ITEM_TEMPLATES } from "../../data/items";
 import { createItemFromTemplate } from "../items/loot";
 import { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
+import {
+  type DungeonTheme,
+  getThemeForDepth,
+  pickVariant,
+} from "../../data/DungeonThemes";
 
 const BOSS_FLOORS = new Set([5, 10, 15, 20, 25, 30]);
 
 // ── Tile factories (use active tileset) ───────────────────
 
 let ts: Tileset = TILESETS["mine"];
+let bossTheme: DungeonTheme = getThemeForDepth(1);
+let bossRand: () => number = Math.random;
 
 function wall(): Tile {
-  return { type: "wall", sprite: ts.wall, walkable: false, transparent: false };
+  return {
+    type: "wall",
+    sprite: pickVariant(bossTheme.walls, bossRand),
+    walkable: false,
+    transparent: false,
+  };
 }
 
 function floor(): Tile {
-  return { type: "floor", sprite: ts.floor, walkable: true, transparent: true };
+  return {
+    type: "floor",
+    sprite: pickVariant(bossTheme.floors, bossRand),
+    walkable: true,
+    transparent: true,
+  };
 }
 
 function stairsUp(): Tile {
@@ -839,6 +856,8 @@ export function generateBossFloor(
 ): { floor: Floor; playerStart: Vector2 } | null {
   if (!BOSS_FLOORS.has(floorNum)) return null;
   ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS["mine"];
+  bossTheme = getThemeForDepth(floorNum);
+  bossRand = Math.random;
 
   // Use floorNum for boss/monster lookups, depth for scaling
   let result: { floor: Floor; playerStart: Vector2 } | null = null;
