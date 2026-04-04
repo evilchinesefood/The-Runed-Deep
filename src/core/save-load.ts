@@ -226,6 +226,10 @@ export function loadGame(slot: number = 1): GameState | null {
     if ((state as any).crucibleBestWave === undefined)
       (state as any).crucibleBestWave = 0;
 
+    // Migration: add rune forge fields
+    if ((state as any).runeForgeMaxSockets === undefined)
+      (state as any).runeForgeMaxSockets = 2;
+
     // Migration: 0-indexed floors → 1-indexed
     const has0Key = Object.keys(state.floors).some(
       (k) => k.endsWith("-0") && k !== "town-0",

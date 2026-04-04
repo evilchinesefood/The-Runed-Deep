@@ -437,12 +437,19 @@ export function createShopScreen(
     titleBar.insertBefore(itemsBtn, titleBar.lastChild);
     screen.appendChild(titleBar);
 
-    const currencyLine = el("div", { fontSize: "13px", marginBottom: "8px", display: "flex", gap: "12px" });
+    const currencyLine = el("div", {
+      fontSize: "13px",
+      marginBottom: "8px",
+      display: "flex",
+      gap: "12px",
+    });
     const goldLabel = el("span", { color: "#fff" }, "Gold: ");
     goldLabel.appendChild(el("span", { color: "#fc4" }, `\u0024${gold}`));
     currencyLine.appendChild(goldLabel);
     const shardLabel = el("span", { color: "#fff" }, "Runes: ");
-    shardLabel.appendChild(el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`));
+    shardLabel.appendChild(
+      el("span", { color: "#a6f" }, `\u25C6${state.hero.runeShards}`),
+    );
     currencyLine.appendChild(shardLabel);
     screen.appendChild(currencyLine);
 
@@ -493,6 +500,16 @@ export function createShopScreen(
       sellMarkedBtn.style.cssText +=
         "display:block;width:100%;padding:10px;font-size:14px;";
       sellMarkedBtn.addEventListener("click", () => {
+        const hasRunes = markedItems.some((i) =>
+          i.sockets?.some((s: string | null) => s !== null),
+        );
+        if (
+          hasRunes &&
+          !confirm(
+            "Some marked items have runes that will be destroyed. Sell anyway?",
+          )
+        )
+          return;
         for (const item of markedItems) {
           soldKeys.add(`${item.templateId}|${item.enchantment}`);
           state = sellItem(state, shopId, item.id);
@@ -511,6 +528,14 @@ export function createShopScreen(
       () => true,
       (id) => {
         const sellTarget = state.hero.inventory.find((i) => i.id === id);
+        if (sellTarget?.sockets?.some((s: string | null) => s !== null)) {
+          if (
+            !confirm(
+              "The runes etched into this item will be destroyed. Sell anyway?",
+            )
+          )
+            return;
+        }
         if (sellTarget)
           soldKeys.add(`${sellTarget.templateId}|${sellTarget.enchantment}`);
         const next = sellItem(state, shopId, id);

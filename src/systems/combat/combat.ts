@@ -20,6 +20,32 @@ import { ITEM_BY_ID } from "../../data/items";
 import { getDifficultyConfig } from "../../data/difficulty";
 import { MONSTER_BY_ID } from "../../data/monsters";
 import { getDisplayName } from "../inventory/display-name";
+import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
+
+/** Sum a rune effect value across all equipped items */
+function sumRuneEffect(equipment: any, effect: string): number {
+  let total = 0;
+  for (const item of Object.values(equipment)) {
+    if (!item || !(item as any).sockets) continue;
+    const it = item as any;
+    const effEnch = it.enchantment + (it.blessed ? 1 : 0);
+    for (const runeId of it.sockets) {
+      if (!runeId) continue;
+      const rune = RUNE_BY_ID[runeId];
+      if (rune?.effect === effect) total += getRuneValue(runeId, effEnch);
+    }
+  }
+  return total;
+}
+
+/** Check if any equipped item has a specific rune */
+function hasRune(equipment: any, runeId: string): boolean {
+  for (const item of Object.values(equipment)) {
+    if (!item || !(item as any).sockets) continue;
+    if ((item as any).sockets.includes(runeId)) return true;
+  }
+  return false;
+}
 
 function fortuneXp(baseXp: number, equipment: any): number {
   let xp = baseXp;
@@ -231,6 +257,62 @@ export function playerAttacksMonster(
   const berserkBonus = equipAffixTotal(state.hero.equipment, "berserk-fury");
   if (berserkBonus > 0) damage = Math.round(damage * (1 + berserkBonus / 100));
 
+  // Rune: Flame — add fire damage
+  const flameDmg = sumRuneEffect(state.hero.equipment, "fire-damage");
+  if (flameDmg > 0) {
+    const bonus = Math.max(1, Math.round((damage * flameDmg) / 10));
+    damage += bonus;
+    messages.push({
+      text: `Flame rune sears for +${bonus} fire damage.`,
+      severity: "combat",
+      turn: state.turn,
+    });
+  }
+
+  // Rune: Frost — cold damage + chance to slow
+  const frostDmg = sumRuneEffect(state.hero.equipment, "cold-damage-slow");
+  if (frostDmg > 0) {
+    const bonus = Math.max(1, Math.round((damage * frostDmg) / 10));
+    damage += bonus;
+    if (Math.random() < 0.25 && !monster.slowed) {
+      const floorKey2 = `${state.currentDungeon}-${state.currentFloor}`;
+      const floor2 = state.floors[floorKey2];
+      if (floor2) {
+        const mIdx2 = floor2.monsters.findIndex((m) => m.id === monster.id);
+        if (mIdx2 >= 0) {
+          const ms2 = [...floor2.monsters];
+          ms2[mIdx2] = { ...ms2[mIdx2], slowed: true };
+          state = {
+            ...state,
+            floors: {
+              ...state.floors,
+              [floorKey2]: { ...floor2, monsters: ms2 },
+            },
+          };
+          floor =
+            state.floors[`${state.currentDungeon}-${state.currentFloor}`]!;
+          monster = floor.monsters.find((m) => m.id === monsterId)!;
+          messages.push({
+            text: `Frost rune chills the ${monster.name}!`,
+            severity: "combat",
+            turn: state.turn,
+          });
+        }
+      }
+    }
+  }
+
+  // Rune: Precision — crit chance bonus
+  const critBonus = sumRuneEffect(state.hero.equipment, "crit-chance");
+  if (critBonus > 0 && Math.random() * 100 < critBonus) {
+    damage = Math.round(damage * 1.5);
+    messages.push({
+      text: `Critical hit! (Precision rune)`,
+      severity: "combat",
+      turn: state.turn,
+    });
+  }
+
   // Hit flash on the monster
   queueAnimation([
     {
@@ -354,12 +436,38 @@ export function playerAttacksMonster(
         turn: state.turn,
       });
     }
+    // Rune: Siphon — restore MP on kill
+    let siphonMp = 0;
+    const siphonVal = sumRuneEffect(state.hero.equipment, "mp-per-kill");
+    if (siphonVal > 0) {
+      siphonMp = Math.round(siphonVal);
+      messages.push({
+        text: `Siphon rune restores ${siphonMp} MP.`,
+        severity: "combat",
+        turn: state.turn,
+      });
+    }
+
+    // Rune: Conversion — heal % of overkill damage
+    let convHeal = 0;
+    const convPct = sumRuneEffect(state.hero.equipment, "overkill-heal");
+    if (convPct > 0 && newHp < 0) {
+      convHeal = Math.max(1, Math.round((Math.abs(newHp) * convPct) / 100));
+      messages.push({
+        text: `Conversion rune heals you for ${convHeal} HP.`,
+        severity: "combat",
+        turn: state.turn,
+      });
+    }
+
     const resultState: GameState = {
       ...applyMessages(state, messages),
       hero: {
         ...state.hero,
         xp: state.hero.xp + fortuneXp(monster.xpValue, state.hero.equipment),
         runeShards: state.hero.runeShards + shardReward,
+        mp: Math.min(state.hero.maxMp, state.hero.mp + siphonMp),
+        hp: Math.min(state.hero.maxHp, state.hero.hp + convHeal),
       },
       floors: { ...state.floors, [floorKey]: newFloor },
       turn: state.turn + 1,
@@ -374,13 +482,21 @@ export function playerAttacksMonster(
     }
 
     // Worldsplitter AoE: damage all other adjacent monsters
-    return worldsplitterAoe(
+    let afterKill = worldsplitterAoe(
       resultState,
       state.hero,
       monster.position,
       damage,
       messages,
     );
+    // Rune: Splitting — splash damage to adjacent enemies
+    afterKill = runeSplashDamage(
+      afterKill,
+      state.hero,
+      monster.position,
+      damage,
+    );
+    return afterKill;
   } else {
     // Monster survives
     messages.push({
@@ -402,13 +518,16 @@ export function playerAttacksMonster(
     };
 
     // Worldsplitter AoE: damage all other adjacent monsters
-    return worldsplitterAoe(
+    let afterHit = worldsplitterAoe(
       resultState,
       state.hero,
       monster.position,
       damage,
       [],
     );
+    // Rune: Splitting — splash damage to adjacent enemies
+    afterHit = runeSplashDamage(afterHit, state.hero, monster.position, damage);
+    return afterHit;
   }
 }
 
@@ -496,6 +615,91 @@ function worldsplitterAoe(
   return result;
 }
 
+/** Rune: Splitting — splash damage to adjacent enemies (skip primary target, skip worldsplitter targets) */
+function runeSplashDamage(
+  state: GameState,
+  hero: Hero,
+  primaryPos: { x: number; y: number },
+  baseDmg: number,
+): GameState {
+  const splashVal = sumRuneEffect(hero.equipment, "splash-damage");
+  if (splashVal <= 0) return state;
+  // If worldsplitter is active, skip (already handled)
+  const weapon = hero.equipment.weapon;
+  if (
+    weapon &&
+    ITEM_BY_ID[weapon.templateId]?.uniqueAbility === "worldsplitter"
+  )
+    return state;
+
+  const splashDmg = Math.max(1, Math.round((baseDmg * splashVal) / 10));
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  let result = state;
+
+  const floor = result.floors[floorKey];
+  if (!floor) return result;
+
+  for (const m of [...floor.monsters]) {
+    if (m.position.x === primaryPos.x && m.position.y === primaryPos.y)
+      continue;
+    const dx = Math.abs(m.position.x - primaryPos.x);
+    const dy = Math.abs(m.position.y - primaryPos.y);
+    if (dx > 1 || dy > 1) continue;
+
+    const curFloor = result.floors[floorKey];
+    if (!curFloor) break;
+    const mIdx = curFloor.monsters.findIndex((cm) => cm.id === m.id);
+    if (mIdx === -1) continue;
+    const cm = curFloor.monsters[mIdx];
+    const mNewHp = cm.hp - splashDmg;
+
+    if (mNewHp <= 0) {
+      const newMonsters = [...curFloor.monsters];
+      newMonsters.splice(mIdx, 1);
+      result = {
+        ...result,
+        hero: {
+          ...result.hero,
+          xp: result.hero.xp + fortuneXp(cm.xpValue, hero.equipment),
+        },
+        floors: {
+          ...result.floors,
+          [floorKey]: { ...curFloor, monsters: newMonsters },
+        },
+        messages: [
+          ...result.messages,
+          {
+            text: `Splitting rune hits ${cm.name} for ${splashDmg} damage, killing it! (+${cm.xpValue} XP)`,
+            severity: "combat" as const,
+            turn: result.turn,
+          },
+        ],
+      };
+      trackMonsterKill(cm.templateId, cm.xpValue >= 250);
+      if (cm.templateId === "surtur") return { ...result, screen: "victory" };
+    } else {
+      const newMonsters = [...curFloor.monsters];
+      newMonsters[mIdx] = { ...cm, hp: mNewHp };
+      result = {
+        ...result,
+        floors: {
+          ...result.floors,
+          [floorKey]: { ...curFloor, monsters: newMonsters },
+        },
+        messages: [
+          ...result.messages,
+          {
+            text: `Splitting rune hits ${cm.name} for ${splashDmg} damage. (${mNewHp}/${cm.maxHp})`,
+            severity: "combat" as const,
+            turn: result.turn,
+          },
+        ],
+      };
+    }
+  }
+  return result;
+}
+
 /**
  * Monster attacks the player. Returns updated state.
  */
@@ -512,6 +716,17 @@ export function monsterAttacksPlayer(
   if (!doesHit(hitChance)) {
     messages.push({
       text: `The ${monster.name} misses ${state.hero.name}.`,
+      severity: "combat",
+      turn: state.turn,
+    });
+    return applyMessages(state, messages);
+  }
+
+  // Rune: Phantom — dodge chance
+  const phantomDodge = sumRuneEffect(state.hero.equipment, "dodge");
+  if (phantomDodge > 0 && Math.random() * 100 < phantomDodge) {
+    messages.push({
+      text: `${state.hero.name} phases through the ${monster.name}'s attack! (Phantom rune)`,
       severity: "combat",
       turn: state.turn,
     });
@@ -595,9 +810,10 @@ export function monsterAttacksPlayer(
     floors,
   };
 
-  // Reflect damage (Thorns affix + unique abilities)
+  // Reflect damage (Thorns affix + unique abilities + rune)
   let monsterKilledByThorns = false;
   let totalThornsPct = equipAffixTotal(state.hero.equipment, "thorns");
+  totalThornsPct += sumRuneEffect(state.hero.equipment, "reflect-damage");
   // Aegis of the Fallen: 30% reflect
   for (const eq of Object.values(state.hero.equipment)) {
     if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "aegis-power")

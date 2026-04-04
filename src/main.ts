@@ -848,6 +848,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
       activeRift: null,
       activeCrucible: null,
       crucibleBestWave: 0,
+      runeForgeMaxSockets: 2,
     };
     gameLoop.setState(testState);
   }

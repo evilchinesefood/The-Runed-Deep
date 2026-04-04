@@ -110,5 +110,6 @@ export function createInitialGameState(
     activeRift: null,
     activeCrucible: null,
     crucibleBestWave: 0,
+    runeForgeMaxSockets: 2,
   };
 }

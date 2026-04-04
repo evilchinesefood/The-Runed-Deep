@@ -11,6 +11,7 @@ import {
 import { getDifficultyConfig } from "../data/difficulty";
 import { ITEM_BY_ID } from "../data/items";
 import { recomputeDerivedStats } from "../systems/character/derived-stats";
+import { getRuneValue } from "../data/Runes";
 
 export type RenderCallback = (state: GameState) => void;
 export type StateChangeCallback = (state: GameState) => void;
@@ -53,6 +54,36 @@ export class GameLoop {
     // 1. Process player action
     let newState = processAction(this.state, action);
 
+    // 1b. Reset anchor rune flags on floor change (equipment + inventory)
+    if (
+      newState.currentFloor !== this.state.currentFloor ||
+      newState.currentDungeon !== this.state.currentDungeon
+    ) {
+      for (const [slot, item] of Object.entries(newState.hero.equipment)) {
+        if (item && item.properties["anchorUsed"]) {
+          const { anchorUsed, ...rest } = item.properties;
+          newState = {
+            ...newState,
+            hero: {
+              ...newState.hero,
+              equipment: {
+                ...newState.hero.equipment,
+                [slot]: { ...item, properties: rest },
+              },
+            },
+          };
+        }
+      }
+      const inv = newState.hero.inventory.map((item) => {
+        if (item.properties["anchorUsed"]) {
+          const { anchorUsed, ...rest } = item.properties;
+          return { ...item, properties: rest };
+        }
+        return item;
+      });
+      newState = { ...newState, hero: { ...newState.hero, inventory: inv } };
+    }
+
     // 2. Check for level-ups (after XP gain from combat)
     if (newState.screen === "game") {
       newState = checkAndApplyLevelUps(newState);
@@ -88,7 +119,44 @@ export class GameLoop {
       }
     }
 
-    // 5. Check for player death
+    // 5. Check for Anchor rune (prevent death once per floor)
+    if (newState.screen === "game" && newState.hero.hp <= 0) {
+      let anchored = false;
+      for (const item of Object.values(newState.hero.equipment)) {
+        if (!item || !item.sockets) continue;
+        if (item.sockets.includes("anchor") && !item.properties["anchorUsed"]) {
+          const updated = {
+            ...item,
+            properties: { ...item.properties, anchorUsed: 1 },
+          };
+          for (const [slot, eq] of Object.entries(newState.hero.equipment)) {
+            if (eq && eq.id === item.id) {
+              newState = {
+                ...newState,
+                hero: {
+                  ...newState.hero,
+                  hp: 1,
+                  equipment: { ...newState.hero.equipment, [slot]: updated },
+                },
+                messages: [
+                  ...newState.messages,
+                  {
+                    text: "The Anchor rune flares! You cling to life with 1 HP!",
+                    severity: "important" as const,
+                    turn: newState.turn,
+                  },
+                ],
+              };
+              anchored = true;
+              break;
+            }
+          }
+          if (anchored) break;
+        }
+      }
+    }
+
+    // Check for player death
     if (newState.screen === "game" && newState.hero.hp <= 0) {
       Sound.playerDeath();
       // Clear active rift on death
@@ -118,7 +186,11 @@ export class GameLoop {
       newState.activeCrucible.wave > 0
     ) {
       const cFloor = newState.floors["crucible-0"];
-      if (cFloor && cFloor.monsters.length > 0 && cFloor.monsters.every((m) => m.hp <= 0)) {
+      if (
+        cFloor &&
+        cFloor.monsters.length > 0 &&
+        cFloor.monsters.every((m) => m.hp <= 0)
+      ) {
         newState = processCrucibleWaveCleared(newState);
       }
     }
@@ -147,6 +219,23 @@ export class GameLoop {
       const healMult = getDifficultyConfig(state.difficulty).healingMult;
       const heal = Math.max(1, Math.round(regenHp * healMult));
       hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
+    }
+
+    // ── Renewal rune HP regen ─────────────────────────────
+    if (state.turn % 2 === 0 && hero.hp < hero.maxHp && !cursedGround) {
+      let runeRegen = 0;
+      for (const item of Object.values(hero.equipment)) {
+        if (!item || !item.sockets) continue;
+        const effEnch = item.enchantment + (item.blessed ? 1 : 0);
+        for (const rid of item.sockets) {
+          if (rid === "renewal") runeRegen += getRuneValue(rid, effEnch);
+        }
+      }
+      if (runeRegen > 0) {
+        const healMult = getDifficultyConfig(state.difficulty).healingMult;
+        const heal = Math.max(1, Math.round(runeRegen * healMult));
+        hero = { ...hero, hp: Math.min(hero.maxHp, hero.hp + heal) };
+      }
     }
 
     // ── Arcane Mastery MP regen (secondary value) ───────────

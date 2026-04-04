@@ -1,6 +1,7 @@
 import type { Item } from "../core/types";
 import { ITEM_BY_ID } from "../data/items";
 import { ENCHANTMENT_BY_ID, formatAffixDesc } from "../data/Enchantments";
+import { RUNE_BY_ID, formatRuneDesc, RUNE_TIER_COLOR } from "../data/Runes";
 import {
   getDisplayName,
   itemNameColor,
@@ -309,6 +310,27 @@ export function buildTooltipContent(item: Item): HTMLElement {
       }
     }
     container.appendChild(enchBox);
+  }
+
+  // Sockets
+  if (item.sockets && item.sockets.length > 0) {
+    const sockBox = d("div", { marginBottom: "4px" });
+    const effEnch = item.enchantment + (item.blessed ? 1 : 0);
+    for (const runeId of item.sockets) {
+      if (!runeId) {
+        sockBox.appendChild(iconLine("\u25CB", "Empty Socket", "#666"));
+      } else {
+        const rune = RUNE_BY_ID[runeId];
+        if (rune) {
+          const desc = formatRuneDesc(runeId, effEnch);
+          const color = RUNE_TIER_COLOR[rune.tier] ?? "#aaa";
+          sockBox.appendChild(
+            iconLine("\u25C6", `${rune.name}: ${desc}`, color),
+          );
+        }
+      }
+    }
+    container.appendChild(sockBox);
   }
 
   // Unique ability

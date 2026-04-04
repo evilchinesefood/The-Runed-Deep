@@ -14,6 +14,7 @@ import {
   AFFIX_BY_ID,
 } from "../../data/Enchantments";
 import { pickItemSprite } from "./SpritePool";
+import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
 
 let nextItemId = Date.now();
 
@@ -292,6 +293,15 @@ export function createItemFromTemplate(
     );
   }
 
+  // Roll sockets — only equippable items
+  let sockets: (string | null)[] | undefined;
+  if (template.equipSlot) {
+    const socketChance = Math.min(0.4, 0.05 + depth * 0.01);
+    if (Math.random() < socketChance) {
+      sockets = Math.random() < 0.8 ? [null] : [null, null];
+    }
+  }
+
   if (specials.length > 0) {
     const suffix = getAffixSuffix(specials);
     return {
@@ -299,10 +309,11 @@ export function createItemFromTemplate(
       name: `${base.name} ${suffix}`,
       identified: true,
       specialEnchantments: specials,
+      ...(sockets ? { sockets } : {}),
     };
   }
 
-  return base;
+  return sockets ? { ...base, sockets } : base;
 }
 
 export function createGoldDrop(
@@ -324,7 +335,22 @@ export function createGoldDrop(
         break;
       }
     }
-    amount = Math.round(amount * (1 + goldBonus) * fortuneUniqueMult);
+    // Rune: Fortune — gold find bonus
+    let runeGoldPct = 0;
+    for (const eq of Object.values(equipment)) {
+      if (!eq || !(eq as any).sockets) continue;
+      const it = eq as any;
+      const effEnch = it.enchantment + (it.blessed ? 1 : 0);
+      for (const rid of it.sockets) {
+        if (!rid) continue;
+        const r = RUNE_BY_ID[rid];
+        if (r?.effect === "gold-find")
+          runeGoldPct += getRuneValue(rid, effEnch) / 100;
+      }
+    }
+    amount = Math.round(
+      amount * (1 + goldBonus + runeGoldPct) * fortuneUniqueMult,
+    );
   }
   const goldLayers = pickItemSprite("gold-coins", false);
   const goldSprite = goldLayers.length > 0 ? goldLayers[0] : "coins-gold";

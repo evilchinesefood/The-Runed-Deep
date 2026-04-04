@@ -25,6 +25,7 @@ import {
 import { equipAffixTotal, equipAffixTotal2 } from "../../utils/Enchants";
 import { ITEM_BY_ID } from "../../data/items";
 import { recomputeDerivedStats } from "../character/derived-stats";
+import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
 
 function fortuneXp(baseXp: number, equipment: any): number {
   let xp = baseXp;
@@ -122,6 +123,32 @@ export function castSpell(
 
   // Resolve effect
   newState = resolveSpellEffect(newState, spell, direction, target);
+
+  // Rune: Echo — chance to double-cast for free
+  let echoPct = 0;
+  for (const item of Object.values(newState.hero.equipment)) {
+    if (!item || !item.sockets) continue;
+    const effEnch = item.enchantment + (item.blessed ? 1 : 0);
+    for (const rid of item.sockets) {
+      if (!rid) continue;
+      const r = RUNE_BY_ID[rid];
+      if (r?.effect === "double-cast") echoPct += getRuneValue(rid, effEnch);
+    }
+  }
+  if (echoPct > 0 && Math.random() * 100 < echoPct) {
+    newState = resolveSpellEffect(newState, spell, direction, target);
+    newState = {
+      ...newState,
+      messages: [
+        ...newState.messages,
+        {
+          text: `Echo rune triggers! ${spell.name} casts again!`,
+          severity: "important" as const,
+          turn: newState.turn,
+        },
+      ],
+    };
+  }
 
   // Casting consumes a turn
   return { ...newState, turn: newState.turn + 1 };
@@ -264,7 +291,8 @@ function resolveSpellEffect(
     case "warcry": {
       const fk = `${state.currentDungeon}-${state.currentFloor}`;
       const fl = state.floors[fk];
-      if (!fl) return addMsg(state, "Your warcry echoes into silence.", "system");
+      if (!fl)
+        return addMsg(state, "Your warcry echoes into silence.", "system");
       const monsters = fl.monsters.map((m) =>
         m.hp > 0 ? { ...m, alerted: true } : m,
       );

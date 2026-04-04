@@ -1,6 +1,10 @@
-import type { Hero, Attributes, Equipment, EquipSlot } from '../../core/types';
-import { ITEM_BY_ID } from '../../data/items';
-import { getEquipAffixTotal, getEquipAffixTotal2 } from '../../data/Enchantments';
+import type { Hero, Attributes, Equipment, EquipSlot } from "../../core/types";
+import { ITEM_BY_ID } from "../../data/items";
+import {
+  getEquipAffixTotal,
+  getEquipAffixTotal2,
+} from "../../data/Enchantments";
+import { RUNE_BY_ID, getRuneValue } from "../../data/Runes";
 
 export function computeMaxHp(constitution: number, level: number): number {
   const base = 10 + Math.floor(constitution / 5);
@@ -18,13 +22,27 @@ export function computeBaseArmorValue(dexterity: number): number {
   return Math.floor(dexterity / 10);
 }
 
-export function computeTotalArmorValue(dexterity: number, equipment: Equipment): number {
+export function computeTotalArmorValue(
+  dexterity: number,
+  equipment: Equipment,
+): number {
   let ac = computeBaseArmorValue(dexterity);
-  const armorSlots: EquipSlot[] = ['helmet', 'body', 'shield', 'cloak', 'gauntlets', 'boots', 'belt', 'ringLeft', 'ringRight', 'amulet'];
+  const armorSlots: EquipSlot[] = [
+    "helmet",
+    "body",
+    "shield",
+    "cloak",
+    "gauntlets",
+    "boots",
+    "belt",
+    "ringLeft",
+    "ringRight",
+    "amulet",
+  ];
   for (const slot of armorSlots) {
     const item = equipment[slot];
-    if (item && item.properties['ac']) {
-      ac += item.properties['ac'] + item.enchantment;
+    if (item && item.properties["ac"]) {
+      ac += item.properties["ac"] + item.enchantment;
     }
   }
   return ac;
@@ -34,23 +52,32 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const eq = hero.equipment;
 
   // ── Scaled affix attribute bonuses ────────────────────────
-  const soulDrainAll = Math.round(getEquipAffixTotal(eq, 'soul-drain'));
-  const bonusStr = Math.round(getEquipAffixTotal(eq, 'might')) + soulDrainAll;
-  const bonusInt = Math.round(getEquipAffixTotal(eq, 'brilliance')) + soulDrainAll;
-  const bonusCon = Math.round(getEquipAffixTotal(eq, 'fortitude')) + soulDrainAll;
-  const bonusDex = Math.round(getEquipAffixTotal(eq, 'grace')) + soulDrainAll;
+  const soulDrainAll = Math.round(getEquipAffixTotal(eq, "soul-drain"));
+  const bonusStr = Math.round(getEquipAffixTotal(eq, "might")) + soulDrainAll;
+  const bonusInt =
+    Math.round(getEquipAffixTotal(eq, "brilliance")) + soulDrainAll;
+  const bonusCon =
+    Math.round(getEquipAffixTotal(eq, "fortitude")) + soulDrainAll;
+  const bonusDex = Math.round(getEquipAffixTotal(eq, "grace")) + soulDrainAll;
 
   // ── Unique item attribute bonuses ─────────────────────────
-  let uStr = 0, uInt = 0, uCon = 0, uDex = 0;
+  let uStr = 0,
+    uInt = 0,
+    uCon = 0,
+    uDex = 0;
   for (const slot of Object.values(eq)) {
     if (!slot) continue;
     const tpl = ITEM_BY_ID[slot.templateId];
     if (!tpl?.uniqueAbility) continue;
     const ua = tpl.uniqueAbility;
-    if (ua === 'crown-power') { uStr += 10; uInt += 10; uCon += 10; uDex += 10; }
-    else if (ua === 'titan-power') uCon += 30;
-    else if (ua === 'archmage-power') uInt += 30;
-    else if (ua === 'forge-power') uStr += 20;
+    if (ua === "crown-power") {
+      uStr += 10;
+      uInt += 10;
+      uCon += 10;
+      uDex += 10;
+    } else if (ua === "titan-power") uCon += 30;
+    else if (ua === "archmage-power") uInt += 30;
+    else if (ua === "forge-power") uStr += 20;
   }
 
   const effCon = hero.attributes.constitution + bonusCon + uCon;
@@ -60,26 +87,67 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   // ── Max HP/MP with Vitality and Arcane Well bonuses ───────
   let maxHp = computeMaxHp(effCon, hero.level);
   let maxMp = computeMaxMp(effInt, hero.level);
-  maxHp += Math.round(getEquipAffixTotal(eq, 'vitality'));
-  maxMp += Math.round(getEquipAffixTotal(eq, 'arcane-well'));
+  maxHp += Math.round(getEquipAffixTotal(eq, "vitality"));
+  maxMp += Math.round(getEquipAffixTotal(eq, "arcane-well"));
   // Soul Drain: reduce max HP (secondary value)
-  const soulDrainHpPenalty = Math.round(getEquipAffixTotal2(eq, 'soul-drain'));
+  const soulDrainHpPenalty = Math.round(getEquipAffixTotal2(eq, "soul-drain"));
   if (soulDrainHpPenalty > 0) maxHp = Math.max(10, maxHp - soulDrainHpPenalty);
 
   // ── Armor value + Hardened affix ──────────────────────────
   let armorValue = computeTotalArmorValue(effDex, eq);
-  armorValue += Math.round(getEquipAffixTotal(eq, 'hardened'));
+  armorValue += Math.round(getEquipAffixTotal(eq, "hardened"));
 
   // Unique armor bonuses
   for (const slot of Object.values(eq)) {
     if (!slot) continue;
     const tpl = ITEM_BY_ID[slot.templateId];
-    if (tpl?.uniqueAbility === 'aegis-power') armorValue += 10;
-    if (tpl?.uniqueAbility === 'demonhide-power') armorValue += 15;
+    if (tpl?.uniqueAbility === "aegis-power") armorValue += 10;
+    if (tpl?.uniqueAbility === "demonhide-power") armorValue += 15;
   }
 
+  // ── Rune socket bonuses ────────────────────────────────
+  let runeHpBonus = 0,
+    runeMpBonus = 0,
+    runeAcBonus = 0;
+  let runeResistBonus = 0,
+    runeDodgeBonus = 0,
+    runeRegenBonus = 0;
+  for (const slot of Object.values(eq)) {
+    if (!slot || !slot.sockets) continue;
+    const effEnch = slot.enchantment + (slot.blessed ? 1 : 0);
+    for (const runeId of slot.sockets) {
+      if (!runeId) continue;
+      const rune = RUNE_BY_ID[runeId];
+      if (!rune) continue;
+      const val = getRuneValue(runeId, effEnch);
+      switch (rune.effect) {
+        case "flat-ac":
+          runeAcBonus += val;
+          break;
+        case "max-hp":
+          runeHpBonus += val;
+          break;
+        case "max-mp":
+          runeMpBonus += val;
+          break;
+        case "all-resist":
+          runeResistBonus += val;
+          break;
+        case "dodge":
+          runeDodgeBonus += val;
+          break;
+        case "hp-regen":
+          runeRegenBonus += val;
+          break;
+      }
+    }
+  }
+  maxHp += Math.round(runeHpBonus);
+  maxMp += Math.round(runeMpBonus);
+  armorValue += Math.round(runeAcBonus);
+
   // Shield spell bonus
-  const hasShield = hero.activeEffects?.some(e => e.id === 'shield');
+  const hasShield = hero.activeEffects?.some((e) => e.id === "shield");
   if (hasShield) armorValue += 4;
 
   // ── Weapon bonuses + Sharpness affix ──────────────────────
@@ -88,19 +156,22 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   const weapon = eq.weapon;
   if (weapon) {
     equipDamageBonus = weapon.enchantment;
-    equipAccuracyBonus = (weapon.properties['accuracy'] ?? 0) + weapon.enchantment;
+    equipAccuracyBonus =
+      (weapon.properties["accuracy"] ?? 0) + weapon.enchantment;
   }
-  equipDamageBonus += Math.round(getEquipAffixTotal(eq, 'sharpness'));
+  equipDamageBonus += Math.round(getEquipAffixTotal(eq, "sharpness"));
   // Might/Strength bonus adds to melee damage (1 per 5 bonus Str)
   equipDamageBonus += Math.floor((bonusStr + uStr) / 5);
 
   // ── Magic Resistance (scaled, capped at 40% per affix) ───
-  const magicResistBonus = Math.round(getEquipAffixTotal(eq, 'magic-resist'));
+  const magicResistBonus = Math.round(getEquipAffixTotal(eq, "magic-resist"));
 
   // ── Elemental Touched resist bonuses ──────────────────────
-  const fireResistBonus = Math.round(getEquipAffixTotal2(eq, 'fire-touched'));
-  const coldResistBonus = Math.round(getEquipAffixTotal2(eq, 'frost-touched'));
-  const lightningResistBonus = Math.round(getEquipAffixTotal2(eq, 'storm-touched'));
+  const fireResistBonus = Math.round(getEquipAffixTotal2(eq, "fire-touched"));
+  const coldResistBonus = Math.round(getEquipAffixTotal2(eq, "frost-touched"));
+  const lightningResistBonus = Math.round(
+    getEquipAffixTotal2(eq, "storm-touched"),
+  );
 
   // ── Unique item elemental resistances ─────────────────────
   let uniqueResist = { cold: 0, fire: 0, lightning: 0, acid: 0, drain: 0 };
@@ -109,18 +180,22 @@ export function recomputeDerivedStats(hero: Hero): Hero {
     const tpl = ITEM_BY_ID[slot.templateId];
     if (!tpl?.uniqueAbility) continue;
     const ua = tpl.uniqueAbility;
-    const wardVal = slot.properties?.['wardUpgraded'] ? 99 : 75;
-    if (ua === 'resist-fire-75') uniqueResist.fire += wardVal;
-    else if (ua === 'resist-cold-75') uniqueResist.cold += wardVal;
-    else if (ua === 'resist-lightning-75') uniqueResist.lightning += wardVal;
-    else if (ua === 'resist-drain-75') uniqueResist.drain += wardVal;
-    else if (ua === 'elemental-immunity') {
-      uniqueResist.cold += 50; uniqueResist.fire += 50;
-      uniqueResist.lightning += 50; uniqueResist.acid += 50; uniqueResist.drain += 50;
-    } else if (ua === 'lightning-boost') {
+    const wardVal = slot.properties?.["wardUpgraded"] ? 99 : 75;
+    if (ua === "resist-fire-75") uniqueResist.fire += wardVal;
+    else if (ua === "resist-cold-75") uniqueResist.cold += wardVal;
+    else if (ua === "resist-lightning-75") uniqueResist.lightning += wardVal;
+    else if (ua === "resist-drain-75") uniqueResist.drain += wardVal;
+    else if (ua === "elemental-immunity") {
+      uniqueResist.cold += 50;
+      uniqueResist.fire += 50;
+      uniqueResist.lightning += 50;
+      uniqueResist.acid += 50;
+      uniqueResist.drain += 50;
+    } else if (ua === "lightning-boost") {
       uniqueResist.lightning += 75;
-    } else if (ua === 'demonhide-power') {
-      uniqueResist.fire += 50; uniqueResist.cold += 50;
+    } else if (ua === "demonhide-power") {
+      uniqueResist.fire += 50;
+      uniqueResist.cold += 50;
     }
   }
 
@@ -130,30 +205,59 @@ export function recomputeDerivedStats(hero: Hero): Hero {
   // ── Active spell resist buffs ──────────────────────────────
   let spellResist = { cold: 0, fire: 0, lightning: 0 };
   for (const eff of hero.activeEffects ?? []) {
-    if (eff.id === 'resist-cold') spellResist.cold += 50;
-    if (eff.id === 'resist-fire') spellResist.fire += 50;
-    if (eff.id === 'resist-lightning') spellResist.lightning += 50;
+    if (eff.id === "resist-cold") spellResist.cold += 50;
+    if (eff.id === "resist-fire") spellResist.fire += 50;
+    if (eff.id === "resist-lightning") spellResist.lightning += 50;
   }
 
   // Use createDefaultResistances base (0 for all) + all bonuses
+  const rr = Math.round(runeResistBonus);
   const resistances = {
-    cold:      Math.min(100, magicResistBonus + coldResistBonus + uniqueResist.cold + spellResist.cold),
-    fire:      Math.min(100, magicResistBonus + fireResistBonus + uniqueResist.fire + spellResist.fire),
-    lightning: Math.min(100, magicResistBonus + lightningResistBonus + uniqueResist.lightning + spellResist.lightning),
-    acid:      Math.min(100, magicResistBonus + uniqueResist.acid),
-    drain:     Math.min(100, magicResistBonus + uniqueResist.drain),
+    cold: Math.min(
+      100,
+      magicResistBonus +
+        coldResistBonus +
+        uniqueResist.cold +
+        spellResist.cold +
+        rr,
+    ),
+    fire: Math.min(
+      100,
+      magicResistBonus +
+        fireResistBonus +
+        uniqueResist.fire +
+        spellResist.fire +
+        rr,
+    ),
+    lightning: Math.min(
+      100,
+      magicResistBonus +
+        lightningResistBonus +
+        uniqueResist.lightning +
+        spellResist.lightning +
+        rr,
+    ),
+    acid: Math.min(100, magicResistBonus + uniqueResist.acid + rr),
+    drain: Math.min(100, magicResistBonus + uniqueResist.drain + rr),
   };
 
   return {
     ...hero,
-    maxHp, maxMp, hp, mp, armorValue, equipDamageBonus, equipAccuracyBonus, resistances,
+    maxHp,
+    maxMp,
+    hp,
+    mp,
+    armorValue,
+    equipDamageBonus,
+    equipAccuracyBonus,
+    resistances,
   };
 }
 
 export function getEffectiveAttribute(
   base: number,
   attr: keyof Attributes,
-  equipment: Equipment
+  equipment: Equipment,
 ): number {
   let total = base;
   for (const item of Object.values(equipment)) {

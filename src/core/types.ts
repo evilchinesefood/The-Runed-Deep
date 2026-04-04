@@ -157,6 +157,7 @@ export interface Item {
   contents?: Item[]; // for containers
   spriteLayers?: string[]; // multi-layer sprite classes for stacked rendering
   specialEnchantments?: string[]; // e.g. ['vampiric', 'might', 'regeneration']
+  sockets?: (string | null)[]; // rune effect IDs, null = empty socket
   markedForSale?: boolean;
 }
 
@@ -339,6 +340,7 @@ export interface GameState {
   activeRift: RiftState | null;
   activeCrucible: CrucibleState | null;
   crucibleBestWave: number;
+  runeForgeMaxSockets: 2 | 3;
 }
 
 // ============================================================
