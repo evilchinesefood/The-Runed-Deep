@@ -18,7 +18,7 @@ function parseCss(sheet) {
     width = 0,
     height = 0;
   const baseMatch = css.match(
-    /url\(['"]?\.\.\/\.\.\/assets\/([^'")\s]+)['"]?\).*?background-size:\s*(\d+)px\s+(\d+)px/s,
+    /background-image:\s*url\(['"]?\.\.\/\.\.\/assets\/([^'")\s]+)['"]?\).*?background-size:\s*(\d+)px\s+(\d+)px/s,
   );
   if (baseMatch) {
     png = `assets/${baseMatch[1]}`;
@@ -29,7 +29,7 @@ function parseCss(sheet) {
   // Extract all sprite classes
   const sprites = [];
   const re =
-    /^\.([a-zA-Z0-9_-]+)\s*\{[^}]*?(-?\d+)px\s+(-?\d+)px;\s*\n\s*background-size/gm;
+    /^\.([a-zA-Z0-9_-]+)\s*\{[^}]*?background-position:\s*(-?\d+)px\s+(-?\d+)px/gm;
   let m;
   while ((m = re.exec(css)) !== null) {
     const className = m[1];
