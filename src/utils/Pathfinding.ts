@@ -78,10 +78,10 @@ export function findPath(
   );
   gScore[start.y][start.x] = 0;
 
-  // Pre-build monster occupancy grid
+  // Pre-build monster occupancy grid (exclude NPCs — they don't block pathing)
   const monsterOcc = new Uint8Array(w * fh);
   for (const m of floor.monsters)
-    monsterOcc[m.position.y * w + m.position.x] = 1;
+    if (m.templateId !== "npc") monsterOcc[m.position.y * w + m.position.x] = 1;
 
   const open = new MinHeap<Node>((a, b) => a.f < b.f);
   const startNode: Node = {

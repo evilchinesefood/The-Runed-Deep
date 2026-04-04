@@ -239,11 +239,12 @@ function exploreNext(): void {
     return;
   }
 
-  // Stop if any monster is visible
+  // Stop if any non-NPC monster is visible
   const hasVisibleMonster = floor.monsters.some(
     (m) =>
-      floor.visible[m.position.y]?.[m.position.x] ||
-      floor.lit[m.position.y]?.[m.position.x],
+      m.templateId !== "npc" &&
+      (floor.visible[m.position.y]?.[m.position.x] ||
+        floor.lit[m.position.y]?.[m.position.x]),
   );
   if (hasVisibleMonster) {
     aeMsg("Auto-explore stopped — monster spotted!");
@@ -387,8 +388,9 @@ function stepAutoPathExplore(): void {
   // Stop conditions
   const hasVisibleMonster = floor.monsters.some(
     (m) =>
-      floor.visible[m.position.y]?.[m.position.x] ||
-      floor.lit[m.position.y]?.[m.position.x],
+      m.templateId !== "npc" &&
+      (floor.visible[m.position.y]?.[m.position.x] ||
+        floor.lit[m.position.y]?.[m.position.x]),
   );
   if (hasVisibleMonster) {
     aeMsg("Auto-explore stopped — monster spotted!");
@@ -521,10 +523,11 @@ function stepAutoPath(): void {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (floor) {
-    // Stop if any monster is visible
+    // Stop if any non-NPC monster is visible
     const hasVisibleMonster = floor.monsters.some(
       (m) =>
         m.hp > 0 &&
+        m.templateId !== "npc" &&
         (floor.visible[m.position.y]?.[m.position.x] ||
           floor.lit[m.position.y]?.[m.position.x]),
     );

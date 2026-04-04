@@ -348,6 +348,14 @@ export class MapRenderer {
                   ]
                 : tile.sprite;
 
+            const isTownOverlay = inTown && (
+              tile.sprite.startsWith("trees-") ||
+              tile.sprite.startsWith("statues-") ||
+              tile.sprite.startsWith("decor-") ||
+              tile.sprite.startsWith("plants-") ||
+              tile.sprite.startsWith("altars-") ||
+              tile.sprite.startsWith("shops-")
+            );
             const isOverlayTile =
               tile.type === "stairs-up" ||
               tile.type === "stairs-down" ||
@@ -357,6 +365,7 @@ export class MapRenderer {
               tile.type === "building" ||
               tile.type === "decor" ||
               tile.sprite === "statues-orcish_idol" ||
+              isTownOverlay ||
               (tile.type === "trap" && tile.trapRevealed);
 
             if (isOverlayTile) {
