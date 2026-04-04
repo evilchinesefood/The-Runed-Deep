@@ -3,21 +3,13 @@
     "id": "inn",
     "name": "The Resting Stag Inn",
     "flavor": "A warm bed and a hearty meal await weary adventurers.",
-    "facing": "east",
-    "width": 7,
-    "height": 5,
+    "facing": "west",
+    "width": 8,
+    "height": 6,
     "tiles": [
       [
         {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
+          "sprite": "wall-sandstone_wall3",
           "type": "wall"
         },
         {
@@ -25,185 +17,49 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall5",
+          "sprite": "wall-sandstone_wall8",
           "type": "wall"
         },
         {
           "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor1",
-          "type": "floor"
-        },
-        {
-          "sprite": "decor-cache_of_baked_goods_1",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor4",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble6",
-          "type": "floor"
-        },
-        {
-          "sprite": "decor-cache_of_fruit_0",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sand7",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor5",
-          "type": "floor"
-        },
-        {
-          "sprite": "decor-blue_fountain",
-          "type": "decor"
-        },
-        {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand6",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall5",
           "type": "wall"
         },
         {
           "sprite": "wall-sandstone_wall2",
           "type": "wall"
         },
-        {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall1",
-          "type": "wall"
-        }
-      ]
-    ],
-    "entrance": {
-      "x": 6,
-      "y": 2
-    },
-    "npc": {
-      "x": 3,
-      "y": 2
-    }
-  },
-  {
-    "id": "weapon-shop",
-    "name": "Iron Fang Armory",
-    "flavor": "Fine blades for the discerning adventurer.",
-    "facing": "south",
-    "width": 6,
-    "height": 5,
-    "tiles": [
-      [
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
-        }
+        null,
+        null,
+        null
       ],
       [
         {
-          "sprite": "wall-sandstone_wall9",
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "decor-cache_of_baked_goods_1",
+          "type": "decor"
+        },
+        {
+          "sprite": "decor-cache_of_meat_0",
+          "type": "decor"
+        },
+        {
+          "sprite": "decor-cache_of_fruit_0",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        null,
+        null,
+        null
+      ],
+      [
+        {
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         },
         {
@@ -211,59 +67,37 @@
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor6",
+          "sprite": "floor-white_marble0",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand7",
+          "sprite": "floor-sandstone_floor5",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand1",
+          "sprite": "floor-sand2",
           "type": "floor"
         },
         {
-          "sprite": "wall-stone2_brown0",
+          "sprite": "wall-sandstone_wall3",
           "type": "wall"
-        }
-      ],
-      [
+        },
+        {
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        },
         {
           "sprite": "wall-sandstone_wall8",
           "type": "wall"
-        },
-        {
-          "sprite": "floor-sandstone_floor1",
-          "type": "floor"
-        },
-        {
-          "sprite": "shops-shop_weapon",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-metal_statue",
-          "type": "decor"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand6",
+          "sprite": "floor-sand4",
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor6",
+          "sprite": "floor-sandstone_floor8",
           "type": "floor"
         },
         {
@@ -271,11 +105,57 @@
           "type": "floor"
         },
         {
-          "sprite": "floor-sand6",
+          "sprite": "floor-sand1",
           "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall3",
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand7",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble4",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "decor-cache_of_fruit_2",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble0",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-white_marble7",
+          "type": "floor"
+        },
+        {
+          "sprite": "decor-blue_fountain",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
           "type": "wall"
         }
       ],
@@ -285,23 +165,179 @@
           "type": "wall"
         },
         {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown0",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall8",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown0",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        }
+      ]
+    ],
+    "entrance": {
+      "x": 0,
+      "y": 3
+    },
+    "npc": {
+      "x": 2,
+      "y": 3
+    }
+  },
+  {
+    "id": "weapon-shop",
+    "name": "Weapon Shop",
+    "flavor": "Blades of every make line the walls.",
+    "facing": "south",
+    "width": 6,
+    "height": 5,
+    "tiles": [
+      [
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall9",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
           "sprite": "wall-sandstone_wall7",
           "type": "wall"
         },
         {
-          "sprite": "wall-stone2_brown2",
+          "sprite": "shops-shop_weapon",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor1",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-statue_sword",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall3",
           "type": "wall"
         },
         {
-          "sprite": "doors-closed_door",
-          "type": "door"
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
         },
         {
-          "sprite": "wall-stone2_brown2",
+          "sprite": "floor-sandstone_floor0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble2",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall5",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall2",
+          "sprite": "statues-statue_polearm",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor3",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand7",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-statue_axe",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall8",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
           "type": "wall"
         }
       ]
@@ -317,483 +353,19 @@
   },
   {
     "id": "armor-shop",
-    "name": "The Warded Shield",
-    "flavor": "Protection for every part of the body.",
-    "facing": "south",
-    "width": 6,
-    "height": 5,
-    "tiles": [
-      [
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble7",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble9",
-          "type": "floor"
-        },
-        {
-          "sprite": "shops-shop_armour",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor1",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-statue_axe",
-          "type": "decor"
-        },
-        {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
-        },
-        {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        }
-      ]
-    ],
-    "entrance": {
-      "x": 2,
-      "y": 4
-    },
-    "npc": {
-      "x": 2,
-      "y": 2
-    }
-  },
-  {
-    "id": "blacksmith",
-    "name": "The Forge",
-    "flavor": "Hammers ring and sparks fly day and night.",
-    "facing": "south",
-    "width": 7,
-    "height": 5,
-    "tiles": [
-      [
-        {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-volcanic_floor1",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-white_marble2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand5",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-metal_statue",
-          "type": "decor"
-        },
-        {
-          "sprite": "wall-stone2_brown0",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sandstone_floor5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble2",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall2",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        }
-      ]
-    ],
-    "entrance": {
-      "x": 3,
-      "y": 4
-    },
-    "npc": {
-      "x": 3,
-      "y": 2
-    }
-  },
-  {
-    "id": "general-store",
-    "name": "Odds & Ends",
-    "flavor": "Potions, scrolls, and sundries for every occasion.",
-    "facing": "west",
-    "width": 6,
-    "height": 5,
-    "tiles": [
-      [
-        {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-stone2_brown0",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sandstone_floor5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble3",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        },
-        {
-          "sprite": "decor-cache_of_fruit_1",
-          "type": "decor"
-        },
-        {
-          "sprite": "shops-shop_general",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor8",
-          "type": "floor"
-        },
-        {
-          "sprite": "decor-cache_of_fruit_0",
-          "type": "decor"
-        },
-        {
-          "sprite": "wall-shoals_wall4",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand3",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor6",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown0",
-          "type": "wall"
-        }
-      ]
-    ],
-    "entrance": {
-      "x": 0,
-      "y": 2
-    },
-    "npc": {
-      "x": 2,
-      "y": 2
-    }
-  },
-  {
-    "id": "magic-shop",
-    "name": "The Arcane Sanctum",
-    "flavor": "Arcane tomes and enchanted wands of great power.",
+    "name": "Armor Shop",
+    "flavor": "Shields and plate gleam in the torchlight.",
     "facing": "east",
     "width": 6,
     "height": 5,
     "tiles": [
       [
         {
-          "sprite": "wall-shoals_wall4",
+          "sprite": "wall-sandstone_wall8",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall8",
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         },
         {
@@ -801,21 +373,47 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall4",
+          "sprite": "wall-stone2_brown0",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall4",
+          "sprite": "wall-sandstone_wall1",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall1",
+          "sprite": "wall-sandstone_wall7",
           "type": "wall"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall3",
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "shops-shop_armour",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor2",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-statue_iron",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall6",
           "type": "wall"
         },
         {
@@ -823,63 +421,11 @@
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor8",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "shops-shop_scrolls",
-          "type": "decor"
-        },
-        {
-          "sprite": "shops-shop_books",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-white_marble7",
-          "type": "floor"
-        },
-        {
-          "sprite": "shops-shop_wands",
-          "type": "decor"
-        },
-        {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble9",
-          "type": "floor"
-        },
-        {
           "sprite": "floor-white_marble4",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble7",
+          "sprite": "floor-sandstone_floor2",
           "type": "floor"
         },
         {
@@ -887,33 +433,59 @@
           "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall7",
+          "sprite": "floor-sandstone_floor3",
+          "type": "floor"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        {
+          "sprite": "statues-metal_statue",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-statue_dwarf",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor0",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
           "type": "wall"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall2",
+          "sprite": "wall-sandstone_wall7",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall1",
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall1",
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall3",
+          "sprite": "wall-sandstone_wall8",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall1",
+          "sprite": "wall-stone2_brown3",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall1",
+          "sprite": "wall-stone2_brown2",
           "type": "wall"
         }
       ]
@@ -923,21 +495,29 @@
       "y": 2
     },
     "npc": {
-      "x": 2,
+      "x": 3,
       "y": 2
     }
   },
   {
-    "id": "rune-forge",
-    "name": "The Rune Forge",
-    "flavor": "Ancient flames dance within, ready to bind runes to steel.",
-    "facing": "north",
+    "id": "general-store",
+    "name": "General Store",
+    "flavor": "Everything an adventurer could need, and more.",
+    "facing": "south",
     "width": 7,
-    "height": 5,
+    "height": 6,
     "tiles": [
       [
         {
-          "sprite": "wall-shoals_wall1",
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall3",
           "type": "wall"
         },
         {
@@ -945,23 +525,15 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall0",
+          "sprite": "wall-sandstone_wall2",
           "type": "wall"
         },
         {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
+          "sprite": "wall-sandstone_wall1",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
+          "sprite": "wall-sandstone_wall3",
           "type": "wall"
         }
       ],
@@ -971,19 +543,123 @@
           "type": "wall"
         },
         {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
+          "sprite": "shops-shop_general",
+          "type": "decor"
         },
         {
           "sprite": "floor-sand6",
           "type": "floor"
         },
         {
+          "sprite": "decor-cache_of_baked_goods_2",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble3",
+          "type": "floor"
+        },
+        {
+          "sprite": "shops-shop_food",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble1",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
+          "type": "floor"
+        },
+        {
           "sprite": "floor-sandstone_floor0",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall0",
+          "type": "wall"
+        },
+        {
+          "sprite": "decor-cache_of_fruit_1",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble5",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand4",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble3",
+          "type": "floor"
+        },
+        {
+          "sprite": "decor-cache_of_meat_1",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall8",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown0",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall9",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand4",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall0",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "floor-white_marble5",
           "type": "floor"
         },
         {
@@ -991,37 +667,151 @@
           "type": "floor"
         },
         {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
+          "sprite": "floor-sandstone_floor0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
+          "type": "floor"
         }
-      ],
+      ]
+    ],
+    "entrance": {
+      "x": 3,
+      "y": 4
+    },
+    "npc": {
+      "x": 3,
+      "y": 2
+    }
+  },
+  {
+    "id": "magic-shop",
+    "name": "Magic Shop",
+    "flavor": "Arcane energies crackle between dusty shelves.",
+    "facing": "west",
+    "width": 5,
+    "height": 6,
+    "tiles": [
       [
         {
           "sprite": "wall-sandstone_wall9",
           "type": "wall"
         },
         {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-volcanic_floor0",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor0",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-volcanic_floor2",
-          "type": "decor"
+          "sprite": "wall-shoals_wall3",
+          "type": "wall"
         },
         {
           "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-crystal_bookcase0",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble6",
+          "type": "floor"
+        },
+        {
+          "sprite": "shops-shop_books",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall0",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown0",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sandstone_floor7",
+          "type": "floor"
+        },
+        {
+          "sprite": "vaults-arcane_conduit_0",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sand4",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "floor-sand6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand2",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand8",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "shops-shop_scrolls",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor7",
+          "type": "floor"
+        },
+        {
+          "sprite": "shops-shop_wands",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
           "type": "wall"
         }
       ],
@@ -1031,27 +821,127 @@
           "type": "wall"
         },
         {
-          "sprite": "floor-sandstone_floor1",
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        }
+      ]
+    ],
+    "entrance": {
+      "x": 0,
+      "y": 3
+    },
+    "npc": {
+      "x": 2,
+      "y": 3
+    }
+  },
+  {
+    "id": "rune-forge",
+    "name": "Rune Forge",
+    "flavor": "Ancient runes pulse with power in the forge's heat.",
+    "facing": "north",
+    "width": 7,
+    "height": 6,
+    "tiles": [
+      [
+        {
+          "sprite": "wall-sandstone_wall8",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand8",
           "type": "floor"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall9",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-crystal_bookcase1",
+          "type": "decor"
         },
         {
           "sprite": "floor-white_marble2",
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor9",
+          "sprite": "floor-sandstone_floor3",
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor0",
+          "sprite": "floor-sandstone_floor6",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble8",
+          "sprite": "statues-statue_orb",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand8",
           "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall9",
+          "sprite": "floor-sand8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor2",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand1",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         }
       ],
@@ -1061,15 +951,67 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-stone2_brown0",
+          "sprite": "wall-shoals_wall2",
           "type": "wall"
         },
         {
-          "sprite": "wall-stone2_brown2",
+          "sprite": "wall-stone2_brown3",
           "type": "wall"
         },
         {
-          "sprite": "wall-stone2_brown1",
+          "sprite": "floor-sand1",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "vaults-alchemical_conduit_0",
+          "type": "decor"
+        },
+        {
+          "sprite": "vaults-arcane_conduit_1",
+          "type": "decor"
+        },
+        {
+          "sprite": "vaults-alchemical_conduit_2",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-shoals_wall3",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall8",
           "type": "wall"
         },
         {
@@ -1077,11 +1019,19 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall1",
+          "sprite": "wall-sandstone_wall6",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall5",
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall2",
           "type": "wall"
         }
       ]
@@ -1096,11 +1046,11 @@
     }
   },
   {
-    "id": "sage",
-    "name": "The Sage's Study",
-    "flavor": "Ancient knowledge to reveal the secrets of your treasures.",
-    "facing": "north",
-    "width": 5,
+    "id": "blacksmith",
+    "name": "Blacksmith",
+    "flavor": "The ring of hammer on steel echoes endlessly.",
+    "facing": "south",
+    "width": 7,
     "height": 5,
     "tiles": [
       [
@@ -1113,12 +1063,246 @@
           "type": "wall"
         },
         {
-          "sprite": "doors-closed_door",
-          "type": "door"
+          "sprite": "wall-stone2_brown1",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "vaults-alchemical_conduit_1",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble5",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor2",
+          "type": "floor"
+        },
+        {
+          "sprite": "vaults-alchemical_conduit_3",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand7",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand7",
+          "type": "floor"
+        },
+        {
+          "sprite": "vaults-arcane_conduit_2",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand5",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        },
+        {
+          "sprite": "statues-statue_axe",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble9",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-statue_sword",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-shoals_wall1",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-shoals_wall4",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand6",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall0",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
         },
         {
           "sprite": "wall-sandstone_wall7",
           "type": "wall"
+        }
+      ]
+    ],
+    "entrance": {
+      "x": 3,
+      "y": 4
+    },
+    "npc": {
+      "x": 3,
+      "y": 2
+    }
+  },
+  {
+    "id": "sage",
+    "name": "Sage",
+    "flavor": "Knowledge older than stone rests in these tomes.",
+    "facing": "north",
+    "width": 5,
+    "height": 5,
+    "tiles": [
+      [
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand2",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall6",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-crystal_bookcase2",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor4",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-crystal_bookcase3",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall8",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-white_marble7",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble7",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall9",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "shops-shop_scrolls",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble5",
+          "type": "floor"
+        },
+        {
+          "sprite": "vaults-arcane_conduit_3",
+          "type": "decor"
         },
         {
           "sprite": "wall-shoals_wall4",
@@ -1127,89 +1311,23 @@
       ],
       [
         {
-          "sprite": "wall-sandstone_wall2",
+          "sprite": "wall-shoals_wall2",
           "type": "wall"
         },
         {
-          "sprite": "floor-white_marble2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble7",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall1",
+          "sprite": "wall-sandstone_wall4",
           "type": "wall"
         },
         {
-          "sprite": "shops-shop_books",
-          "type": "decor"
-        },
-        {
-          "sprite": "wall-crystal_bookcase0",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall3",
+          "sprite": "wall-sandstone_wall6",
           "type": "wall"
         },
         {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand4",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall3",
+          "sprite": "wall-sandstone_wall9",
           "type": "wall"
         },
         {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-shoals_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
+          "sprite": "wall-sandstone_wall6",
           "type": "wall"
         }
       ]
@@ -1226,22 +1344,14 @@
   {
     "id": "temple",
     "name": "Temple of Odin",
-    "flavor": "A place of healing and divine protection under the All-Father's gaze.",
+    "flavor": "The All-Father's gaze watches over all who enter.",
     "facing": "north",
     "width": 9,
     "height": 7,
     "tiles": [
       [
         {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall0",
+          "sprite": "wall-shoals_wall4",
           "type": "wall"
         },
         {
@@ -1249,23 +1359,145 @@
           "type": "wall"
         },
         {
-          "sprite": "doors-closed_door",
-          "type": "door"
-        },
-        {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        },
-        {
           "sprite": "wall-stone2_brown0",
           "type": "wall"
         },
         {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-shoals_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-shoals_wall3",
+          "type": "wall"
+        },
+        {
+          "sprite": "wall-sandstone_wall5",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall1",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble9",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand6",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sand3",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall7",
+          "type": "wall"
+        }
+      ],
+      [
+        {
           "sprite": "wall-stone2_brown2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand4",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble1",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand2",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-white_marble1",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-stone2_brown3",
+          "type": "wall"
+        },
+        {
+          "sprite": "statues-statue_ancient_hero",
+          "type": "decor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sandstone_floor2",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "statues-statue_depths_zot_angel",
+          "type": "decor"
+        },
+        {
+          "sprite": "wall-stone2_brown0",
           "type": "wall"
         }
       ],
@@ -1275,31 +1507,69 @@
           "type": "wall"
         },
         {
-          "sprite": "floor-white_marble7",
+          "sprite": "floor-sandstone_floor0",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble0",
+          "sprite": "floor-sandstone_floor4",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand3",
+          "sprite": "floor-sand5",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble1",
+          "sprite": "floor-white_marble3",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble4",
+          "sprite": "floor-white_marble2",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble5",
+          "sprite": "floor-sandstone_floor1",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand4",
+          "sprite": "floor-sandstone_floor6",
+          "type": "floor"
+        },
+        {
+          "sprite": "wall-stone2_brown0",
+          "type": "wall"
+        }
+      ],
+      [
+        {
+          "sprite": "wall-sandstone_wall2",
+          "type": "wall"
+        },
+        {
+          "sprite": "floor-sand1",
+          "type": "floor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "statues-statue_depths_seraph",
+          "type": "decor"
+        },
+        {
+          "sprite": "altars-ecumenical",
+          "type": "decor"
+        },
+        {
+          "sprite": "statues-statue_angel",
+          "type": "decor"
+        },
+        {
+          "sprite": "statues-depths_column",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor9",
           "type": "floor"
         },
         {
@@ -1309,167 +1579,19 @@
       ],
       [
         {
-          "sprite": "wall-sandstone_wall9",
+          "sprite": "wall-shoals_wall3",
           "type": "wall"
         },
         {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-statue_angel",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand4",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-statue_angel",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-white_marble1",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-stone2_brown3",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-stone2_brown3",
+          "sprite": "wall-sandstone_wall8",
           "type": "wall"
         },
         {
-          "sprite": "floor-white_marble1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor1",
-          "type": "floor"
-        },
-        {
-          "sprite": "decor-sparkling_fountain",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sand4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor8",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-shoals_wall2",
+          "sprite": "wall-sandstone_wall4",
           "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall2",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-white_marble2",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-statue_depths_seraph",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-white_marble4",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble2",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "statues-statue_depths_seraph",
-          "type": "decor"
-        },
-        {
-          "sprite": "floor-sandstone_floor0",
-          "type": "floor"
         },
         {
           "sprite": "wall-stone2_brown1",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-shoals_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand7",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor9",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-white_marble5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand8",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand5",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor5",
-          "type": "floor"
-        },
-        {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
-        }
-      ],
-      [
-        {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall3",
           "type": "wall"
         },
         {
@@ -1477,11 +1599,11 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall3",
+          "sprite": "wall-sandstone_wall7",
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall3",
+          "sprite": "wall-stone2_brown1",
           "type": "wall"
         },
         {
@@ -1489,11 +1611,7 @@
           "type": "wall"
         },
         {
-          "sprite": "wall-shoals_wall4",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall8",
+          "sprite": "wall-sandstone_wall5",
           "type": "wall"
         }
       ]
@@ -1510,27 +1628,27 @@
   {
     "id": "rift-stone",
     "name": "Rift Stone",
-    "flavor": "A cracked monolith humming with residual planar energy.",
+    "flavor": "A crackling portal to the depths below.",
     "width": 3,
     "height": 3,
     "tiles": [
       [
         {
-          "sprite": "floor-sandstone_floor8",
+          "sprite": "floor-white_marble0",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor9",
           "type": "floor"
         },
         {
-          "sprite": "floor-sandstone_floor6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sand3",
-          "type": "floor"
+          "sprite": "floor-white_marble2",
+          "type": "decor"
         }
       ],
       [
         {
-          "sprite": "floor-sand3",
+          "sprite": "floor-sandstone_floor1",
           "type": "floor"
         },
         {
@@ -1538,22 +1656,22 @@
           "type": "decor"
         },
         {
-          "sprite": "floor-white_marble4",
+          "sprite": "floor-white_marble7",
           "type": "floor"
         }
       ],
       [
         {
-          "sprite": "floor-sandstone_floor4",
+          "sprite": "floor-white_marble4",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor8",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor5",
-          "type": "floor"
+          "sprite": "floor-white_marble6",
+          "type": "decor"
         }
       ]
     ],
@@ -1569,27 +1687,27 @@
   {
     "id": "statue-of-fortune",
     "name": "Statue of Fortune",
-    "flavor": "A weathered idol said to bless the generous.",
+    "flavor": "Rub the hero's shield for luck... or so they say.",
     "width": 3,
     "height": 3,
     "tiles": [
       [
         {
-          "sprite": "floor-white_marble5",
+          "sprite": "floor-white_marble1",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-white_marble8",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble6",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor0",
-          "type": "floor"
+          "sprite": "floor-white_marble3",
+          "type": "decor"
         }
       ],
       [
         {
-          "sprite": "floor-sand1",
+          "sprite": "floor-sandstone_floor1",
           "type": "floor"
         },
         {
@@ -1597,22 +1715,22 @@
           "type": "decor"
         },
         {
-          "sprite": "floor-sand3",
+          "sprite": "floor-sand4",
           "type": "floor"
         }
       ],
       [
         {
-          "sprite": "floor-sand8",
+          "sprite": "floor-white_marble5",
+          "type": "decor"
+        },
+        {
+          "sprite": "floor-sandstone_floor0",
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble1",
-          "type": "floor"
-        },
-        {
-          "sprite": "floor-sandstone_floor6",
-          "type": "floor"
+          "sprite": "floor-white_marble7",
+          "type": "decor"
         }
       ]
     ],
