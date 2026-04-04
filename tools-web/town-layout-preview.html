@@ -318,9 +318,10 @@
       function render() {
         let map = document.getElementById("map");
         let s = zoom === "half" ? 0.5 : 1;
-        let cp = TILE * s;
-        map.style.width = W * cp + "px";
-        map.style.height = H * cp + "px";
+        map.style.width = W * TILE + "px";
+        map.style.height = H * TILE + "px";
+        map.style.transform = "scale(" + s + ")";
+        map.style.transformOrigin = "top left";
 
         // Clear
         while (map.firstChild) map.removeChild(map.firstChild);
@@ -334,18 +335,16 @@
             cell.className = "cell";
             cell.style.cssText =
               "left:" +
-              x * cp +
+              x * TILE +
               "px;top:" +
-              y * cp +
+              y * TILE +
               "px;width:" +
-              cp +
+              TILE +
               "px;height:" +
-              cp +
+              TILE +
               "px;";
             let t = document.createElement("div");
             t.className = "tile " + grid[y][x];
-            t.style.cssText =
-              "transform:scale(" + s + ");transform-origin:top left;";
             cell.appendChild(t);
             frag.appendChild(cell);
           }
@@ -361,8 +360,8 @@
             let lbl = document.createElement("div");
             lbl.className = "label building-label";
             lbl.textContent = t.name;
-            lbl.style.left = (b.x + t.width / 2) * cp + "px";
-            lbl.style.top = b.y * cp + "px";
+            lbl.style.left = (b.x + t.width / 2) * TILE + "px";
+            lbl.style.top = b.y * TILE + "px";
             frag.appendChild(lbl);
           }
         }
@@ -375,9 +374,9 @@
           m.className = "marker " + cls;
           m.style.cssText =
             "left:" +
-            (pos.x * cp + cp / 2 - ms / 2) +
+            (pos.x * TILE + TILE / 2 - ms / 2) +
             "px;top:" +
-            (pos.y * cp + cp / 2 - ms / 2) +
+            (pos.y * TILE + TILE / 2 - ms / 2) +
             "px;width:" +
             ms +
             "px;height:" +
