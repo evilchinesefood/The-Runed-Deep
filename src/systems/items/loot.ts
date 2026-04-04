@@ -255,7 +255,7 @@ export function createItemFromTemplate(
   // Roll affixes — only for equippable items
   let specials: string[] = [];
   if (!template.equipSlot) {
-    // Non-equippable items (scrolls, spellbooks, wands, potions, misc) never get affixes
+    // Non-equippable items (spellbooks, potions) never get affixes
   } else if (isUnique) {
     // Always roll affixes for uniques, min count scales with NG+
     const minAffixes =

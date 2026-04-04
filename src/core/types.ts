@@ -370,10 +370,7 @@ export type GameAction =
   | { type: "unequipItem"; slot: EquipSlot }
   | { type: "dropItem"; itemId: string }
   | { type: "enterBuilding" }
-  | { type: "buyItem"; shopId: string; itemId: string }
-  | { type: "sellItem"; shopId: string; itemId: string }
   | { type: "save" }
-  | { type: "load" }
   | { type: "newGame" }
   | { type: "toggleMarkForSale"; itemId: string }
   | { type: "removeCurseItem"; itemId: string }

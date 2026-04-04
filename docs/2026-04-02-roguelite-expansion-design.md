@@ -93,7 +93,7 @@ Monsters have `minFloor`/`maxFloor` instead of just `unlockFloor`. Once you leav
 - Displayed in HUD alongside gold
 
 **Sources:**
-- Main dungeon boss kills: 2 shards per boss
+- Main dungeon boss kills: 5 shards per boss
 - Fractured Rift completion: 5 base + difficulty bonus from modifier weights
 - Crucible waves: 1/wave (w1-10), 2/wave (w11-20), 3/wave (w21-30) + milestones (+5 w10, +10 w20, +20 w30)
 

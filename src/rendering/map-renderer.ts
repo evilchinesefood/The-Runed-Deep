@@ -12,6 +12,9 @@ import {
 } from "../systems/inventory/display-name";
 import { pickItemSprite } from "../systems/items/SpritePool";
 import { ITEM_BY_ID } from "../data/items";
+import { BUILDING_FLAVORS } from "../systems/town/TownMap";
+import { TOWN_CONFIG } from "../data/TownConfigData";
+import { TOWN_BUILDINGS_DATA } from "../data/TownBuildingData";
 
 const TILE_SIZE = 32;
 
@@ -72,8 +75,8 @@ export class MapRenderer {
   private mapWrapper: HTMLElement;
   private lastState: GameState | null = null;
   private scale = 1;
-  private _prevCamX = -1;
-  private _prevCamY = -1;
+  private _labelCamX = -1;
+  private _labelCamY = -1;
   private _prevFloorKey = "";
   private _lastTipX = -1;
   private _lastTipY = -1;
@@ -549,102 +552,90 @@ export class MapRenderer {
       }
     }
 
-    // Render multi-tile building sprites as overlays (town only)
-    this.renderBuildingOverlays(state, cameraX, cameraY);
+    // Render building name labels (town only)
+    this.renderBuildingLabels(state, cameraX, cameraY);
   }
 
-  private buildingOverlays: HTMLElement[] = [];
+  private buildingLabels: HTMLElement[] = [];
 
-  // Sprite dimensions for building CSS classes
-  private static BUILDING_SPRITES: Record<string, [number, number]> = {
-    "wall-piece": [90, 31],
-    "round-hut": [66, 59],
-    "building-1": [98, 63],
-    "building-2": [106, 66],
-    "building-3": [85, 59],
-    silo: [65, 65],
-    "big-hut": [105, 93],
-    "building-4": [64, 94],
-    "junk-yard": [111, 98],
-    keep: [125, 120],
-    "l-building-1": [143, 138],
-    "l-building-2": [161, 138],
-    "hut-1": [56, 54],
-    "hut-2": [57, 55],
-    sage: [110, 109],
-    temple: [132, 127],
-    "statues-depths_column": [32, 32],
-    "statues-statue_ancient_hero": [32, 32],
-  };
+  // Pre-compute label positions: building entrance positions from config
+  private static _labelPositions:
+    | { x: number; y: number; name: string }[]
+    | null = null;
+  private static getLabelPositions(): { x: number; y: number; name: string }[] {
+    if (MapRenderer._labelPositions) return MapRenderer._labelPositions;
+    const tmplMap: Record<string, (typeof TOWN_BUILDINGS_DATA)[0]> = {};
+    for (const t of TOWN_BUILDINGS_DATA) tmplMap[t.id] = t;
+    MapRenderer._labelPositions = TOWN_CONFIG.buildings.map((bp) => {
+      const tmpl = tmplMap[bp.id];
+      if (!tmpl) return { x: bp.x, y: bp.y, name: bp.id };
+      const info = BUILDING_FLAVORS[bp.id];
+      return {
+        x: bp.x + tmpl.entrance.x,
+        y: bp.y + tmpl.entrance.y - 1,
+        name: info?.name ?? bp.id,
+      };
+    });
+    return MapRenderer._labelPositions;
+  }
 
-  private renderBuildingOverlays(
+  private renderBuildingLabels(
     state: GameState,
     cameraX: number,
     cameraY: number,
   ): void {
     if (state.currentDungeon !== "town") {
-      if (this.buildingOverlays.length > 0) {
-        for (const el of this.buildingOverlays) el.remove();
-        this.buildingOverlays = [];
+      if (this.buildingLabels.length > 0) {
+        for (const el of this.buildingLabels) el.remove();
+        this.buildingLabels = [];
       }
-      this._prevCamX = -1;
-      this._prevCamY = -1;
+      this._labelCamX = -1;
+      this._labelCamY = -1;
       return;
     }
 
-    // Skip rebuild if camera and floor haven't changed
     const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
     if (
-      this._prevCamX === cameraX &&
-      this._prevCamY === cameraY &&
+      this._labelCamX === cameraX &&
+      this._labelCamY === cameraY &&
       this._prevFloorKey === floorKey &&
-      this.buildingOverlays.length > 0
+      this.buildingLabels.length > 0
     )
       return;
-    this._prevCamX = cameraX;
-    this._prevCamY = cameraY;
+    this._labelCamX = cameraX;
+    this._labelCamY = cameraY;
     this._prevFloorKey = floorKey;
 
-    for (const el of this.buildingOverlays) el.remove();
-    this.buildingOverlays = [];
+    for (const el of this.buildingLabels) el.remove();
+    this.buildingLabels = [];
 
-    const floor = state.floors[floorKey];
-    if (!floor) return;
+    const vpW = VIEWPORT_TILES_X * TILE_SIZE;
+    const vpH = VIEWPORT_TILES_Y * TILE_SIZE;
 
-    // Scan floor tiles for building sprites (type='building' with non-walkable = sprite anchor)
-    for (let y = 0; y < floor.height; y++) {
-      for (let x = 0; x < floor.width; x++) {
-        const tile = floor.tiles[y][x];
-        if (tile.type !== "building" || tile.walkable) continue; // skip entrance tiles
+    for (const lp of MapRenderer.getLabelPositions()) {
+      const screenX = (lp.x - cameraX) * TILE_SIZE + TILE_SIZE / 2;
+      const screenY = (lp.y - cameraY) * TILE_SIZE;
 
-        const dims = MapRenderer.BUILDING_SPRITES[tile.sprite];
-        if (!dims) continue;
+      if (screenX < -100 || screenX > vpW + 100) continue;
+      if (screenY < -30 || screenY > vpH + 30) continue;
 
-        const [sw, sh] = dims;
-        const screenX = (x - cameraX) * TILE_SIZE;
-        const screenY = (y - cameraY) * TILE_SIZE;
-        const vpW = VIEWPORT_TILES_X * TILE_SIZE;
-        const vpH = VIEWPORT_TILES_Y * TILE_SIZE;
-
-        if (screenX + sw < 0 || screenX > vpW) continue;
-        if (screenY + sh < 0 || screenY > vpH) continue;
-
-        const div = document.createElement("div");
-        div.className = tile.sprite;
-        const rot = tile.rotate ?? 0;
-        div.style.cssText = `
-          position:absolute;
-          left:${screenX}px;
-          top:${screenY}px;
-          width:${sw}px;
-          height:${sh}px;
-          pointer-events:none;
-          z-index:2;
-          ${rot ? `transform:rotate(${rot}deg);transform-origin:center center;` : ""}
-        `;
-        this.mapContainer.appendChild(div);
-        this.buildingOverlays.push(div);
-      }
+      const div = document.createElement("div");
+      div.textContent = lp.name;
+      div.style.cssText = `
+        position:absolute;
+        left:${screenX}px;
+        top:${screenY}px;
+        transform:translateX(-50%);
+        font-size:10px;
+        color:#ffd700;
+        text-shadow:1px 1px 2px #000, -1px -1px 2px #000;
+        white-space:nowrap;
+        pointer-events:none;
+        z-index:5;
+        font-family:serif;
+      `;
+      this.mapContainer.appendChild(div);
+      this.buildingLabels.push(div);
     }
   }
 

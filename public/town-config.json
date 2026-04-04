@@ -1,7 +1,63 @@
 {
   "width": 45,
   "height": 60,
-  "buildings": [],
+  "buildings": [
+    {
+      "id": "inn",
+      "x": 5,
+      "y": 4
+    },
+    {
+      "id": "weapon-shop",
+      "x": 16,
+      "y": 5
+    },
+    {
+      "id": "armor-shop",
+      "x": 27,
+      "y": 5
+    },
+    {
+      "id": "general-store",
+      "x": 5,
+      "y": 13
+    },
+    {
+      "id": "magic-shop",
+      "x": 16,
+      "y": 13
+    },
+    {
+      "id": "rune-forge",
+      "x": 25,
+      "y": 22
+    },
+    {
+      "id": "blacksmith",
+      "x": 5,
+      "y": 22
+    },
+    {
+      "id": "sage",
+      "x": 16,
+      "y": 22
+    },
+    {
+      "id": "temple",
+      "x": 16,
+      "y": 32
+    },
+    {
+      "id": "rift-stone",
+      "x": 5,
+      "y": 31
+    },
+    {
+      "id": "statue-of-fortune",
+      "x": 29,
+      "y": 32
+    }
+  ],
   "mineEntrance": {
     "x": 22,
     "y": 2

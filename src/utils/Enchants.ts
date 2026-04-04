@@ -10,14 +10,6 @@ export function hasEnchant(equipment: Equipment, id: string): boolean {
   );
 }
 
-/** Legacy multiplier — returns 1 or 2 (critical) */
-export function enchantMult(equipment: Equipment, id: string): number {
-  return Object.values(equipment).some((i) =>
-    i?.specialEnchantments?.includes(`${id}:critical`),
-  )
-    ? 2
-    : 1;
-}
 
 /** Get total scaled affix value across all equipped items */
 export function equipAffixTotal(
