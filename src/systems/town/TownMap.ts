@@ -65,7 +65,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   );
 
   // 2. Paint water
-  for (const w of cfg.water) {
+  for (const w of cfg.water || []) {
     if (w.y < H && w.x < W)
       tiles[w.y][w.x] = {
         type: "water",
@@ -76,7 +76,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 3. Paint decorations (flowers, moss, plants — walkable grass)
-  for (const d of cfg.decoration) {
+  for (const d of cfg.decoration || []) {
     if (d.y < H && d.x < W)
       tiles[d.y][d.x] = {
         type: "grass",
@@ -86,8 +86,24 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       };
   }
 
+  // 3b. Paint custom tiles from builder (walkable ground tiles)
+  for (const t of (cfg as any).tiles || []) {
+    if (t.y < H && t.x < W) {
+      const isWall = t.sprite.startsWith("wall-");
+      const isWater = t.sprite.startsWith("water-");
+      const isTree = t.sprite.startsWith("trees-");
+      tiles[t.y][t.x] = {
+        type: isWall ? "wall" : isWater ? "water" : isTree ? "wall" : "grass",
+        sprite: t.sprite,
+        walkable: !isWall && !isWater && !isTree,
+        transparent: !isWall,
+        spriteLayers: t.overlay ? [t.sprite, t.overlay] : undefined,
+      };
+    }
+  }
+
   // 4. Paint trees (not walkable, but transparent)
-  for (const t of cfg.trees) {
+  for (const t of cfg.trees || []) {
     if (t.y < H && t.x < W)
       tiles[t.y][t.x] = {
         type: "wall",
@@ -98,7 +114,7 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
 
   // 5. Paint features
-  for (const f of cfg.features) {
+  for (const f of cfg.features || []) {
     const sprite = FEATURE_SPRITES[f.type] ?? "floor-grass_full";
     const fw = f.w ?? 1;
     const fh = f.h ?? 1;
