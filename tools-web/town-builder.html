@@ -771,7 +771,7 @@
           // Remove old overlays
           buildingOverlays.forEach((el) => el.remove());
           labelOverlays.forEach((el) => el.remove());
-          if (markerEls.mine) markerEls.mine.remove();
+          // markerEls.mine handled via buildingOverlays cleanup
           if (markerEls.spawn) markerEls.spawn.remove();
           buildingOverlays = [];
           labelOverlays = [];
@@ -805,6 +805,19 @@
             mapEl.appendChild(ov);
             buildingOverlays.push(ov);
 
+            // Entrance dot (green)
+            if (tmpl.entrance) {
+              let dot = document.createElement("div");
+              dot.style.cssText =
+                "position:absolute;width:" + Math.max(4, cp / 3) + "px;height:" + Math.max(4, cp / 3) + "px;" +
+                "background:#4f4;border-radius:50%;z-index:12;pointer-events:none;" +
+                "left:" + (bx + tmpl.entrance.x * cp + cp / 3) + "px;" +
+                "top:" + (by + tmpl.entrance.y * cp + cp / 3) + "px;";
+              dot.title = "Entrance";
+              mapEl.appendChild(dot);
+              buildingOverlays.push(dot);
+            }
+
             if (showLabels) {
               let lbl = document.createElement("div");
               lbl.className = "building-label";
@@ -816,26 +829,18 @@
             }
           });
 
-          // Mine marker
-          if (minePos) {
+          // Mine markers (supports array)
+          let mineArr = Array.isArray(minePos) ? minePos : (minePos ? [minePos] : []);
+          for (let mp of mineArr) {
             let m = document.createElement("div");
             m.className = "marker-overlay marker-mine";
             m.style.cssText =
-              "left:" +
-              minePos.x * cp +
-              "px;top:" +
-              minePos.y * cp +
-              "px;width:" +
-              cp +
-              "px;height:" +
-              cp +
-              "px;" +
-              "font-size:" +
-              (cp < 24 ? "8" : "11") +
-              "px;";
+              "left:" + mp.x * cp + "px;top:" + mp.y * cp +
+              "px;width:" + cp + "px;height:" + cp + "px;" +
+              "font-size:" + (cp < 24 ? "8" : "11") + "px;";
             m.textContent = "M";
             mapEl.appendChild(m);
-            markerEls.mine = m;
+            buildingOverlays.push(m);
           }
 
           // Spawn marker
@@ -1019,12 +1024,10 @@
         /* ── Map interaction ── */
         function mapToGrid(e) {
           let rect = mapEl.getBoundingClientRect();
-          let scale = cellSize === 16 ? 0.5 : 1;
-          let cp = TILE * scale;
-          let mx = e.clientX - rect.left + $("#center").scrollLeft;
-          let my = e.clientY - rect.top + $("#center").scrollTop;
-          let gx = Math.floor(mx / cp);
-          let gy = Math.floor(my / cp);
+          let mx = e.clientX - rect.left;
+          let my = e.clientY - rect.top;
+          let gx = Math.floor(mx / cellSize);
+          let gy = Math.floor(my / cellSize);
           return {
             x: Math.max(0, Math.min(TOWN_W - 1, gx)),
             y: Math.max(0, Math.min(TOWN_H - 1, gy)),
@@ -1065,6 +1068,17 @@
               return;
             }
             pushUndo();
+            // Clear tiles under the building footprint
+            let tmpl = selectedBuildingTemplate;
+            for (let dy = 0; dy < tmpl.height; dy++) {
+              for (let dx = 0; dx < tmpl.width; dx++) {
+                let gx2 = x + dx, gy2 = y + dy;
+                if (gx2 < TOWN_W && gy2 < TOWN_H) {
+                  grid[gy2][gx2] = null;
+                  renderCell(gx2, gy2);
+                }
+              }
+            }
             placedBuildings.push({
               templateId: selectedBuildingTemplate.id,
               x,
@@ -1075,7 +1089,8 @@
             status("Placed: " + selectedBuildingTemplate.name);
           } else if (activeTool === "mine") {
             pushUndo();
-            minePos = { x, y };
+            if (!Array.isArray(minePos)) minePos = minePos ? [minePos] : [];
+            minePos.push({ x, y });
             renderOverlays();
             updatePositions();
             autoSave();
