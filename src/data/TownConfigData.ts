@@ -1,19 +1,6 @@
-import type { Vector2 } from "../core/types";
+import type { Vector2 } from '../core/types';
 
-export interface TownConfig {
-  width: number;
-  height: number;
-  buildings: { templateId?: string; id?: string; x: number; y: number }[];
-  mineEntrance: Vector2 | Vector2[];
-  playerSpawn: Vector2;
-  playerReturnSpawn?: Vector2;
-  paths: any[];
-  water: { x: number; y: number }[];
-  trees: { x: number; y: number; sprite: string }[];
-  features: any[];
-  decoration: { x: number; y: number; sprite: string }[];
-  tiles?: { x: number; y: number; sprite: string; overlay?: string }[];
-}
+export interface TownConfig { width: number; height: number; buildings: { templateId?: string; id?: string; x: number; y: number }[]; mineEntrance: Vector2 | Vector2[]; playerSpawn: Vector2; playerReturnSpawn?: Vector2; paths: any[]; water: { x: number; y: number }[]; trees: { x: number; y: number; sprite: string }[]; features: any[]; decoration: { x: number; y: number; sprite: string }[]; tiles?: { x: number; y: number; sprite: string; overlay?: string }[]; }
 
 export const TOWN_CONFIG: TownConfig = {
   "width": 45,
@@ -682,6 +669,11 @@ export const TOWN_CONFIG: TownConfig = {
       "sprite": "plants-bloom_plant_01"
     },
     {
+      "x": 36,
+      "y": 3,
+      "sprite": "vaults-gravestone_blank"
+    },
+    {
       "x": 43,
       "y": 3,
       "sprite": "trees-tree11"
@@ -742,6 +734,11 @@ export const TOWN_CONFIG: TownConfig = {
       "sprite": "floor-grass-dark_flowers4"
     },
     {
+      "x": 37,
+      "y": 4,
+      "sprite": "vaults-gravestone_writing1"
+    },
+    {
       "x": 39,
       "y": 4,
       "sprite": "floor-grass3"
@@ -749,7 +746,7 @@ export const TOWN_CONFIG: TownConfig = {
     {
       "x": 40,
       "y": 4,
-      "sprite": "floor-grass_flowers2"
+      "sprite": "vaults-gravestone_blank"
     },
     {
       "x": 42,
@@ -805,6 +802,11 @@ export const TOWN_CONFIG: TownConfig = {
       "x": 34,
       "y": 5,
       "sprite": "floor-grass_flowers4"
+    },
+    {
+      "x": 39,
+      "y": 5,
+      "sprite": "vaults-gravestone_writing1"
     },
     {
       "x": 40,
@@ -8711,30 +8713,34 @@ export const TOWN_CONFIG: TownConfig = {
     }
   ],
   "paths": [],
-  "mineEntrance": {
-    "0": {
+  "mineEntrance": [
+    {
       "x": 22,
       "y": 0
     },
-    "1": {
+    {
       "x": 21,
       "y": 0
     },
-    "2": {
+    {
       "x": 23,
       "y": 0
     },
-    "3": {
+    {
       "x": 24,
       "y": 0
     },
-    "4": {
+    {
       "x": 20,
       "y": 0
     }
-  },
+  ],
   "playerSpawn": {
     "x": 22,
     "y": 39
+  },
+  "playerReturnSpawn": {
+    "x": 22,
+    "y": 2
   }
 };

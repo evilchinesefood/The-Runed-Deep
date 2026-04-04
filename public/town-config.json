@@ -665,6 +665,11 @@
       "sprite": "plants-bloom_plant_01"
     },
     {
+      "x": 36,
+      "y": 3,
+      "sprite": "vaults-gravestone_blank"
+    },
+    {
       "x": 43,
       "y": 3,
       "sprite": "trees-tree11"
@@ -725,6 +730,11 @@
       "sprite": "floor-grass-dark_flowers4"
     },
     {
+      "x": 37,
+      "y": 4,
+      "sprite": "vaults-gravestone_writing1"
+    },
+    {
       "x": 39,
       "y": 4,
       "sprite": "floor-grass3"
@@ -732,7 +742,7 @@
     {
       "x": 40,
       "y": 4,
-      "sprite": "floor-grass_flowers2"
+      "sprite": "vaults-gravestone_blank"
     },
     {
       "x": 42,
@@ -788,6 +798,11 @@
       "x": 34,
       "y": 5,
       "sprite": "floor-grass_flowers4"
+    },
+    {
+      "x": 39,
+      "y": 5,
+      "sprite": "vaults-gravestone_writing1"
     },
     {
       "x": 40,
@@ -8694,30 +8709,34 @@
     }
   ],
   "paths": [],
-  "mineEntrance": {
-    "0": {
+  "mineEntrance": [
+    {
       "x": 22,
       "y": 0
     },
-    "1": {
+    {
       "x": 21,
       "y": 0
     },
-    "2": {
+    {
       "x": 23,
       "y": 0
     },
-    "3": {
+    {
       "x": 24,
       "y": 0
     },
-    "4": {
+    {
       "x": 20,
       "y": 0
     }
-  },
+  ],
   "playerSpawn": {
     "x": 22,
     "y": 39
+  },
+  "playerReturnSpawn": {
+    "x": 22,
+    "y": 2
   }
 }

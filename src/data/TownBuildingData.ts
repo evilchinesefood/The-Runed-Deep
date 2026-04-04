@@ -1,23 +1,7 @@
 import type { Vector2 } from '../core/types';
 
-export interface BuildingTile {
-  sprite: string;
-  type: string;
-  overlay?: string;
-  npcSprite?: string;
-}
-
-export interface BuildingTemplate {
-  id: string;
-  name: string;
-  flavor: string;
-  width: number;
-  height: number;
-  tiles: (BuildingTile | null)[][];
-  entrance: Vector2 | Vector2[];
-  npc: Vector2 | null;
-  facing?: string;
-}
+export interface BuildingTile { sprite: string; type: string; overlay?: string; npcSprite?: string; }
+export interface BuildingTemplate { id: string; name: string; flavor: string; width: number; height: number; tiles: (BuildingTile | null)[][]; entrance: Vector2 | Vector2[]; npc: Vector2 | null; facing?: string; }
 
 export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
   {
