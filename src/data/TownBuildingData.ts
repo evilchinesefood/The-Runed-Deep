@@ -1814,7 +1814,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         },
         {
           "sprite": "floor-pedestal_full",
-          "type": "floor"
+          "type": "floor",
+          "overlay": "altars-yredelemnul"
         },
         {
           "sprite": "floor-grass-pedestal_e",
@@ -1869,8 +1870,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
           "type": "floor"
         },
         {
-          "sprite": "floor-white_marble6",
-          "type": "floor"
+          "sprite": "wall-church0",
+          "type": "wall"
         },
         {
           "sprite": "floor-white_marble1",
@@ -1892,7 +1893,12 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         }
       ]
     ],
-    "entrance": [],
+    "entrance": [
+      {
+        "x": 1,
+        "y": 1
+      }
+    ],
     "npc": {
       "x": 1,
       "y": 1
@@ -1908,38 +1914,38 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     "tiles": [
       [
         {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
+          "sprite": "floor-sand7",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
+          "sprite": "floor-sand7",
+          "type": "floor"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
+          "sprite": "floor-sand7",
+          "type": "floor"
         },
         {
           "sprite": "floor-sand3",
@@ -1952,11 +1958,10 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         },
         {
           "sprite": "floor-sand7",
-          "type": "floor",
-          "overlay": "vaults-gravestone_blank"
+          "type": "floor"
         },
         {
-          "sprite": "floor-sand5",
+          "sprite": "floor-grass_full",
           "type": "floor"
         },
         {
@@ -1965,46 +1970,45 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
           "overlay": "statues-statue_ancient_hero"
         },
         {
-          "sprite": "wall-sandstone_wall4",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand2",
+          "sprite": "floor-grass0",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand6",
-          "type": "floor",
-          "overlay": "vaults-silver_statue_0"
-        },
-        {
-          "sprite": "floor-sand1",
+          "sprite": "floor-grass_full",
           "type": "floor"
         },
         {
-          "sprite": "floor-sand8",
+          "sprite": "floor-grass_full",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-grass_full",
           "type": "floor",
-          "overlay": "vaults-silver_statue_0"
+          "overlay": "gateways-abyssal_stair"
+        },
+        {
+          "sprite": "floor-grass_full",
+          "type": "floor"
         },
         {
           "sprite": "floor-sand4",
           "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall2",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall1",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         },
         {
           "sprite": "floor-sand3",
@@ -2016,7 +2020,7 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
           "type": "floor"
         },
         {
-          "sprite": "floor-sand3",
+          "sprite": "floor-grass_full",
           "type": "floor"
         },
         {
@@ -2029,49 +2033,45 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
           "overlay": "statues-statue_sword"
         },
         {
-          "sprite": "wall-sandstone_wall7",
-          "type": "wall"
+          "sprite": "floor-grass0",
+          "type": "floor"
         }
       ],
       [
         {
-          "sprite": "wall-sandstone_wall0",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall5",
-          "type": "wall"
-        },
-        {
-          "sprite": "wall-sandstone_wall9",
-          "type": "wall"
-        },
-        {
-          "sprite": "floor-sand2",
+          "sprite": "floor-grass0",
           "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall3",
-          "type": "wall"
+          "sprite": "floor-sand7",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall6",
-          "type": "wall"
+          "sprite": "floor-grass_full",
+          "type": "floor"
         },
         {
-          "sprite": "wall-sandstone_wall8",
-          "type": "wall"
+          "sprite": "floor-grass_full",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-grass_full",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-grass0",
+          "type": "floor"
+        },
+        {
+          "sprite": "floor-sand7",
+          "type": "floor"
         }
       ]
     ],
     "entrance": [
       {
         "x": 3,
-        "y": 4
-      },
-      {
-        "x": 3,
-        "y": 3
+        "y": 2
       }
     ],
     "npc": {

@@ -30,7 +30,12 @@ export function TOWN_START_INITIAL(): Vector2 {
 
 export function TOWN_START_RETURN(): Vector2 {
   const cfg = getTownConfig();
-  return { x: cfg.playerReturnSpawn.x, y: cfg.playerReturnSpawn.y };
+  if (cfg.playerReturnSpawn) return { x: cfg.playerReturnSpawn.x, y: cfg.playerReturnSpawn.y };
+  // Fallback: near mine entrance
+  const me = cfg.mineEntrance;
+  if (Array.isArray(me) && me.length > 0) return { x: me[0].x, y: me[0].y + 2 };
+  if (me && typeof me === "object" && (me as any).x !== undefined) return { x: (me as any).x, y: (me as any).y + 2 };
+  return TOWN_START_INITIAL();
 }
 
 // ── Feature sprite helpers ─────────────────────────────────

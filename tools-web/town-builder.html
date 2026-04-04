@@ -912,22 +912,16 @@
             mapEl.appendChild(ov);
             buildingOverlays.push(ov);
 
-            // Entrance dot (green)
-            if (tmpl.entrance) {
+            // Entrance dots (green)
+            let entArr = Array.isArray(tmpl.entrance) ? tmpl.entrance : (tmpl.entrance ? [tmpl.entrance] : []);
+            for (let ent of entArr) {
               let dot = document.createElement("div");
+              let ds = Math.max(4, cp / 3);
               dot.style.cssText =
-                "position:absolute;width:" +
-                Math.max(4, cp / 3) +
-                "px;height:" +
-                Math.max(4, cp / 3) +
-                "px;" +
+                "position:absolute;width:" + ds + "px;height:" + ds + "px;" +
                 "background:#4f4;border-radius:50%;z-index:12;pointer-events:none;" +
-                "left:" +
-                (bx + tmpl.entrance.x * cp + cp / 3) +
-                "px;" +
-                "top:" +
-                (by + tmpl.entrance.y * cp + cp / 3) +
-                "px;";
+                "left:" + (bx + ent.x * cp + cp / 3) + "px;" +
+                "top:" + (by + ent.y * cp + cp / 3) + "px;";
               dot.title = "Entrance";
               mapEl.appendChild(dot);
               buildingOverlays.push(dot);
@@ -1540,6 +1534,12 @@
             )
               paths.push({ x: t.x, y: t.y });
           }
+          // Normalize minePos to array
+          let mineArr = [];
+          if (Array.isArray(minePos)) mineArr = minePos;
+          else if (minePos && typeof minePos === "object" && minePos.x !== undefined) mineArr = [minePos];
+          else if (minePos && typeof minePos === "object") mineArr = Object.values(minePos);
+
           let config = {
             width: TOWN_W,
             height: TOWN_H,
@@ -1552,8 +1552,9 @@
             water,
             trees,
             paths,
-            mineEntrance: minePos,
+            mineEntrance: mineArr,
             playerSpawn: spawnPos,
+            playerReturnSpawn: mineArr.length > 0 ? { x: mineArr[0].x, y: mineArr[0].y + 2 } : spawnPos,
           };
           let blob = new Blob([JSON.stringify(config, null, 2)], {
             type: "application/json",
