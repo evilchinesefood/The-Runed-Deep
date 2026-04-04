@@ -128,10 +128,8 @@ export class MapRenderer {
     while (ground.firstChild) ground.removeChild(ground.firstChild);
     if (gc.indexOf("|") === -1) {
       ground.className = gc;
-      ground.style.position = "";
     } else {
       ground.className = "";
-      ground.style.position = "relative";
       for (const cls of gc.split("|")) {
         const layer = document.createElement("div");
         layer.className = cls;
