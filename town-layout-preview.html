@@ -186,17 +186,47 @@
         grid = [];
         for (let y = 0; y < H; y++) {
           grid[y] = [];
-          for (let x = 0; x < W; x++) grid[y][x] = "floor-grass_full";
+          for (let x = 0; x < W; x++) grid[y][x] = "floor-grass0";
         }
 
         // Paths
+        const pathFloorPool = [
+          "floor-sand1",
+          "floor-sand2",
+          "floor-sand3",
+          "floor-sand4",
+          "floor-sand5",
+          "floor-sand6",
+          "floor-sand7",
+          "floor-sand8",
+          "floor-sandstone_floor0",
+          "floor-sandstone_floor1",
+          "floor-sandstone_floor2",
+          "floor-sandstone_floor3",
+          "floor-sandstone_floor4",
+          "floor-sandstone_floor5",
+          "floor-sandstone_floor6",
+          "floor-sandstone_floor7",
+          "floor-sandstone_floor8",
+          "floor-sandstone_floor9",
+          "floor-white_marble5",
+          "floor-white_marble6",
+          "floor-white_marble7",
+          "floor-white_marble8",
+          "floor-white_marble9",
+          "floor-white_marble0",
+          "floor-white_marble1",
+          "floor-white_marble2",
+          "floor-white_marble3",
+          "floor-white_marble4",
+        ];
+        const pickFloor = () =>
+          pathFloorPool[Math.floor(Math.random() * pathFloorPool.length)];
         if (cfg.paths) {
           for (const p of cfg.paths) {
-            let spr =
-              p.type === "cobble" ? "floor-cobble_blood1" : "floor-dirt_full";
             for (const pt of p.points) {
               if (pt[0] >= 0 && pt[0] < W && pt[1] >= 0 && pt[1] < H)
-                grid[pt[1]][pt[0]] = spr;
+                grid[pt[1]][pt[0]] = pickFloor();
             }
           }
         }
