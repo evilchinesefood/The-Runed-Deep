@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tile Debug</title>
+<link rel="stylesheet" href="../css/sprites/tiles.css">
+<style>
+body { background: #1a1a1a; color: #ccc; font-family: monospace; padding: 20px; }
+h3 { color: #c9a84c; margin: 16px 0 8px; }
+
+/* Test 1: Raw tiles with no container */
+.test1 .tile { display: block; }
+
+/* Test 2: CSS Grid */
+.test2 { display: inline-grid; grid-template-columns: repeat(5, 32px); gap: 0; }
+.test2 .tile { display: block; width: 32px; height: 32px; }
+
+/* Test 3: Flex rows */
+.test3-row { display: flex; height: 32px; }
+.test3-row .tile { display: block; width: 32px; height: 32px; flex-shrink: 0; }
+
+/* Test 4: Absolute positioned (like map renderer) */
+.test4 { position: relative; width: 160px; height: 96px; background: #333; }
+.test4 .tile { position: absolute; display: block; width: 32px; height: 32px; }
+
+/* Test 5: Scaled container */
+.test5-wrap { transform: scale(0.5); transform-origin: top left; }
+
+/* Red grid overlay to check alignment */
+.grid-check { position: relative; display: inline-block; }
+.grid-check::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(0deg, transparent, transparent 31px, red 31px, red 32px),
+              repeating-linear-gradient(90deg, transparent, transparent 31px, red 31px, red 32px);
+  pointer-events: none;
+  opacity: 0.3;
+}
+</style>
+</head>
+<body>
+<h2>Tile Alignment Debug</h2>
+<p>Red grid lines should align perfectly with tile edges.</p>
+
+<h3>Test 1: Inline tiles (no container)</h3>
+<div class="grid-check">
+<div class="tile floor-sand1" style="display:inline-block"></div><div class="tile floor-sand2" style="display:inline-block"></div><div class="tile floor-sand3" style="display:inline-block"></div><div class="tile wall-sandstone_wall0" style="display:inline-block"></div><div class="tile wall-sandstone_wall1" style="display:inline-block"></div>
+</div>
+
+<h3>Test 2: CSS Grid (gap:0)</h3>
+<div class="grid-check">
+<div class="test2">
+  <div class="tile floor-sand1"></div><div class="tile floor-sand2"></div><div class="tile floor-sand3"></div><div class="tile wall-sandstone_wall0"></div><div class="tile wall-sandstone_wall1"></div>
+  <div class="tile wall-sandstone_wall2"></div><div class="tile floor-sand4"></div><div class="tile floor-sand5"></div><div class="tile floor-sand6"></div><div class="tile wall-sandstone_wall3"></div>
+  <div class="tile wall-sandstone_wall4"></div><div class="tile floor-sand7"></div><div class="tile floor-sand8"></div><div class="tile floor-sand1"></div><div class="tile wall-sandstone_wall5"></div>
+</div>
+</div>
+
+<h3>Test 3: Flex rows</h3>
+<div class="grid-check">
+<div>
+  <div class="test3-row"><div class="tile floor-sand1"></div><div class="tile floor-sand2"></div><div class="tile floor-sand3"></div><div class="tile wall-sandstone_wall0"></div><div class="tile wall-sandstone_wall1"></div></div>
+  <div class="test3-row"><div class="tile wall-sandstone_wall2"></div><div class="tile floor-sand4"></div><div class="tile floor-sand5"></div><div class="tile floor-sand6"></div><div class="tile wall-sandstone_wall3"></div></div>
+  <div class="test3-row"><div class="tile wall-sandstone_wall4"></div><div class="tile floor-sand7"></div><div class="tile floor-sand8"></div><div class="tile floor-sand1"></div><div class="tile wall-sandstone_wall5"></div></div>
+</div>
+</div>
+
+<h3>Test 4: Absolute positioned</h3>
+<div class="grid-check">
+<div class="test4">
+  <div class="tile floor-sand1" style="left:0;top:0"></div><div class="tile floor-sand2" style="left:32px;top:0"></div><div class="tile wall-sandstone_wall0" style="left:64px;top:0"></div><div class="tile wall-sandstone_wall1" style="left:96px;top:0"></div><div class="tile wall-sandstone_wall2" style="left:128px;top:0"></div>
+  <div class="tile wall-sandstone_wall3" style="left:0;top:32px"></div><div class="tile floor-sand3" style="left:32px;top:32px"></div><div class="tile floor-sand4" style="left:64px;top:32px"></div><div class="tile floor-sand5" style="left:96px;top:32px"></div><div class="tile wall-sandstone_wall4" style="left:128px;top:32px"></div>
+  <div class="tile wall-sandstone_wall5" style="left:0;top:64px"></div><div class="tile floor-sand6" style="left:32px;top:64px"></div><div class="tile floor-sand7" style="left:64px;top:64px"></div><div class="tile floor-sand8" style="left:96px;top:64px"></div><div class="tile wall-sandstone_wall6" style="left:128px;top:64px"></div>
+</div>
+</div>
+
+<h3>Test 5: Scaled 0.5x (container scaled)</h3>
+<div class="grid-check">
+<div class="test5-wrap">
+<div class="test4">
+  <div class="tile floor-sand1" style="left:0;top:0"></div><div class="tile floor-sand2" style="left:32px;top:0"></div><div class="tile wall-sandstone_wall0" style="left:64px;top:0"></div><div class="tile wall-sandstone_wall1" style="left:96px;top:0"></div><div class="tile wall-sandstone_wall2" style="left:128px;top:0"></div>
+  <div class="tile wall-sandstone_wall3" style="left:0;top:32px"></div><div class="tile floor-sand3" style="left:32px;top:32px"></div><div class="tile floor-sand4" style="left:64px;top:32px"></div><div class="tile floor-sand5" style="left:96px;top:32px"></div><div class="tile wall-sandstone_wall4" style="left:128px;top:32px"></div>
+  <div class="tile wall-sandstone_wall5" style="left:0;top:64px"></div><div class="tile floor-sand6" style="left:32px;top:64px"></div><div class="tile floor-sand7" style="left:64px;top:64px"></div><div class="tile floor-sand8" style="left:96px;top:64px"></div><div class="tile wall-sandstone_wall6" style="left:128px;top:64px"></div>
+</div>
+</div>
+</div>
+
+<h3>CSS Check</h3>
+<div id="css-info"></div>
+<script>
+// Check computed styles on a tile
+const t = document.querySelector('.test2 .tile');
+const cs = getComputedStyle(t);
+const info = document.getElementById('css-info');
+info.textContent =
+  'display: ' + cs.display +
+  ', width: ' + cs.width +
+  ', height: ' + cs.height +
+  ', bgSize: ' + cs.backgroundSize +
+  ', bgPos: ' + cs.backgroundPosition +
+  ', bgImage: ' + (cs.backgroundImage ? cs.backgroundImage.substring(0, 50) + '...' : 'none');
+</script>
+</body>
+</html>
