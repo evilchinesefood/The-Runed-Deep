@@ -271,7 +271,7 @@
               for (let c = 0; c < t.tiles[r].length; c++) {
                 let gx = b.x + c,
                   gy = b.y + r;
-                if (gx >= 0 && gx < W && gy >= 0 && gy < H)
+                if (gx >= 0 && gx < W && gy >= 0 && gy < H && t.tiles[r][c])
                   grid[gy][gx] = t.tiles[r][c].sprite;
               }
             }

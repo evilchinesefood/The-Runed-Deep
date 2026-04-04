@@ -152,10 +152,14 @@ function renderBuildings(data) {
     b.tiles.forEach(function(row, y) {
       row.forEach(function(t, x) {
         const tile = document.createElement('div');
-        tile.className = 'tile ' + t.sprite;
+        if (t) {
+          tile.className = 'tile ' + t.sprite;
+          tile.title = t.sprite + ' (' + t.type + ')';
+        } else {
+          tile.className = 'tile';
+        }
         if (x === b.entrance.x && y === b.entrance.y) tile.classList.add('entrance');
         if (x === b.npc.x && y === b.npc.y) tile.classList.add('npc');
-        tile.title = t.sprite + ' (' + t.type + ')';
         grid.appendChild(tile);
       });
     });
