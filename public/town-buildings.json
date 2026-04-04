@@ -3,6 +3,7 @@
     "id": "inn",
     "name": "The Resting Stag Inn",
     "flavor": "A warm bed and a hearty meal await weary adventurers.",
+    "facing": "east",
     "width": 7,
     "height": 5,
     "tiles": [
@@ -31,7 +32,7 @@
         { "sprite": "floor-pebble_brown0", "type": "floor" },
         { "sprite": "floor-pebble_brown2", "type": "floor" },
         { "sprite": "decor-blue_fountain", "type": "decor" },
-        { "sprite": "wall-brick_brown0", "type": "wall" }
+        { "sprite": "doors-closed_door", "type": "door" }
       ],
       [
         { "sprite": "wall-brick_brown0", "type": "wall" },
@@ -46,19 +47,20 @@
         { "sprite": "wall-brick_brown2", "type": "wall" },
         { "sprite": "wall-brick_brown4", "type": "wall" },
         { "sprite": "wall-brick_brown0", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-brick_brown2", "type": "wall" },
         { "sprite": "wall-brick_brown4", "type": "wall" },
-        { "sprite": "wall-brick_brown0", "type": "wall" }
+        { "sprite": "wall-brick_brown0", "type": "wall" },
+        { "sprite": "wall-brick_brown2", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 3, "y": 4 },
+    "entrance": { "x": 6, "y": 2 },
     "npc": { "x": 3, "y": 2 }
   },
   {
     "id": "weapon-shop",
     "name": "Iron Fang Armory",
     "flavor": "Fine blades for the discerning adventurer.",
+    "facing": "south",
     "width": 6,
     "height": 5,
     "tiles": [
@@ -110,6 +112,7 @@
     "id": "armor-shop",
     "name": "The Warded Shield",
     "flavor": "Protection for every part of the body.",
+    "facing": "south",
     "width": 6,
     "height": 5,
     "tiles": [
@@ -161,6 +164,7 @@
     "id": "blacksmith",
     "name": "The Forge",
     "flavor": "Hammers ring and sparks fly day and night.",
+    "facing": "south",
     "width": 7,
     "height": 5,
     "tiles": [
@@ -217,6 +221,7 @@
     "id": "general-store",
     "name": "Odds & Ends",
     "flavor": "Potions, scrolls, and sundries for every occasion.",
+    "facing": "west",
     "width": 6,
     "height": 5,
     "tiles": [
@@ -237,7 +242,7 @@
         { "sprite": "wall-brick_brown0", "type": "wall" }
       ],
       [
-        { "sprite": "wall-brick_brown2", "type": "wall" },
+        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "decor-cache_of_fruit_1", "type": "decor" },
         { "sprite": "shops-shop_general", "type": "decor" },
         { "sprite": "floor-sandstone_floor0", "type": "floor" },
@@ -255,19 +260,20 @@
       [
         { "sprite": "wall-brick_brown4", "type": "wall" },
         { "sprite": "wall-brick_brown0", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-brick_brown4", "type": "wall" },
         { "sprite": "wall-brick_brown0", "type": "wall" },
+        { "sprite": "wall-brick_brown2", "type": "wall" },
         { "sprite": "wall-brick_brown2", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 2, "y": 4 },
+    "entrance": { "x": 0, "y": 2 },
     "npc": { "x": 2, "y": 2 }
   },
   {
     "id": "magic-shop",
     "name": "The Arcane Sanctum",
     "flavor": "Arcane tomes and enchanted wands of great power.",
+    "facing": "east",
     "width": 6,
     "height": 5,
     "tiles": [
@@ -293,32 +299,33 @@
         { "sprite": "shops-shop_books", "type": "decor" },
         { "sprite": "floor-crystal_floor0", "type": "floor" },
         { "sprite": "shops-shop_wands", "type": "decor" },
+        { "sprite": "doors-closed_door", "type": "door" }
+      ],
+      [
+        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
+        { "sprite": "floor-crystal_floor0", "type": "floor" },
+        { "sprite": "floor-crystal_floor2", "type": "floor" },
+        { "sprite": "floor-crystal_floor0", "type": "floor" },
+        { "sprite": "floor-crystal_floor2", "type": "floor" },
+        { "sprite": "wall-crystal_wall_blue", "type": "wall" }
+      ],
+      [
+        { "sprite": "wall-crystal_wall_blue", "type": "wall" },
+        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
+        { "sprite": "wall-crystal_wall_blue", "type": "wall" },
+        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
+        { "sprite": "wall-crystal_wall_blue", "type": "wall" },
         { "sprite": "wall-crystal_wall_cyan", "type": "wall" }
-      ],
-      [
-        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
-        { "sprite": "floor-crystal_floor0", "type": "floor" },
-        { "sprite": "floor-crystal_floor2", "type": "floor" },
-        { "sprite": "floor-crystal_floor0", "type": "floor" },
-        { "sprite": "floor-crystal_floor2", "type": "floor" },
-        { "sprite": "wall-crystal_wall_blue", "type": "wall" }
-      ],
-      [
-        { "sprite": "wall-crystal_wall_blue", "type": "wall" },
-        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
-        { "sprite": "wall-crystal_wall_blue", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
-        { "sprite": "wall-crystal_wall_cyan", "type": "wall" },
-        { "sprite": "wall-crystal_wall_blue", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 3, "y": 4 },
+    "entrance": { "x": 5, "y": 2 },
     "npc": { "x": 2, "y": 2 }
   },
   {
     "id": "rune-forge",
     "name": "The Rune Forge",
     "flavor": "Ancient flames dance within, ready to bind runes to steel.",
+    "facing": "north",
     "width": 7,
     "height": 5,
     "tiles": [
@@ -326,7 +333,7 @@
         { "sprite": "wall-brick_dark_1_0", "type": "wall" },
         { "sprite": "wall-brick_dark_1_2", "type": "wall" },
         { "sprite": "wall-brick_dark_1_4", "type": "wall" },
-        { "sprite": "wall-brick_dark_1_0", "type": "wall" },
+        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-brick_dark_1_2", "type": "wall" },
         { "sprite": "wall-brick_dark_1_4", "type": "wall" },
         { "sprite": "wall-brick_dark_1_0", "type": "wall" }
@@ -362,26 +369,27 @@
         { "sprite": "wall-brick_dark_1_2", "type": "wall" },
         { "sprite": "wall-brick_dark_1_4", "type": "wall" },
         { "sprite": "wall-brick_dark_1_0", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-brick_dark_1_2", "type": "wall" },
         { "sprite": "wall-brick_dark_1_4", "type": "wall" },
-        { "sprite": "wall-brick_dark_1_0", "type": "wall" }
+        { "sprite": "wall-brick_dark_1_0", "type": "wall" },
+        { "sprite": "wall-brick_dark_1_2", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 3, "y": 4 },
+    "entrance": { "x": 3, "y": 0 },
     "npc": { "x": 3, "y": 2 }
   },
   {
     "id": "sage",
     "name": "The Sage's Study",
     "flavor": "Ancient knowledge to reveal the secrets of your treasures.",
+    "facing": "north",
     "width": 5,
     "height": 5,
     "tiles": [
       [
         { "sprite": "wall-crypt0", "type": "wall" },
         { "sprite": "wall-crypt2", "type": "wall" },
-        { "sprite": "wall-crypt0", "type": "wall" },
+        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-crypt2", "type": "wall" },
         { "sprite": "wall-crypt0", "type": "wall" }
       ],
@@ -409,18 +417,19 @@
       [
         { "sprite": "wall-crypt0", "type": "wall" },
         { "sprite": "wall-crypt2", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
+        { "sprite": "wall-crypt0", "type": "wall" },
         { "sprite": "wall-crypt0", "type": "wall" },
         { "sprite": "wall-crypt2", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 2, "y": 4 },
+    "entrance": { "x": 2, "y": 0 },
     "npc": { "x": 2, "y": 2 }
   },
   {
     "id": "temple",
     "name": "Temple of Odin",
     "flavor": "A place of healing and divine protection under the All-Father's gaze.",
+    "facing": "north",
     "width": 9,
     "height": 7,
     "tiles": [
@@ -429,7 +438,7 @@
         { "sprite": "wall-church2", "type": "wall" },
         { "sprite": "wall-church4", "type": "wall" },
         { "sprite": "wall-church0", "type": "wall" },
-        { "sprite": "wall-church2", "type": "wall" },
+        { "sprite": "doors-closed_door", "type": "door" },
         { "sprite": "wall-church4", "type": "wall" },
         { "sprite": "wall-church0", "type": "wall" },
         { "sprite": "wall-church2", "type": "wall" },
@@ -495,14 +504,14 @@
         { "sprite": "wall-church2", "type": "wall" },
         { "sprite": "wall-church4", "type": "wall" },
         { "sprite": "wall-church0", "type": "wall" },
-        { "sprite": "doors-closed_door", "type": "door" },
+        { "sprite": "wall-church2", "type": "wall" },
         { "sprite": "wall-church4", "type": "wall" },
         { "sprite": "wall-church0", "type": "wall" },
         { "sprite": "wall-church2", "type": "wall" },
         { "sprite": "wall-church4", "type": "wall" }
       ]
     ],
-    "entrance": { "x": 4, "y": 6 },
+    "entrance": { "x": 4, "y": 0 },
     "npc": { "x": 4, "y": 3 }
   },
   {

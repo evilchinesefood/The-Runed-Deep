@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Town Layout Preview - The Runed Deep</title>
+    <link rel="stylesheet" href="public/css/sprites/tiles.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a2e;
+        color: #e0e0e0;
+        font-family: monospace;
+      }
+      #controls {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: #1a1a2eee;
+        padding: 8px 16px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        border-bottom: 1px solid #333;
+      }
+      #controls button {
+        background: #2a2a4e;
+        color: #e0e0e0;
+        border: 1px solid #555;
+        padding: 6px 14px;
+        cursor: pointer;
+        font-family: monospace;
+        border-radius: 3px;
+      }
+      #controls button.active {
+        background: #4a4a8e;
+        border-color: #88f;
+      }
+      #controls label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      #controls input[type="checkbox"] {
+        cursor: pointer;
+      }
+      #map-wrap {
+        padding-top: 44px;
+        overflow: auto;
+      }
+      #map {
+        position: relative;
+        margin: 20px auto;
+      }
+      .cell {
+        position: absolute;
+        overflow: hidden;
+      }
+      .cell .tile {
+        display: block;
+        width: 32px;
+        height: 32px;
+      }
+      .label {
+        position: absolute;
+        z-index: 50;
+        background: #000c;
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        border: 1px solid #555;
+        border-radius: 2px;
+        transform: translate(-50%, -100%);
+      }
+      .marker {
+        position: absolute;
+        z-index: 40;
+        border-radius: 50%;
+        opacity: 0.7;
+        pointer-events: none;
+      }
+      .marker-mine {
+        background: #4488ff;
+      }
+      .marker-spawn {
+        background: #44ff88;
+      }
+      .marker-return {
+        background: #ffaa44;
+      }
+      #map.show-grid .cell {
+        outline: 1px solid #ffffff15;
+      }
+      #legend {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 100;
+        background: #1a1a2eee;
+        border: 1px solid #555;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 11px;
+      }
+      #legend div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 3px 0;
+      }
+      #legend .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <strong>Town Layout Preview</strong>
+      <button id="btn-half" class="active" onclick="setZoom('half')">
+        16px (Overview)
+      </button>
+      <button id="btn-full" onclick="setZoom('full')">32px (Full)</button>
+      <label
+        ><input
+          type="checkbox"
+          id="chk-labels"
+          checked
+          onchange="toggleLabels()"
+        />
+        Labels</label
+      >
+      <label
+        ><input type="checkbox" id="chk-grid" onchange="toggleGrid()" />
+        Grid</label
+      >
+      <span id="info" style="margin-left: auto; font-size: 11px; color: #888"
+        >45 x 60</span
+      >
+    </div>
+    <div id="map-wrap">
+      <div id="map"></div>
+    </div>
+    <div id="legend">
+      <div>
+        <span class="dot" style="background: #4488ff"></span> Mine Entrance
+      </div>
+      <div>
+        <span class="dot" style="background: #44ff88"></span> Player Spawn
+      </div>
+      <div>
+        <span class="dot" style="background: #ffaa44"></span> Return Spawn
+      </div>
+    </div>
+
+    <script>
+      const W = 45,
+        H = 60,
+        TILE = 32;
+      let zoom = "half";
+      let grid = [];
+      let bldgs = [],
+        cfg = {};
+
+      async function init() {
+        [bldgs, cfg] = await Promise.all([
+          fetch("public/town-buildings.json").then((r) => r.json()),
+          fetch("public/town-config.json").then((r) => r.json()),
+        ]);
+        buildGrid();
+        render();
+      }
+
+      function buildGrid() {
+        grid = [];
+        for (let y = 0; y < H; y++) {
+          grid[y] = [];
+          for (let x = 0; x < W; x++) grid[y][x] = "floor-grass_full";
+        }
+
+        // Paths
+        if (cfg.paths) {
+          for (const p of cfg.paths) {
+            let spr =
+              p.type === "cobble" ? "floor-cobble_blood1" : "floor-dirt_full";
+            for (const pt of p.points) {
+              if (pt[0] >= 0 && pt[0] < W && pt[1] >= 0 && pt[1] < H)
+                grid[pt[1]][pt[0]] = spr;
+            }
+          }
+        }
+
+        // Water
+        if (cfg.water) {
+          for (const w of cfg.water) {
+            if (w.x >= 0 && w.x < W && w.y >= 0 && w.y < H)
+              grid[w.y][w.x] = "water-deep_water";
+          }
+        }
+
+        // Decoration
+        if (cfg.decoration) {
+          for (const d of cfg.decoration) {
+            if (d.x >= 0 && d.x < W && d.y >= 0 && d.y < H)
+              grid[d.y][d.x] = d.sprite;
+          }
+        }
+
+        // Trees
+        if (cfg.trees) {
+          for (const t of cfg.trees) {
+            if (t.x >= 0 && t.x < W && t.y >= 0 && t.y < H)
+              grid[t.y][t.x] = t.sprite;
+          }
+        }
+
+        // Features
+        if (cfg.features) {
+          for (const f of cfg.features) stampFeature(f);
+        }
+
+        // Buildings
+        let tpl = {};
+        for (const b of bldgs) tpl[b.id] = b;
+        if (cfg.buildings) {
+          for (const b of cfg.buildings) {
+            let t = tpl[b.templateId];
+            if (!t) continue;
+            for (let r = 0; r < t.tiles.length; r++) {
+              for (let c = 0; c < t.tiles[r].length; c++) {
+                let gx = b.x + c,
+                  gy = b.y + r;
+                if (gx >= 0 && gx < W && gy >= 0 && gy < H)
+                  grid[gy][gx] = t.tiles[r][c].sprite;
+              }
+            }
+          }
+        }
+      }
+
+      function stampFeature(f) {
+        let w = f.w || 1,
+          h = f.h || 1;
+        let sprites = {
+          fountain: (dx, dy) =>
+            dx === Math.floor(w / 2) && dy === Math.floor(h / 2)
+              ? "decor-sparkling_fountain"
+              : "floor-limestone0",
+          graveyard: (dx, dy) =>
+            (dx + dy) % 2 === 0
+              ? "statues-statue_demonic_bust"
+              : "floor-grey_dirt0",
+          well: () => "decor-blue_fountain",
+          "market-stall": () => "shops-enter_shop",
+          garden: (dx, dy) =>
+            [
+              "plants-bloom_plant_01",
+              "plants-bloom_plant_02",
+              "plants-fruit_plant_01",
+            ][(dx + dy) % 3],
+          "animal-pen": (dx, dy) =>
+            dx === 0 || dx === w - 1 || dy === 0 || dy === h - 1
+              ? "floor-dirt_full"
+              : "floor-grass0",
+        };
+        let fn = sprites[f.type];
+        if (!fn) return;
+        for (let dy = 0; dy < h; dy++) {
+          for (let dx = 0; dx < w; dx++) {
+            let gx = f.x + dx,
+              gy = f.y + dy;
+            if (gx < W && gy < H) grid[gy][gx] = fn(dx, dy);
+          }
+        }
+      }
+
+      function render() {
+        let map = document.getElementById("map");
+        let s = zoom === "half" ? 0.5 : 1;
+        let cp = TILE * s;
+        map.style.width = W * cp + "px";
+        map.style.height = H * cp + "px";
+
+        // Clear
+        while (map.firstChild) map.removeChild(map.firstChild);
+
+        let frag = document.createDocumentFragment();
+
+        // Tiles
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            let cell = document.createElement("div");
+            cell.className = "cell";
+            cell.style.cssText =
+              "left:" +
+              x * cp +
+              "px;top:" +
+              y * cp +
+              "px;width:" +
+              cp +
+              "px;height:" +
+              cp +
+              "px;";
+            let t = document.createElement("div");
+            t.className = "tile " + grid[y][x];
+            t.style.cssText =
+              "transform:scale(" + s + ");transform-origin:top left;";
+            cell.appendChild(t);
+            frag.appendChild(cell);
+          }
+        }
+
+        // Building labels
+        let tpl = {};
+        for (const b of bldgs) tpl[b.id] = b;
+        if (cfg.buildings) {
+          for (const b of cfg.buildings) {
+            let t = tpl[b.templateId];
+            if (!t) continue;
+            let lbl = document.createElement("div");
+            lbl.className = "label building-label";
+            lbl.textContent = t.name;
+            lbl.style.left = (b.x + t.width / 2) * cp + "px";
+            lbl.style.top = b.y * cp + "px";
+            frag.appendChild(lbl);
+          }
+        }
+
+        // Markers
+        let ms = Math.max(cp * 0.8, 8);
+        function addMarker(pos, cls) {
+          if (!pos) return;
+          let m = document.createElement("div");
+          m.className = "marker " + cls;
+          m.style.cssText =
+            "left:" +
+            (pos.x * cp + cp / 2 - ms / 2) +
+            "px;top:" +
+            (pos.y * cp + cp / 2 - ms / 2) +
+            "px;width:" +
+            ms +
+            "px;height:" +
+            ms +
+            "px;";
+          frag.appendChild(m);
+        }
+        addMarker(cfg.mineEntrance, "marker-mine");
+        addMarker(cfg.playerSpawn, "marker-spawn");
+        addMarker(cfg.playerReturnSpawn, "marker-return");
+
+        map.appendChild(frag);
+      }
+
+      function setZoom(z) {
+        zoom = z;
+        document
+          .getElementById("btn-half")
+          .classList.toggle("active", z === "half");
+        document
+          .getElementById("btn-full")
+          .classList.toggle("active", z === "full");
+        render();
+      }
+
+      function toggleLabels() {
+        let show = document.getElementById("chk-labels").checked;
+        document
+          .querySelectorAll(".label")
+          .forEach((el) => (el.style.display = show ? "" : "none"));
+      }
+
+      function toggleGrid() {
+        document
+          .getElementById("map")
+          .classList.toggle(
+            "show-grid",
+            document.getElementById("chk-grid").checked,
+          );
+      }
+
+      init();
+    </script>
+  </body>
+</html>
