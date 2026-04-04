@@ -278,6 +278,16 @@
       }
 
       /* Building palette */
+      .building-section-header {
+        padding: 6px 8px;
+        font-size: 11px;
+        font-weight: bold;
+        color: var(--gold);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
       .building-thumb {
         padding: 6px 8px;
         cursor: pointer;
@@ -299,6 +309,45 @@
       .building-thumb-size {
         font-size: 10px;
         color: var(--text2);
+      }
+      .building-thumb-coords {
+        font-size: 10px;
+        color: var(--gold);
+        margin-left: auto;
+      }
+      .building-thumb .btn-unplace {
+        font-size: 10px;
+        padding: 1px 6px;
+        margin-left: 4px;
+        color: var(--red);
+        border-color: var(--red);
+        flex-shrink: 0;
+      }
+      .building-thumb .btn-unplace:hover {
+        background: var(--red);
+        color: #fff;
+      }
+
+      /* Layer mode banner */
+      #layer-banner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        padding: 8px 24px;
+        background: #1a1400;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: bold;
+        border: 2px solid var(--gold);
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        box-shadow: 0 2px 12px rgba(201, 168, 76, 0.3);
+      }
+      #layer-banner.show {
+        display: block;
       }
 
       /* Right panel tools */
@@ -476,6 +525,7 @@
             <button data-tool="mine">Mine Entrance</button>
             <button data-tool="spawn">Player Spawn</button>
             <button data-tool="erase">Erase</button>
+            <button data-tool="layer" id="btn-layer">Layer Mode</button>
           </div>
         </div>
         <div class="prop-group">
@@ -520,6 +570,7 @@
             <div><b>Right-click</b> — Erase tile</div>
             <div><b>Click+drag</b> — Paint sweep</div>
             <div><b>Ctrl+Z</b> — Undo</div>
+            <div><b>Esc</b> — Exit layer mode</div>
           </div>
         </div>
       </div>
@@ -529,6 +580,7 @@
       <span id="status-msg">Ready</span>
       <span id="status-pos"></span>
     </div>
+    <div id="layer-banner">LAYER MODE — Click a tile to add an overlay</div>
     <div id="toast" class="toast"></div>
 
     <script>
@@ -544,7 +596,7 @@
         /* ── State ── */
         let tileSprites = [];
         let allBuildings = [];
-        let grid = []; // [y][x] = sprite className or null (null = grass)
+        let grid = []; // [y][x] = null | string | {base, overlay}
         let placedBuildings = []; // [{templateId, x, y}]
         let minePos = null,
           spawnPos = null;
@@ -558,6 +610,30 @@
         let leftTab = "tiles";
         let showGrid = false;
         let showLabels = true;
+        let layerMode = false;
+        let layerTimer = null;
+
+        /* ── Grid helpers ── */
+        function getBase(cell) {
+          if (!cell) return null;
+          if (typeof cell === "string") return cell;
+          return cell.base;
+        }
+        function getOverlay(cell) {
+          if (!cell || typeof cell === "string") return null;
+          return cell.overlay;
+        }
+        function setOverlay(x, y, sprite) {
+          let cell = grid[y][x];
+          let base = getBase(cell);
+          if (!base) base = "floor-grass0";
+          grid[y][x] = { base, overlay: sprite };
+        }
+        function removeOverlay(x, y) {
+          let cell = grid[y][x];
+          if (!cell || typeof cell === "string") return;
+          grid[y][x] = cell.base;
+        }
 
         /* ── DOM cache ── */
         const $ = (s) => document.querySelector(s);
@@ -694,7 +770,9 @@
             if (cfg.tiles)
               for (let t of cfg.tiles)
                 if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
-                  grid[t.y][t.x] = t.sprite;
+                  grid[t.y][t.x] = t.overlay
+                    ? { base: t.sprite, overlay: t.overlay }
+                    : t.sprite;
             if (cfg.mineEntrance) minePos = cfg.mineEntrance;
             if (cfg.playerSpawn) spawnPos = cfg.playerSpawn;
             if (cfg.buildings)
@@ -724,7 +802,9 @@
           // Create all cells
           for (let y = 0; y < TOWN_H; y++) {
             for (let x = 0; x < TOWN_W; x++) {
-              let sprite = grid[y][x];
+              let raw = grid[y][x];
+              let base = getBase(raw) || "floor-grass0";
+              let overlay = getOverlay(raw);
               let cell = document.createElement("div");
               cell.className = "cell";
               cell.style.cssText =
@@ -736,12 +816,23 @@
                 cp +
                 "px;height:" +
                 cp +
-                "px;";
+                "px;position:absolute;overflow:hidden;";
               let t = document.createElement("div");
-              t.className = "tile " + (sprite || "floor-grass0");
+              t.className = "tile " + base;
               t.style.cssText =
-                "transform:scale(" + s + ");transform-origin:top left;";
+                "transform:scale(" +
+                s +
+                ");transform-origin:top left;position:absolute;left:0;top:0;";
               cell.appendChild(t);
+              if (overlay) {
+                let o = document.createElement("div");
+                o.className = "tile " + overlay;
+                o.style.cssText =
+                  "transform:scale(" +
+                  s +
+                  ");transform-origin:top left;position:absolute;left:0;top:0;";
+                cell.appendChild(o);
+              }
               frag.appendChild(cell);
               cellEls[y][x] = cell;
             }
@@ -757,11 +848,27 @@
           let s = cellSize === 16 ? 0.5 : 1;
           let cell = cellEls[y][x];
           if (!cell) return;
-          let t = cell.firstChild;
-          let sprite = grid[y][x];
-          t.className = "tile " + (sprite || "floor-grass0");
+          let raw = grid[y][x];
+          let base = getBase(raw) || "floor-grass0";
+          let overlay = getOverlay(raw);
+          // Clear existing children
+          while (cell.firstChild) cell.removeChild(cell.firstChild);
+          let t = document.createElement("div");
+          t.className = "tile " + base;
           t.style.cssText =
-            "transform:scale(" + s + ");transform-origin:top left;";
+            "transform:scale(" +
+            s +
+            ");transform-origin:top left;position:absolute;left:0;top:0;";
+          cell.appendChild(t);
+          if (overlay) {
+            let o = document.createElement("div");
+            o.className = "tile " + overlay;
+            o.style.cssText =
+              "transform:scale(" +
+              s +
+              ");transform-origin:top left;position:absolute;left:0;top:0;";
+            cell.appendChild(o);
+          }
         }
 
         function renderOverlays() {
@@ -809,10 +916,18 @@
             if (tmpl.entrance) {
               let dot = document.createElement("div");
               dot.style.cssText =
-                "position:absolute;width:" + Math.max(4, cp / 3) + "px;height:" + Math.max(4, cp / 3) + "px;" +
+                "position:absolute;width:" +
+                Math.max(4, cp / 3) +
+                "px;height:" +
+                Math.max(4, cp / 3) +
+                "px;" +
                 "background:#4f4;border-radius:50%;z-index:12;pointer-events:none;" +
-                "left:" + (bx + tmpl.entrance.x * cp + cp / 3) + "px;" +
-                "top:" + (by + tmpl.entrance.y * cp + cp / 3) + "px;";
+                "left:" +
+                (bx + tmpl.entrance.x * cp + cp / 3) +
+                "px;" +
+                "top:" +
+                (by + tmpl.entrance.y * cp + cp / 3) +
+                "px;";
               dot.title = "Entrance";
               mapEl.appendChild(dot);
               buildingOverlays.push(dot);
@@ -830,14 +945,27 @@
           });
 
           // Mine markers (supports array)
-          let mineArr = Array.isArray(minePos) ? minePos : (minePos ? [minePos] : []);
+          let mineArr = Array.isArray(minePos)
+            ? minePos
+            : minePos
+              ? [minePos]
+              : [];
           for (let mp of mineArr) {
             let m = document.createElement("div");
             m.className = "marker-overlay marker-mine";
             m.style.cssText =
-              "left:" + mp.x * cp + "px;top:" + mp.y * cp +
-              "px;width:" + cp + "px;height:" + cp + "px;" +
-              "font-size:" + (cp < 24 ? "8" : "11") + "px;";
+              "left:" +
+              mp.x * cp +
+              "px;top:" +
+              mp.y * cp +
+              "px;width:" +
+              cp +
+              "px;height:" +
+              cp +
+              "px;" +
+              "font-size:" +
+              (cp < 24 ? "8" : "11") +
+              "px;";
             m.textContent = "M";
             mapEl.appendChild(m);
             buildingOverlays.push(m);
@@ -963,46 +1091,170 @@
         function buildBuildingPalette() {
           let pal = $("#building-palette");
           pal.textContent = "";
-          allBuildings.forEach((b) => {
-            let d = document.createElement("div");
-            d.className = "building-thumb";
-            let n = document.createElement("span");
-            n.className = "building-thumb-name";
-            n.textContent = b.name;
-            let s = document.createElement("span");
-            s.className = "building-thumb-size";
-            s.textContent = b.width + "x" + b.height;
-            d.appendChild(n);
-            d.appendChild(s);
-            d.addEventListener("click", () => {
-              selectedBuildingTemplate = b;
-              pal
-                .querySelectorAll(".building-thumb")
-                .forEach((x) => x.classList.remove("selected"));
-              d.classList.add("selected");
-              setTool("place");
-              status("Place: " + b.name);
+          let placedIds = new Set(placedBuildings.map((p) => p.templateId));
+
+          // Available section
+          let avail = allBuildings.filter((b) => !placedIds.has(b.id));
+          if (avail.length) {
+            let hdr = document.createElement("div");
+            hdr.className = "building-section-header";
+            hdr.textContent = "Available (" + avail.length + ")";
+            pal.appendChild(hdr);
+            avail.forEach((b) => {
+              let d = document.createElement("div");
+              d.className = "building-thumb";
+              let n = document.createElement("span");
+              n.className = "building-thumb-name";
+              n.textContent = b.name;
+              let s = document.createElement("span");
+              s.className = "building-thumb-size";
+              s.textContent = b.width + "x" + b.height;
+              d.appendChild(n);
+              d.appendChild(s);
+              d.addEventListener("click", () => {
+                selectedBuildingTemplate = b;
+                pal
+                  .querySelectorAll(".building-thumb")
+                  .forEach((x) => x.classList.remove("selected"));
+                d.classList.add("selected");
+                setTool("place");
+                status("Place: " + b.name);
+              });
+              pal.appendChild(d);
             });
-            pal.appendChild(d);
-          });
+          }
+
+          // Placed section
+          let placed = placedBuildings
+            .map((p, i) => ({
+              p,
+              i,
+              tmpl: allBuildings.find((b) => b.id === p.templateId),
+            }))
+            .filter((o) => o.tmpl);
+          if (placed.length) {
+            let hdr = document.createElement("div");
+            hdr.className = "building-section-header";
+            hdr.textContent = "Placed (" + placed.length + ")";
+            pal.appendChild(hdr);
+            placed.forEach((o) => {
+              let d = document.createElement("div");
+              d.className = "building-thumb";
+              let n = document.createElement("span");
+              n.className = "building-thumb-name";
+              n.textContent = o.tmpl.name;
+              let coords = document.createElement("span");
+              coords.className = "building-thumb-coords";
+              coords.textContent = "(" + o.p.x + ", " + o.p.y + ")";
+              d.appendChild(n);
+              d.appendChild(coords);
+              let rm = document.createElement("button");
+              rm.className = "btn-unplace";
+              rm.textContent = "Remove";
+              rm.addEventListener("click", (e) => {
+                e.stopPropagation();
+                pushUndo();
+                placedBuildings.splice(o.i, 1);
+                selectedPlacedIdx = -1;
+                renderOverlays();
+                updateSelection();
+                buildBuildingPalette();
+                autoSave();
+              });
+              d.appendChild(rm);
+              d.addEventListener("click", () => {
+                selectedPlacedIdx = o.i;
+                renderOverlays();
+                updateSelection();
+                // Scroll map to building
+                let cp = TILE * (cellSize === 16 ? 0.5 : 1);
+                let cx = o.p.x * cp + (o.tmpl.width * cp) / 2;
+                let cy = o.p.y * cp + (o.tmpl.height * cp) / 2;
+                let ctr = $("#center");
+                ctr.scrollLeft = cx - ctr.clientWidth / 2;
+                ctr.scrollTop = cy - ctr.clientHeight / 2;
+                pal
+                  .querySelectorAll(".building-thumb")
+                  .forEach((x) => x.classList.remove("selected"));
+                d.classList.add("selected");
+              });
+              pal.appendChild(d);
+            });
+          }
         }
 
         /* ── Tools ── */
         function setTool(t) {
+          if (t === "layer") {
+            toggleLayerMode();
+            return;
+          }
           activeTool = t;
           document.querySelectorAll("#tools-wrap button").forEach((b) => {
+            if (b.dataset.tool === "layer") return;
             b.classList.toggle("active", b.dataset.tool === t);
           });
+          if (layerMode) exitLayerMode();
           selectedPlacedIdx = -1;
           updateSelection();
+        }
+
+        /* ── Layer Mode ── */
+        function toggleLayerMode() {
+          if (layerMode) {
+            exitLayerMode();
+          } else {
+            enterLayerMode();
+          }
+        }
+
+        function enterLayerMode() {
+          layerMode = true;
+          let btn = $("#btn-layer");
+          btn.classList.add("active");
+          btn.style.background = "var(--gold)";
+          btn.style.color = "#111";
+          btn.style.boxShadow = "0 0 8px var(--gold)";
+          $("#layer-banner").classList.add("show");
+          resetLayerTimer();
+          status("Layer mode ON — select a tile, then click map to overlay");
+        }
+
+        function exitLayerMode() {
+          layerMode = false;
+          clearTimeout(layerTimer);
+          layerTimer = null;
+          let btn = $("#btn-layer");
+          btn.classList.remove("active");
+          btn.style.background = "";
+          btn.style.color = "";
+          btn.style.boxShadow = "";
+          $("#layer-banner").classList.remove("show");
+          status("Layer mode OFF");
+        }
+
+        function resetLayerTimer() {
+          clearTimeout(layerTimer);
+          layerTimer = setTimeout(() => {
+            if (layerMode) {
+              exitLayerMode();
+              toast("Layer mode timed out");
+            }
+          }, 10000);
         }
 
         /* ── Undo ── */
         function pushUndo() {
           undoStack.push({
-            grid: grid.map((r) => [...r]),
+            grid: grid.map((r) =>
+              r.map((c) => (c && typeof c === "object" ? { ...c } : c)),
+            ),
             buildings: JSON.parse(JSON.stringify(placedBuildings)),
-            mine: minePos ? { ...minePos } : null,
+            mine: minePos
+              ? Array.isArray(minePos)
+                ? minePos.map((m) => ({ ...m }))
+                : { ...minePos }
+              : null,
             spawn: spawnPos ? { ...spawnPos } : null,
           });
           if (undoStack.length > MAX_UNDO) undoStack.shift();
@@ -1016,6 +1268,7 @@
           minePos = s.mine;
           spawnPos = s.spawn;
           renderFull();
+          buildBuildingPalette();
           updatePositions();
           autoSave();
           status("Undo (" + undoStack.length + " left)");
@@ -1037,6 +1290,35 @@
         function onMapDown(e) {
           e.preventDefault();
           let { x, y } = mapToGrid(e);
+
+          // Layer mode handling
+          if (layerMode) {
+            resetLayerTimer();
+            if (e.button === 2) {
+              // Right-click in layer mode = remove overlay only
+              pushUndo();
+              removeOverlay(x, y);
+              renderCell(x, y);
+              autoSave();
+              return;
+            }
+            if (!selectedTile) {
+              status("Select a tile first");
+              return;
+            }
+            let cell = grid[y][x];
+            if (getOverlay(cell)) {
+              toast(
+                "Tile already has an overlay — right-click to remove it first",
+              );
+              return;
+            }
+            pushUndo();
+            setOverlay(x, y, selectedTile);
+            renderCell(x, y);
+            autoSave();
+            return;
+          }
 
           // Right-click = erase
           if (e.button === 2) {
@@ -1062,9 +1344,29 @@
             painting = true;
             grid[y][x] = null;
             renderCell(x, y);
+            // Also remove any building at this position
+            let removedBld = null;
+            for (let i = placedBuildings.length - 1; i >= 0; i--) {
+              let pb = placedBuildings[i];
+              let tmpl = allBuildings.find(b => b.id === pb.templateId);
+              if (tmpl && x >= pb.x && x < pb.x + tmpl.width && y >= pb.y && y < pb.y + tmpl.height) {
+                removedBld = placedBuildings.splice(i, 1)[0];
+                break;
+              }
+            }
+            if (removedBld) {
+              renderOverlays();
+              buildBuildingPalette();
+              status("Removed building: " + removedBld.templateId);
+            }
           } else if (activeTool === "place") {
             if (!selectedBuildingTemplate) {
               status("Select a building first");
+              return;
+            }
+            // Prevent placing the same building twice
+            if (placedBuildings.some(p => p.templateId === selectedBuildingTemplate.id)) {
+              status(selectedBuildingTemplate.name + " is already placed — erase it first to move");
               return;
             }
             pushUndo();
@@ -1072,7 +1374,8 @@
             let tmpl = selectedBuildingTemplate;
             for (let dy = 0; dy < tmpl.height; dy++) {
               for (let dx = 0; dx < tmpl.width; dx++) {
-                let gx2 = x + dx, gy2 = y + dy;
+                let gx2 = x + dx,
+                  gy2 = y + dy;
                 if (gx2 < TOWN_W && gy2 < TOWN_H) {
                   grid[gy2][gx2] = null;
                   renderCell(gx2, gy2);
@@ -1085,6 +1388,7 @@
               y,
             });
             renderOverlays();
+            buildBuildingPalette();
             autoSave();
             status("Placed: " + selectedBuildingTemplate.name);
           } else if (activeTool === "mine") {
@@ -1118,7 +1422,11 @@
           $("#status-pos").textContent = "(" + x + ", " + y + ")";
 
           // Hover preview
-          if (activeTool === "paint" && selectedTile && !painting) {
+          if (
+            (activeTool === "paint" || layerMode) &&
+            selectedTile &&
+            !painting
+          ) {
             let scale = cellSize === 16 ? 0.5 : 1;
             let cp = TILE * scale;
             hoverEl.style.display = "";
@@ -1205,8 +1513,16 @@
         function downloadConfig() {
           let tiles = [];
           for (let y = 0; y < TOWN_H; y++)
-            for (let x = 0; x < TOWN_W; x++)
-              if (grid[y][x]) tiles.push({ x, y, sprite: grid[y][x] });
+            for (let x = 0; x < TOWN_W; x++) {
+              let raw = grid[y][x];
+              let base = getBase(raw);
+              let overlay = getOverlay(raw);
+              if (base) {
+                let entry = { x, y, sprite: base };
+                if (overlay) entry.overlay = overlay;
+                tiles.push(entry);
+              }
+            }
           let water = [],
             trees = [],
             paths = [];
@@ -1261,8 +1577,16 @@
           try {
             let tiles = [];
             for (let y = 0; y < TOWN_H; y++)
-              for (let x = 0; x < TOWN_W; x++)
-                if (grid[y][x]) tiles.push({ x, y, s: grid[y][x] });
+              for (let x = 0; x < TOWN_W; x++) {
+                let raw = grid[y][x];
+                let base = getBase(raw);
+                let overlay = getOverlay(raw);
+                if (base) {
+                  let entry = { x, y, s: base };
+                  if (overlay) entry.o = overlay;
+                  tiles.push(entry);
+                }
+              }
             localStorage.setItem(
               "tb2-state",
               JSON.stringify({
@@ -1283,7 +1607,7 @@
             if (!s.tiles || !s.tiles.length) return false;
             for (let t of s.tiles)
               if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
-                grid[t.y][t.x] = t.s;
+                grid[t.y][t.x] = t.o ? { base: t.s, overlay: t.o } : t.s;
             if (s.buildings) placedBuildings = s.buildings;
             if (s.mine) minePos = s.mine;
             if (s.spawn) spawnPos = s.spawn;
@@ -1320,7 +1644,9 @@
               if (cfg.tiles)
                 for (let t of cfg.tiles)
                   if (t.x >= 0 && t.x < TOWN_W && t.y >= 0 && t.y < TOWN_H)
-                    grid[t.y][t.x] = t.sprite;
+                    grid[t.y][t.x] = t.overlay
+                      ? { base: t.sprite, overlay: t.overlay }
+                      : t.sprite;
               // Fallback: load from legacy arrays
               if (cfg.water)
                 for (let w of cfg.water)
@@ -1359,6 +1685,7 @@
                 }));
               undoStack = [];
               renderFull();
+              buildBuildingPalette();
               updatePositions();
               autoSave();
               toast("Loaded from file");
@@ -1386,6 +1713,7 @@
           undoStack = [];
           await loadConfig();
           renderFull();
+          buildBuildingPalette();
           updatePositions();
           toast("Reset to town-config.json");
         }
@@ -1416,6 +1744,9 @@
               e.preventDefault();
               undo();
             }
+            if (e.key === "Escape" && layerMode) {
+              exitLayerMode();
+            }
           });
 
           // Palette search
@@ -1434,6 +1765,7 @@
               selectedPlacedIdx = -1;
               renderOverlays();
               updateSelection();
+              buildBuildingPalette();
               autoSave();
             }
           });
