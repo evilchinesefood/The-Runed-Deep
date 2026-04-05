@@ -1,5 +1,4 @@
-import type { GameState, Item } from "../../core/types";
-import { ITEM_BY_ID } from "../../data/items";
+import type { GameState, Item, EquipSlot } from "../../core/types";
 import { createPanel, createButton, el } from "../Theme";
 import {
   RUNES,
@@ -25,25 +24,21 @@ function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
   btn.style.cursor = disabled ? "not-allowed" : "pointer";
 }
 
-function getAllEquipAndInv(state: GameState): Item[] {
-  const items: Item[] = [];
-  for (const eq of Object.values(state.hero.equipment)) {
-    if (eq) items.push(eq);
-  }
-  for (const i of state.hero.inventory) items.push(i);
-  return items;
-}
+const SLOT_LABELS: Record<string, string> = {
+  weapon: "Weapon", shield: "Shield", helmet: "Head", body: "Body",
+  cloak: "Cloak", gauntlets: "Hands", belt: "Belt", boots: "Feet",
+  ringLeft: "Ring L", ringRight: "Ring R", amulet: "Amulet", pack: "Pack",
+};
+
+const SLOT_ORDER: EquipSlot[] = [
+  "helmet", "amulet", "cloak", "body", "weapon", "shield",
+  "gauntlets", "belt", "ringLeft", "ringRight", "boots", "pack",
+];
 
 function updateItemInState(state: GameState, updated: Item): GameState {
   for (const [slot, eq] of Object.entries(state.hero.equipment)) {
     if (eq && eq.id === updated.id) {
-      return {
-        ...state,
-        hero: {
-          ...state.hero,
-          equipment: { ...state.hero.equipment, [slot]: updated },
-        },
-      };
+      return { ...state, hero: { ...state.hero, equipment: { ...state.hero.equipment, [slot]: updated } } };
     }
   }
   const idx = state.hero.inventory.findIndex((i) => i.id === updated.id);
@@ -58,41 +53,25 @@ function updateItemInState(state: GameState, updated: Item): GameState {
 // ── Shared drawer ─────────────────────────────────────────
 let forgeDrawer: HTMLElement | null = null;
 function closeForgeDrawer(): void {
-  if (forgeDrawer) {
-    forgeDrawer.remove();
-    forgeDrawer = null;
-  }
+  if (forgeDrawer) { forgeDrawer.remove(); forgeDrawer = null; }
 }
 export { closeForgeDrawer as closeRuneDrawer };
 
 function openDrawer(content: HTMLElement, buttons: HTMLElement): void {
   closeForgeDrawer();
   forgeDrawer = el("div", {
-    position: "fixed",
-    bottom: "0",
-    left: "0",
-    right: "0",
-    zIndex: "2000",
-    background: "#1a1a1a",
-    borderTop: "2px solid #555",
-    maxHeight: "70vh",
-    display: "flex",
-    flexDirection: "column",
-    boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
+    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
+    background: "#1a1a1a", borderTop: "2px solid #555", maxHeight: "70vh",
+    display: "flex", flexDirection: "column", boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
   const scroll = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
   scroll.appendChild(content);
   forgeDrawer.appendChild(scroll);
   const btnRow = el("div", {
-    display: "flex",
-    gap: "8px",
-    padding: "8px 16px",
+    display: "flex", gap: "8px", padding: "8px 16px",
     paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    flexShrink: "0",
-    borderTop: "1px solid #333",
-    background: "#1a1a1a",
+    justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
+    borderTop: "1px solid #333", background: "#1a1a1a",
   });
   btnRow.appendChild(buttons);
   forgeDrawer.appendChild(btnRow);
@@ -107,50 +86,49 @@ function makeDrawerBtn(label: string, onClick: () => void, disabled = false): HT
   return btn;
 }
 
-// ── Item row (sprite + name + info + small button) ────────
-function itemRow(
-  item: Item,
+// ── Slot row (matches blacksmith/sage pattern) ────────────
+function slotRow(
+  slotKey: string,
+  item: Item | null | undefined,
   subtitle: string,
-  btnLabel: string,
-  btnDisabled: boolean,
-  onBtnClick: (e: MouseEvent) => void,
-  onRowClick: () => void,
+  actionBtn: HTMLButtonElement | null,
+  onRowClick: (() => void) | null,
 ): HTMLElement {
   const row = el("div", {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "4px 6px",
-    cursor: "pointer",
-    borderRadius: "4px",
+    display: "flex", alignItems: "center", gap: "8px",
+    padding: "4px 6px", cursor: item && onRowClick ? "pointer" : "default", borderRadius: "4px",
   });
-  row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
-  row.addEventListener("mouseleave", () => { row.style.background = ""; });
+  if (item && onRowClick) {
+    row.addEventListener("mouseenter", () => { row.style.background = "#1a1a1a"; });
+    row.addEventListener("mouseleave", () => { row.style.background = ""; });
+  }
 
   const spriteWrap = el("div", { width: "32px", height: "32px", flexShrink: "0" });
-  spriteWrap.className = getDisplaySprite(item);
-  const glow = getItemGlow(item);
-  if (glow) spriteWrap.style.filter = glow;
+  if (item) {
+    spriteWrap.className = getDisplaySprite(item);
+    const glow = getItemGlow(item);
+    if (glow) spriteWrap.style.filter = glow;
+  }
   row.appendChild(spriteWrap);
 
-  const info = el("div", { flex: "1", minWidth: "0" });
-  info.appendChild(
-    el("div", {
+  row.appendChild(el("span", { color: "#666", width: "50px", flexShrink: "0", fontSize: "11px" }, SLOT_LABELS[slotKey] ?? slotKey));
+
+  if (item && !item.cursed) {
+    const info = el("div", { flex: "1", minWidth: "0" });
+    info.appendChild(el("div", {
       color: itemNameColor(item), fontSize: "13px",
       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-    }, getDisplayName(item)),
-  );
-  info.appendChild(el("div", { color: "#888", fontSize: "11px" }, subtitle));
-  row.appendChild(info);
-
-  const btn = createButton(btnLabel, "sm");
-  greyBtn(btn, btnDisabled);
-  if (!btnDisabled) {
-    btn.addEventListener("click", (e) => { e.stopPropagation(); onBtnClick(e); });
+    }, getDisplayName(item)));
+    info.appendChild(el("div", { color: "#888", fontSize: "11px" }, subtitle));
+    row.appendChild(info);
+    if (actionBtn) row.appendChild(actionBtn);
+    if (onRowClick) row.addEventListener("click", onRowClick);
+  } else if (item && item.cursed) {
+    row.appendChild(el("span", { color: "#f44", flex: "1", fontSize: "13px", fontStyle: "italic" }, `${getDisplayName(item)} (cursed)`));
+  } else {
+    row.appendChild(el("span", { color: "#333", flex: "1", fontSize: "13px", fontStyle: "italic" }, "\u2014 empty \u2014"));
   }
-  row.appendChild(btn);
 
-  row.addEventListener("click", onRowClick);
   return row;
 }
 
@@ -160,22 +138,22 @@ let forgeTab: "socket" | "inscribe" | "erase" = "inscribe";
 // ── Add Socket tab ────────────────────────────────────────
 function buildAddSocket(panel: HTMLElement, state: GameState, onUpdate: (s: GameState) => void): void {
   const cap = state.runeForgeMaxSockets ?? 2;
-  panel.appendChild(
-    el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" },
-      `Add an empty socket. Cost: 10 shards + 200g. Cap: ${cap}`),
-  );
-  const items = getAllEquipAndInv(state)
-    .filter((i) => i.sockets !== undefined || ITEM_BY_ID[i.templateId]?.equipSlot)
-    .filter((i) => (i.sockets?.length ?? 0) < cap);
-  if (items.length === 0) {
-    panel.appendChild(el("div", { color: "#555", fontSize: "12px", fontStyle: "italic", padding: "8px 0" }, "No items eligible for new sockets."));
-    return;
-  }
+  panel.appendChild(el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" },
+    `Add an empty socket. Cost: 10 shards + 200g. Cap: ${cap}`));
+
   const list = el("div", { maxHeight: "clamp(200px, 50vh, 400px)", overflowY: "auto" });
   list.setAttribute("data-service-list", "1");
-  for (const item of items) {
+
+  for (const slotKey of SLOT_ORDER) {
+    const item = state.hero.equipment[slotKey];
+    if (!item || item.cursed) {
+      list.appendChild(slotRow(slotKey, item, "", null, null));
+      continue;
+    }
     const cur = item.sockets?.length ?? 0;
-    const canAfford = state.hero.runeShards >= 10 && state.hero.gold >= 200;
+    const atCap = cur >= cap;
+    const canAfford = state.hero.runeShards >= 10 && state.hero.gold >= 200 && !atCap;
+
     const doSocket = () => {
       const newSockets = [...(item.sockets ?? []), null];
       const updated = { ...item, sockets: newSockets };
@@ -194,25 +172,33 @@ function buildAddSocket(panel: HTMLElement, state: GameState, onUpdate: (s: Game
       btns.appendChild(makeDrawerBtn("Close", closeForgeDrawer));
       openDrawer(content, btns);
     };
-    list.appendChild(itemRow(item, `Sockets: ${cur}/${cap}`, "+1", !canAfford, doSocket, openSocketDrawer));
+
+    const btn = createButton(atCap ? "MAX" : "+1", "sm");
+    greyBtn(btn, !canAfford);
+    if (canAfford) btn.addEventListener("click", (e) => { e.stopPropagation(); doSocket(); });
+
+    list.appendChild(slotRow(slotKey, item, `Sockets: ${cur}/${cap}`, btn, openSocketDrawer));
   }
   panel.appendChild(list);
 }
 
 // ── Inscribe tab ──────────────────────────────────────────
 function buildInscribe(panel: HTMLElement, state: GameState, onUpdate: (s: GameState) => void): void {
-  panel.appendChild(
-    el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" }, "Select an item to inscribe a rune into an empty socket."),
-  );
-  const items = getAllEquipAndInv(state).filter((i) => i.sockets?.some((s) => s === null));
-  if (items.length === 0) {
-    panel.appendChild(el("div", { color: "#555", fontSize: "12px", fontStyle: "italic", padding: "8px 0" }, "No items with empty sockets."));
-    return;
-  }
+  panel.appendChild(el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" },
+    "Select an item to inscribe a rune into an empty socket."));
+
   const list = el("div", { maxHeight: "clamp(200px, 50vh, 400px)", overflowY: "auto" });
   list.setAttribute("data-service-list", "1");
-  for (const item of items) {
+
+  for (const slotKey of SLOT_ORDER) {
+    const item = state.hero.equipment[slotKey];
+    if (!item || item.cursed) {
+      list.appendChild(slotRow(slotKey, item, "", null, null));
+      continue;
+    }
     const empty = (item.sockets ?? []).filter((s) => s === null).length;
+    const hasEmpty = empty > 0;
+
     const openInscribeDrawer = () => {
       const existing = (item.sockets ?? []).filter((s): s is string => s !== null);
       const content = el("div", {});
@@ -221,8 +207,7 @@ function buildInscribe(panel: HTMLElement, state: GameState, onUpdate: (s: GameS
         `Inscribe Rune onto ${getDisplayName(item)}`));
 
       const runeList = el("div", { marginTop: "8px", maxHeight: "40vh", overflowY: "auto" });
-      const tiers: ("common" | "uncommon" | "rare")[] = ["common", "uncommon", "rare"];
-      for (const tier of tiers) {
+      for (const tier of ["common", "uncommon", "rare"] as const) {
         const tierRunes = RUNES.filter((r) => r.tier === tier);
         runeList.appendChild(el("div", { color: RUNE_TIER_COLOR[tier], fontSize: "12px", fontWeight: "bold", marginTop: "6px" },
           `${tier.charAt(0).toUpperCase() + tier.slice(1)} (${tierRunes[0]?.cost ?? 0} shards)`));
@@ -256,30 +241,40 @@ function buildInscribe(panel: HTMLElement, state: GameState, onUpdate: (s: GameS
         }
       }
       content.appendChild(runeList);
-
       const btns = el("div", { display: "flex", gap: "8px" });
       btns.appendChild(makeDrawerBtn("Close", closeForgeDrawer));
       openDrawer(content, btns);
     };
-    list.appendChild(itemRow(item, `${empty} empty socket${empty > 1 ? "s" : ""}`, "Inscribe", false, openInscribeDrawer, openInscribeDrawer));
+
+    const sockets = item.sockets ?? [];
+    const total = sockets.length;
+    const sub = total === 0 ? "No sockets" : `${empty}/${total} empty`;
+    const btn = createButton("Inscribe", "sm");
+    greyBtn(btn, !hasEmpty);
+    if (hasEmpty) btn.addEventListener("click", (e) => { e.stopPropagation(); openInscribeDrawer(); });
+
+    list.appendChild(slotRow(slotKey, item, sub, btn, hasEmpty ? openInscribeDrawer : null));
   }
   panel.appendChild(list);
 }
 
 // ── Erase tab ─────────────────────────────────────────────
 function buildErase(panel: HTMLElement, state: GameState, onUpdate: (s: GameState) => void): void {
-  panel.appendChild(
-    el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" }, "Remove a rune from a socket. Cost: 100g."),
-  );
-  const items = getAllEquipAndInv(state).filter((i) => i.sockets?.some((s) => s !== null));
-  if (items.length === 0) {
-    panel.appendChild(el("div", { color: "#555", fontSize: "12px", fontStyle: "italic", padding: "8px 0" }, "No items with inscribed runes."));
-    return;
-  }
+  panel.appendChild(el("div", { color: "#888", fontSize: "11px", marginBottom: "6px" },
+    "Remove a rune from a socket. Cost: 100g."));
+
   const list = el("div", { maxHeight: "clamp(200px, 50vh, 400px)", overflowY: "auto" });
   list.setAttribute("data-service-list", "1");
-  for (const item of items) {
+
+  for (const slotKey of SLOT_ORDER) {
+    const item = state.hero.equipment[slotKey];
+    if (!item || item.cursed) {
+      list.appendChild(slotRow(slotKey, item, "", null, null));
+      continue;
+    }
     const filled = (item.sockets ?? []).filter((s) => s !== null).length;
+    const hasFilled = filled > 0;
+
     const openEraseDrawer = () => {
       const content = el("div", {});
       content.appendChild(buildTooltipContent(item));
@@ -316,12 +311,19 @@ function buildErase(panel: HTMLElement, state: GameState, onUpdate: (s: GameStat
         runeList.appendChild(eraseBtn);
       }
       content.appendChild(runeList);
-
       const btns = el("div", { display: "flex", gap: "8px" });
       btns.appendChild(makeDrawerBtn("Close", closeForgeDrawer));
       openDrawer(content, btns);
     };
-    list.appendChild(itemRow(item, `${filled} rune${filled > 1 ? "s" : ""} inscribed`, "Erase", false, openEraseDrawer, openEraseDrawer));
+
+    const sockets = item.sockets ?? [];
+    const total = sockets.length;
+    const sub = total === 0 ? "No sockets" : `${filled}/${total} inscribed`;
+    const btn = createButton("Erase", "sm");
+    greyBtn(btn, !hasFilled);
+    if (hasFilled) btn.addEventListener("click", (e) => { e.stopPropagation(); openEraseDrawer(); });
+
+    list.appendChild(slotRow(slotKey, item, sub, btn, hasFilled ? openEraseDrawer : null));
   }
   panel.appendChild(list);
 }
@@ -334,19 +336,12 @@ export function buildRuneForge(
   const panel = createPanel();
 
   const tabBar = el("div", {
-    display: "flex",
-    borderBottom: "2px solid #333",
-    marginBottom: "8px",
-    gap: "0",
+    display: "flex", borderBottom: "2px solid #333", marginBottom: "8px", gap: "0",
   });
   const makeTab = (label: string) =>
     el("div", {
-      padding: "8px 12px",
-      fontSize: "12px",
-      cursor: "pointer",
-      whiteSpace: "nowrap",
-      userSelect: "none",
-      transition: "color 0.15s",
+      padding: "8px 12px", fontSize: "12px", cursor: "pointer",
+      whiteSpace: "nowrap", userSelect: "none", transition: "color 0.15s",
     }, label);
 
   const tabs = [
