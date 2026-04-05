@@ -21,7 +21,7 @@ const BUILDING_NAMES: Record<string, string> = {
   temple: "Temple of Odin",
   sage: "The Blacksmith",
   blacksmith: "The Enchanter",
-  inn: "The Resting Stag — Your Stash",
+  inn: "The Resting Stag",
   "rune-forge": "The Rune Forge",
   "rift-stone": "Rift Stone",
   "statue-of-fortune": "Statue of Fortune",

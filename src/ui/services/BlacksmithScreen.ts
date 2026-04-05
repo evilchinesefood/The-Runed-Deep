@@ -317,7 +317,7 @@ export function buildBlacksmith(
   state: GameState,
   onUpdate: (s: GameState) => void,
 ): HTMLElement {
-  const panel = createPanel("Forge");
+  const panel = createPanel();
   const ngPlus = state.ngPlusCount ?? 0;
   const cap = getBlacksmithCap(ngPlus);
 

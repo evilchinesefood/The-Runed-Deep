@@ -300,7 +300,6 @@ export function createInventoryScreen(
 
   // Equipment list with sprite icons
   const legend = el("div", { flex: "1", padding: "4px 0", overflowY: "auto" });
-  legend.appendChild(sectionHeader("Equipped Items"));
 
   for (const slotKey of slotKeys) {
     const item = h.equipment[slotKey];
@@ -367,7 +366,7 @@ export function createInventoryScreen(
   screen.appendChild(equipPanel);
 
   // ── Inventory panel ────────────────────────────────────────
-  const invPanel = createPanel("Inventory");
+  const invPanel = createPanel();
   invPanel.setAttribute("data-inv-panel", "1");
 
   // Sort controls
