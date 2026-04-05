@@ -41,6 +41,12 @@ export function createServiceScreen(
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
 
   function render(): void {
+    // Close any open drawers when re-rendering (tab switch, action, etc.)
+    closeSageDrawer();
+    closeBsDrawer();
+    closeStashDrawer();
+    closeRuneDrawer();
+
     const listEl = screen.querySelector<HTMLElement>("[data-service-list]");
     if (listEl) scrollTop = listEl.scrollTop;
     screen.replaceChildren();

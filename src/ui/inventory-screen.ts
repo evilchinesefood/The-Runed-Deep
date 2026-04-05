@@ -255,12 +255,20 @@ export function createInventoryScreen(
     equipPanel.style.display = eq ? "flex" : "none";
     invPanel.style.display = !eq ? "block" : "none";
   }
+  // Detail drawer state (declared early so tab handlers can close it)
+  let drawerEl: HTMLElement | null = null;
+  function closeDrawer(): void {
+    if (drawerEl) { drawerEl.remove(); drawerEl = null; }
+  }
+
   tabEquip.addEventListener("click", () => {
     activeTab = "equipment";
+    closeDrawer();
     updateTabs();
   });
   tabInv.addEventListener("click", () => {
     activeTab = "inventory";
+    closeDrawer();
     updateTabs();
   });
 
@@ -460,15 +468,6 @@ export function createInventoryScreen(
   let invRows: HTMLElement[] = [];
 
   // ── Detail drawer (mobile) ──────────────────────────────
-  let drawerEl: HTMLElement | null = null;
-
-  const closeDrawer = () => {
-    if (drawerEl) {
-      drawerEl.remove();
-      drawerEl = null;
-    }
-  };
-
   const openDrawer = (
     item: Item,
     tpl: any,
