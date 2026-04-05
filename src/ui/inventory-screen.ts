@@ -829,14 +829,11 @@ export function createInventoryScreen(
   ];
   const totalWeight = allItems.reduce((sum, it) => sum + it.weight, 0) / 1000;
 
-  const footer = el("div", { width: "100%" });
+  const footer = el("div", { width: "100%", alignItems: "center" });
   footer.className = "footer";
-  footer.appendChild(
-    el("span", undefined, `Weight: ${totalWeight.toFixed(1)} kg`),
-  );
-  footer.appendChild(el("span", { color: "#fc4" }, `\u0024${h.gold}`));
-  footer.appendChild(el("span", { color: "#a6f" }, `\u25C6${h.runeShards}`));
-  footer.appendChild(el("span", { color: "#4f8" }, `\u2726${h.essence}`));
+  footer.appendChild(el("span", { color: "#fc4", lineHeight: "1" }, `\u0024${h.gold}`));
+  footer.appendChild(el("span", { color: "#a6f", lineHeight: "1" }, `\u25C6${h.runeShards}`));
+  footer.appendChild(el("span", { color: "#4f8", lineHeight: "1" }, `\u2726${h.essence}`));
   footer.appendChild(el("span", undefined, `Items: ${h.inventory.length}`));
 
   // Show carry capacity (base 10kg + pack bonus + enchantment)

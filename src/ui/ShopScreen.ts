@@ -448,6 +448,7 @@ export function createShopScreen(
       marginBottom: "8px",
       display: "flex",
       gap: "12px",
+      alignItems: "center",
     });
     const goldLabel = el("span", { color: "#fff" }, "Gold: ");
     goldLabel.appendChild(el("span", { color: "#fc4" }, `\u0024${gold}`));

@@ -239,6 +239,7 @@ export function injectTheme(): void {
       display: flex;
       gap: var(--sp-lg);
       flex-wrap: wrap;
+      align-items: center;
       font-size: var(--fs-md);
       color: var(--text-dim);
       width: 100%;

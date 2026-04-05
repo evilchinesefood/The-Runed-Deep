@@ -61,6 +61,7 @@ export function createServiceScreen(
         marginBottom: "8px",
         display: "flex",
         gap: "12px",
+        alignItems: "center",
       });
       const gLabel = el("span", { color: "#fff" }, "Gold: ");
       gLabel.appendChild(
