@@ -687,6 +687,26 @@ touchControls.setMenuHandler((action) => {
       screen: "death",
     });
   }
+  if (action === "debug-f8") {
+    const state = gameLoop.getState();
+    gameLoop.setState({
+      ...state,
+      hero: {
+        ...state.hero,
+        gold: state.hero.gold + 10000,
+        runeShards: state.hero.runeShards + 1000,
+        essence: (state.hero.essence ?? 0) + 1000,
+      },
+      messages: [
+        ...state.messages,
+        {
+          text: "DEBUG: +10,000g, +1,000 shards, +1,000 essence",
+          severity: "system" as const,
+          turn: state.turn,
+        },
+      ],
+    });
+  }
   if (action === "debug-f11") {
     const state = gameLoop.getState();
     if (state.screen !== "game") return;

@@ -451,6 +451,7 @@ export class TouchControls {
     `;
 
     const items: [string, string][] = [
+      ["Add Currency", "debug-f8"],
       ["Spell Test Arena", "debug-f9"],
       ["Jump to Floor", "debug-f10"],
       ["Teleport to Town", "debug-f11"],
