@@ -214,7 +214,7 @@ export function loadGame(slot: number = 1): GameState | null {
 
     // Migration: add rift fields
     if ((state as any).riftStoneUnlocked === undefined)
-      (state as any).riftStoneUnlocked = false;
+      (state as any).riftStoneUnlocked = true;
     if ((state as any).riftOffering === undefined)
       (state as any).riftOffering = null;
     if ((state as any).activeRift === undefined)

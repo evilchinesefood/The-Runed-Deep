@@ -82,37 +82,6 @@ export function createRiftMenuScreen(
 ): HTMLElement & { cleanup: () => void } {
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
 
-  // Dormant state
-  if (!(state as any).riftStoneUnlocked) {
-    screen.appendChild(createTitleBar("Rift Stone", onClose));
-    const panel = createPanel();
-    panel.appendChild(
-      el(
-        "div",
-        {
-          color: "#888",
-          padding: "20px",
-          textAlign: "center",
-          fontStyle: "italic",
-          fontSize: "14px",
-        },
-        "The Rift Stone is dormant. Clear Floor 15 to awaken it.",
-      ),
-    );
-    const leaveBtn = createButton("Leave");
-    leaveBtn.style.cssText += "display:block;width:100%;margin-top:12px;";
-    leaveBtn.addEventListener("click", onClose);
-    panel.appendChild(leaveBtn);
-    screen.appendChild(panel);
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    screen.cleanup = () => document.removeEventListener("keydown", onKey);
-    return screen;
-  }
-
   // Active rift stone
   const offering = state.riftOffering;
   const mods: RiftModifier[] = offering?.modifiers ?? [];

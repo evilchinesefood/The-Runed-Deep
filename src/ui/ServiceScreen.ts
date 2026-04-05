@@ -100,35 +100,25 @@ export function createServiceScreen(
         break;
       case "rift-stone": {
         content = createPanel("Services");
-        if (!state.riftStoneUnlocked) {
-          content.appendChild(
-            el(
-              "div",
-              { color: "#555", padding: "20px", textAlign: "center" },
-              "The Rift Stone is dormant. Clear Floor 15 to awaken it.",
-            ),
-          );
-        } else {
-          content.appendChild(
-            el(
-              "div",
-              {
-                color: "#a6f",
-                padding: "12px",
-                textAlign: "center",
-                fontStyle: "italic",
-              },
-              "A swirling vortex of energy pulses before you...",
-            ),
-          );
-          const riftBtn = createButton("Approach the Rift Stone");
-          riftBtn.style.cssText +=
-            "display:block;width:100%;padding:12px;font-size:14px;margin-top:12px;";
-          riftBtn.addEventListener("click", () => {
-            onUpdate({ ...state, screen: "rift-menu" as any });
-          });
-          content.appendChild(riftBtn);
-        }
+        content.appendChild(
+          el(
+            "div",
+            {
+              color: "#a6f",
+              padding: "12px",
+              textAlign: "center",
+              fontStyle: "italic",
+            },
+            "A swirling vortex of energy pulses before you...",
+          ),
+        );
+        const riftBtn = createButton("Approach the Rift Stone");
+        riftBtn.style.cssText +=
+          "display:block;width:100%;padding:12px;font-size:14px;margin-top:12px;";
+        riftBtn.addEventListener("click", () => {
+          onUpdate({ ...state, screen: "rift-menu" as any });
+        });
+        content.appendChild(riftBtn);
         break;
       }
       case "crucible": {

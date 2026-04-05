@@ -17,9 +17,6 @@ function addMessage(
 }
 
 export function processOpenRiftMenu(state: GameState): GameState {
-  if (!state.riftStoneUnlocked) {
-    return addMessage(state, "The Rift Stone is dormant.", "system");
-  }
   let offering = state.riftOffering;
   if (!offering) {
     const seed = Date.now();

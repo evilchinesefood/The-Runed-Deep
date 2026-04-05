@@ -187,11 +187,7 @@ export class GameLoop {
       newState.activeCrucible.wave > 0
     ) {
       const cFloor = newState.floors["crucible-0"];
-      if (
-        cFloor &&
-        cFloor.monsters.length > 0 &&
-        cFloor.monsters.every((m) => m.hp <= 0)
-      ) {
+      if (cFloor && cFloor.monsters.length === 0) {
         newState = processCrucibleWaveCleared(newState);
       }
     }

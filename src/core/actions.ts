@@ -868,15 +868,6 @@ function goToFloor(
     });
   }
 
-  // Rift stone unlock at floor 15+
-  if (targetFloor >= 15 && !state.riftStoneUnlocked) {
-    state = { ...state, riftStoneUnlocked: true };
-    messages.push({
-      text: "A strange resonance pulses through you... The Rift Stone in town has awakened.",
-      severity: "important" as const,
-      turn: state.turn,
-    });
-  }
 
   // Prune old floors — keep current + previous only
   const keepKeys = new Set<string>();
