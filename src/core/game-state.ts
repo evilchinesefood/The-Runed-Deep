@@ -106,7 +106,7 @@ export function createInitialGameState(
     activeBuildingId: "",
     ngPlusCount: 0,
     stash: [],
-    riftStoneUnlocked: false,
+    riftStoneUnlocked: true,
     riftOffering: null,
     activeRift: null,
     activeCrucible: null,

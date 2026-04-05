@@ -940,6 +940,29 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     gameLoop.setState(teleportToTown(state));
   }
 
+  // F8: Add currency (debug)
+  if (e.code === "F8") {
+    e.preventDefault();
+    const state = gameLoop.getState();
+    gameLoop.setState({
+      ...state,
+      hero: {
+        ...state.hero,
+        gold: state.hero.gold + 10000,
+        runeShards: state.hero.runeShards + 1000,
+        essence: (state.hero.essence ?? 0) + 1000,
+      },
+      messages: [
+        ...state.messages,
+        {
+          text: "DEBUG: +10,000g, +1,000 shards, +1,000 essence",
+          severity: "system" as const,
+          turn: state.turn,
+        },
+      ],
+    });
+  }
+
   // F12: Reset — kill player, trigger death respawn flow
   if (e.code === "F12") {
     e.preventDefault();

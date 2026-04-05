@@ -71,19 +71,7 @@ export function createCrucibleMenuScreen(
   );
   btnRow.appendChild(enterBtn);
 
-  const leaveBtn = createButton("Leave");
-  leaveBtn.addEventListener("click", onClose);
-  btnRow.appendChild(leaveBtn);
-
   screen.appendChild(btnRow);
-
-  screen.appendChild(
-    el(
-      "div",
-      { color: "#555", fontSize: "11px", marginTop: "4px" },
-      "Press Esc to close",
-    ),
-  );
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "Escape") onClose();
