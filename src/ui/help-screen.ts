@@ -32,9 +32,9 @@ const KEYS: [string, string][] = [
   // System
   ["F3", "Save game"],
   ["F4", "Toggle sound on/off"],
-  ["F12", "Reset (die and respawn in town)"],
   ["---", ""],
   ["F10", "Debug: Jump to any floor"],
+  ["F12", "Debug: Reset (die and respawn in town)"],
 ];
 
 export function createHelpScreen(
