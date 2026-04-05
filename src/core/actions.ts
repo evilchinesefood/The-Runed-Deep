@@ -543,6 +543,7 @@ function processEnterBuilding(state: GameState): GameState {
   const shopIds = ["weapon-shop", "armor-shop", "general-store", "magic-shop"];
   const directScreens: Record<string, string> = {
     crucible: "crucible-menu",
+    "rift-stone": "rift-menu",
   };
   const screen = directScreens[tile.buildingId]
     ?? (shopIds.includes(tile.buildingId) ? "shop" : "service");

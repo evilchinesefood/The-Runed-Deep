@@ -1570,6 +1570,10 @@ function switchScreen(state: GameState): void {
 
     case "rift-menu": {
       input.setEnabled(false);
+      // Ensure offering exists
+      if (!gameLoop.getState().riftOffering) {
+        gameLoop.handleAction({ type: "openRiftMenu" });
+      }
       const riftScreen = createRiftMenuScreen(
         gameLoop.getState(),
         (action) => {

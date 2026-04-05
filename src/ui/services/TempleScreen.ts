@@ -57,37 +57,44 @@ export function buildTemple(
       });
   }
 
-  if (cursedItems.length > 0) {
+  panel.appendChild(
+    el(
+      "div",
+      {
+        color: "#c90",
+        fontSize: "13px",
+        fontWeight: "bold",
+        margin: "12px 0 6px",
+        borderTop: "1px solid #444",
+        paddingTop: "8px",
+      },
+      "Remove Curse (10g)",
+    ),
+  );
+  if (cursedItems.length === 0) {
     panel.appendChild(
       el(
         "div",
-        {
-          color: "#c90",
-          fontSize: "13px",
-          fontWeight: "bold",
-          margin: "12px 0 6px",
-          borderTop: "1px solid #444",
-          paddingTop: "8px",
-        },
-        "Remove Curse (25g)",
+        { color: "#555", fontSize: "12px", fontStyle: "italic", padding: "4px 0" },
+        "No cursed items.",
       ),
     );
-    for (const ci of cursedItems) {
-      const canAfford = state.hero.gold >= 25;
-      const btn = createButton(`Bless: ${ci.name}`);
-      Object.assign(btn.style, {
-        display: "block",
-        width: "100%",
-        marginBottom: "4px",
-        textAlign: "left",
-        fontSize: "12px",
-      });
-      greyBtn(btn, !canAfford);
-      btn.addEventListener("click", () =>
-        onUpdate(templeRemoveCurse(state, ci.id)),
-      );
-      panel.appendChild(btn);
-    }
+  }
+  for (const ci of cursedItems) {
+    const canAfford = state.hero.gold >= 10;
+    const btn = createButton(`Bless: ${ci.name}`);
+    Object.assign(btn.style, {
+      display: "block",
+      width: "100%",
+      marginBottom: "4px",
+      textAlign: "left",
+      fontSize: "12px",
+    });
+    greyBtn(btn, !canAfford);
+    btn.addEventListener("click", () =>
+      onUpdate(templeRemoveCurse(state, ci.id)),
+    );
+    panel.appendChild(btn);
   }
 
   return panel;

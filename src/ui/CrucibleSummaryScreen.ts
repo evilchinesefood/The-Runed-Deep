@@ -80,21 +80,6 @@ export function createCrucibleBetweenScreen(
 
   screen.appendChild(btnRow);
 
-  if (!isDead) {
-    screen.appendChild(
-      el(
-        "div",
-        {
-          color: "#666",
-          fontSize: "11px",
-          marginTop: "8px",
-          textAlign: "center",
-        },
-        "Use potions and spells before continuing. No passive healing between waves.",
-      ),
-    );
-  }
-
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "Escape" && !isDead) onLeave();
   };

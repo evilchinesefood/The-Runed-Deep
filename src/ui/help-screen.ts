@@ -34,6 +34,7 @@ const KEYS: [string, string][] = [
   ["F4", "Toggle sound on/off"],
   ["F12", "Reset (die and respawn in town)"],
   ["---", ""],
+  ["F8", "Debug: Add currency (+10k g, +1k shards, +1k essence)"],
   ["F9", "Debug: Spell test arena"],
   ["F10", "Debug: Jump to any floor"],
   ["F11", "Debug: Teleport to town"],
