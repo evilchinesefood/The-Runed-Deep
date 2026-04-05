@@ -44,7 +44,7 @@ export function buildSage(
   state: GameState,
   onUpdate: (s: GameState) => void,
 ): HTMLElement {
-  const panel = createPanel("Enchantment (100g)");
+  const panel = createPanel();
   const cap = getEnchanterCap(state.ngPlusCount ?? 0);
 
   const sageSlots: EquipSlot[] = [
@@ -66,7 +66,7 @@ export function buildSage(
     el(
       "div",
       { color: "#888", fontSize: "11px", marginBottom: "6px" },
-      `Enhance equipment by +1. (Limit: +${cap} per item)`,
+      `Enhance equipment by +1 for 100g. (Limit: +${cap} per item)`,
     ),
   );
 

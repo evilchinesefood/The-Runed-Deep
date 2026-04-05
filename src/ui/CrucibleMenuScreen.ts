@@ -20,7 +20,7 @@ export function createCrucibleMenuScreen(
 
   screen.appendChild(createTitleBar("The Crucible", onClose));
 
-  const panel = createPanel("SURVIVAL ARENA");
+  const panel = createPanel();
 
   panel.appendChild(
     el(
