@@ -64,7 +64,7 @@ function openShopDrawer(
     flexDirection: "column",
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
-  const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
   scrollArea.appendChild(buildTooltipContent(item));
   scrollArea.appendChild(
     el(

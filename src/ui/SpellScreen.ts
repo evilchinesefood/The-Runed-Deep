@@ -94,7 +94,7 @@ export function createSpellScreen(
     });
 
     // Scrollable content area
-    const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+    const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
 
     // Spell name + category
     const nameRow = el("div", { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" });

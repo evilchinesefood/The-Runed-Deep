@@ -1358,9 +1358,11 @@ function switchScreen(state: GameState): void {
       createDeathScreen(root, gameLoop.getState(), () => {
         // Respawn in town — keep hero, regenerate death/return floor, refresh shops
         const s = gameLoop.getState();
-        // If died in town, regenerate the returnFloor (the dungeon floor to retry)
+        // Use returnFloor for rift/crucible deaths (currentFloor is the rift/crucible floor, not the main dungeon)
         const regenFloor =
-          s.currentDungeon === "town" ? s.returnFloor : s.currentFloor;
+          s.currentDungeon === "rift" || s.currentDungeon === "crucible"
+            ? s.returnFloor || 1
+            : s.currentDungeon === "town" ? s.returnFloor : s.currentFloor;
         const regenDungeon = getDungeonForFloor(regenFloor);
         const regenKey = `${regenDungeon}-${regenFloor}`;
 

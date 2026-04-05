@@ -71,7 +71,7 @@ function openDrawer(content: HTMLElement, buttons: HTMLElement): void {
     flexDirection: "column",
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
-  const scroll = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  const scroll = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
   scroll.appendChild(content);
   forgeDrawer.appendChild(scroll);
   const btnRow = el("div", {
@@ -268,7 +268,7 @@ function buildAddSocket(
       });
 
     list.appendChild(
-      slotRow(slotKey, item, `Sockets: ${cur}/${cap}`, btn, openSocketDrawer),
+      slotRow(slotKey, item, `${cur} socket${cur !== 1 ? "s" : ""}`, btn, openSocketDrawer),
     );
   }
   panel.appendChild(list);
@@ -386,7 +386,7 @@ function buildInscribe(
 
     const sockets = item.sockets ?? [];
     const total = sockets.length;
-    const sub = total === 0 ? "No sockets" : `${empty}/${total} empty`;
+    const sub = total === 0 ? "No sockets" : `${empty} empty`;
     const btn = createButton("Inscribe", "sm");
     greyBtn(btn, !hasEmpty);
     if (hasEmpty)
@@ -491,7 +491,7 @@ function buildErase(
 
     const sockets = item.sockets ?? [];
     const total = sockets.length;
-    const sub = total === 0 ? "No sockets" : `${filled}/${total} inscribed`;
+    const sub = total === 0 ? "No sockets" : `${filled} inscribed`;
     const btn = createButton("Erase", "sm");
     greyBtn(btn, !hasFilled);
     if (hasFilled)

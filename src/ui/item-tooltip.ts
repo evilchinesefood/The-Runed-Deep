@@ -298,6 +298,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
 
   // Affixes
   if (item.specialEnchantments && item.specialEnchantments.length > 0) {
+    container.appendChild(d("hr", { border: "none", borderTop: "1px solid #333", margin: "4px 0" }));
     const enchBox = d("div", { marginBottom: "4px" });
     for (const rawEid of item.specialEnchantments) {
       const isCrit = rawEid.endsWith(":critical");
@@ -314,6 +315,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
 
   // Sockets
   if (item.sockets && item.sockets.length > 0) {
+    container.appendChild(d("hr", { border: "none", borderTop: "1px solid #333", margin: "4px 0" }));
     const sockBox = d("div", { marginBottom: "4px" });
     const effEnch = item.enchantment + (item.blessed ? 1 : 0);
     for (const runeId of item.sockets) {
@@ -335,6 +337,7 @@ export function buildTooltipContent(item: Item): HTMLElement {
 
   // Unique ability
   if (tpl?.uniqueAbility) {
+    container.appendChild(d("hr", { border: "none", borderTop: "1px solid #333", margin: "4px 0" }));
     const abilityDesc: Record<string, string> = {
       "resist-fire-75": item.properties?.["wardUpgraded"]
         ? "+99 Fire Resistance"

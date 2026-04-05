@@ -58,7 +58,7 @@ function openBsDrawer(
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
-  const bsScroll = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  const bsScroll = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
   bsScroll.appendChild(buildTooltipContent(item));
   bsScroll.appendChild(
     el(
@@ -149,7 +149,7 @@ function showAffixSelect(
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
-  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
   scrollDiv.appendChild(
     el(
       "div",
@@ -236,7 +236,7 @@ function showAffixPicker(
     boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
-  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px", maxWidth: "480px", margin: "0 auto" });
 
   if (options.length === 0) {
     scrollDiv.appendChild(

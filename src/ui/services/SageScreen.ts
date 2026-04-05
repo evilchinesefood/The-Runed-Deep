@@ -147,6 +147,8 @@ export function buildSage(
         const sageScroll = el("div", {
           overflowY: "auto",
           padding: "12px 16px 8px",
+          maxWidth: "480px",
+          margin: "0 auto",
         });
         sageScroll.appendChild(buildTooltipContent(item));
         sageScroll.appendChild(

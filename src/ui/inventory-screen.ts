@@ -467,6 +467,8 @@ export function createInventoryScreen(
     const scrollArea = el("div", {
       overflowY: "auto",
       padding: "12px 16px 8px",
+      maxWidth: "480px",
+      margin: "0 auto",
     });
 
     // Item tooltip content
@@ -585,6 +587,8 @@ export function createInventoryScreen(
     const scrollArea = el("div", {
       overflowY: "auto",
       padding: "12px 16px 8px",
+      maxWidth: "480px",
+      margin: "0 auto",
     });
     scrollArea.appendChild(buildTooltipContent(item));
     drawerEl.appendChild(scrollArea);
