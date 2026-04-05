@@ -251,29 +251,41 @@ export function buildStatue(
 ): HTMLElement {
   const panel = createPanel("Statue of Fortune");
 
-  // Tab buttons
-  const tabs = el("div", {
+  // Tab bar (matches inventory style)
+  const tabBar = el("div", {
     display: "flex",
-    gap: "4px",
-    marginBottom: "10px",
+    borderBottom: "2px solid #333",
+    marginBottom: "8px",
+    gap: "0",
   });
-  const sacTab = createButton("Sacrifice");
-  const upgTab = createButton("Upgrades");
-  const activeStyle = "border-bottom:2px solid #4f8;";
-  const inactiveStyle = "opacity:0.5;";
-  sacTab.style.cssText += `flex:1;${statueTab === "sacrifice" ? activeStyle : inactiveStyle}`;
-  upgTab.style.cssText += `flex:1;${statueTab === "upgrades" ? activeStyle : inactiveStyle}`;
-  sacTab.addEventListener("click", () => {
-    statueTab = "sacrifice";
-    onUpdate(state);
-  });
-  upgTab.addEventListener("click", () => {
-    statueTab = "upgrades";
-    onUpdate(state);
-  });
-  tabs.appendChild(sacTab);
-  tabs.appendChild(upgTab);
-  panel.appendChild(tabs);
+  const makeTab = (label: string) =>
+    el("div", {
+      padding: "8px 20px",
+      fontSize: "13px",
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      userSelect: "none",
+      transition: "color 0.15s",
+    }, label);
+  const sacTab = makeTab("Sacrifice");
+  const upgTab = makeTab("Upgrades");
+
+  function updateTabs(): void {
+    const isSac = statueTab === "sacrifice";
+    sacTab.style.color = isSac ? "#c9a84c" : "#555";
+    sacTab.style.borderBottom = isSac ? "2px solid #c9a84c" : "2px solid transparent";
+    sacTab.style.marginBottom = isSac ? "-2px" : "";
+    upgTab.style.color = !isSac ? "#c9a84c" : "#555";
+    upgTab.style.borderBottom = !isSac ? "2px solid #c9a84c" : "2px solid transparent";
+    upgTab.style.marginBottom = !isSac ? "-2px" : "";
+  }
+
+  sacTab.addEventListener("click", () => { statueTab = "sacrifice"; onUpdate(state); });
+  upgTab.addEventListener("click", () => { statueTab = "upgrades"; onUpdate(state); });
+  tabBar.appendChild(sacTab);
+  tabBar.appendChild(upgTab);
+  updateTabs();
+  panel.appendChild(tabBar);
 
   if (statueTab === "sacrifice") {
     buildStatueSacrifice(panel, state, onUpdate);
