@@ -204,7 +204,9 @@ export function createInventoryScreen(
   });
   screen.appendChild(titleBar);
 
-  // ── Tab bar ──────────────────────────────────────────────────
+  // ── Wrapper panel with tabs inside ──────────────────────────
+  const wrapperPanel = createPanel();
+
   const tabBar = el("div", {
     display: "flex",
     borderBottom: "2px solid #333",
@@ -212,35 +214,43 @@ export function createInventoryScreen(
     gap: "0",
   });
   const makeTab = (label: string): HTMLElement =>
-    el(
-      "div",
-      {
-        padding: "8px 20px",
-        fontSize: "13px",
-        fontWeight: "bold",
-        cursor: "pointer",
-        userSelect: "none",
-        transition: "color 0.15s",
-      },
-      label,
-    );
+    el("div", {
+      padding: "8px 20px",
+      fontSize: "13px",
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      userSelect: "none",
+      transition: "color 0.15s",
+    }, label);
   const tabEquip = makeTab("Equipment");
   const tabInv = makeTab("Inventory");
   tabBar.appendChild(tabEquip);
   tabBar.appendChild(tabInv);
-  screen.appendChild(tabBar);
+  wrapperPanel.appendChild(tabBar);
+
+  // Equipment content div (inside wrapper)
+  const isMobile = window.innerWidth <= 480;
+  const equipPanel = el("div", {
+    display: "flex",
+    gap: isMobile ? "0" : "12px",
+    padding: "0",
+  });
+
+  // Inventory content div (inside wrapper)
+  const invPanel = el("div", {});
+  invPanel.setAttribute("data-inv-panel", "1");
+
+  wrapperPanel.appendChild(equipPanel);
+  wrapperPanel.appendChild(invPanel);
+  screen.appendChild(wrapperPanel);
 
   function updateTabs(): void {
     const eq = activeTab === "equipment";
     tabEquip.style.color = eq ? "#c9a84c" : "#555";
-    tabEquip.style.borderBottom = eq
-      ? "2px solid #c9a84c"
-      : "2px solid transparent";
+    tabEquip.style.borderBottom = eq ? "2px solid #c9a84c" : "2px solid transparent";
     tabEquip.style.marginBottom = eq ? "-2px" : "";
     tabInv.style.color = !eq ? "#c9a84c" : "#555";
-    tabInv.style.borderBottom = !eq
-      ? "2px solid #c9a84c"
-      : "2px solid transparent";
+    tabInv.style.borderBottom = !eq ? "2px solid #c9a84c" : "2px solid transparent";
     tabInv.style.marginBottom = !eq ? "-2px" : "";
     equipPanel.style.display = eq ? "flex" : "none";
     invPanel.style.display = !eq ? "block" : "none";
@@ -253,13 +263,6 @@ export function createInventoryScreen(
     activeTab = "inventory";
     updateTabs();
   });
-
-  // ── Equipment panel: paperdoll (desktop only) + slot list ────
-  const isMobile = window.innerWidth <= 480;
-  const equipPanel = createPanel();
-  equipPanel.style.display = "flex";
-  equipPanel.style.gap = isMobile ? "0" : "12px";
-  equipPanel.style.padding = "8px";
 
   const slotKeys: EquipSlot[] = [
     "helmet",
@@ -363,12 +366,8 @@ export function createInventoryScreen(
   }
 
   equipPanel.appendChild(legend);
-  screen.appendChild(equipPanel);
 
-  // ── Inventory panel ────────────────────────────────────────
-  const invPanel = createPanel();
-  invPanel.setAttribute("data-inv-panel", "1");
-
+  // ── Inventory content ──────────────────────────────────────
   // Sort controls
   type SortMode = "newest" | "oldest" | "type";
   let sortMode: SortMode =
@@ -845,7 +844,6 @@ export function createInventoryScreen(
   };
 
   renderInvRows();
-  screen.appendChild(invPanel);
 
   // ── Footer ────────────────────────────────────────────────
   const allItems: Item[] = [
