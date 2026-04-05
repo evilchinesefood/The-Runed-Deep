@@ -11,7 +11,7 @@ import {
   itemNameColor,
   getDisplayName,
 } from "../../systems/inventory/display-name";
-import { attachItemTooltip } from "../item-tooltip";
+import { attachItemTooltip, buildTooltipContent } from "../item-tooltip";
 import {
   trackRuneInscribe,
   trackSocketsFilled,
@@ -230,7 +230,7 @@ function showErasePicker(
 export { closeRuneDrawer };
 
 // ── Tab state ─────────────────────────────────────────────
-let forgeTab: "socket" | "inscribe" | "erase" | "upgrade" = "inscribe";
+let forgeTab: "socket" | "inscribe" | "erase" = "inscribe";
 
 function buildItemList(
   items: Item[],
@@ -250,6 +250,62 @@ function buildItemList(
   panel.appendChild(list);
 }
 
+function showSocketDrawer(
+  state: GameState,
+  item: Item,
+  onUpdate: (s: GameState) => void,
+): void {
+  closeRuneDrawer();
+  const cap = state.runeForgeMaxSockets ?? 2;
+  const curSockets = item.sockets?.length ?? 0;
+  const canAfford = state.hero.runeShards >= 10 && state.hero.gold >= 200;
+
+  runeDrawer = el("div", {
+    position: "fixed",
+    inset: "0",
+    zIndex: "300",
+    background: "rgba(0,0,0,0.9)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    padding: "20px",
+    overflowY: "auto",
+  });
+
+  runeDrawer.appendChild(
+    el("div", { color: "#c9a84c", fontSize: "16px", fontWeight: "bold" },
+      `Add Socket to ${getDisplayName(item)}`),
+  );
+  runeDrawer.appendChild(
+    el("div", { color: "#888", fontSize: "12px", marginBottom: "8px" },
+      `Sockets: ${curSockets}/${cap} · Cost: 10 shards + 200g`),
+  );
+  runeDrawer.appendChild(buildTooltipContent(item));
+
+  const addBtn = createButton("Add Socket");
+  addBtn.style.cssText += "min-width:120px;padding:10px 20px;font-size:14px;margin-top:12px;";
+  greyBtn(addBtn, !canAfford);
+  if (canAfford) {
+    addBtn.addEventListener("click", () => {
+      const newSockets = [...(item.sockets ?? []), null];
+      const updated = { ...item, sockets: newSockets };
+      let s = updateItemInState(state, updated);
+      s = { ...s, hero: { ...s.hero, runeShards: s.hero.runeShards - 10, gold: s.hero.gold - 200 } };
+      closeRuneDrawer();
+      onUpdate(s);
+    });
+  }
+  runeDrawer.appendChild(addBtn);
+
+  const cancelBtn = createButton("Cancel");
+  cancelBtn.style.marginTop = "8px";
+  cancelBtn.addEventListener("click", closeRuneDrawer);
+  runeDrawer.appendChild(cancelBtn);
+  document.body.appendChild(runeDrawer);
+}
+
 function buildAddSocket(panel: HTMLElement, state: GameState, onUpdate: (s: GameState) => void): void {
   const cap = state.runeForgeMaxSockets ?? 2;
   panel.appendChild(
@@ -259,23 +315,13 @@ function buildAddSocket(panel: HTMLElement, state: GameState, onUpdate: (s: Game
     .filter((i) => i.sockets !== undefined || ITEM_BY_ID[i.templateId]?.equipSlot)
     .filter((i) => (i.sockets?.length ?? 0) < cap);
   buildItemList(items, "No items eligible for new sockets.", panel, (item) => {
-    const canAfford = state.hero.runeShards >= 10 && state.hero.gold >= 200;
     const curSockets = item.sockets?.length ?? 0;
     const btn = createButton(`${getDisplayName(item)} [${curSockets}/${cap}]`, "sm");
     Object.assign(btn.style, {
       display: "block", width: "100%", marginBottom: "3px",
       textAlign: "left", fontSize: "12px", color: itemNameColor(item),
     });
-    greyBtn(btn, !canAfford);
-    if (canAfford) {
-      btn.addEventListener("click", () => {
-        const newSockets = [...(item.sockets ?? []), null];
-        const updated = { ...item, sockets: newSockets };
-        let s = updateItemInState(state, updated);
-        s = { ...s, hero: { ...s.hero, runeShards: s.hero.runeShards - 10, gold: s.hero.gold - 200 } };
-        onUpdate(s);
-      });
-    }
+    btn.addEventListener("click", () => showSocketDrawer(state, item, onUpdate));
     attachItemTooltip(btn, item);
     return btn;
   });
@@ -315,33 +361,6 @@ function buildErase(panel: HTMLElement, state: GameState, onUpdate: (s: GameStat
   });
 }
 
-function buildUpgrade(panel: HTMLElement, state: GameState, onUpdate: (s: GameState) => void): void {
-  const cap = state.runeForgeMaxSockets ?? 2;
-  if (cap >= 3) {
-    panel.appendChild(
-      el("div", { color: "#4f8", fontSize: "13px", padding: "12px 0", textAlign: "center" }, "Socket cap already upgraded to 3."),
-    );
-    return;
-  }
-  panel.appendChild(
-    el("div", { color: "#888", fontSize: "11px", marginBottom: "8px" }, "Permanently increase the maximum sockets per item from 2 to 3. Cost: 100 shards."),
-  );
-  const canUpgrade = state.hero.runeShards >= 100;
-  const upBtn = createButton("Upgrade Socket Cap (2 \u2192 3)");
-  Object.assign(upBtn.style, { display: "block", width: "100%", padding: "10px", fontSize: "14px" });
-  greyBtn(upBtn, !canUpgrade);
-  if (canUpgrade) {
-    upBtn.addEventListener("click", () => {
-      onUpdate({
-        ...state,
-        runeForgeMaxSockets: 3,
-        hero: { ...state.hero, runeShards: state.hero.runeShards - 100 },
-      });
-    });
-  }
-  panel.appendChild(upBtn);
-}
-
 export function buildRuneForge(
   state: GameState,
   onUpdate: (s: GameState) => void,
@@ -369,7 +388,6 @@ export function buildRuneForge(
     { key: "socket" as const, label: "Add Socket" },
     { key: "inscribe" as const, label: "Inscribe" },
     { key: "erase" as const, label: "Erase" },
-    { key: "upgrade" as const, label: "Upgrade Cap" },
   ];
   const tabEls = tabs.map((t) => makeTab(t.label));
 
@@ -388,7 +406,6 @@ export function buildRuneForge(
     case "socket": buildAddSocket(panel, state, onUpdate); break;
     case "inscribe": buildInscribe(panel, state, onUpdate); break;
     case "erase": buildErase(panel, state, onUpdate); break;
-    case "upgrade": buildUpgrade(panel, state, onUpdate); break;
   }
 
   return panel;
