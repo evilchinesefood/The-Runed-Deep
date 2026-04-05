@@ -1,5 +1,5 @@
 import type { GameState } from "../../core/types";
-import { createPanel, createButton, el } from "../Theme";
+import { createPanel, createButton, el, greyBtn } from "../Theme";
 import {
   templeHealHP,
   templeHealMP,
@@ -7,17 +7,11 @@ import {
   templeRemoveCurse,
 } from "../../systems/town/Services";
 
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? "0.4" : "1";
-  btn.style.cursor = disabled ? "not-allowed" : "pointer";
-}
-
 export function buildTemple(
   state: GameState,
   onUpdate: (s: GameState) => void,
 ): HTMLElement {
-  const panel = createPanel("Services");
+  const panel = createPanel();
 
   const missingHP = state.hero.maxHp - state.hero.hp;
   const missingMP = state.hero.maxMp - state.hero.mp;
@@ -75,7 +69,12 @@ export function buildTemple(
     panel.appendChild(
       el(
         "div",
-        { color: "#555", fontSize: "12px", fontStyle: "italic", padding: "4px 0" },
+        {
+          color: "#555",
+          fontSize: "12px",
+          fontStyle: "italic",
+          padding: "4px 0",
+        },
         "No cursed items.",
       ),
     );

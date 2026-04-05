@@ -1,5 +1,12 @@
-import type { GameState, Item, EquipSlot } from "../../core/types";
-import { createPanel, createButton, el } from "../Theme";
+import type { GameState, Item } from "../../core/types";
+import {
+  createPanel,
+  createButton,
+  el,
+  greyBtn,
+  SERVICE_SLOT_LABELS,
+  EQUIP_SLOT_ORDER,
+} from "../Theme";
 import {
   getBlacksmithCost,
   getBlacksmithCap,
@@ -15,27 +22,6 @@ import {
   getDisplayName,
 } from "../../systems/inventory/display-name";
 import { buildTooltipContent } from "../item-tooltip";
-
-const SLOT_LABELS: Record<string, string> = {
-  weapon: "Weapon",
-  shield: "Shield",
-  helmet: "Head",
-  body: "Body",
-  cloak: "Cloak",
-  gauntlets: "Hands",
-  belt: "Belt",
-  boots: "Feet",
-  ringLeft: "Ring L",
-  ringRight: "Ring R",
-  amulet: "Amulet",
-  pack: "Pack",
-};
-
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? "0.4" : "1";
-  btn.style.cursor = disabled ? "not-allowed" : "pointer";
-}
 
 let bsDrawer: HTMLElement | null = null;
 function closeBsDrawer(): void {
@@ -146,24 +132,33 @@ function showAffixSelect(
   ngPlus: number,
   onUpdate: (s: GameState) => void,
 ): void {
+  closeBsDrawer();
   const enchants = item.specialEnchantments ?? [];
-  const overlay = el("div", {
+
+  bsDrawer = el("div", {
     position: "fixed",
-    inset: "0",
-    zIndex: "300",
-    background: "rgba(0,0,0,0.9)",
+    bottom: "0",
+    left: "0",
+    right: "0",
+    zIndex: "2000",
+    background: "#1a1a1a",
+    borderTop: "2px solid #555",
+    maxHeight: "70vh",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    padding: "20px",
+    boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
-  overlay.appendChild(
+  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+  scrollDiv.appendChild(
     el(
       "div",
-      { color: "#c9a84c", fontSize: "16px", fontWeight: "bold" },
+      {
+        color: "#c9a84c",
+        fontSize: "16px",
+        fontWeight: "bold",
+        marginBottom: "8px",
+      },
       "Select affix to replace",
     ),
   );
@@ -187,19 +182,34 @@ function showAffixSelect(
       color: aff.color,
     });
     btn.addEventListener("click", () => {
-      overlay.remove();
+      closeBsDrawer();
       const charged = blacksmithCharge(state, item.id);
       if (!charged) return;
       const options = rollBlacksmithOptions(item, ngPlus, [id]);
       showAffixPicker(charged, item, options, i, "reroll", onUpdate);
     });
-    overlay.appendChild(btn);
+    scrollDiv.appendChild(btn);
   }
+  bsDrawer.appendChild(scrollDiv);
 
+  const btnRow = el("div", {
+    display: "flex",
+    gap: "8px",
+    padding: "8px 16px",
+    paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    flexShrink: "0",
+    borderTop: "1px solid #333",
+    background: "#1a1a1a",
+  });
   const cancelBtn = createButton("Cancel");
-  cancelBtn.addEventListener("click", () => overlay.remove());
-  overlay.appendChild(cancelBtn);
-  document.body.appendChild(overlay);
+  cancelBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+  cancelBtn.addEventListener("click", closeBsDrawer);
+  btnRow.appendChild(cancelBtn);
+  bsDrawer.appendChild(btnRow);
+
+  document.body.appendChild(bsDrawer);
 }
 
 function showAffixPicker(
@@ -210,37 +220,57 @@ function showAffixPicker(
   _mode: "add" | "reroll",
   onUpdate: (s: GameState) => void,
 ): void {
-  const overlay = el("div", {
+  closeBsDrawer();
+
+  bsDrawer = el("div", {
     position: "fixed",
-    inset: "0",
-    zIndex: "300",
-    background: "rgba(0,0,0,0.9)",
+    bottom: "0",
+    left: "0",
+    right: "0",
+    zIndex: "2000",
+    background: "#1a1a1a",
+    borderTop: "2px solid #555",
+    maxHeight: "70vh",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    padding: "20px",
+    boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
   });
 
+  const scrollDiv = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
+
   if (options.length === 0) {
-    overlay.appendChild(
+    scrollDiv.appendChild(
       el(
         "div",
         { color: "#f44", fontSize: "14px", fontWeight: "bold" },
         "No affixes available for this item.",
       ),
     );
-    overlay.appendChild(
+    scrollDiv.appendChild(
       el("div", { color: "#888", fontSize: "12px" }, "Gold has been spent."),
     );
+    bsDrawer.appendChild(scrollDiv);
+
+    const btnRow = el("div", {
+      display: "flex",
+      gap: "8px",
+      padding: "8px 16px",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      flexShrink: "0",
+      borderTop: "1px solid #333",
+      background: "#1a1a1a",
+    });
     const okBtn = createButton("OK");
+    okBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
     okBtn.addEventListener("click", () => {
-      overlay.remove();
+      closeBsDrawer();
       onUpdate(state);
     });
-    overlay.appendChild(okBtn);
-    document.body.appendChild(overlay);
+    btnRow.appendChild(okBtn);
+    bsDrawer.appendChild(btnRow);
+    document.body.appendChild(bsDrawer);
     return;
   }
 
@@ -276,7 +306,7 @@ function showAffixPicker(
       "Refuse them, and your item remains unchanged, but the offering is lost.",
     ),
   );
-  overlay.appendChild(flavorBox);
+  scrollDiv.appendChild(flavorBox);
 
   for (const opt of options) {
     const aff = AFFIX_BY_ID[opt.id];
@@ -294,21 +324,36 @@ function showAffixPicker(
       color: aff.color,
     });
     btn.addEventListener("click", () => {
-      overlay.remove();
+      closeBsDrawer();
       onUpdate(
         blacksmithApplyAffix(state, item.id, opt.id, opt.critical, replaceIdx),
       );
     });
-    overlay.appendChild(btn);
+    scrollDiv.appendChild(btn);
   }
+  bsDrawer.appendChild(scrollDiv);
 
-  const cancelBtn = createButton("Cancel");
+  const btnRow = el("div", {
+    display: "flex",
+    gap: "8px",
+    padding: "8px 16px",
+    paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    flexShrink: "0",
+    borderTop: "1px solid #333",
+    background: "#1a1a1a",
+  });
+  const cancelBtn = createButton("Refuse All");
+  cancelBtn.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
   cancelBtn.addEventListener("click", () => {
-    overlay.remove();
+    closeBsDrawer();
     onUpdate(state);
   });
-  overlay.appendChild(cancelBtn);
-  document.body.appendChild(overlay);
+  btnRow.appendChild(cancelBtn);
+  bsDrawer.appendChild(btnRow);
+
+  document.body.appendChild(bsDrawer);
 }
 
 export { closeBsDrawer };
@@ -329,28 +374,13 @@ export function buildBlacksmith(
     ),
   );
 
-  const slotOrder: EquipSlot[] = [
-    "helmet",
-    "amulet",
-    "cloak",
-    "body",
-    "weapon",
-    "shield",
-    "gauntlets",
-    "belt",
-    "ringLeft",
-    "ringRight",
-    "boots",
-    "pack",
-  ];
-
   const list = el("div", {
     maxHeight: "clamp(200px, 50vh, 400px)",
     overflowY: "auto",
   });
   list.setAttribute("data-service-list", "1");
 
-  for (const slotKey of slotOrder) {
+  for (const slotKey of EQUIP_SLOT_ORDER) {
     const item = state.hero.equipment[slotKey];
 
     const row = el("div", {
@@ -388,7 +418,7 @@ export function buildBlacksmith(
       el(
         "span",
         { color: "#666", width: "50px", flexShrink: "0", fontSize: "11px" },
-        SLOT_LABELS[slotKey] ?? slotKey,
+        SERVICE_SLOT_LABELS[slotKey] ?? slotKey,
       ),
     );
 

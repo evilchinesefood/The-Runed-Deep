@@ -9,6 +9,7 @@ import {
   createPanel,
   createButton,
   el,
+  greyBtn,
 } from "./Theme";
 import {
   SHOP_DEFS,
@@ -152,14 +153,6 @@ function spriteEl(sprite: string): HTMLElement {
   s.style.cssText = "width:32px;height:32px;flex-shrink:0;";
   s.className = sprite;
   return s;
-}
-
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  if (disabled) {
-    btn.disabled = true;
-    btn.style.opacity = "0.4";
-    btn.style.cursor = "not-allowed";
-  }
 }
 
 function itemRow(

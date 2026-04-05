@@ -11,6 +11,7 @@ import {
   createPanel,
   createButton,
   el,
+  greyBtn,
 } from "./Theme";
 
 function diffBadge(weight: number): HTMLElement {
@@ -109,7 +110,7 @@ export function createRiftMenuScreen(
     );
   } else {
     const list = el("div", {
-      maxHeight: "clamp(200px, 50vh, 360px)",
+      maxHeight: "clamp(200px, 50vh, 400px)",
       overflowY: "auto",
     });
     for (const mod of mods) list.appendChild(modRow(mod));
@@ -173,9 +174,7 @@ export function createRiftMenuScreen(
   const rerollCost = 50;
   const canReroll = state.hero.gold >= rerollCost;
   const rerollBtn = createButton(`Reroll (${rerollCost}g)`);
-  rerollBtn.disabled = !canReroll;
-  rerollBtn.style.opacity = canReroll ? "1" : "0.4";
-  rerollBtn.style.cursor = canReroll ? "pointer" : "not-allowed";
+  greyBtn(rerollBtn, !canReroll);
   if (canReroll) {
     rerollBtn.addEventListener("click", () =>
       onAction({ type: "rerollRift" } as any),
@@ -187,9 +186,7 @@ export function createRiftMenuScreen(
   const addCost = getRiftAddCost(addCount);
   const canAdd = state.hero.gold >= addCost && mods.length < RIFT_MODIFIERS.length;
   const addBtn = createButton(`Add Offering (${addCost}g)`);
-  addBtn.disabled = !canAdd;
-  addBtn.style.opacity = canAdd ? "1" : "0.4";
-  addBtn.style.cursor = canAdd ? "pointer" : "not-allowed";
+  greyBtn(addBtn, !canAdd);
   if (canAdd) {
     addBtn.addEventListener("click", () =>
       onAction({ type: "addRiftModifier" } as any),

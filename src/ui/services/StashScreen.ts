@@ -1,5 +1,5 @@
 import type { GameState, Item } from "../../core/types";
-import { createPanel, createButton, el } from "../Theme";
+import { createPanel, createButton, el, greyBtn } from "../Theme";
 import {
   getDisplaySprite,
   getItemGlow,
@@ -14,12 +14,6 @@ import {
 
 const STASH_LIMIT = 50;
 const isMobileStash = () => window.innerWidth <= 768;
-
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? "0.4" : "1";
-  btn.style.cursor = disabled ? "not-allowed" : "pointer";
-}
 
 let stashDrawerEl: HTMLElement | null = null;
 function closeStashDrawer(): void {
@@ -95,11 +89,9 @@ function buildStashRow(
   const row = el("div", {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
+    gap: "8px",
     padding: "4px 6px",
-    borderBottom: "1px solid #222",
     cursor: mobile ? "pointer" : "default",
-    minHeight: "36px",
   });
 
   const glow = getItemGlow(item);

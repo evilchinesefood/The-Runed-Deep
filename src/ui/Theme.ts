@@ -393,3 +393,28 @@ export function createButton(
   btn.className = classes.join(" ");
   return btn;
 }
+
+// ── Shared UI utilities ──────────────────────────────────
+
+export function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
+  btn.disabled = disabled;
+  btn.style.opacity = disabled ? "0.4" : "1";
+  btn.style.cursor = disabled ? "not-allowed" : "pointer";
+}
+
+export const SERVICE_SLOT_LABELS: Record<string, string> = {
+  weapon: "Weapon", shield: "Shield", helmet: "Head", body: "Body",
+  cloak: "Cloak", gauntlets: "Hands", belt: "Belt", boots: "Feet",
+  ringLeft: "Ring L", ringRight: "Ring R", amulet: "Amulet", pack: "Pack",
+};
+
+export const INVENTORY_SLOT_LABELS: Record<string, string> = {
+  weapon: "Weapon", shield: "Shield", helmet: "Helmet", body: "Body",
+  cloak: "Cloak", gauntlets: "Gloves", belt: "Belt", boots: "Boots",
+  ringLeft: "Ring L", ringRight: "Ring R", amulet: "Amulet",
+};
+
+export const EQUIP_SLOT_ORDER = [
+  "helmet", "amulet", "cloak", "body", "weapon", "shield",
+  "gauntlets", "belt", "ringLeft", "ringRight", "boots", "pack",
+] as const;

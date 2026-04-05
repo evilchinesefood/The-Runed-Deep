@@ -17,6 +17,7 @@ import { buildStash, closeStashDrawer } from "./services/StashScreen";
 import { buildRuneForge, closeRuneDrawer } from "./services/RuneForgeScreen";
 import { buildStatue } from "./services/StatueScreen";
 
+// Note: sage ID → blacksmith service, blacksmith ID → sage service (historical swap)
 const BUILDING_NAMES: Record<string, string> = {
   temple: "Temple of Odin",
   sage: "The Blacksmith",
@@ -88,6 +89,7 @@ export function createServiceScreen(
     }
 
     let content: HTMLElement;
+    // Note: sage ID → blacksmith service, blacksmith ID → sage service (historical swap)
     switch (buildingId) {
       case "temple":
         content = buildTemple(state, handleUpdate);
@@ -105,7 +107,7 @@ export function createServiceScreen(
         content = buildRuneForge(state, handleUpdate);
         break;
       case "rift-stone": {
-        content = createPanel("Services");
+        content = createPanel();
         content.appendChild(
           el(
             "div",
@@ -128,14 +130,14 @@ export function createServiceScreen(
         break;
       }
       case "crucible": {
-        content = createPanel("Services");
+        content = createPanel();
         break;
       }
       case "statue-of-fortune":
         content = buildStatue(state, handleUpdate);
         break;
       default:
-        content = createPanel("Unknown Service");
+        content = createPanel();
         content.appendChild(
           el("div", { color: "#888" }, "No services available here."),
         );

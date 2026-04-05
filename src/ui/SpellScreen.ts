@@ -87,17 +87,21 @@ export function createSpellScreen(
     const canAdd = !inHotkeys && hotkeys.length < 5;
 
     drawerEl = el("div", {
-      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "200",
+      position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "2000",
       background: "#1a1a1a", borderTop: "2px solid #555",
-      padding: "16px", maxHeight: "50vh", overflowY: "auto",
+      maxHeight: "70vh", display: "flex", flexDirection: "column",
+      boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
     });
+
+    // Scrollable content area
+    const scrollArea = el("div", { overflowY: "auto", padding: "12px 16px 8px" });
 
     // Spell name + category
     const nameRow = el("div", { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" });
     nameRow.appendChild(el("div", { color: "#c9a84c", fontSize: "16px", fontWeight: "bold" }, spell.name));
     const catColor = CATEGORY_COLORS[spell.category] ?? "#aaa";
     nameRow.appendChild(el("span", { color: catColor, fontSize: "12px" }, spell.category));
-    drawerEl.appendChild(nameRow);
+    scrollArea.appendChild(nameRow);
 
     // Stats row
     const stats = el("div", { display: "flex", gap: "12px", fontSize: "12px", color: "#888", marginBottom: "8px" });
@@ -106,20 +110,23 @@ export function createSpellScreen(
     const targetNames: Record<string, string> = { self: "Self", direction: "Directional", target: "Targeted", none: "Instant", area: "Area" };
     stats.appendChild(el("span", {}, targetNames[spell.targeting] ?? spell.targeting));
     if (spell.aoe) stats.appendChild(el("span", { color: "#f90" }, "AoE"));
-    drawerEl.appendChild(stats);
+    scrollArea.appendChild(stats);
 
     // Description
-    drawerEl.appendChild(el("div", { color: "#ccc", fontSize: "13px", lineHeight: "1.4", marginBottom: "12px" }, spell.description));
+    scrollArea.appendChild(el("div", { color: "#ccc", fontSize: "13px", lineHeight: "1.4" }, spell.description));
 
-    // Action buttons
-    const btnRow = el("div", { display: "flex", gap: "8px", justifyContent: "center" });
+    drawerEl.appendChild(scrollArea);
+
+    // Pinned button row
+    const btnRow = el("div", {
+      display: "flex", gap: "8px", padding: "8px 16px",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center", flexWrap: "wrap", flexShrink: "0",
+      borderTop: "1px solid #333", background: "#1a1a1a",
+    });
 
     if (inHotkeys) {
-      const rmBtn = el("div", {
-        padding: "8px 20px", color: "#fff", fontSize: "13px", fontWeight: "bold",
-        background: "#622", border: "1px solid #844", borderRadius: "4px",
-        cursor: "pointer", userSelect: "none",
-      }, "Remove from Hotkeys");
+      const rmBtn = createButton("Remove from Hotkeys", "danger");
       rmBtn.addEventListener("click", () => {
         hotkeys = hotkeys.filter(id => id !== spellId);
         onUpdateHotkeys([...hotkeys]);
@@ -129,11 +136,7 @@ export function createSpellScreen(
       });
       btnRow.appendChild(rmBtn);
     } else if (canAdd) {
-      const addBtn = el("div", {
-        padding: "8px 20px", color: "#fff", fontSize: "13px", fontWeight: "bold",
-        background: "#264", border: "1px solid #486", borderRadius: "4px",
-        cursor: "pointer", userSelect: "none",
-      }, "Add to Hotkeys");
+      const addBtn = createButton("Add to Hotkeys", "primary");
       addBtn.addEventListener("click", () => {
         hotkeys.push(spellId);
         onUpdateHotkeys([...hotkeys]);
@@ -144,11 +147,7 @@ export function createSpellScreen(
       btnRow.appendChild(addBtn);
     }
 
-    const closeBtn2 = el("div", {
-      padding: "8px 20px", color: "#aaa", fontSize: "13px",
-      border: "1px solid #444", borderRadius: "4px",
-      cursor: "pointer", userSelect: "none",
-    }, "Close");
+    const closeBtn2 = createButton("Close");
     closeBtn2.addEventListener("click", closeDrawer);
     btnRow.appendChild(closeBtn2);
 

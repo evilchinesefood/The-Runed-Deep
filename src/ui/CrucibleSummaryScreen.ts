@@ -2,7 +2,7 @@
 // Crucible Between-Wave / Summary Screen
 // ============================================================
 
-import { createScreen, createPanel, createButton, el } from "./Theme";
+import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
 
 export function createCrucibleBetweenScreen(
   wave: number,
@@ -15,19 +15,7 @@ export function createCrucibleBetweenScreen(
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
 
   const title = isDead ? "Defeated!" : `Wave ${wave} Cleared!`;
-  screen.appendChild(
-    el(
-      "h2",
-      {
-        color: isDead ? "#f44" : "#c9a84c",
-        fontSize: "22px",
-        margin: "0 0 12px",
-        textAlign: "center",
-        width: "100%",
-      },
-      title,
-    ),
-  );
+  screen.appendChild(createTitleBar(title, onLeave));
 
   const panel = createPanel("CRUCIBLE RESULTS");
 
@@ -80,8 +68,16 @@ export function createCrucibleBetweenScreen(
 
   screen.appendChild(btnRow);
 
+  screen.appendChild(
+    el(
+      "div",
+      { color: "#555", fontSize: "11px", marginTop: "4px" },
+      "Press Esc to close",
+    ),
+  );
+
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === "Escape" && !isDead) onLeave();
+    if (e.key === "Escape") onLeave();
   };
   document.addEventListener("keydown", onKey);
   screen.cleanup = () => document.removeEventListener("keydown", onKey);

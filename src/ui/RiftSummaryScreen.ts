@@ -4,7 +4,7 @@
 
 import type { GameState } from "../core/types";
 import type { RiftModifier } from "../core/types";
-import { createScreen, createPanel, createButton, el } from "./Theme";
+import { createScreen, createPanel, createTitleBar, createButton, el } from "./Theme";
 
 function weightColor(w: number): string {
   if (w >= 2) return "#f66";
@@ -23,20 +23,7 @@ export function createRiftSummaryScreen(
 ): HTMLElement & { cleanup: () => void } {
   const screen = createScreen() as HTMLElement & { cleanup: () => void };
 
-  // Title
-  screen.appendChild(
-    el(
-      "h2",
-      {
-        color: "#c9a84c",
-        fontSize: "22px",
-        margin: "0 0 12px",
-        textAlign: "center",
-        width: "100%",
-      },
-      "Rift Complete!",
-    ),
-  );
+  screen.appendChild(createTitleBar("Rift Complete!", onClose));
 
   const panel = createPanel("RESULTS");
   const totalDifficulty = modifiers.reduce((s, m) => s + m.weight, 0);
@@ -115,6 +102,14 @@ export function createRiftSummaryScreen(
   btn.style.cssText += "display:block;width:100%;margin-top:8px;";
   btn.addEventListener("click", onClose);
   screen.appendChild(btn);
+
+  screen.appendChild(
+    el(
+      "div",
+      { color: "#555", fontSize: "11px", marginTop: "4px" },
+      "Press Esc to close",
+    ),
+  );
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "Escape") onClose();

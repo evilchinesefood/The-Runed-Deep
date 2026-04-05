@@ -1,5 +1,5 @@
 import type { GameState } from "../../core/types";
-import { createPanel, createButton, el } from "../Theme";
+import { createPanel, createButton, el, greyBtn } from "../Theme";
 import {
   STATUE_UPGRADES,
   STATUE_CATEGORIES,
@@ -17,12 +17,6 @@ import {
   getDisplayName,
 } from "../../systems/inventory/display-name";
 import { attachItemTooltip } from "../item-tooltip";
-
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? "0.4" : "1";
-  btn.style.cursor = disabled ? "not-allowed" : "pointer";
-}
 
 let statueTab: "sacrifice" | "upgrades" = "sacrifice";
 
@@ -259,29 +253,43 @@ export function buildStatue(
     gap: "0",
   });
   const makeTab = (label: string) =>
-    el("div", {
-      padding: "8px 20px",
-      fontSize: "13px",
-      cursor: "pointer",
-      whiteSpace: "nowrap",
-      userSelect: "none",
-      transition: "color 0.15s",
-    }, label);
+    el(
+      "div",
+      {
+        padding: "8px 20px",
+        fontSize: "13px",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        userSelect: "none",
+        transition: "color 0.15s",
+      },
+      label,
+    );
   const sacTab = makeTab("Sacrifice");
   const upgTab = makeTab("Upgrades");
 
   function updateTabs(): void {
     const isSac = statueTab === "sacrifice";
     sacTab.style.color = isSac ? "#c9a84c" : "#555";
-    sacTab.style.borderBottom = isSac ? "2px solid #c9a84c" : "2px solid transparent";
+    sacTab.style.borderBottom = isSac
+      ? "2px solid #c9a84c"
+      : "2px solid transparent";
     sacTab.style.marginBottom = isSac ? "-2px" : "";
     upgTab.style.color = !isSac ? "#c9a84c" : "#555";
-    upgTab.style.borderBottom = !isSac ? "2px solid #c9a84c" : "2px solid transparent";
+    upgTab.style.borderBottom = !isSac
+      ? "2px solid #c9a84c"
+      : "2px solid transparent";
     upgTab.style.marginBottom = !isSac ? "-2px" : "";
   }
 
-  sacTab.addEventListener("click", () => { statueTab = "sacrifice"; onUpdate(state); });
-  upgTab.addEventListener("click", () => { statueTab = "upgrades"; onUpdate(state); });
+  sacTab.addEventListener("click", () => {
+    statueTab = "sacrifice";
+    onUpdate(state);
+  });
+  upgTab.addEventListener("click", () => {
+    statueTab = "upgrades";
+    onUpdate(state);
+  });
   tabBar.appendChild(sacTab);
   tabBar.appendChild(upgTab);
   updateTabs();

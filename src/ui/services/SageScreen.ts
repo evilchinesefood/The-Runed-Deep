@@ -1,5 +1,12 @@
-import type { GameState, EquipSlot } from "../../core/types";
-import { createPanel, createButton, el } from "../Theme";
+import type { GameState } from "../../core/types";
+import {
+  createPanel,
+  createButton,
+  el,
+  greyBtn,
+  SERVICE_SLOT_LABELS,
+  EQUIP_SLOT_ORDER,
+} from "../Theme";
 import { sageEnchantItem, getEnchanterCap } from "../../systems/town/Services";
 import {
   getDisplaySprite,
@@ -8,27 +15,6 @@ import {
   getDisplayName,
 } from "../../systems/inventory/display-name";
 import { buildTooltipContent } from "../item-tooltip";
-
-const SLOT_LABELS: Record<string, string> = {
-  weapon: "Weapon",
-  shield: "Shield",
-  helmet: "Head",
-  body: "Body",
-  cloak: "Cloak",
-  gauntlets: "Hands",
-  belt: "Belt",
-  boots: "Feet",
-  ringLeft: "Ring L",
-  ringRight: "Ring R",
-  amulet: "Amulet",
-  pack: "Pack",
-};
-
-function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? "0.4" : "1";
-  btn.style.cursor = disabled ? "not-allowed" : "pointer";
-}
 
 let sageDrawer: HTMLElement | null = null;
 function closeSageDrawer(): void {
@@ -47,21 +33,6 @@ export function buildSage(
   const panel = createPanel();
   const cap = getEnchanterCap(state.ngPlusCount ?? 0);
 
-  const sageSlots: EquipSlot[] = [
-    "helmet",
-    "amulet",
-    "cloak",
-    "body",
-    "weapon",
-    "shield",
-    "gauntlets",
-    "belt",
-    "ringLeft",
-    "ringRight",
-    "boots",
-    "pack",
-  ];
-
   panel.appendChild(
     el(
       "div",
@@ -76,7 +47,7 @@ export function buildSage(
   });
   list.setAttribute("data-service-list", "1");
 
-  for (const slotKey of sageSlots) {
+  for (const slotKey of EQUIP_SLOT_ORDER) {
     const item = state.hero.equipment[slotKey];
     const ups = item ? (item.properties["enchanterUps"] ?? 0) : 0;
     const atCap = item ? ups >= cap : true;
@@ -117,7 +88,7 @@ export function buildSage(
       el(
         "span",
         { color: "#666", width: "50px", flexShrink: "0", fontSize: "11px" },
-        SLOT_LABELS[slotKey] ?? slotKey,
+        SERVICE_SLOT_LABELS[slotKey] ?? slotKey,
       ),
     );
 

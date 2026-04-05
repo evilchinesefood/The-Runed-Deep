@@ -19,6 +19,8 @@ import {
   createTitleBar,
   createButton,
   el,
+  INVENTORY_SLOT_LABELS,
+  EQUIP_SLOT_ORDER,
 } from "./Theme";
 
 function renderSpriteLayers(
@@ -108,20 +110,6 @@ const SLOT_POSITIONS: Record<string, { x: number; y: number }> = {
   pack: { x: 190, y: 100 },
 };
 
-const SLOT_LABELS: Record<string, string> = {
-  weapon: "Weapon",
-  shield: "Shield",
-  helmet: "Helmet",
-  body: "Body",
-  cloak: "Cloak",
-  gauntlets: "Gloves",
-  belt: "Belt",
-  boots: "Boots",
-  ringLeft: "Ring L",
-  ringRight: "Ring R",
-  amulet: "Amulet",
-  pack: "Pack",
-};
 
 function createEquipSlot(
   slotKey: EquipSlot,
@@ -163,7 +151,7 @@ function createEquipSlot(
     container.style.pointerEvents = "auto";
     attachItemTooltip(container, item);
   } else {
-    container.title = `${SLOT_LABELS[slotKey]}: empty`;
+    container.title = `${INVENTORY_SLOT_LABELS[slotKey] || slotKey}: empty`;
     container.style.opacity = "0.7";
   }
 
@@ -272,20 +260,6 @@ export function createInventoryScreen(
     updateTabs();
   });
 
-  const slotKeys: EquipSlot[] = [
-    "helmet",
-    "amulet",
-    "cloak",
-    "body",
-    "weapon",
-    "shield",
-    "gauntlets",
-    "belt",
-    "ringLeft",
-    "ringRight",
-    "boots",
-    "pack",
-  ];
 
   // Paperdoll — desktop only, no slot icons
   if (!isMobile) {
@@ -312,7 +286,7 @@ export function createInventoryScreen(
   // Equipment list with sprite icons
   const legend = el("div", { flex: "1", padding: "4px 0", overflowY: "auto" });
 
-  for (const slotKey of slotKeys) {
+  for (const slotKey of EQUIP_SLOT_ORDER) {
     const item = h.equipment[slotKey];
     const row = el("div", {
       display: "flex",
@@ -337,7 +311,7 @@ export function createInventoryScreen(
     }
     row.appendChild(spriteWrap);
 
-    const label = SLOT_LABELS[slotKey] || slotKey;
+    const label = INVENTORY_SLOT_LABELS[slotKey] || slotKey;
     row.appendChild(
       el(
         "span",
