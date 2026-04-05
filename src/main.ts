@@ -30,11 +30,6 @@ import { drainAnimations } from "./rendering/animation-queue";
 import { computeFov } from "./utils/fov";
 import { loadGame, saveGame } from "./core/save-load";
 import type { GameState, Screen, Floor } from "./core/types";
-import { generateTestFloor, getAllSpellIds } from "./systems/dungeon/TestFloor";
-import {
-  createEmptyEquipment,
-  createDefaultResistances,
-} from "./core/game-state";
 import { TouchControls } from "./ui/TouchControls";
 import { teleportToTown } from "./core/actions";
 import { ITEM_BY_ID } from "./data/items";
@@ -687,31 +682,6 @@ touchControls.setMenuHandler((action) => {
       screen: "death",
     });
   }
-  if (action === "debug-f8") {
-    const state = gameLoop.getState();
-    gameLoop.setState({
-      ...state,
-      hero: {
-        ...state.hero,
-        gold: state.hero.gold + 10000,
-        runeShards: state.hero.runeShards + 1000,
-        essence: (state.hero.essence ?? 0) + 1000,
-      },
-      messages: [
-        ...state.messages,
-        {
-          text: "DEBUG: +10,000g, +1,000 shards, +1,000 essence",
-          severity: "system" as const,
-          turn: state.turn,
-        },
-      ],
-    });
-  }
-  if (action === "debug-f11") {
-    const state = gameLoop.getState();
-    if (state.screen !== "game") return;
-    gameLoop.setState(teleportToTown(state));
-  }
   if (action === "debug-f10") {
     const input = prompt("Floor (1-30, 0=town):");
     if (!input) return;
@@ -765,10 +735,6 @@ touchControls.setMenuHandler((action) => {
       });
     }
   }
-  if (action === "debug-f9") {
-    // Trigger F9 test arena via synthetic event
-    document.dispatchEvent(new KeyboardEvent("keydown", { code: "F9" }));
-  }
 });
 
 function playPendingAnimations(): void {
@@ -792,99 +758,12 @@ function playPendingAnimations(): void {
   });
 }
 
-// F4: Toggle sound / F9: spell test arena / F10: boss test / F11: town teleport
+// F4: Toggle sound / F10: jump to floor / F12: reset
 document.addEventListener("keydown", (e: KeyboardEvent) => {
   if (e.code === "F4") {
     e.preventDefault();
     Sound.toggle();
     return;
-  }
-
-  if (e.code === "F9") {
-    e.preventDefault();
-    const { floor: testFloor, playerStart } = generateTestFloor();
-    const testState: GameState = {
-      screen: "game",
-      hero: {
-        name: "Test Hero",
-        gender: "male",
-        position: playerStart,
-        attributes: {
-          strength: 60,
-          intelligence: 70,
-          constitution: 60,
-          dexterity: 60,
-        },
-        hp: 200,
-        maxHp: 200,
-        mp: 500,
-        maxMp: 500,
-        xp: 0,
-        level: 10,
-        equipment: createEmptyEquipment(),
-        inventory: [],
-        gold: 1000,
-        knownSpells: getAllSpellIds(),
-        spellHotkeys: getAllSpellIds().slice(0, 5),
-        activeEffects: [],
-        resistances: createDefaultResistances(),
-        armorValue: 6,
-        equipDamageBonus: 0,
-        equipAccuracyBonus: 0,
-        runeShards: 0,
-        essence: 0,
-        statueUpgrades: {},
-      },
-      currentFloor: 1,
-      currentDungeon: "mine",
-      floors: { "mine-1": testFloor },
-      town: {
-        id: "hamlet",
-        shopInventories: {},
-        bankBalance: 0,
-        deepestFloor: 10,
-      },
-      messages: [
-        { text: "=== SPELL TEST ARENA ===", severity: "important", turn: 0 },
-        {
-          text: "All 30 spells available. 500 MP. Monsters placed for testing.",
-          severity: "system",
-          turn: 0,
-        },
-        {
-          text: "Bolt targets: E line at y=15. AoE group: x=10-11, y=20-21.",
-          severity: "system",
-          turn: 0,
-        },
-        {
-          text: "Items on ground near start. Cursed armor + unidentified ring for ID/curse testing.",
-          severity: "system",
-          turn: 0,
-        },
-        {
-          text: "Enclosed room at top-right for Light spell testing.",
-          severity: "system",
-          turn: 0,
-        },
-      ],
-      turn: 0,
-      gameTime: 0,
-      difficulty: "normal",
-      rngSeed: Date.now(),
-      returnFloor: 0,
-      activeBuildingId: "",
-      ngPlusCount: 0,
-      stash: [],
-      riftStoneUnlocked: false,
-      riftOffering: null,
-      activeRift: null,
-      activeCrucible: null,
-      crucibleBestWave: 0,
-      runeForgeMaxSockets: 2,
-      statueUpgrades: {},
-      itemsSacrificed: 0,
-    };
-    gameLoop.setState(testState);
   }
 
   // F10: Jump to any floor (or town) — keeps current hero as-is
@@ -946,36 +825,6 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         ...state.messages,
         {
           text: `Jumped to floor ${num}.`,
-          severity: "system" as const,
-          turn: state.turn,
-        },
-      ],
-    });
-  }
-
-  // F11: Teleport to town
-  if (e.code === "F11") {
-    e.preventDefault();
-    const state = gameLoop.getState();
-    gameLoop.setState(teleportToTown(state));
-  }
-
-  // F8: Add currency (debug)
-  if (e.code === "F8") {
-    e.preventDefault();
-    const state = gameLoop.getState();
-    gameLoop.setState({
-      ...state,
-      hero: {
-        ...state.hero,
-        gold: state.hero.gold + 10000,
-        runeShards: state.hero.runeShards + 1000,
-        essence: (state.hero.essence ?? 0) + 1000,
-      },
-      messages: [
-        ...state.messages,
-        {
-          text: "DEBUG: +10,000g, +1,000 shards, +1,000 essence",
           severity: "system" as const,
           turn: state.turn,
         },
