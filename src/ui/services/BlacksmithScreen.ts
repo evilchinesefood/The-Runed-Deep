@@ -429,7 +429,10 @@ export function buildBlacksmith(
         if (canAfford)
           addBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            openBsDrawer(state, item, "add", ngPlus, cap, onUpdate);
+            const charged = blacksmithCharge(state, item.id);
+            if (!charged) return;
+            const options = rollBlacksmithOptions(item, ngPlus);
+            showAffixPicker(charged, item, options, undefined, "add", onUpdate);
           });
         row.appendChild(addBtn);
       }
@@ -439,7 +442,7 @@ export function buildBlacksmith(
         if (canAfford)
           rerollBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            openBsDrawer(state, item, "reroll", ngPlus, cap, onUpdate);
+            showAffixSelect(state, item, ngPlus, onUpdate);
           });
         row.appendChild(rerollBtn);
       }
