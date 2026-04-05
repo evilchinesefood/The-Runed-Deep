@@ -541,9 +541,11 @@ function processEnterBuilding(state: GameState): GameState {
     return addMessage(state, "There is no building here.", "system");
   }
   const shopIds = ["weapon-shop", "armor-shop", "general-store", "magic-shop"];
-  const screen = shopIds.includes(tile.buildingId)
-    ? ("shop" as const)
-    : ("service" as const);
+  const directScreens: Record<string, string> = {
+    crucible: "crucible-menu",
+  };
+  const screen = directScreens[tile.buildingId]
+    ?? (shopIds.includes(tile.buildingId) ? "shop" : "service");
 
   const info = BUILDING_FLAVORS[tile.buildingId];
   const msg = info

@@ -132,8 +132,6 @@ export function createServiceScreen(
         break;
       }
       case "crucible": {
-        // Go directly to crucible menu
-        onUpdate({ ...state, screen: "crucible-menu" });
         content = createPanel("Services");
         break;
       }
