@@ -249,7 +249,7 @@ export function buildStatue(
   state: GameState,
   onUpdate: (s: GameState) => void,
 ): HTMLElement {
-  const panel = createPanel("Statue of Fortune");
+  const panel = createPanel();
 
   // Tab bar (matches inventory style)
   const tabBar = el("div", {
