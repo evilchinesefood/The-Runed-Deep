@@ -657,6 +657,9 @@ function processUseStairs(state: GameState): GameState {
   }
 
   if (heroTile.type === "stairs-down") {
+    if (state.currentDungeon === "crucible") {
+      return addMessage(state, "There is no escape this way.", "system");
+    }
     Sound.stairs();
     if (state.currentDungeon === "town") {
       return returnToDungeon(state);

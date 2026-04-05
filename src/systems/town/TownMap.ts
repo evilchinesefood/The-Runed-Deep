@@ -201,13 +201,16 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
       const ex = bp.x + ent.x;
       const ey = bp.y + ent.y;
       if (ey < H && ex < W) {
+        const td = tmpl.tiles[ent.y]?.[ent.x];
+        const overlay = (td as any)?.overlay;
+        const layers = overlay ? [td!.sprite, overlay] : undefined;
         tiles[ey][ex] = {
           type: "building",
-          sprite:
-            tmpl.tiles[ent.y]?.[ent.x]?.sprite ?? "floor-sand1",
+          sprite: td?.sprite ?? "floor-sand1",
           walkable: true,
           transparent: true,
           buildingId: tmpl.id,
+          spriteLayers: layers,
         };
       }
     }
@@ -266,11 +269,10 @@ export function generateTownMap(): { floor: Floor; playerStart: Vector2 } {
   }
   for (const mp of minePoints) {
     if (mp && mp.y < H && mp.x < W) {
+      const existing = tiles[mp.y][mp.x];
       tiles[mp.y][mp.x] = {
+        ...existing,
         type: "stairs-down",
-        sprite: "gateways-stone_stairs_down",
-        walkable: true,
-        transparent: true,
       };
     }
   }

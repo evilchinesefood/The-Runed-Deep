@@ -5,10 +5,16 @@ import { trackCrucibleWave } from "../Achievements";
 
 export function processEnterCrucible(state: GameState): GameState {
   const { floor, playerStart } = generateCrucibleArena(Date.now());
+
+  // Spawn wave 1 immediately
+  const wave1Floor = crucibleSpawnWave(floor, 1, playerStart, state.difficulty);
+  const reward = getWaveReward(1);
+  trackCrucibleWave(1);
+
   const crucible: import("../../core/types").CrucibleState = {
-    wave: 0,
-    shardsEarned: 0,
-    goldEarned: 0,
+    wave: 1,
+    shardsEarned: reward.shards,
+    goldEarned: reward.gold,
   };
 
   return {
@@ -19,13 +25,18 @@ export function processEnterCrucible(state: GameState): GameState {
     currentFloor: 0,
     returnFloor:
       state.currentDungeon !== "town" ? state.currentFloor : state.returnFloor,
-    floors: { ...state.floors, "crucible-0": floor },
-    hero: { ...state.hero, position: playerStart },
+    floors: { ...state.floors, "crucible-0": wave1Floor },
+    hero: {
+      ...state.hero,
+      position: playerStart,
+      runeShards: state.hero.runeShards + reward.shards,
+      gold: state.hero.gold + reward.gold,
+    },
     screen: "game",
     messages: [
       ...state.messages,
       {
-        text: "You enter the Crucible. Prepare for battle!",
+        text: "You enter the Crucible. Wave 1 begins!",
         severity: "important" as const,
         turn: state.turn,
       },

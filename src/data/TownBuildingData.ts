@@ -212,10 +212,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         "y": 3
       },
       {
-        "x": 0,
-        "y": 3
-      },
-      {
         "x": 2,
         "y": 2
       }
@@ -382,10 +378,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
       {
         "x": 3,
         "y": 2
-      },
-      {
-        "x": 3,
-        "y": 4
       }
     ],
     "npc": {
@@ -539,10 +531,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
       ]
     ],
     "entrance": [
-      {
-        "x": 5,
-        "y": 2
-      },
       {
         "x": 4,
         "y": 2
@@ -755,10 +743,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     "entrance": [
       {
         "x": 3,
-        "y": 4
-      },
-      {
-        "x": 3,
         "y": 3
       },
       {
@@ -924,12 +908,12 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     ],
     "entrance": [
       {
-        "x": 0,
+        "x": 1,
         "y": 3
       },
       {
         "x": 1,
-        "y": 3
+        "y": 2
       }
     ],
     "npc": {
@@ -1136,11 +1120,15 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     "entrance": [
       {
         "x": 3,
-        "y": 0
+        "y": 1
       },
       {
-        "x": 3,
-        "y": 1
+        "x": 4,
+        "y": 2
+      },
+      {
+        "x": 2,
+        "y": 2
       }
     ],
     "npc": {
@@ -1235,7 +1223,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         },
         {
           "sprite": "floor-sand3",
-          "type": "floor"
+          "type": "floor",
+          "npcSprite": "humanoids-wizard"
         },
         {
           "sprite": "floor-sand4",
@@ -1315,10 +1304,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     "entrance": [
       {
         "x": 3,
-        "y": 4
-      },
-      {
-        "x": 3,
         "y": 3
       }
     ],
@@ -1329,8 +1314,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
   },
   {
     "id": "sage",
-    "name": "The Sage",
-    "flavor": "Ancient wisdom whispers from dusty tomes.",
+    "name": "The Blacksmith",
+    "flavor": "The ring of hammer on steel echoes endlessly.",
     "facing": "north",
     "width": 5,
     "height": 5,
@@ -1451,10 +1436,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
       ]
     ],
     "entrance": [
-      {
-        "x": 2,
-        "y": 0
-      },
       {
         "x": 2,
         "y": 1
@@ -1753,10 +1734,6 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
     "entrance": [
       {
         "x": 4,
-        "y": 0
-      },
-      {
-        "x": 4,
         "y": 2
       },
       {
@@ -1863,7 +1840,8 @@ export const TOWN_BUILDINGS_DATA: BuildingTemplate[] = [
         },
         {
           "sprite": "wall-church0",
-          "type": "wall"
+          "type": "wall",
+          "overlay": "altars-gozag0"
         },
         {
           "sprite": "floor-white_marble1",

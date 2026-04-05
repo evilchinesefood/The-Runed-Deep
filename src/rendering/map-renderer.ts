@@ -588,10 +588,10 @@ export class MapRenderer {
       const tmpl = tmplMap[bid];
       if (!tmpl) return { x: bp.x, y: bp.y, name: bid };
       const info = BUILDING_FLAVORS[bid];
-      // Position label at center-top of building
-      const ent = Array.isArray(tmpl.entrance) ? tmpl.entrance[0] : tmpl.entrance;
-      const lx = ent ? bp.x + ent.x : bp.x + Math.floor(tmpl.width / 2);
-      const ly = ent ? bp.y + ent.y - 1 : bp.y - 1;
+      // Position label right below the NPC
+      const npc = tmpl.npc;
+      const lx = npc ? bp.x + npc.x : bp.x + Math.floor(tmpl.width / 2);
+      const ly = npc ? bp.y + npc.y + 1 : bp.y + 1;
       return {
         x: lx,
         y: ly,

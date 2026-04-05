@@ -231,6 +231,11 @@ function exploreNext(): void {
     autoExploring = false;
     return;
   }
+  if (state.currentDungeon === "crucible") {
+    aeMsg("Auto-explore is not available in the Crucible.");
+    autoExploring = false;
+    return;
+  }
 
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];

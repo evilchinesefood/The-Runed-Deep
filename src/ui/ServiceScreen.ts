@@ -132,26 +132,9 @@ export function createServiceScreen(
         break;
       }
       case "crucible": {
+        // Go directly to crucible menu
+        onUpdate({ ...state, screen: "crucible-menu" });
         content = createPanel("Services");
-        content.appendChild(
-          el(
-            "div",
-            {
-              color: "#c9a84c",
-              padding: "12px",
-              textAlign: "center",
-              fontStyle: "italic",
-            },
-            "A battle-scarred arena where warriors test their mettle against endless waves of enemies.",
-          ),
-        );
-        const crucBtn = createButton("Enter the Crucible");
-        crucBtn.style.cssText +=
-          "display:block;width:100%;padding:12px;font-size:14px;margin-top:12px;";
-        crucBtn.addEventListener("click", () => {
-          onUpdate({ ...state, screen: "crucible-menu" });
-        });
-        content.appendChild(crucBtn);
         break;
       }
       case "statue-of-fortune":
