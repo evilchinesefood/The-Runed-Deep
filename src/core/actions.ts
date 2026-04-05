@@ -46,6 +46,7 @@ import {
   processEnterRift,
   processExitRift as _processExitRift,
   processRerollRift,
+  processAddRiftModifier,
   processRiftComplete,
 } from "../systems/rift/RiftActions";
 import {
@@ -205,6 +206,8 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return _processExitRift(state, teleportToTown);
     case "rerollRift":
       return processRerollRift(state);
+    case "addRiftModifier":
+      return processAddRiftModifier(state);
     case "riftComplete":
       return processRiftComplete(state);
     case "enterCrucible":

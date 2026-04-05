@@ -275,6 +275,7 @@ export interface RiftOffering {
   seed: number;
   modifiers: RiftModifier[];
   rerollCount: number;
+  addCount?: number;
 }
 
 export interface RiftState {
@@ -379,6 +380,7 @@ export type GameAction =
   | { type: "enterRift" }
   | { type: "exitRift" }
   | { type: "rerollRift" }
+  | { type: "addRiftModifier" }
   | { type: "openRiftMenu" }
   | { type: "riftComplete" }
   | { type: "enterCrucible" }

@@ -1,5 +1,5 @@
 import type { GameState, Message } from "../../core/types";
-import { rollRiftModifiers, getRiftShardReward } from "./RiftModifiers";
+import { rollRiftModifiers, getRiftShardReward, RIFT_MODIFIERS } from "./RiftModifiers";
 import { generateRiftFloor } from "./RiftGen";
 import { trackRiftComplete } from "../Achievements";
 
@@ -126,6 +126,49 @@ export function processRerollRift(state: GameState): GameState {
       ...state.messages,
       {
         text: "The rift shifts... new modifiers appear.",
+        severity: "system" as const,
+        turn: state.turn,
+      },
+    ],
+  };
+}
+
+const ADD_COSTS = [10, 20, 50, 100];
+function getAddCost(addCount: number): number {
+  return ADD_COSTS[Math.min(addCount, ADD_COSTS.length - 1)];
+}
+export { getAddCost as getRiftAddCost };
+
+export function processAddRiftModifier(state: GameState): GameState {
+  const offering = state.riftOffering;
+  if (!offering)
+    return addMessage(state, "No rift offering available.", "system");
+
+  const addCount = offering.addCount ?? 0;
+  const cost = getAddCost(addCount);
+  if (state.hero.gold < cost)
+    return addMessage(state, `Not enough gold. Costs ${cost}g.`, "system");
+
+  const existing = new Set(offering.modifiers.map((m) => m.id));
+  const pool = RIFT_MODIFIERS.filter((m) => !existing.has(m.id));
+  if (pool.length === 0)
+    return addMessage(state, "All modifiers are already active.", "system");
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const newOffering = {
+    ...offering,
+    modifiers: [...offering.modifiers, pick],
+    addCount: addCount + 1,
+  };
+
+  return {
+    ...state,
+    hero: { ...state.hero, gold: state.hero.gold - cost },
+    riftOffering: newOffering,
+    messages: [
+      ...state.messages,
+      {
+        text: `${pick.name} has been added to the offering.`,
         severity: "system" as const,
         turn: state.turn,
       },

@@ -3,7 +3,8 @@
 // ============================================================
 
 import type { GameState, GameAction, RiftModifier } from "../core/types";
-import { getRiftShardReward } from "../systems/rift/RiftModifiers";
+import { getRiftShardReward, RIFT_MODIFIERS } from "../systems/rift/RiftModifiers";
+import { getRiftAddCost } from "../systems/rift/RiftActions";
 import {
   createScreen,
   createTitleBar,
@@ -112,6 +113,7 @@ export function createRiftMenuScreen(
       overflowY: "auto",
     });
     for (const mod of mods) list.appendChild(modRow(mod));
+    if (list.lastElementChild) (list.lastElementChild as HTMLElement).style.borderBottom = "none";
     panel.appendChild(list);
   }
 
@@ -180,6 +182,20 @@ export function createRiftMenuScreen(
     );
   }
   btnRow.appendChild(rerollBtn);
+
+  const addCount = offering?.addCount ?? 0;
+  const addCost = getRiftAddCost(addCount);
+  const canAdd = state.hero.gold >= addCost && mods.length < RIFT_MODIFIERS.length;
+  const addBtn = createButton(`Add Offering (${addCost}g)`);
+  addBtn.disabled = !canAdd;
+  addBtn.style.opacity = canAdd ? "1" : "0.4";
+  addBtn.style.cursor = canAdd ? "pointer" : "not-allowed";
+  if (canAdd) {
+    addBtn.addEventListener("click", () =>
+      onAction({ type: "addRiftModifier" } as any),
+    );
+  }
+  btnRow.appendChild(addBtn);
 
   const leaveBtn = createButton("Leave");
   leaveBtn.addEventListener("click", onClose);
