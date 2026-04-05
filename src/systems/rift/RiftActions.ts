@@ -78,9 +78,14 @@ export function processExitRift(
   state: GameState,
   teleportToTown: (s: GameState) => GameState,
 ): GameState {
+  // Roll a new offering for the next rift
+  const seed = Date.now();
+  const newOffering = { seed, modifiers: rollRiftModifiers(seed), rerollCount: 0 };
   return {
     ...teleportToTown({ ...state, currentFloor: state.returnFloor || 1 }),
     activeRift: null,
+    riftOffering: newOffering,
+    screen: "game",
     messages: [
       ...state.messages,
       {
