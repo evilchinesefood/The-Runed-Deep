@@ -142,7 +142,7 @@ export class MapRenderer {
   }
 
   /** Set entity cell class — supports multi-layer sprites joined by '|'. */
-  private setEntityClass(entity: HTMLElement, ec: string): void {
+  private setEntityClass(entity: HTMLElement, ec: string, isPlayer = false): void {
     while (entity.firstChild) entity.removeChild(entity.firstChild);
     if (ec.indexOf("|") === -1) {
       entity.className = ec;
@@ -151,7 +151,7 @@ export class MapRenderer {
       for (const cls of ec.split("|")) {
         const layer = document.createElement("div");
         // Player overlay sprites need the .player base class for background-size
-        layer.className = `player ${cls}`;
+        layer.className = isPlayer ? `player ${cls}` : cls;
         layer.style.cssText =
           "position:absolute;top:0;left:0;width:32px;height:32px;";
         entity.appendChild(layer);
@@ -333,7 +333,8 @@ export class MapRenderer {
           gtrap = false;
         let ec = "",
           ed = "none",
-          eo = "";
+          eo = "",
+          eIsPlayer = false;
 
         // Out of bounds
         if (
@@ -468,6 +469,7 @@ export class MapRenderer {
                 ec = heroSprite;
                 ed = "block";
                 eo = "1";
+                eIsPlayer = true;
               } else {
                 const monster = monsterAt.get(key);
                 if (monster) {
@@ -522,7 +524,7 @@ export class MapRenderer {
           cell.ground.style.filter = gf;
           if (gtrap) cell.ground.classList.add("trap-revealed");
           else cell.ground.classList.remove("trap-revealed");
-          this.setEntityClass(cell.entity, ec);
+          this.setEntityClass(cell.entity, ec, eIsPlayer);
           cell.entity.style.display = ed;
           cell.entity.style.opacity = eo;
         } else {
@@ -580,7 +582,7 @@ export class MapRenderer {
             p.gtrap = gtrap;
           }
           if (p.ec !== ec) {
-            this.setEntityClass(cell.entity, ec);
+            this.setEntityClass(cell.entity, ec, eIsPlayer);
             p.ec = ec;
           }
           if (p.ed !== ed) {

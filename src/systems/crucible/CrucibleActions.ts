@@ -82,28 +82,23 @@ export function processCrucibleNextWave(state: GameState): GameState {
     state.difficulty,
   );
 
-  const reward = getWaveReward(nextWave);
+  // Rewards granted on wave clear, not wave start
   trackCrucibleWave(nextWave);
   const newCrucible: import("../../core/types").CrucibleState = {
     wave: nextWave,
-    shardsEarned: crucible.shardsEarned + reward.shards,
-    goldEarned: crucible.goldEarned + reward.gold,
+    shardsEarned: crucible.shardsEarned,
+    goldEarned: crucible.goldEarned,
   };
 
   return {
     ...state,
     activeCrucible: newCrucible,
-    hero: {
-      ...state.hero,
-      runeShards: state.hero.runeShards + reward.shards,
-      gold: state.hero.gold + reward.gold,
-    },
     floors: { ...state.floors, [floorKey]: updatedFloor },
     screen: "game",
     messages: [
       ...state.messages,
       {
-        text: `Wave ${nextWave} begins! (+${reward.shards} shards, +${reward.gold}g)`,
+        text: `Wave ${nextWave} begins!`,
         severity: "important" as const,
         turn: state.turn,
       },

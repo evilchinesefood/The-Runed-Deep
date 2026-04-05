@@ -157,18 +157,20 @@ export function castSpell(
         echoValid = false;
       }
     }
-    if (echoValid) newState = resolveSpellEffect(newState, spell, direction, target);
-    newState = {
-      ...newState,
-      messages: [
-        ...newState.messages,
-        {
-          text: `Echo rune triggers! ${spell.name} casts again!`,
-          severity: "important" as const,
-          turn: newState.turn,
-        },
+    if (echoValid) {
+      newState = resolveSpellEffect(newState, spell, direction, target);
+      newState = {
+        ...newState,
+        messages: [
+          ...newState.messages,
+          {
+            text: `Echo rune triggers! ${spell.name} casts again!`,
+            severity: "important" as const,
+            turn: newState.turn,
+          },
       ],
     };
+    }
   }
 
   // Casting consumes a turn

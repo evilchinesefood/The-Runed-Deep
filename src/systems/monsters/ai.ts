@@ -4,6 +4,8 @@ import type {
   Vector2,
   Monster,
   Message,
+  PlacedItem,
+  Hero,
 } from "../../core/types";
 import { monsterAttacksPlayer } from "../combat/combat";
 import { queueAnimation } from "../../rendering/animation-queue";
@@ -17,6 +19,55 @@ import { createMonster } from "./spawning";
 import { xpRequiredForLevel } from "../character/leveling";
 import { ITEM_BY_ID } from "../../data/items";
 import { getModifierFlags } from "../rift/ModifierFlags";
+
+// ── Mutable turn context (batch state mutations) ───────────
+
+/** Mutable working context used during processAllMonsterTurns.
+ *  All monster AI mutates this directly instead of copying GameState. */
+interface TurnCtx {
+  monsters: Monster[];
+  messages: Message[];
+  hero: Hero;
+  items: PlacedItem[];
+  decals: Vector2[];
+  floor: Floor; // reference for tiles/dimensions (read-only during AI)
+  floorKey: string;
+  state: GameState; // base state (hero/messages updated via ctx, floors rebuilt at end)
+  occ: Set<string>;
+}
+
+/** Build a snapshot GameState from the mutable context (for combat calls). */
+function ctxToState(ctx: TurnCtx): GameState {
+  const floor: Floor = {
+    ...ctx.floor,
+    monsters: ctx.monsters,
+    items: ctx.items,
+    decals: ctx.decals,
+  };
+  return {
+    ...ctx.state,
+    hero: ctx.hero,
+    messages: ctx.messages,
+    floors: { ...ctx.state.floors, [ctx.floorKey]: floor },
+  };
+}
+
+/** Extract mutable fields back from a GameState returned by combat. */
+function stateToCtx(ctx: TurnCtx, s: GameState): void {
+  const f = s.floors[ctx.floorKey];
+  if (f) {
+    ctx.monsters = f.monsters;
+    ctx.items = f.items;
+    ctx.decals = f.decals;
+  }
+  ctx.hero = s.hero;
+  ctx.messages = s.messages;
+  // Capture screen changes (e.g., victory on Surtur thorns kill)
+  ctx.state = { ...ctx.state, screen: s.screen };
+  // Rebuild occupied set since combat may have removed/moved monsters
+  ctx.occ.clear();
+  for (const m of ctx.monsters) ctx.occ.add(`${m.position.x},${m.position.y}`);
+}
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -77,28 +128,23 @@ function canMoveTo(
   return false;
 }
 
-/** True if no other monster occupies (x,y). Uses Set if provided, falls back to linear scan. */
-function noMonster(
-  floor: Floor,
+/** True if no other monster occupies (x,y). */
+function noMonsterCtx(
+  monsters: Monster[],
   x: number,
   y: number,
   excludeIdx: number,
-  occupied?: Set<string>,
+  occ: Set<string>,
 ): boolean {
-  if (occupied) {
-    const k = `${x},${y}`;
-    const own = floor.monsters[excludeIdx];
-    if (own && own.position.x === x && own.position.y === y) return true;
-    return !occupied.has(k);
-  }
-  return !floor.monsters.some(
-    (m, i) => i !== excludeIdx && m.position.x === x && m.position.y === y,
-  );
+  const k = `${x},${y}`;
+  const own = monsters[excludeIdx];
+  if (own && own.position.x === x && own.position.y === y) return true;
+  return !occ.has(k);
 }
 
-function buildOccupied(floor: Floor): Set<string> {
+function buildOccupied(monsters: Monster[]): Set<string> {
   const s = new Set<string>();
-  for (const m of floor.monsters) s.add(`${m.position.x},${m.position.y}`);
+  for (const m of monsters) s.add(`${m.position.x},${m.position.y}`);
   return s;
 }
 
@@ -147,6 +193,15 @@ function directionTo(
 }
 
 function addMsg(
+  ctx: TurnCtx,
+  text: string,
+  severity: Message["severity"] = "combat",
+): void {
+  ctx.messages.push({ text, severity, turn: ctx.state.turn });
+}
+
+/** State-based addMsg for exported functions called from combat.ts. */
+function addMsgState(
   state: GameState,
   text: string,
   severity: Message["severity"] = "combat",
@@ -157,7 +212,8 @@ function addMsg(
   };
 }
 
-function updateMonster(
+/** State-based updateMonster for exported functions called from combat.ts. */
+function updateMonsterState(
   state: GameState,
   floorKey: string,
   idx: number,
@@ -175,21 +231,12 @@ function updateMonster(
 
 // ── Movement helpers ─────────────────────────────────────────
 
-/** Move monster toward a target. Returns new state. */
-function moveToward(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  target: Vector2,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
+/** Move monster toward a target. Mutates ctx in place. */
+function moveToward(ctx: TurnCtx, idx: number, target: Vector2): void {
+  const monster = ctx.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
   const flying = monster.abilities.includes("flying");
-  const occ = occupied ?? buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = Infinity;
@@ -197,8 +244,8 @@ function moveToward(
   for (const d of ALL_DIRS) {
     const nx = x + d.x,
       ny = y + d.y;
-    if (!canMoveTo(floor, nx, ny, phasing, flying)) continue;
-    if (!noMonster(floor, nx, ny, idx, occ)) continue;
+    if (!canMoveTo(ctx.floor, nx, ny, phasing, flying)) continue;
+    if (!noMonsterCtx(ctx.monsters, nx, ny, idx, ctx.occ)) continue;
     if (nx === target.x && ny === target.y) continue;
 
     const dist = manhattan({ x: nx, y: ny }, target);
@@ -208,30 +255,18 @@ function moveToward(
     }
   }
 
-  if (!bestPos) return state;
-  // Update occupied set
-  if (occupied) {
-    occupied.delete(`${x},${y}`);
-    occupied.add(`${bestPos.x},${bestPos.y}`);
-  }
-  return updateMonster(state, floorKey, idx, { ...monster, position: bestPos });
+  if (!bestPos) return;
+  ctx.occ.delete(`${x},${y}`);
+  ctx.occ.add(`${bestPos.x},${bestPos.y}`);
+  ctx.monsters[idx] = { ...monster, position: bestPos };
 }
 
-/** Move monster away from a target (flee or ranged retreat). */
-function moveAwayFrom(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  threat: Vector2,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
+/** Move monster away from a target (flee or ranged retreat). Mutates ctx. */
+function moveAwayFrom(ctx: TurnCtx, idx: number, threat: Vector2): void {
+  const monster = ctx.monsters[idx];
   const { x, y } = monster.position;
   const phasing = monster.abilities.includes("phase-through-walls");
   const flying = monster.abilities.includes("flying");
-  const occ = occupied ?? buildOccupied(floor);
 
   let bestPos: Vector2 | null = null;
   let bestDist = -Infinity;
@@ -239,8 +274,8 @@ function moveAwayFrom(
   for (const d of ALL_DIRS) {
     const nx = x + d.x,
       ny = y + d.y;
-    if (!canMoveTo(floor, nx, ny, phasing, flying)) continue;
-    if (!noMonster(floor, nx, ny, idx, occ)) continue;
+    if (!canMoveTo(ctx.floor, nx, ny, phasing, flying)) continue;
+    if (!noMonsterCtx(ctx.monsters, nx, ny, idx, ctx.occ)) continue;
 
     const dist = manhattan({ x: nx, y: ny }, threat);
     if (dist > bestDist) {
@@ -249,34 +284,26 @@ function moveAwayFrom(
     }
   }
 
-  if (!bestPos) return state;
-  // Update occupied set
-  if (occupied) {
-    occupied.delete(`${x},${y}`);
-    occupied.add(`${bestPos.x},${bestPos.y}`);
-  }
-  return updateMonster(state, floorKey, idx, { ...monster, position: bestPos });
+  if (!bestPos) return;
+  ctx.occ.delete(`${x},${y}`);
+  ctx.occ.add(`${bestPos.x},${bestPos.y}`);
+  ctx.monsters[idx] = { ...monster, position: bestPos };
 }
 
-/** Move monster to stay at a preferred distance range from the target. */
+/** Move monster to stay at a preferred distance range from the target. Mutates ctx. */
 function moveToRange(
-  state: GameState,
-  floorKey: string,
+  ctx: TurnCtx,
   idx: number,
   target: Vector2,
   minDist: number,
   maxDist: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
+): void {
+  const monster = ctx.monsters[idx];
   const dist = manhattan(monster.position, target);
 
-  if (dist < minDist)
-    return moveAwayFrom(state, floorKey, idx, target, occupied);
-  if (dist > maxDist) return moveToward(state, floorKey, idx, target, occupied);
-  return state; // already in range, stay put
+  if (dist < minDist) moveAwayFrom(ctx, idx, target);
+  else if (dist > maxDist) moveToward(ctx, idx, target);
+  // else: already in range, stay put
 }
 
 // ── Summoning ────────────────────────────────────────────────
@@ -289,48 +316,35 @@ const SUMMON_TYPE_MAP: Record<string, string[]> = {
 };
 
 function spawnNearSummoner(
-  state: GameState,
-  floorKey: string,
+  ctx: TurnCtx,
   summonerIdx: number,
   ability: string,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const summoner = floor.monsters[summonerIdx];
+): void {
+  const summoner = ctx.monsters[summonerIdx];
 
-  // Count already-summoned monsters (track by summonerId property — we use a simple approach:
-  // count all living monsters with templateIds matching summon pools belonging to this summoner.
-  // For simplicity, cap total floor monsters from this summoner heuristically.)
   const summonedTemplateIds =
     SUMMON_TYPE_MAP[ability] ?? SUMMON_TYPE_MAP["summon-monster"];
-  const existingSummoned = floor.monsters.filter(
+  const existingSummoned = ctx.monsters.filter(
     (m, i) => i !== summonerIdx && summonedTemplateIds.includes(m.templateId),
   ).length;
-  if (existingSummoned >= 3) return state;
+  if (existingSummoned >= 3) return;
 
-  const depth = state.currentFloor;
+  const depth = ctx.state.currentFloor;
   const available = getMonstersForDepth(depth).filter((t) =>
     summonedTemplateIds.includes(t.id),
   );
-  if (available.length === 0) return state;
+  if (available.length === 0) return;
 
   const count = rollRange(1, 2);
-  let cur = state;
   let spawned = 0;
 
   for (const d of ALL_DIRS) {
     if (spawned >= count) break;
     const nx = summoner.position.x + d.x;
     const ny = summoner.position.y + d.y;
-    if (!walkable(floor, nx, ny)) continue;
-
-    const curFloor = cur.floors[floorKey];
-    if (!curFloor) break;
-    const occupied = curFloor.monsters.some(
-      (m) => m.position.x === nx && m.position.y === ny,
-    );
-    if (occupied) continue;
-    if (cur.hero.position.x === nx && cur.hero.position.y === ny) continue;
+    if (!walkable(ctx.floor, nx, ny)) continue;
+    if (ctx.occ.has(`${nx},${ny}`)) continue;
+    if (ctx.hero.position.x === nx && ctx.hero.position.y === ny) continue;
 
     const template = available[Math.floor(Math.random() * available.length)];
     const newMonster = createMonster(
@@ -340,21 +354,14 @@ function spawnNearSummoner(
       Math.random,
     );
 
-    const newMonsters = [...curFloor.monsters, newMonster];
-    cur = {
-      ...cur,
-      floors: {
-        ...cur.floors,
-        [floorKey]: { ...curFloor, monsters: newMonsters },
-      },
-    };
+    ctx.monsters.push(newMonster);
+    ctx.occ.add(`${nx},${ny}`);
     spawned++;
   }
 
   if (spawned > 0) {
-    cur = addMsg(cur, `${summoner.name} summons reinforcements!`, "important");
+    addMsg(ctx, `${summoner.name} summons reinforcements!`, "important");
   }
-  return cur;
 }
 
 // ── Ranged attack ────────────────────────────────────────────
@@ -363,18 +370,21 @@ function spawnNearSummoner(
  * Handles a monster's ranged or spell attack on the hero.
  * Queues animations and applies damage.
  */
-export function monsterRangedAttack(
-  state: GameState,
+/** Ranged/spell attack. Mutates ctx (hero HP, messages, monsters for summon). */
+function monsterRangedAttack(
+  ctx: TurnCtx,
   monster: Monster,
   ability: string,
-): GameState {
-  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-
-  const hero = state.hero;
+): void {
+  const hero = ctx.hero;
   const dir = directionTo(monster.position, hero.position);
-  const depth = state.currentFloor;
+  const depth = ctx.state.currentFloor;
+
+  // Helper to apply ranged damage
+  const applyDmg = (dmg: number, msg: string) => {
+    ctx.hero = { ...ctx.hero, hp: Math.max(0, ctx.hero.hp - dmg) };
+    addMsg(ctx, msg);
+  };
 
   // ── Spell bolts ──────────────────────────────────────────
   if (
@@ -387,24 +397,21 @@ export function monsterRangedAttack(
     const elem = spellId.replace("-bolt", "") as keyof typeof hero.resistances;
     const resist = (hero.resistances[elem] ?? 0) / 100;
     const finalDmg = Math.max(1, Math.round(dmg * (1 - resist)));
-
-    const anims = buildBoltAnimation(
-      spellId,
-      monster.position,
-      dir,
-      12,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBoltAnimation(
+        spellId,
+        monster.position,
+        dir,
+        12,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-
-    const newHp = Math.max(0, hero.hp - finalDmg);
-    let s = addMsg(
-      state,
+    applyDmg(
+      finalDmg,
       `${monster.name} casts a ${spellId.replace("-", " ")} at you for ${finalDmg} damage!`,
     );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    return;
   }
 
   // ── Spell balls ──────────────────────────────────────────
@@ -415,64 +422,56 @@ export function monsterRangedAttack(
     const dmg = rollRange(8, 20) + Math.floor(depth / 2);
     const resist = (hero.resistances[elem] ?? 0) / 100;
     const finalDmg = Math.max(1, Math.round(dmg * (1 - resist)));
-
-    const anims = buildBallAnimation(
-      spellId,
-      monster.position,
-      dir,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBallAnimation(
+        spellId,
+        monster.position,
+        dir,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-
-    const newHp = Math.max(0, hero.hp - finalDmg);
-    let s = addMsg(
-      state,
+    applyDmg(
+      finalDmg,
       `${monster.name} hurls a ${elem} ball at you for ${finalDmg} damage!`,
     );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    return;
   }
 
   // ── Physical ranged ──────────────────────────────────────
   if (ability === "throw-boulder") {
     const dmg = rollRange(6, 14);
-    const anims = buildBoltAnimation(
-      "magic-arrow",
-      monster.position,
-      dir,
-      10,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBoltAnimation(
+        "magic-arrow",
+        monster.position,
+        dir,
+        10,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-    const newHp = Math.max(0, hero.hp - dmg);
-    let s = addMsg(
-      state,
-      `${monster.name} hurls a boulder at you for ${dmg} damage!`,
-    );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    applyDmg(dmg, `${monster.name} hurls a boulder at you for ${dmg} damage!`);
+    return;
   }
 
   if (ability === "tail-spikes") {
     const dmg = rollRange(4, 10);
-    const anims = buildBoltAnimation(
-      "magic-arrow",
-      monster.position,
-      dir,
-      8,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBoltAnimation(
+        "magic-arrow",
+        monster.position,
+        dir,
+        8,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-    const newHp = Math.max(0, hero.hp - dmg);
-    let s = addMsg(
-      state,
+    applyDmg(
+      dmg,
       `${monster.name} fires tail spikes at you for ${dmg} damage!`,
     );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    return;
   }
 
   // ── AoE ball ─────────────────────────────────────────────
@@ -480,21 +479,20 @@ export function monsterRangedAttack(
     const dmg = rollRange(6, 14);
     const resist = (hero.resistances.cold ?? 0) / 100;
     const finalDmg = Math.max(1, Math.round(dmg * (1 - resist)));
-    const anims = buildBallAnimation(
-      "cold-ball",
-      monster.position,
-      dir,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBallAnimation(
+        "cold-ball",
+        monster.position,
+        dir,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-    const newHp = Math.max(0, hero.hp - finalDmg);
-    let s = addMsg(
-      state,
+    applyDmg(
+      finalDmg,
       `${monster.name} hurls an ice ball at you for ${finalDmg} damage!`,
     );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    return;
   }
 
   // ── Breath weapons ───────────────────────────────────────
@@ -512,22 +510,21 @@ export function monsterRangedAttack(
           : elem === "lightning"
             ? "lightning-bolt"
             : "acid-bolt";
-    const anims = buildBoltAnimation(
-      spellId,
-      monster.position,
-      dir,
-      12,
-      hero.position,
-      floor,
+    queueAnimation(
+      buildBoltAnimation(
+        spellId,
+        monster.position,
+        dir,
+        12,
+        hero.position,
+        ctx.floor,
+      ),
     );
-    queueAnimation(anims);
-    const newHp = Math.max(0, hero.hp - finalDmg);
-    let s = addMsg(
-      state,
+    applyDmg(
+      finalDmg,
       `${monster.name} breathes ${elem} at you for ${finalDmg} damage!`,
     );
-    s = { ...s, hero: { ...s.hero, hp: newHp } };
-    return s;
+    return;
   }
 
   // ── Summon abilities (used by summoner AI) ───────────────
@@ -535,15 +532,10 @@ export function monsterRangedAttack(
     /^summon-(monster|undead|devil|fire-giant)$/,
   );
   if (summonMatch) {
-    const freshFloor = state.floors[floorKey];
-    const floorIdx = freshFloor
-      ? freshFloor.monsters.findIndex((m) => m.id === monster.id)
-      : -1;
-    if (floorIdx < 0) return state;
-    return spawnNearSummoner(state, floorKey, floorIdx, ability);
+    const floorIdx = ctx.monsters.findIndex((m) => m.id === monster.id);
+    if (floorIdx < 0) return;
+    spawnNearSummoner(ctx, floorIdx, ability);
   }
-
-  return state;
 }
 
 // ── On-hit ability processing ────────────────────────────────
@@ -576,7 +568,11 @@ export function processMonsterAbility(
               { id: "poisoned", name: "Poisoned", turnsRemaining: 5 },
             ];
             s = { ...s, hero: { ...s.hero, activeEffects: effects } };
-            s = addMsg(s, `${monster.name}'s attack poisons you!`, "important");
+            s = addMsgState(
+              s,
+              `${monster.name}'s attack poisons you!`,
+              "important",
+            );
           }
         }
         break;
@@ -601,7 +597,11 @@ export function processMonsterAbility(
               s.statueUpgrades,
             );
             s = { ...s, hero };
-            s = addMsg(s, `${monster.name} drains your ${attr}!`, "important");
+            s = addMsgState(
+              s,
+              `${monster.name} drains your ${attr}!`,
+              "important",
+            );
           }
         }
         break;
@@ -622,7 +622,7 @@ export function processMonsterAbility(
             s.statueUpgrades,
           );
           s = { ...s, hero };
-          s = addMsg(
+          s = addMsgState(
             s,
             `${monster.name} drains your life force! You lose a level!`,
             "important",
@@ -649,10 +649,10 @@ export function processMonsterAbility(
             if (idx >= 0) {
               const m = floor.monsters[idx];
               const newHp = Math.min(m.maxHp, m.hp + heal);
-              s = updateMonster(s, floorKey, idx, { ...m, hp: newHp });
+              s = updateMonsterState(s, floorKey, idx, { ...m, hp: newHp });
             }
           }
-          s = addMsg(
+          s = addMsgState(
             s,
             `${monster.name} drains ${heal} HP from you! (${newHeroHp}/${s.hero.maxHp} HP)`,
           );
@@ -664,7 +664,11 @@ export function processMonsterAbility(
         if (Math.random() < 0.5 && s.hero.gold > 0) {
           const stolen = Math.min(s.hero.gold, rollRange(10, 50));
           s = { ...s, hero: { ...s.hero, gold: s.hero.gold - stolen } };
-          s = addMsg(s, `${monster.name} steals ${stolen} gold!`, "important");
+          s = addMsgState(
+            s,
+            `${monster.name} steals ${stolen} gold!`,
+            "important",
+          );
         }
         break;
       }
@@ -682,7 +686,7 @@ export function processMonsterAbility(
           const dmg = Math.max(1, Math.round(rawDmg * (1 - resist)));
           const newHp = Math.max(0, s.hero.hp - dmg);
           s = { ...s, hero: { ...s.hero, hp: newHp } };
-          s = addMsg(
+          s = addMsgState(
             s,
             `${monster.name}'s ${elem} touch deals ${dmg} extra damage!`,
           );
@@ -701,7 +705,7 @@ export function processMonsterAbility(
               { id: "paralyzed", name: "Paralyzed", turnsRemaining: 3 },
             ];
             s = { ...s, hero: { ...s.hero, activeEffects: effects } };
-            s = addMsg(
+            s = addMsgState(
               s,
               `The ${monster.name}'s attack paralyzes you!`,
               "important",
@@ -720,7 +724,7 @@ export function processMonsterAbility(
               { id: "blinded", name: "Blinded", turnsRemaining: 8 },
             ];
             s = { ...s, hero: { ...s.hero, activeEffects: effects } };
-            s = addMsg(s, `The ${monster.name} blinds you!`, "important");
+            s = addMsgState(s, `The ${monster.name} blinds you!`, "important");
           }
         }
         break;
@@ -735,19 +739,19 @@ export function processMonsterAbility(
   return s;
 }
 
+// ── Combat bridge ───────────────────────────────────────────
+
+/** Run monsterAttacksPlayer through ctx, syncing state before/after. */
+function ctxMeleeAttack(ctx: TurnCtx, monster: Monster): void {
+  const s = monsterAttacksPlayer(ctxToState(ctx), monster);
+  stateToCtx(ctx, s);
+}
+
 // ── Per-AI-type turn logic ───────────────────────────────────
 
-function processMelee(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  detectRange: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  let monster = floor.monsters[idx];
-  const hero = state.hero;
+function processMelee(ctx: TurnCtx, idx: number, detectRange: number): void {
+  let monster = ctx.monsters[idx];
+  const hero = ctx.hero;
   const dist = chebyshev(monster.position, hero.position);
 
   // Process alert abilities (e.g. War Drummer)
@@ -755,14 +759,14 @@ function processMelee(
     monster.abilities.includes("alert-radius") ||
     monster.abilities.includes("alert-floor")
   ) {
-    state = processAlertAbilities(state, floorKey, idx, monster, detectRange);
+    processAlertAbilities(ctx, idx, monster, detectRange);
   }
 
   // Tick flee timer
   if (monster.fleeing > 0) {
-    monster = { ...monster, fleeing: monster.fleeing - 1 };
-    let s = updateMonster(state, floorKey, idx, monster);
-    return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
+    ctx.monsters[idx] = { ...monster, fleeing: monster.fleeing - 1 };
+    moveAwayFrom(ctx, idx, hero.position);
+    return;
   }
 
   // Charge ability: rush the hero from 2-4 tiles away in a straight line
@@ -770,7 +774,7 @@ function processMelee(
     const dx = hero.position.x - monster.position.x;
     const dy = hero.position.y - monster.position.y;
     const isLine = dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy);
-    if (isLine && hasLineOfSight(floor, monster.position, hero.position)) {
+    if (isLine && hasLineOfSight(ctx.floor, monster.position, hero.position)) {
       const stepX = dx === 0 ? 0 : dx > 0 ? 1 : -1;
       const stepY = dy === 0 ? 0 : dy > 0 ? 1 : -1;
       const chargePos = {
@@ -778,16 +782,15 @@ function processMelee(
         y: hero.position.y - stepY,
       };
       if (
-        walkable(floor, chargePos.x, chargePos.y) &&
-        noMonster(floor, chargePos.x, chargePos.y, idx)
+        walkable(ctx.floor, chargePos.x, chargePos.y) &&
+        noMonsterCtx(ctx.monsters, chargePos.x, chargePos.y, idx, ctx.occ)
       ) {
-        // Move monster to charge position (with original damage — don't persist the boost)
-        let s = updateMonster(state, floorKey, idx, {
-          ...monster,
-          position: chargePos,
-        });
-        s = addMsg(s, `The ${monster.name} charges!`, "combat");
-        // Attack with a temporary boosted copy (not written back to state)
+        // Move monster to charge position
+        ctx.occ.delete(`${monster.position.x},${monster.position.y}`);
+        ctx.occ.add(`${chargePos.x},${chargePos.y}`);
+        ctx.monsters[idx] = { ...monster, position: chargePos };
+        addMsg(ctx, `The ${monster.name} charges!`, "combat");
+        // Attack with a temporary boosted copy (not written back)
         const boosted = {
           ...monster,
           position: chargePos,
@@ -796,21 +799,19 @@ function processMelee(
             Math.floor(monster.damage[1] * 1.5),
           ] as [number, number],
         };
-        return monsterAttacksPlayer(s, boosted);
+        ctxMeleeAttack(ctx, boosted);
+        return;
       }
     }
   }
 
   if (dist <= 1) {
-    // Attack
-    let s = monsterAttacksPlayer(state, monster);
+    ctxMeleeAttack(ctx, monster);
     // Check flee trigger at low HP (only once per monster)
     // Re-find by ID since thorns kills may have shifted indices
-    const updatedFloor = s.floors[floorKey];
-    const newIdx =
-      updatedFloor?.monsters.findIndex((m) => m.id === monster.id) ?? -1;
-    if (updatedFloor && newIdx >= 0) {
-      const updatedMonster = updatedFloor.monsters[newIdx];
+    const newIdx = ctx.monsters.findIndex((m) => m.id === monster.id);
+    if (newIdx >= 0) {
+      const updatedMonster = ctx.monsters[newIdx];
       if (
         updatedMonster &&
         !updatedMonster.hasFled &&
@@ -818,14 +819,14 @@ function processMelee(
         Math.random() < 0.4
       ) {
         const fleeTurns = rollRange(5, 10);
-        s = updateMonster(s, floorKey, newIdx, {
+        ctx.monsters[newIdx] = {
           ...updatedMonster,
           fleeing: fleeTurns,
           hasFled: true,
-        });
+        };
       }
     }
-    return s;
+    return;
   }
 
   const inRange = manhattan(monster.position, hero.position) <= detectRange;
@@ -837,35 +838,26 @@ function processMelee(
       Math.random() < 0.4
     ) {
       const fleeTurns = rollRange(5, 10);
-      let s = updateMonster(state, floorKey, idx, {
+      ctx.monsters[idx] = {
         ...monster,
         fleeing: fleeTurns,
         hasFled: true,
-      });
-      return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
+      };
+      moveAwayFrom(ctx, idx, hero.position);
+      return;
     }
-    return moveToward(state, floorKey, idx, hero.position, occupied);
+    moveToward(ctx, idx, hero.position);
   }
-
-  return state;
 }
 
-function processRanged(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  detectRange: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
-  const hero = state.hero;
+function processRanged(ctx: TurnCtx, idx: number, detectRange: number): void {
+  const monster = ctx.monsters[idx];
+  const hero = ctx.hero;
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
   // Silence rift modifier: suppress cast/summon spells only
-  const silenced = getModifierFlags(state).silence;
+  const silenced = getModifierFlags(ctx.state).silence;
 
   const rangedAbilities = monster.abilities.filter(
     (a) =>
@@ -877,83 +869,67 @@ function processRanged(
   );
 
   const hasRanged = rangedAbilities.length > 0;
-  const los = hasLineOfSight(floor, monster.position, hero.position);
+  const los = hasLineOfSight(ctx.floor, monster.position, hero.position);
 
   // Melee fallback when adjacent
   if (cDist <= 1) {
-    return monsterAttacksPlayer(state, monster);
+    ctxMeleeAttack(ctx, monster);
+    return;
   }
 
   // Ranged attack if in range and LOS — stand and fire, no retreat
   if (hasRanged && los && dist <= 8) {
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
-    return monsterRangedAttack(state, monster, ability);
+    monsterRangedAttack(ctx, monster, ability);
+    return;
   }
 
   // Close distance to get into firing range
   if (dist <= detectRange || monster.alerted) {
-    return moveToward(state, floorKey, idx, hero.position, occupied);
+    moveToward(ctx, idx, hero.position);
   }
-
-  return state;
 }
 
-function processCaster(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  detectRange: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
-  const hero = state.hero;
+function processCaster(ctx: TurnCtx, idx: number, detectRange: number): void {
+  const monster = ctx.monsters[idx];
+  const hero = ctx.hero;
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
 
   // Silence rift modifier: suppress cast spells only
-  const silenced = getModifierFlags(state).silence;
+  const silenced = getModifierFlags(ctx.state).silence;
 
   const spellAbilities = silenced
     ? []
     : monster.abilities.filter((a) => a.startsWith("cast-"));
-  const los = hasLineOfSight(floor, monster.position, hero.position);
+  const los = hasLineOfSight(ctx.floor, monster.position, hero.position);
 
   if (cDist <= 1) {
-    // Too close — melee fallback
-    return monsterAttacksPlayer(state, monster);
+    ctxMeleeAttack(ctx, monster);
+    return;
   }
 
   if (spellAbilities.length > 0 && los && dist >= 4 && dist <= 8) {
     // 30% chance to move instead of casting (unpredictable)
     if (Math.random() < 0.3) {
-      return moveToRange(state, floorKey, idx, hero.position, 4, 8, occupied);
+      moveToRange(ctx, idx, hero.position, 4, 8);
+      return;
     }
     const spell =
       spellAbilities[Math.floor(Math.random() * spellAbilities.length)];
-    return monsterRangedAttack(state, monster, spell);
+    monsterRangedAttack(ctx, monster, spell);
+    return;
   }
 
   if (dist <= detectRange || monster.alerted) {
-    return moveToRange(state, floorKey, idx, hero.position, 4, 8, occupied);
+    moveToRange(ctx, idx, hero.position, 4, 8);
   }
-
-  return state;
 }
 
-function processThief(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  detectRange: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  let monster = floor.monsters[idx];
-  const hero = state.hero;
+function processThief(ctx: TurnCtx, idx: number, detectRange: number): void {
+  let monster = ctx.monsters[idx];
+  const hero = ctx.hero;
   const dist = chebyshev(monster.position, hero.position);
 
   // Tick flee timer
@@ -961,83 +937,74 @@ function processThief(
     // 30% chance to teleport away while fleeing
     if (Math.random() < 0.3) {
       for (let tries = 0; tries < 100; tries++) {
-        const rx = Math.floor(Math.random() * floor.width);
-        const ry = Math.floor(Math.random() * floor.height);
+        const rx = Math.floor(Math.random() * ctx.floor.width);
+        const ry = Math.floor(Math.random() * ctx.floor.height);
         if (
-          walkable(floor, rx, ry) &&
-          noMonster(floor, rx, ry, idx) &&
+          walkable(ctx.floor, rx, ry) &&
+          !ctx.occ.has(`${rx},${ry}`) &&
           !(rx === hero.position.x && ry === hero.position.y)
         ) {
-          monster = {
+          ctx.occ.delete(`${monster.position.x},${monster.position.y}`);
+          ctx.occ.add(`${rx},${ry}`);
+          ctx.monsters[idx] = {
             ...monster,
             fleeing: monster.fleeing - 1,
             position: { x: rx, y: ry },
           };
-          let s = updateMonster(state, floorKey, idx, monster);
-          return addMsg(s, `The ${monster.name} vanishes!`, "important");
+          addMsg(ctx, `The ${monster.name} vanishes!`, "important");
+          return;
         }
       }
     }
-    monster = { ...monster, fleeing: monster.fleeing - 1 };
-    let s = updateMonster(state, floorKey, idx, monster);
-    return moveAwayFrom(s, floorKey, idx, hero.position, occupied);
+    ctx.monsters[idx] = { ...monster, fleeing: monster.fleeing - 1 };
+    moveAwayFrom(ctx, idx, hero.position);
+    return;
   }
 
   if (dist <= 1) {
-    let s = monsterAttacksPlayer(state, monster);
+    const prevGold = ctx.hero.gold;
+    ctxMeleeAttack(ctx, monster);
     // After stealing (handled by processMonsterAbility 'steal-gold'), flee
-    const curFloor = s.floors[floorKey];
-    if (curFloor && s.hero.gold < state.hero.gold) {
-      // Gold was stolen — trigger flee
-      const mi = curFloor.monsters.findIndex((m) => m.id === monster.id);
-      if (mi >= 0 && !curFloor.monsters[mi].hasFled) {
+    if (ctx.hero.gold < prevGold) {
+      const mi = ctx.monsters.findIndex((m) => m.id === monster.id);
+      if (mi >= 0 && !ctx.monsters[mi].hasFled) {
         const fleeTurns = rollRange(8, 12);
-        s = updateMonster(s, floorKey, mi, {
-          ...curFloor.monsters[mi],
+        ctx.monsters[mi] = {
+          ...ctx.monsters[mi],
           fleeing: fleeTurns,
           hasFled: true,
-        });
+        };
       }
     }
-    return s;
+    return;
   }
 
   if (
     manhattan(monster.position, hero.position) <= detectRange ||
     monster.alerted
   ) {
-    return moveToward(state, floorKey, idx, hero.position, occupied);
+    moveToward(ctx, idx, hero.position);
   }
-
-  return state;
 }
 
-function processSummoner(
-  state: GameState,
-  floorKey: string,
-  idx: number,
-  detectRange: number,
-  occupied?: Set<string>,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
-  const hero = state.hero;
+function processSummoner(ctx: TurnCtx, idx: number, detectRange: number): void {
+  const monster = ctx.monsters[idx];
+  const hero = ctx.hero;
   const dist = manhattan(monster.position, hero.position);
   const cDist = chebyshev(monster.position, hero.position);
-  const los = hasLineOfSight(floor, monster.position, hero.position);
+  const los = hasLineOfSight(ctx.floor, monster.position, hero.position);
 
   // Silence rift modifier: suppress cast/summon spells only
-  const silenced = getModifierFlags(state).silence;
+  const silenced = getModifierFlags(ctx.state).silence;
 
   // Summon every 4-5 turns
   const summonAbilities = silenced
     ? []
     : monster.abilities.filter((a) => a.startsWith("summon-"));
-  if (summonAbilities.length > 0 && dist <= 12 && state.turn % 5 === 0) {
+  if (summonAbilities.length > 0 && dist <= 12 && ctx.state.turn % 5 === 0) {
     const ability =
       summonAbilities[Math.floor(Math.random() * summonAbilities.length)];
-    let s = spawnNearSummoner(state, floorKey, idx, ability);
+    spawnNearSummoner(ctx, idx, ability);
     // Also try a ranged attack this turn (throw/breath still work under silence)
     const rangedAbilities = monster.abilities.filter(
       (a) =>
@@ -1048,14 +1015,11 @@ function processSummoner(
     if (rangedAbilities.length > 0 && los && dist <= 8) {
       const ability2 =
         rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
-      const curFloor = s.floors[floorKey];
-      if (curFloor) {
-        const mi = curFloor.monsters.findIndex((m) => m.id === monster.id);
-        if (mi >= 0)
-          s = monsterRangedAttack(s, curFloor.monsters[mi], ability2);
-      }
+      // Re-find monster since summoning may have shifted things
+      const mi = ctx.monsters.findIndex((m) => m.id === monster.id);
+      if (mi >= 0) monsterRangedAttack(ctx, ctx.monsters[mi], ability2);
     }
-    return s;
+    return;
   }
 
   // Ranged attack if in range and LOS
@@ -1068,35 +1032,30 @@ function processSummoner(
   if (rangedAbilities.length > 0 && los && dist <= 8) {
     const ability =
       rangedAbilities[Math.floor(Math.random() * rangedAbilities.length)];
-    return monsterRangedAttack(state, monster, ability);
+    monsterRangedAttack(ctx, monster, ability);
+    return;
   }
 
   // Stay 5-8 tiles from hero
   if (cDist <= 1) {
-    return monsterAttacksPlayer(state, monster);
+    ctxMeleeAttack(ctx, monster);
+    return;
   }
 
   if (dist <= detectRange || monster.alerted) {
-    return moveToRange(state, floorKey, idx, hero.position, 5, 8, occupied);
+    moveToRange(ctx, idx, hero.position, 5, 8);
   }
-
-  return state;
 }
 
 // ── Stationary AI ───────────────────────────────────────────
 
 function processStationary(
-  state: GameState,
-  floorKey: string,
+  ctx: TurnCtx,
   idx: number,
   detectRange: number,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const monster = floor.monsters[idx];
-
-  // Process alert abilities when player is in detection range
-  return processAlertAbilities(state, floorKey, idx, monster, detectRange);
+): void {
+  const monster = ctx.monsters[idx];
+  processAlertAbilities(ctx, idx, monster, detectRange);
 }
 
 /**
@@ -1104,90 +1063,74 @@ function processStationary(
  * alert-radius alerts monsters within 10 Manhattan distance.
  */
 function processAlertAbilities(
-  state: GameState,
-  floorKey: string,
+  ctx: TurnCtx,
   idx: number,
   monster: Monster,
   detectRange?: number,
-): GameState {
-  const floor = state.floors[floorKey];
-  if (!floor) return state;
-  const hero = state.hero;
+): void {
+  const hero = ctx.hero;
   const dist = manhattan(monster.position, hero.position);
-  if (detectRange === undefined) detectRange = getDetectRange(state);
+  if (detectRange === undefined) detectRange = getDetectRange(ctx.state);
 
-  if (dist > detectRange) return state;
-  if (!hasLineOfSight(floor, monster.position, hero.position)) return state;
+  if (dist > detectRange) return;
+  if (!hasLineOfSight(ctx.floor, monster.position, hero.position)) return;
 
   // Already shrieked/drummed — don't fire again
-  if (monster.alerted) return state;
-
-  let cur = state;
+  if (monster.alerted) return;
 
   if (monster.abilities.includes("alert-floor")) {
-    const curFloor = cur.floors[floorKey];
-    if (!curFloor) return cur;
-
-    // Alert ALL monsters on the floor (including self to mark as used)
-    const monsters = curFloor.monsters.map((m) =>
-      !m.alerted && m.hp > 0 ? { ...m, alerted: true } : m,
-    );
-    cur = {
-      ...cur,
-      floors: { ...cur.floors, [floorKey]: { ...curFloor, monsters } },
-    };
-    cur = addMsg(
-      cur,
+    for (let i = 0; i < ctx.monsters.length; i++) {
+      const m = ctx.monsters[i];
+      if (!m.alerted && m.hp > 0) ctx.monsters[i] = { ...m, alerted: true };
+    }
+    addMsg(
+      ctx,
       "The Shrieker lets out a piercing shriek! You hear movement in the darkness...",
       "important",
     );
   }
 
   if (monster.abilities.includes("alert-radius")) {
-    const curFloor = cur.floors[floorKey];
-    if (!curFloor) return cur;
-
-    // Alert monsters within 10 Manhattan distance (and self)
-    const monsters = curFloor.monsters.map((m, i) => {
-      if (i === idx) return { ...m, alerted: true };
-      if (m.alerted || m.hp <= 0) return m;
-      if (manhattan(m.position, monster.position) <= 10) {
-        return { ...m, alerted: true };
+    for (let i = 0; i < ctx.monsters.length; i++) {
+      const m = ctx.monsters[i];
+      if (i === idx) {
+        ctx.monsters[i] = { ...m, alerted: true };
+      } else if (
+        !m.alerted &&
+        m.hp > 0 &&
+        manhattan(m.position, monster.position) <= 10
+      ) {
+        ctx.monsters[i] = { ...m, alerted: true };
       }
-      return m;
-    });
-    cur = {
-      ...cur,
-      floors: { ...cur.floors, [floorKey]: { ...curFloor, monsters } },
-    };
-    cur = addMsg(
-      cur,
+    }
+    addMsg(
+      ctx,
       "The War Drummer beats a frenzied rhythm! Something stirs nearby...",
       "important",
     );
   }
-
-  return cur;
 }
 
 // ── Main entry point ─────────────────────────────────────────
 
 /**
  * Process all monster turns on the current floor.
+ * Batches all mutations into a single state update at the end.
  */
 export function processAllMonsterTurns(state: GameState): GameState {
   const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
   const floor = state.floors[floorKey];
   if (!floor) return state;
 
-  let cur = state;
   const detectRange = getDetectRange(state);
-  const occ = buildOccupied(floor);
+
+  // Build mutable working copies
+  let monsters = [...floor.monsters];
 
   // Packhunter rift modifier: when any monster spots the player, alert all within 10 tiles
   const packhunter = getModifierFlags(state).packhunter;
   if (packhunter) {
-    const spotted = floor.monsters.some(
+    const spotted = monsters.some(
       (m) =>
         m.hp > 0 &&
         !m.sleeping &&
@@ -1195,82 +1138,100 @@ export function processAllMonsterTurns(state: GameState): GameState {
         hasLineOfSight(floor, m.position, state.hero.position),
     );
     if (spotted) {
-      const monsters = floor.monsters.map((m) => {
-        if (m.alerted || m.hp <= 0 || m.sleeping) return m;
-        if (manhattan(m.position, state.hero.position) <= 10) {
-          return { ...m, alerted: true };
+      for (let i = 0; i < monsters.length; i++) {
+        const m = monsters[i];
+        if (
+          !m.alerted &&
+          m.hp > 0 &&
+          !m.sleeping &&
+          manhattan(m.position, state.hero.position) <= 10
+        ) {
+          monsters[i] = { ...m, alerted: true };
         }
-        return m;
-      });
-      cur = {
-        ...cur,
-        floors: { ...cur.floors, [floorKey]: { ...floor, monsters } },
-      };
+      }
     }
   }
 
-  // Collect IDs before processing (array may change during iteration)
-  const monsterIds = floor.monsters.map((m) => m.id);
+  // Initialize mutable context
+  const ctx: TurnCtx = {
+    monsters,
+    messages: [...state.messages],
+    hero: state.hero,
+    items: [...floor.items],
+    decals: [...floor.decals],
+    floor,
+    floorKey,
+    state,
+    occ: buildOccupied(monsters),
+  };
+
+  // Collect IDs before processing (array may grow during iteration via summons)
+  const monsterIds = monsters.map((m) => m.id);
   // Build id→index map for O(1) lookup
   let idxMap = new Map<string, number>();
   let idxMapLen = -1;
-  const getIdx = (f: Floor, id: string): number => {
-    if (f.monsters.length !== idxMapLen) {
+  const getIdx = (id: string): number => {
+    if (ctx.monsters.length !== idxMapLen) {
       idxMap.clear();
-      for (let i = 0; i < f.monsters.length; i++)
-        idxMap.set(f.monsters[i].id, i);
-      idxMapLen = f.monsters.length;
+      for (let i = 0; i < ctx.monsters.length; i++)
+        idxMap.set(ctx.monsters[i].id, i);
+      idxMapLen = ctx.monsters.length;
     }
     return idxMap.get(id) ?? -1;
   };
 
   for (const mId of monsterIds) {
-    const curFloor = cur.floors[floorKey];
-    if (!curFloor) break;
-
-    const idx = getIdx(curFloor, mId);
+    const idx = getIdx(mId);
     if (idx === -1) continue; // monster died
 
-    const monster = curFloor.monsters[idx];
+    const monster = ctx.monsters[idx];
     if (monster.hp <= 0 || monster.sleeping) continue;
     if (monster.slowed && state.turn % 2 === 0) continue; // skip every other turn
 
     switch (monster.ai) {
       case "melee":
-        cur = processMelee(cur, floorKey, idx, detectRange, occ);
+        processMelee(ctx, idx, detectRange);
         break;
       case "ranged":
-        cur = processRanged(cur, floorKey, idx, detectRange, occ);
+        processRanged(ctx, idx, detectRange);
         break;
       case "caster":
-        cur = processCaster(cur, floorKey, idx, detectRange, occ);
+        processCaster(ctx, idx, detectRange);
         break;
       case "thief":
-        cur = processThief(cur, floorKey, idx, detectRange, occ);
+        processThief(ctx, idx, detectRange);
         break;
       case "summoner":
-        cur = processSummoner(cur, floorKey, idx, detectRange, occ);
+        processSummoner(ctx, idx, detectRange);
         break;
       case "stationary":
-        cur = processStationary(cur, floorKey, idx, detectRange);
+        processStationary(ctx, idx, detectRange);
         break;
     }
 
     // Regeneration: monsters with 'regenerate' ability recover 2 HP per turn
-    const afterFloor = cur.floors[floorKey];
-    if (afterFloor) {
-      const mIdx = afterFloor.monsters.findIndex((m) => m.id === mId);
-      if (mIdx >= 0) {
-        const m = afterFloor.monsters[mIdx];
-        if (m.abilities.includes("regenerate") && m.hp < m.maxHp && m.hp > 0) {
-          const healed = Math.min(m.maxHp, m.hp + 2);
-          cur = updateMonster(cur, floorKey, mIdx, { ...m, hp: healed });
-        }
+    const mIdx = getIdx(mId);
+    if (mIdx >= 0) {
+      const m = ctx.monsters[mIdx];
+      if (m.abilities.includes("regenerate") && m.hp < m.maxHp && m.hp > 0) {
+        ctx.monsters[mIdx] = { ...m, hp: Math.min(m.maxHp, m.hp + 2) };
       }
     }
 
-    if (cur.hero.hp <= 0) break;
+    if (ctx.hero.hp <= 0) break;
   }
 
-  return cur;
+  // Produce single immutable state
+  const newFloor: Floor = {
+    ...floor,
+    monsters: ctx.monsters,
+    items: ctx.items,
+    decals: ctx.decals,
+  };
+  return {
+    ...state,
+    hero: ctx.hero,
+    messages: ctx.messages,
+    floors: { ...state.floors, [floorKey]: newFloor },
+  };
 }
