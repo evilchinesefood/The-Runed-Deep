@@ -13,6 +13,7 @@ import {
 import { pickItemSprite } from "../systems/items/SpritePool";
 import { ITEM_BY_ID } from "../data/items";
 import { BUILDING_FLAVORS } from "../systems/town/TownMap";
+import { getEquipVisual, EQUIP_RENDER_ORDER } from "../data/EquipVisuals";
 import { TOWN_CONFIG } from "../data/TownConfigData";
 import { TOWN_BUILDINGS_DATA } from "../data/TownBuildingData";
 
@@ -136,6 +137,23 @@ export class MapRenderer {
         layer.style.cssText =
           "position:absolute;top:0;left:0;width:32px;height:32px;";
         ground.appendChild(layer);
+      }
+    }
+  }
+
+  /** Set entity cell class — supports multi-layer sprites joined by '|'. */
+  private setEntityClass(entity: HTMLElement, ec: string): void {
+    while (entity.firstChild) entity.removeChild(entity.firstChild);
+    if (ec.indexOf("|") === -1) {
+      entity.className = ec;
+    } else {
+      entity.className = "";
+      for (const cls of ec.split("|")) {
+        const layer = document.createElement("div");
+        layer.className = cls;
+        layer.style.cssText =
+          "position:absolute;top:0;left:0;width:32px;height:32px;";
+        entity.appendChild(layer);
       }
     }
   }
@@ -282,8 +300,15 @@ export class MapRenderer {
     const inTown = state.currentDungeon === "town";
     const heroX = state.hero.position.x;
     const heroY = state.hero.position.y;
-    const heroSprite =
-      state.hero.gender === "male" ? "base-human_m" : "base-human_f";
+    // Build layered hero sprite: base + equipped gear overlays
+    const heroBase = state.hero.gender === "male" ? "base-human_m" : "base-human_f";
+    const heroLayers = [heroBase];
+    for (const slot of EQUIP_RENDER_ORDER) {
+      const item = state.hero.equipment[slot as keyof typeof state.hero.equipment];
+      const visual = getEquipVisual(slot, item?.templateId);
+      if (visual) heroLayers.push(visual);
+    }
+    const heroSprite = heroLayers.length > 1 ? heroLayers.join("|") : heroBase;
 
     for (let vy = 0; vy < VIEWPORT_TILES_Y; vy++) {
       for (let vx = 0; vx < VIEWPORT_TILES_X; vx++) {
@@ -496,7 +521,7 @@ export class MapRenderer {
           cell.ground.style.filter = gf;
           if (gtrap) cell.ground.classList.add("trap-revealed");
           else cell.ground.classList.remove("trap-revealed");
-          cell.entity.className = ec;
+          this.setEntityClass(cell.entity, ec);
           cell.entity.style.display = ed;
           cell.entity.style.opacity = eo;
         } else {
@@ -554,7 +579,7 @@ export class MapRenderer {
             p.gtrap = gtrap;
           }
           if (p.ec !== ec) {
-            cell.entity.className = ec;
+            this.setEntityClass(cell.entity, ec);
             p.ec = ec;
           }
           if (p.ed !== ed) {
