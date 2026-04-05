@@ -391,8 +391,11 @@ export class HudRenderer {
     }
   }
 
+  private _prevMsgId = -1;
   private renderMessages(messages: Message[]): void {
-    if (messages.length === this._prevMsgCount) return;
+    const lastTurn = messages.length > 0 ? messages[messages.length - 1].turn : -1;
+    if (messages.length === this._prevMsgCount && lastTurn === this._prevMsgId) return;
+    this._prevMsgId = lastTurn;
 
     const limit = this.landscape ? 3 : 50;
     const colors: Record<string, string> = {

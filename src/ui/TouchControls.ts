@@ -802,6 +802,7 @@ export class TouchControls {
       releaseActive();
       this.cancelSpellTarget();
       this.closeSpellPicker();
+      this.debugPanel.remove();
       this.container.remove();
       this.visible = false;
     }

@@ -1319,6 +1319,8 @@ function switchScreen(state: GameState): void {
             difficulty: nextDifficulty,
             ngPlusCount: ngCount,
             returnFloor: 1,
+            activeRift: null,
+            activeCrucible: null,
             messages: [
               {
                 text: `=== NEW GAME PLUS ${ngCount} ===`,
@@ -1401,6 +1403,8 @@ function switchScreen(state: GameState): void {
           currentDungeon: "town",
           currentFloor: 0,
           returnFloor: regenFloor,
+          activeRift: null,
+          activeCrucible: null,
           floors,
           hero: {
             ...s.hero,

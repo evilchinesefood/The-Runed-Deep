@@ -148,7 +148,16 @@ export function castSpell(
     }
   }
   if (echoPct > 0 && Math.random() * 100 < echoPct) {
-    newState = resolveSpellEffect(newState, spell, direction, target);
+    // Skip echo effect if targeted spell already killed the monster
+    let echoValid = true;
+    if (target && spell.targeting !== "self" && spell.targeting !== "none") {
+      const ek = `${newState.currentDungeon}-${newState.currentFloor}`;
+      const ef = newState.floors[ek];
+      if (ef && !ef.monsters.some(m => m.hp > 0 && m.position.x === target.x && m.position.y === target.y)) {
+        echoValid = false;
+      }
+    }
+    if (echoValid) newState = resolveSpellEffect(newState, spell, direction, target);
     newState = {
       ...newState,
       messages: [

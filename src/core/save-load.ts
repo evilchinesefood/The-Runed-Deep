@@ -164,6 +164,9 @@ export function loadGame(slot: number = 1): GameState | null {
       for (const m of state.floors[key].monsters) {
         if (m.armor === undefined) m.armor = 0;
         (m as any).hasFled ??= false;
+        (m as any).bled ??= false;
+        (m as any).alerted ??= false;
+        (m as any).slowed ??= false;
       }
     }
 

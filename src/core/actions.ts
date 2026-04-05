@@ -54,6 +54,7 @@ import {
   processExitCrucible as _processExitCrucible,
   processCrucibleNextWave,
 } from "../systems/crucible/CrucibleActions";
+import { getWaveReward } from "../systems/crucible/WaveManager";
 import { getModifierFlags } from "../systems/rift/ModifierFlags";
 
 const DIRECTION_VECTORS: Record<Direction, Vector2> = {
@@ -750,16 +751,15 @@ function returnToDungeon(state: GameState): GameState {
     return addMessage(state, "There is nowhere to return to.", "system");
   }
 
-  let arrivalPos = { x: 0, y: 0 };
-  for (let y = 0; y < floor.height; y++) {
-    for (let x = 0; x < floor.width; x++) {
+  let arrivalPos: { x: number; y: number } | null = null;
+  for (let y = 0; y < floor.height && !arrivalPos; y++) {
+    for (let x = 0; x < floor.width && !arrivalPos; x++) {
       if (floor.tiles[y][x].type === "stairs-up") {
         arrivalPos = { x, y };
-        break;
       }
     }
-    if (arrivalPos.x !== 0 || arrivalPos.y !== 0) break;
   }
+  if (!arrivalPos) arrivalPos = { x: 1, y: 1 };
 
   return {
     ...state,
@@ -1226,17 +1226,28 @@ export function processCrucibleWaveCleared(state: GameState): GameState {
   const crucible = state.activeCrucible;
   if (!crucible) return state;
 
+  const reward = getWaveReward(crucible.wave);
   let bestWave = state.crucibleBestWave ?? 0;
   if (crucible.wave > bestWave) bestWave = crucible.wave;
 
   return {
     ...state,
+    activeCrucible: {
+      ...crucible,
+      shardsEarned: crucible.shardsEarned + reward.shards,
+      goldEarned: crucible.goldEarned + reward.gold,
+    },
+    hero: {
+      ...state.hero,
+      runeShards: state.hero.runeShards + reward.shards,
+      gold: state.hero.gold + reward.gold,
+    },
     crucibleBestWave: bestWave,
     screen: "crucible-summary",
     messages: [
       ...state.messages,
       {
-        text: `Wave ${crucible.wave} cleared!`,
+        text: `Wave ${crucible.wave} cleared! (+${reward.shards} shards, +${reward.gold}g)`,
         severity: "important" as const,
         turn: state.turn,
       },

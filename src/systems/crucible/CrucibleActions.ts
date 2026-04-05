@@ -6,15 +6,14 @@ import { trackCrucibleWave } from "../Achievements";
 export function processEnterCrucible(state: GameState): GameState {
   const { floor, playerStart } = generateCrucibleArena(Date.now());
 
-  // Spawn wave 1 immediately
+  // Spawn wave 1 immediately (rewards granted on wave clear, not entry)
   const wave1Floor = crucibleSpawnWave(floor, 1, playerStart, state.difficulty);
-  const reward = getWaveReward(1);
   trackCrucibleWave(1);
 
   const crucible: import("../../core/types").CrucibleState = {
     wave: 1,
-    shardsEarned: reward.shards,
-    goldEarned: reward.gold,
+    shardsEarned: 0,
+    goldEarned: 0,
   };
 
   return {
@@ -29,8 +28,6 @@ export function processEnterCrucible(state: GameState): GameState {
     hero: {
       ...state.hero,
       position: playerStart,
-      runeShards: state.hero.runeShards + reward.shards,
-      gold: state.hero.gold + reward.gold,
     },
     screen: "game",
     messages: [

@@ -150,7 +150,8 @@ export class MapRenderer {
       entity.className = "";
       for (const cls of ec.split("|")) {
         const layer = document.createElement("div");
-        layer.className = cls;
+        // Player overlay sprites need the .player base class for background-size
+        layer.className = `player ${cls}`;
         layer.style.cssText =
           "position:absolute;top:0;left:0;width:32px;height:32px;";
         entity.appendChild(layer);

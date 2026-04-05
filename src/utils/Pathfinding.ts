@@ -108,9 +108,10 @@ export function findPath(
       const path: Vector2[] = [];
       let node: Node | null = current;
       while (node && !(node.x === start.x && node.y === start.y)) {
-        path.unshift({ x: node.x, y: node.y });
+        path.push({ x: node.x, y: node.y });
         node = node.parent;
       }
+      path.reverse();
       return path;
     }
 

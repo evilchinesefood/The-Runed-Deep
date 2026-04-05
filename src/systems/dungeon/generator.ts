@@ -392,10 +392,11 @@ function tilesConnected(
 ): boolean {
   const visited = new Set<string>();
   const queue: Vector2[] = [from];
+  let qi = 0;
   visited.add(`${from.x},${from.y}`);
 
-  while (queue.length > 0) {
-    const pos = queue.shift()!;
+  while (qi < queue.length) {
+    const pos = queue[qi++];
     if (pos.x === to.x && pos.y === to.y) return true;
 
     for (const [dx, dy] of [
@@ -932,9 +933,10 @@ function ensureConnectivity(floor: Floor): void {
   function canReach(): boolean {
     const visited = new Set<string>();
     const queue = [stairs[0]];
+    let qi = 0;
     visited.add(`${stairs[0].x},${stairs[0].y}`);
-    while (queue.length > 0) {
-      const cur = queue.shift()!;
+    while (qi < queue.length) {
+      const cur = queue[qi++];
       for (const [dx, dy] of [
         [-1, 0],
         [1, 0],

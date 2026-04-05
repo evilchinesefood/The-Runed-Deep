@@ -149,8 +149,7 @@ export function recomputeDerivedStats(
     runeMpBonus = 0,
     runeAcBonus = 0;
   let runeResistBonus = 0,
-    runeDodgeBonus = 0,
-    runeRegenBonus = 0;
+    runeDodgeBonus = 0;
   for (const slot of Object.values(eq)) {
     if (!slot || !slot.sockets) continue;
     const effEnch = slot.enchantment + (slot.blessed ? 1 : 0);
@@ -176,7 +175,7 @@ export function recomputeDerivedStats(
           runeDodgeBonus += val;
           break;
         case "hp-regen":
-          runeRegenBonus += val;
+          // Regen handled in game-loop.ts tick, not derived stats
           break;
       }
     }
