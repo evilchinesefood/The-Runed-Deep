@@ -8,7 +8,7 @@ A web-based reimagining of the classic 1989 tile-based RPG by Rick Saada. Built 
 
 ## About
 
-The Runed Deep is a turn-based dungeon crawler set in Norse mythology. You descend 40 floors through an abandoned mine, ancient fortress halls, and a castle of old kings to defeat the fire lord Surtur and avenge your destroyed village.
+The Runed Deep is a turn-based dungeon crawler set in Norse mythology. You descend 30 floors through mines, lairs, crypts, frozen caverns, and ancient fortresses to defeat the fire lord Surtur and avenge your destroyed village.
 
 This project is a full rewrite — not a port. The original game ran on Windows 3.1. This version runs entirely in the browser and works on phones.
 
@@ -17,13 +17,13 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ## Features
 
 ### Dungeon
-- **40-floor dungeon** with 3 tilesets (Mine, Fortress, Castle) and 7 hand-designed boss floors
-- **Procedural generation** — 5 room shapes, locked/secret doors, decorative objects
+- **30-floor dungeon** with 6 themes (Mine, Lair, Crypt, Fortress, Ice, Castle) and 8 hand-designed boss floors
+- **Procedural generation** — 5 room shapes, locked/secret doors, water terrain, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental (fire, acid, lightning, wind, rune), special (portal, cobweb)
 - **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored
 
 ### Combat & Monsters
-- **68 monster types** across 5 AI behaviors (melee, ranged, caster, thief, summoner)
+- **169 monster types** across 6 AI behaviors (melee, ranged, caster, thief, summoner, stationary)
 - **Elemental attacks** — monsters deal cold, fire, acid, or drain damage reduced by your resistances
 - **Giants throw projectiles** — boulder and ice attacks at range
 - **Flee mechanic** — monsters flee at low HP once, then fight to the death
@@ -40,13 +40,17 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Resist spells** — temporarily add +50 elemental resistance
 
 ### Items & Equipment
-- **100+ item templates** — weapons, armor, potions, scrolls, spellbooks, wands, containers
+- **100+ item templates** — weapons, armor, potions, spellbooks
 - **3 material tiers** — regular, elven, and meteoric steel with progressively better stats and enchantment ranges
 - **Color-coded rarity** — white (normal), blue (enchanted), purple (blessed), orange (unique), red (cursed)
 - **No identification system** — all items show full stats immediately
 
+#### Rune Sockets
+- **16 runes** across 3 rarities (common, uncommon, rare) — socketed into equipment at the Rune Forge
+- Each rune grants a unique passive effect that scales with the item
+
 #### Affix System
-- **25 scaled affixes** — each has a base value that scales with the item's enchantment level
+- **27 scaled affixes** — each has a base value that scales with the item's enchantment level
 - **Offensive:** Sharpness, Might, Vampiric, Spell Power, Thorns, Fire/Frost/Storm Touched
 - **Defensive:** Hardened, Fortitude, Magic Resistance, Evasion, Vitality, Regeneration
 - **Utility:** Grace, Brilliance, Swiftness, Arcane Well, Arcane Mastery, Fortune
@@ -54,7 +58,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Named items** — items with affixes get suffixes: "of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"
 
 #### Unique Items
-- **18 unique items** — named legendaries with special abilities not found on normal gear
+- **19 unique items** — named legendaries with special abilities not found on normal gear
 - Includes resist amulets, detection helms, levitation boots, damage-reflection shields, and late-game world-altering items
 - Boss kills guarantee a unique drop
 
@@ -62,6 +66,17 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Cursed items** — negative enchantments, freely unequipped, can roll powerful cursed-only affixes
 - **Blessed items** — remove curse at the Temple (25g): enchantment flips positive, cursed-only affixes persist as a bonus
 - **Blacksmith** — add or reroll affixes, pick from weighted options
+
+### Fractured Rifts
+- **Random challenge dungeons** — 5–10 floor mini-dungeons with themed modifiers, launched from the Rift Stone in town
+- Unique rewards including rune shards
+
+### The Crucible
+- **Wave-based arena combat** — fight escalating waves of enemies triggered from a stone in town
+- Rewards gold and runes on completion
+
+### Statue of Fortune
+- **Essence-powered upgrades** — sacrifice unwanted gear to earn essence, then spend it to enhance your equipment
 
 ### New Game Plus
 - Completing the game unlocks a harder NG+ cycle with tougher enemies and better loot
@@ -74,7 +89,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Load by code** — enter a code on any device to download a save
 
 ### Town
-- **9 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Sage (Enchanter), Magic Shop, Junk Store, Temple, Blacksmith
+- **12 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Enchanter, Magic Shop, Junk Store, Temple, Blacksmith, Rune Forge, Crucible, Statue of Fortune
 - **Personal Item Stash** — store items at The Resting Stag; free, unlimited in/out, persists through NG+
 - **Shops restock** on floor clear and on death
 - **Mark for sale** — tag items in inventory, bulk sell at matching shops
@@ -84,9 +99,11 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Tab-compare tooltips** — hold Tab while hovering an equippable to compare with your equipped item
 - **Character sheet** — attributes with equipment bonus breakdown, all active affix totals, combat stats (melee damage, spell power, dodge, swiftness, MP cost, regen, gold/XP bonus, life steal, thorns)
 - **Character creation** — name, gender, 4 attributes, difficulty, starting spell
-- **4 difficulty levels** — Easy, Intermediate, Hard, Impossible
-- **18 achievements**
+- **5 difficulty levels** — Normal, Intermediate, Hard, Nightmare, Impossible
+- **32 achievements**
 - **18 synthesized sound effects** via Web Audio API
+- **Visible gear** — equipped items render as layered overlays on the player sprite
+- **NPC shopkeepers** — each town building has a named NPC with a unique sprite
 - **Death respawn** — no game over; die → death summary → Continue → respawn in town
 - **Click-to-move** with pathfinding
 - **Touch controls** — SVG icon buttons, repositionable D-pad + action bar, resize S/M/L
@@ -152,14 +169,16 @@ src/
   core/           Game state, actions, game loop, save/load, cloud sync
   data/           Item templates, monster data, spells, affixes, traps
   systems/
-    combat/       Melee combat, damage, vampiric, thorns, evasion
     character/    Derived stats, leveling
-    dungeon/      Procedural generation, tilesets, boss floors
+    combat/       Melee combat, damage, vampiric, thorns, evasion
+    crucible/     Wave-based arena combat
+    dungeon/      Procedural generation, 6 themes, boss floors
     inventory/    Equip, pickup, drop, use items
     items/        Loot generation — affixes, scaling, unique items
-    monsters/     AI (5 types), spawning
+    monsters/     AI (6 types), spawning
+    rift/         Fractured Rift generation and modifiers
     spells/       All 30 spell implementations
-    town/         Town map, shops, services
+    town/         Town map, shops, NPC services
   ui/             All screens — splash, creation, inventory, shop, spells, services, etc.
   rendering/      Map renderer, HUD, spell animations
   input/          Keyboard + touch input, auto-explore, spell targeting
