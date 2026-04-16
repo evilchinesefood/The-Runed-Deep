@@ -52,6 +52,7 @@ export class HudRenderer {
   private landscape: boolean;
   private _prevStats = "";
   private _prevMsgCount = 0;
+  private _prevLastTurn = -1;
   private _prevSpellKey = "";
 
   constructor(container: HTMLElement) {
@@ -392,7 +393,12 @@ export class HudRenderer {
   }
 
   private renderMessages(messages: Message[]): void {
-    if (messages.length === this._prevMsgCount) return;
+    const lastTurn = messages[messages.length - 1]?.turn ?? -1;
+    if (
+      messages.length === this._prevMsgCount &&
+      lastTurn === this._prevLastTurn
+    )
+      return;
 
     const limit = this.landscape ? 3 : 50;
     const colors: Record<string, string> = {
@@ -402,8 +408,11 @@ export class HudRenderer {
       normal: "#ccc",
     };
 
-    // If messages were cleared or shrunk, full rebuild
-    if (messages.length < this._prevMsgCount) {
+    // If messages were cleared, shrunk, or pruned+added (same count, new tail), full rebuild
+    const prunedAdd =
+      messages.length === this._prevMsgCount &&
+      lastTurn !== this._prevLastTurn;
+    if (messages.length < this._prevMsgCount || prunedAdd) {
       this.messagesEl.replaceChildren();
       this._prevMsgCount = 0;
     }
@@ -429,6 +438,7 @@ export class HudRenderer {
     }
 
     this._prevMsgCount = messages.length;
+    this._prevLastTurn = lastTurn;
     if (!this.landscape)
       this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   }

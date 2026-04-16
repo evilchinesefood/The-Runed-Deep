@@ -54,6 +54,8 @@ export function processPickupItem(state: GameState): GameState {
 
   // Track picked up item IDs
   const pickedIds = new Set<string>();
+  // First ground item that didn't fit — opens the swap drawer
+  let pendingPackSwap: { groundItemId: string } | null = null;
 
   for (const placed of itemsHere) {
     if (placed.item.category === "currency") {
@@ -75,6 +77,8 @@ export function processPickupItem(state: GameState): GameState {
           turn: state.turn,
         });
         showGameToast("Your pack is too full!", "warning");
+        if (!pendingPackSwap)
+          pendingPackSwap = { groundItemId: placed.item.id };
         continue;
       }
       inventory.push(placed.item);
@@ -102,6 +106,84 @@ export function processPickupItem(state: GameState): GameState {
     hero,
     floors: { ...state.floors, [floorKey]: newFloor },
     messages: [...state.messages, ...messages],
+    pendingPackSwap,
     turn: state.turn + 1,
   };
+}
+
+export function processSwapPickup(
+  state: GameState,
+  dropItemId: string,
+  pickupItemId: string,
+): GameState {
+  const floorKey = `${state.currentDungeon}-${state.currentFloor}`;
+  const floor = state.floors[floorKey];
+  if (!floor) return { ...state, pendingPackSwap: null };
+
+  const groundIdx = floor.items.findIndex((i) => i.item.id === pickupItemId);
+  if (groundIdx === -1) return { ...state, pendingPackSwap: null };
+  const ground = floor.items[groundIdx];
+
+  const dropIdx = state.hero.inventory.findIndex((i) => i.id === dropItemId);
+  if (dropIdx === -1) return state;
+  const droppedItem = state.hero.inventory[dropIdx];
+
+  const BASE_CARRY = 10000;
+  const packItem = state.hero.equipment.pack;
+  const packTpl = packItem ? ITEM_BY_ID[packItem.templateId] : null;
+  const basePackWeight =
+    packItem?.properties["weightCapacity"] ?? packTpl?.weightCapacity ?? 0;
+  const enchBonus = packItem ? packItem.enchantment * 5000 : 0;
+  let packCap = BASE_CARRY + Math.max(0, basePackWeight + enchBonus);
+  for (const eq of Object.values(state.hero.equipment)) {
+    if (eq && ITEM_BY_ID[eq.templateId]?.uniqueAbility === "titan-power") {
+      packCap *= 2;
+      break;
+    }
+  }
+  const currentWeight = state.hero.inventory.reduce((s, i) => s + i.weight, 0);
+  if (currentWeight - droppedItem.weight + ground.item.weight > packCap) {
+    showGameToast("Still too heavy.", "warning");
+    return state;
+  }
+
+  const newInventory = [...state.hero.inventory];
+  newInventory.splice(dropIdx, 1);
+  newInventory.push(ground.item);
+
+  const newItems = floor.items.filter((_, i) => i !== groundIdx);
+  newItems.push({ item: droppedItem, position: { ...state.hero.position } });
+
+  Sound.pickup();
+  showGameToast(
+    `Swapped ${getDisplayName(droppedItem)} \u2194 ${getDisplayName(ground.item)}`,
+    "info",
+  );
+  trackItemPickup();
+  if (ground.item.specialEnchantments)
+    trackItemFound(ground.item.specialEnchantments);
+
+  return {
+    ...state,
+    hero: { ...state.hero, inventory: newInventory },
+    floors: {
+      ...state.floors,
+      [floorKey]: { ...floor, items: newItems },
+    },
+    messages: [
+      ...state.messages,
+      {
+        text: `Dropped ${getDisplayName(droppedItem)} and picked up ${getDisplayName(ground.item)}.`,
+        severity: "normal" as const,
+        turn: state.turn,
+      },
+    ],
+    pendingPackSwap: null,
+    turn: state.turn + 1,
+  };
+}
+
+export function processDismissPackSwap(state: GameState): GameState {
+  if (!state.pendingPackSwap) return state;
+  return { ...state, pendingPackSwap: null };
 }

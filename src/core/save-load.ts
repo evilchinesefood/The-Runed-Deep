@@ -251,6 +251,8 @@ export function loadGame(slot: number = 1): GameState | null {
     }
     if ((state as any).itemsSacrificed === undefined)
       (state as any).itemsSacrificed = 0;
+    if ((state as any).pendingPackSwap === undefined)
+      (state as any).pendingPackSwap = null;
 
     // Migration: 0-indexed floors → 1-indexed
     const has0Key = Object.keys(state.floors).some(

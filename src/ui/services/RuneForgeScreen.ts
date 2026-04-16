@@ -206,7 +206,7 @@ function buildAddSocket(
   );
 
   const list = el("div", {
-    maxHeight: "clamp(200px, 50vh, 400px)",
+    maxHeight: "clamp(240px, 62vh, 560px)",
     overflowY: "auto",
   });
   list.setAttribute("data-service-list", "1");
@@ -289,7 +289,7 @@ function buildInscribe(
   );
 
   const list = el("div", {
-    maxHeight: "clamp(200px, 50vh, 400px)",
+    maxHeight: "clamp(240px, 62vh, 560px)",
     overflowY: "auto",
   });
   list.setAttribute("data-service-list", "1");
@@ -417,7 +417,7 @@ function buildErase(
   );
 
   const list = el("div", {
-    maxHeight: "clamp(200px, 50vh, 400px)",
+    maxHeight: "clamp(240px, 62vh, 560px)",
     overflowY: "auto",
   });
   list.setAttribute("data-service-list", "1");

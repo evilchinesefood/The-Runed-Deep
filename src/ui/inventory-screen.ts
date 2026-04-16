@@ -520,11 +520,7 @@ export function createInventoryScreen(
       return b;
     };
     if (tpl?.equipSlot) {
-      btnRow.appendChild(
-        drawerBtn("Equip", () =>
-          onAction({ type: "equipItem", itemId: item.id }),
-        ),
-      );
+      btnRow.appendChild(drawerBtn("Equip", () => dispatchEquip(item)));
     }
     if (["potion", "spellbook"].includes(item.category)) {
       btnRow.appendChild(
@@ -628,6 +624,112 @@ export function createInventoryScreen(
     btnRow.appendChild(drawerBtn2("Close", () => closeDrawer(), true));
     drawerEl.appendChild(btnRow);
     document.body.appendChild(drawerEl);
+  };
+
+  const openRingSwapDrawer = (newRing: Item) => {
+    const left = h.equipment.ringLeft;
+    const right = h.equipment.ringRight;
+    if (!left || !right) {
+      onAction({ type: "equipItem", itemId: newRing.id });
+      return;
+    }
+    closeDrawer();
+    drawerEl = el("div", {
+      position: "fixed",
+      bottom: "0",
+      left: "0",
+      right: "0",
+      zIndex: "2000",
+      background: "#1a1a1a",
+      borderTop: "2px solid #555",
+      maxHeight: "70vh",
+      display: "flex",
+      flexDirection: "column",
+      boxShadow: "0 -4px 16px rgba(0,0,0,0.8)",
+    });
+    const scroll = el("div", {
+      overflowY: "auto",
+      padding: "12px 16px 8px",
+      maxWidth: "480px",
+      margin: "0 auto",
+    });
+    scroll.appendChild(
+      el(
+        "div",
+        {
+          color: "#c9a84c",
+          fontSize: "16px",
+          fontWeight: "bold",
+          textAlign: "center",
+          marginBottom: "8px",
+        },
+        "Choose Ring Slot",
+      ),
+    );
+    const hdr = (text: string) =>
+      el(
+        "div",
+        {
+          color: "#c90",
+          fontSize: "11px",
+          fontWeight: "bold",
+          marginTop: "8px",
+          marginBottom: "4px",
+        },
+        text,
+      );
+    const hr = () =>
+      el("div", { borderTop: "1px solid #444", margin: "8px 0" });
+    scroll.appendChild(hdr("NEW RING"));
+    scroll.appendChild(buildTooltipContent(newRing));
+    scroll.appendChild(hr());
+    scroll.appendChild(hdr("LEFT RING"));
+    scroll.appendChild(buildTooltipContent(left));
+    scroll.appendChild(hr());
+    scroll.appendChild(hdr("RIGHT RING"));
+    scroll.appendChild(buildTooltipContent(right));
+    drawerEl.appendChild(scroll);
+
+    const btnRow = el("div", {
+      display: "flex",
+      gap: "8px",
+      padding: "8px 16px",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      flexShrink: "0",
+      borderTop: "1px solid #333",
+      background: "#1a1a1a",
+    });
+    const mkBtn = (label: string, slot: EquipSlot | null) => {
+      const b = createButton(label);
+      b.style.cssText += "min-width:80px;padding:8px 16px;font-size:14px;";
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeDrawer();
+        if (slot)
+          onAction({ type: "equipItemToSlot", itemId: newRing.id, slot });
+      });
+      return b;
+    };
+    btnRow.appendChild(mkBtn("Replace Left", "ringLeft"));
+    btnRow.appendChild(mkBtn("Replace Right", "ringRight"));
+    btnRow.appendChild(mkBtn("Cancel", null));
+    drawerEl.appendChild(btnRow);
+    document.body.appendChild(drawerEl);
+  };
+
+  const dispatchEquip = (item: Item) => {
+    const tpl = ITEM_BY_ID[item.templateId];
+    if (
+      tpl?.equipSlot === "ringLeft" &&
+      h.equipment.ringLeft &&
+      h.equipment.ringRight
+    ) {
+      openRingSwapDrawer(item);
+    } else {
+      onAction({ type: "equipItem", itemId: item.id });
+    }
   };
 
   const renderInvRows = () => {
@@ -780,9 +882,7 @@ export function createInventoryScreen(
           marginLeft: "8px",
         });
         if (tpl?.equipSlot) {
-          actions.appendChild(
-            btn("[E]", () => onAction({ type: "equipItem", itemId: item.id })),
-          );
+          actions.appendChild(btn("[E]", () => dispatchEquip(item)));
         }
         if (["potion", "spellbook"].includes(item.category)) {
           actions.appendChild(
@@ -898,7 +998,7 @@ export function createInventoryScreen(
       const tpl = ITEM_BY_ID[item.templateId];
       if (tpl?.equipSlot) {
         e.preventDefault();
-        onAction({ type: "equipItem", itemId: item.id });
+        dispatchEquip(item);
       }
       return;
     }

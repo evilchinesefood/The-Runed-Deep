@@ -114,5 +114,6 @@ export function createInitialGameState(
     runeForgeMaxSockets: 2,
     statueUpgrades: {},
     itemsSacrificed: 0,
+    pendingPackSwap: null,
   };
 }

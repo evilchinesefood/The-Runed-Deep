@@ -15,7 +15,11 @@ import { getThemeForDepth } from "../data/DungeonThemes";
 import { playerAttacksMonster } from "../systems/combat/combat";
 import { castSpell } from "../systems/spells/casting";
 import { saveGame } from "./save-load";
-import { processPickupItem } from "../systems/inventory/pickup";
+import {
+  processPickupItem,
+  processSwapPickup,
+  processDismissPackSwap,
+} from "../systems/inventory/pickup";
 import { processDropItem } from "../systems/inventory/drop";
 import {
   processEquipItem,
@@ -109,10 +113,16 @@ export function processAction(state: GameState, action: GameAction): GameState {
       return processContextAction(state);
     case "pickupItem":
       return processPickupItem(state);
+    case "swapPickup":
+      return processSwapPickup(state, action.dropItemId, action.pickupItemId);
+    case "dismissPackSwap":
+      return processDismissPackSwap(state);
     case "dropItem":
       return processDropItem(state, action.itemId);
     case "equipItem":
       return processEquipItem(state, action.itemId);
+    case "equipItemToSlot":
+      return processEquipItem(state, action.itemId, action.slot);
     case "unequipItem":
       return processUnequipItem(state, action.slot);
     case "useItem":

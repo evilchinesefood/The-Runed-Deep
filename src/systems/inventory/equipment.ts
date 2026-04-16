@@ -14,7 +14,11 @@ function msg(
   return { text, severity, turn };
 }
 
-export function processEquipItem(state: GameState, itemId: string): GameState {
+export function processEquipItem(
+  state: GameState,
+  itemId: string,
+  forceSlot?: EquipSlot,
+): GameState {
   const hero = { ...state.hero };
   const item = hero.inventory.find((i) => i.id === itemId);
   if (!item) return state;
@@ -36,12 +40,12 @@ export function processEquipItem(state: GameState, itemId: string): GameState {
   }
 
   const messages: Message[] = [];
-  let slot: EquipSlot = template.equipSlot;
+  let slot: EquipSlot = forceSlot ?? template.equipSlot;
   let equipment = { ...hero.equipment };
   let inventory = [...hero.inventory];
 
-  // Ring slot resolution
-  if (slot === "ringLeft") {
+  // Ring slot auto-resolution (skipped when caller forces a slot)
+  if (!forceSlot && slot === "ringLeft") {
     if (!equipment.ringLeft) slot = "ringLeft";
     else if (!equipment.ringRight) slot = "ringRight";
     else slot = "ringLeft";

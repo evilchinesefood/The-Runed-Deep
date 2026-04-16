@@ -347,6 +347,7 @@ export interface GameState {
   runeForgeMaxSockets: 2 | 3;
   statueUpgrades: Record<string, number>; // upgrade_id → purchase count
   itemsSacrificed: number;
+  pendingPackSwap: { groundItemId: string } | null;
 }
 
 // ============================================================
@@ -362,6 +363,8 @@ export type GameAction =
       target?: Vector2;
     }
   | { type: "pickupItem" }
+  | { type: "swapPickup"; dropItemId: string; pickupItemId: string }
+  | { type: "dismissPackSwap" }
   | { type: "useStairs" }
   | { type: "contextAction" }
   | { type: "rest" }
@@ -369,6 +372,7 @@ export type GameAction =
   | { type: "useItem"; itemId: string }
   | { type: "useAllItems"; templateId: string }
   | { type: "equipItem"; itemId: string }
+  | { type: "equipItemToSlot"; itemId: string; slot: EquipSlot }
   | { type: "unequipItem"; slot: EquipSlot }
   | { type: "dropItem"; itemId: string }
   | { type: "enterBuilding" }

@@ -103,6 +103,15 @@ export function injectTheme(): void {
     ::-webkit-scrollbar-track { background: var(--bg-panel); }
     ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 
+    /* Service list — always-visible scrollbar so ring rows below the fold are obvious */
+    [data-service-list] {
+      scrollbar-width: thin;
+      scrollbar-color: #555 #1a1a1a;
+    }
+    [data-service-list]::-webkit-scrollbar { width: 8px; }
+    [data-service-list]::-webkit-scrollbar-track { background: #1a1a1a; }
+    [data-service-list]::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
     /* Screen container — centers all content */
     .screen {
       display: flex;

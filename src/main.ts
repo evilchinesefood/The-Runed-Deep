@@ -31,6 +31,7 @@ import { computeFov } from "./utils/fov";
 import { loadGame, saveGame } from "./core/save-load";
 import type { GameState, Screen, Floor } from "./core/types";
 import { TouchControls } from "./ui/TouchControls";
+import { renderPackSwapDrawer } from "./ui/PackSwapDrawer";
 import { teleportToTown } from "./core/actions";
 import { ITEM_BY_ID } from "./data/items";
 import { injectTheme } from "./ui/Theme";
@@ -928,6 +929,7 @@ function render(state: GameState): void {
       mapRenderer?.render(state);
       hudRenderer?.render(state);
     }
+    renderPackSwapDrawer(state, (action) => gameLoop.handleAction(action));
   } catch (err) {
     console.error("Render error:", err);
     const errDiv = document.createElement("div");
