@@ -155,6 +155,12 @@ export class InputManager {
 
   private setupKeyboard(): void {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
+      // Never intercept keys while user is typing into an input/textarea
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        return;
+      }
+
       // Handle Tab — only capture during active gameplay
       if (e.key === 'Tab' || e.code === 'Tab') {
         if (this.enabled && this.onAutoExplore) {
@@ -268,11 +274,7 @@ export class InputManager {
           break;
         case 'F2':
           e.preventDefault();
-          this.emit({ type: 'setScreen', screen: 'achievements' as any });
-          break;
-        case 'Tab':
-          e.preventDefault();
-          this.onAutoExplore?.();
+          this.emit({ type: 'setScreen', screen: 'achievements' });
           break;
         case 'Escape':
           e.preventDefault();

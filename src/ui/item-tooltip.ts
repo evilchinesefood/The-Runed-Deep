@@ -67,14 +67,6 @@ function nameColor(item: Item): string {
 
 const TT_SIZE = "12px";
 
-function statLine(text: string): HTMLElement {
-  return d(
-    "div",
-    { color: "#aeb", paddingLeft: "6px", fontSize: TT_SIZE },
-    `\u2022 ${text}`,
-  );
-}
-
 function iconLine(icon: string, text: string, color = "#aeb"): HTMLElement {
   return d(
     "div",

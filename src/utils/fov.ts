@@ -1,15 +1,20 @@
 import type { Floor } from '../core/types';
 
-let prevVisible: [number, number][] = [];
+// Per-floor cache of previously-visible tiles so we only clear what we lit up
+// last time instead of scanning the whole grid. Keyed by Floor identity via
+// WeakMap so switching floors does not bleed stale visibility into the new one.
+const prevVisibleByFloor = new WeakMap<Floor, [number, number][]>();
 
 export function computeFov(floor: Floor, px: number, py: number, radius?: number): void {
   const VIEW_RADIUS = radius ?? 4;
 
-  // Only clear previously-visible tiles (instead of entire grid)
-  for (const [y, x] of prevVisible) {
+  // Only clear previously-visible tiles on THIS floor
+  const prev = prevVisibleByFloor.get(floor) ?? [];
+  for (const [y, x] of prev) {
     if (y < floor.height && x < floor.width) floor.visible[y][x] = false;
   }
-  prevVisible = [];
+  const prevVisible: [number, number][] = [];
+  prevVisibleByFloor.set(floor, prevVisible);
 
   // Player's tile is always visible
   if (py >= 0 && py < floor.height && px >= 0 && px < floor.width) {

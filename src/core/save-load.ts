@@ -1,5 +1,6 @@
 import type { GameState } from "./types";
 import { syncItemIdCounter } from "../systems/items/loot";
+import { syncMonsterIdCounter } from "../systems/monsters/spawning";
 import { getCloudCode, pushSave } from "./CloudSave";
 import { getDungeonForFloor } from "../systems/dungeon/Tilesets";
 import { generateTownMap } from "../systems/town/TownMap";
@@ -330,8 +331,9 @@ export function loadGame(slot: number = 1): GameState | null {
       }
     }
 
-    // Ensure new item IDs don't collide with loaded items
+    // Ensure new item/monster IDs don't collide with loaded data
     syncItemIdCounter(state);
+    syncMonsterIdCounter(Object.values(state.floors));
 
     return state;
   } catch (e) {

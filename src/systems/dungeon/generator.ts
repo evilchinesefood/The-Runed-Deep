@@ -34,12 +34,6 @@ function seededRandom(seed: number): () => number {
   };
 }
 
-import {
-  type Tileset,
-  TILESETS,
-  getDungeonForFloor,
-  getTileset,
-} from "./Tilesets";
 export { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
 
 import {
@@ -48,7 +42,6 @@ import {
   pickVariant,
 } from "../../data/DungeonThemes";
 
-let activeTileset: Tileset = TILESETS["mine"];
 let activeTheme: DungeonTheme = getThemeForDepth(1);
 let themeRand: () => number = Math.random;
 
@@ -186,7 +179,6 @@ function generateFloorAttempt(
   skipValidation = false,
   ngPlus: number = 0,
 ): { floor: Floor; playerStart: Vector2 } | null {
-  activeTileset = getTileset(getDungeonForFloor(floorNum));
   activeTheme = getThemeForDepth(floorNum);
 
   const rand = seededRandom(seed + floorNum * 1000);

@@ -14,6 +14,22 @@ function rollRange(min: number, max: number, rand: () => number): number {
   return Math.floor(rand() * (max - min + 1)) + min;
 }
 
+/**
+ * After loading a save, ensure the monster ID counter is beyond any ID present
+ * in the saved floors. Without this, freshly-spawned monsters can collide with
+ * saved ones and AI routines would target the wrong entity.
+ */
+export function syncMonsterIdCounter(floors: { monsters: { id: string }[] }[]): void {
+  let max = nextMonsterId;
+  for (const f of floors) {
+    for (const m of f.monsters) {
+      const n = parseInt(m.id.replace(/^monster-/, ""), 10);
+      if (Number.isFinite(n) && n >= max) max = n + 1;
+    }
+  }
+  nextMonsterId = max;
+}
+
 function fullResistances(
   partial: Partial<ElementalResistances>,
 ): ElementalResistances {

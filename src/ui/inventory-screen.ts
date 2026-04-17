@@ -62,21 +62,6 @@ function renderSpriteLayers(
   }
 }
 
-function sectionHeader(text: string): HTMLElement {
-  return el(
-    "div",
-    {
-      fontSize: "14px",
-      fontWeight: "bold",
-      color: "#c90",
-      borderBottom: "1px solid #444",
-      paddingBottom: "4px",
-      marginBottom: "8px",
-    },
-    text,
-  );
-}
-
 function itemDisplayLabel(item: Item): string {
   return getDisplayName(item);
 }
@@ -91,71 +76,6 @@ function btn(label: string, onClick: () => void): HTMLElement {
     onClick();
   });
   return b;
-}
-
-// Paperdoll slot positions (x, y offsets within the 240x480 image)
-// Mapped from the guide lines in equipment-dude.png
-const SLOT_POSITIONS: Record<string, { x: number; y: number }> = {
-  helmet: { x: 104, y: 2 },
-  amulet: { x: 104, y: 78 },
-  cloak: { x: 30, y: 55 },
-  body: { x: 104, y: 130 },
-  weapon: { x: 2, y: 170 },
-  shield: { x: 206, y: 170 },
-  gauntlets: { x: 4, y: 258 },
-  belt: { x: 104, y: 228 },
-  ringLeft: { x: 36, y: 290 },
-  ringRight: { x: 172, y: 290 },
-  boots: { x: 104, y: 420 },
-  pack: { x: 190, y: 100 },
-};
-
-
-function createEquipSlot(
-  slotKey: EquipSlot,
-  item: Item | null,
-  onUnequip: () => void,
-): HTMLElement {
-  const pos = SLOT_POSITIONS[slotKey] ?? { x: 0, y: 0 };
-
-  const container = el("div", {
-    position: "absolute",
-    left: `${pos.x}px`,
-    top: `${pos.y}px`,
-    width: "32px",
-    height: "32px",
-    cursor: item ? "pointer" : "default",
-    border: item ? "1px solid #555" : "1px solid #333",
-    background: "rgba(80,80,80,0.5)",
-    borderRadius: "2px",
-    boxSizing: "border-box",
-  });
-
-  if (item) {
-    const spriteWrap = el("div", {
-      width: "32px",
-      height: "32px",
-      position: "absolute",
-      top: "0",
-      left: "0",
-    });
-    renderSpriteLayers(spriteWrap, item);
-    container.appendChild(spriteWrap);
-    container.addEventListener("click", onUnequip);
-    container.addEventListener("mouseenter", () => {
-      container.style.borderColor = "#c90";
-    });
-    container.addEventListener("mouseleave", () => {
-      container.style.borderColor = "#555";
-    });
-    container.style.pointerEvents = "auto";
-    attachItemTooltip(container, item);
-  } else {
-    container.title = `${INVENTORY_SLOT_LABELS[slotKey] || slotKey}: empty`;
-    container.style.opacity = "0.7";
-  }
-
-  return container;
 }
 
 export function createInventoryScreen(
@@ -269,7 +189,6 @@ export function createInventoryScreen(
       height: "480px",
       flexShrink: "0",
       overflow: "hidden",
-      background: "#fff",
     });
     const dollBg = el("div", {
       width: "100%",
@@ -923,12 +842,6 @@ export function createInventoryScreen(
   renderInvRows();
 
   // ── Footer ────────────────────────────────────────────────
-  const allItems: Item[] = [
-    ...h.inventory,
-    ...Object.values(h.equipment).filter((v): v is Item => v !== null),
-  ];
-  const totalWeight = allItems.reduce((sum, it) => sum + it.weight, 0) / 1000;
-
   const footer = el("div", { width: "100%", alignItems: "center" });
   footer.className = "footer";
   footer.appendChild(el("span", { color: "#fc4", lineHeight: "1" }, `\u0024${h.gold}`));

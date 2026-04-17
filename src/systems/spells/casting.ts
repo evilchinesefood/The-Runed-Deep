@@ -759,15 +759,18 @@ function resolveShield(state: GameState, _spell: SpellDef): GameState {
     { id: "shield", name: "Shield", turnsRemaining: 30 },
   ];
 
-  // Only add AC bonus if shield wasn't already active (prevents stacking)
-  const newAc = alreadyActive ? hero.armorValue : hero.armorValue + 4;
+  // recomputeDerivedStats reads activeEffects and applies the +4 AC itself.
+  const updatedHero = recomputeDerivedStats(
+    { ...hero, activeEffects: newEffects },
+    state.statueUpgrades,
+  );
   const msg = alreadyActive
     ? `${hero.name} refreshes the magical shield. (30 turns)`
     : `A magical shield surrounds ${hero.name}. (+4 AC for 30 turns)`;
 
   return {
     ...addMsg(state, msg, "important"),
-    hero: { ...hero, activeEffects: newEffects, armorValue: newAc },
+    hero: updatedHero,
   };
 }
 

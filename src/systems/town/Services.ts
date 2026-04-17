@@ -286,7 +286,6 @@ export function rollBlacksmithOptions(
   ngPlus: number,
   excludeIds: string[] = [],
 ): { id: string; critical: boolean }[] {
-  const tpl = ITEM_BY_ID[item.templateId];
   const isWeapon = item.category === "weapon";
   const isArmor = [
     "armor",

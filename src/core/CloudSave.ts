@@ -7,6 +7,8 @@ const API_BASE = location.hostname.includes('jdayers.com')
   ? '/rd/api/save.php'
   : null;
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
+const FETCH_TIMEOUT_MS = 10_000;
+const MAX_INFLATE_BYTES = 10 * 1024 * 1024; // 10 MB — saves stay far below this in practice
 
 async function compress(str: string): Promise<string> {
   const blob = new Blob([str]);
@@ -54,6 +56,9 @@ function inflateGzip(data: Uint8Array): string {
 function rawInflate(src: Uint8Array): Uint8Array {
   const out: number[] = [];
   let bitBuf = 0, bitCnt = 0, pos = 0;
+  const guard = () => {
+    if (out.length > MAX_INFLATE_BYTES) throw new Error('Decompressed size exceeds limit');
+  };
 
   function bits(n: number): number {
     while (bitCnt < n) { bitBuf |= src[pos++] << bitCnt; bitCnt += 8; }
@@ -106,6 +111,7 @@ function rawInflate(src: Uint8Array): Uint8Array {
       bitBuf = 0; bitCnt = 0;
       const len = src[pos] | (src[pos + 1] << 8); pos += 4;
       for (let i = 0; i < len; i++) out.push(src[pos++]);
+      guard();
     } else {
       let decodeLit: (bits: () => number) => number;
       let decodeDist: (bits: () => number) => number;
@@ -137,13 +143,14 @@ function rawInflate(src: Uint8Array): Uint8Array {
       for (;;) {
         const sym = decodeLit(getBit);
         if (sym === 256) break;
-        if (sym < 256) { out.push(sym); continue; }
+        if (sym < 256) { out.push(sym); guard(); continue; }
         const li = sym - 257;
         const length = lenBase[li] + bits(lenExtra[li]);
         const di = decodeDist(getBit);
         const distance = distBase[di] + bits(distExtra[di]);
         const start = out.length - distance;
         for (let i = 0; i < length; i++) out.push(out[start + i]);
+        guard();
       }
     }
   }
@@ -152,8 +159,13 @@ function rawInflate(src: Uint8Array): Uint8Array {
 
 export function generateCode(): string {
   let code = '';
+  const src =
+    typeof crypto !== 'undefined' && crypto.getRandomValues
+      ? crypto.getRandomValues(new Uint32Array(5))
+      : null;
   for (let i = 0; i < 5; i++) {
-    code += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+    const r = src ? src[i] : Math.floor(Math.random() * 0xffffffff);
+    code += CODE_CHARS[r % CODE_CHARS.length];
   }
   return code;
 }
@@ -170,12 +182,17 @@ export function clearCloudCode(slot: number): void {
   localStorage.removeItem(`rd-cloud-${slot}`);
 }
 
+function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...init, signal: ctl.signal }).finally(() => clearTimeout(timer));
+}
+
 export async function pushSave(code: string, saveJson: string): Promise<boolean> {
   if (!API_BASE) return false;
   try {
     const compressed = await compress(saveJson);
-    // Debug logging removed for production
-    const res = await fetch(API_BASE, {
+    const res = await fetchWithTimeout(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, data: compressed, compressed: true }),
@@ -195,7 +212,7 @@ export async function pushSave(code: string, saveJson: string): Promise<boolean>
 export async function pullSave(code: string): Promise<string | null> {
   if (!API_BASE) return null;
   try {
-    const res = await fetch(`${API_BASE}?code=${encodeURIComponent(code)}`);
+    const res = await fetchWithTimeout(`${API_BASE}?code=${encodeURIComponent(code)}`);
     if (!res.ok) return null;
     const raw = await res.text();
     try {

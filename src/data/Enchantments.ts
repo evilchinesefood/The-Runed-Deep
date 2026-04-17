@@ -16,9 +16,6 @@ export interface Affix {
   weight: number; // drop weight (higher = more common)
 }
 
-// Keep old interface name for compatibility with tooltip rendering
-export type SpecialEnchantment = Affix;
-
 export const AFFIXES: Affix[] = [
   // ── Offensive ─────────────────────────────────────────────
   {
@@ -246,14 +243,11 @@ export const AFFIXES: Affix[] = [
   },
 ];
 
-// Keep ENCHANTMENTS alias for backward compat with tooltip code
-export const ENCHANTMENTS = AFFIXES;
-
 export const AFFIX_BY_ID: Record<string, Affix> = Object.fromEntries(
   AFFIXES.map((a) => [a.id, a]),
 );
 
-// Backward compat alias
+// Backward compat alias — referenced by ui/item-tooltip.ts
 export const ENCHANTMENT_BY_ID = AFFIX_BY_ID;
 
 /** Compute the effective value of an affix: base × enchantment (×2 if critical, min 1 ench) */

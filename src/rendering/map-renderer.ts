@@ -110,7 +110,9 @@ export class MapRenderer {
       transform-origin: top left;
       transform: scale(${this.scale});
     `;
-    this.mapContainer.style.contain = "strict";
+    // contain:layout gives the same perf win without clipping animation overflow
+    // (projectiles, pulse) that extends beyond a tile.
+    this.mapContainer.style.contain = "layout";
     this.mapWrapper.appendChild(this.mapContainer);
     this.container.appendChild(this.mapWrapper);
 
@@ -135,7 +137,7 @@ export class MapRenderer {
         const layer = document.createElement("div");
         layer.className = cls;
         layer.style.cssText =
-          "position:absolute;top:0;left:0;width:32px;height:32px;";
+          "position:absolute;top:0;left:0;width:32px;height:32px;pointer-events:none;";
         ground.appendChild(layer);
       }
     }
@@ -153,7 +155,7 @@ export class MapRenderer {
         // Player overlay sprites need the .player base class for background-size
         layer.className = isPlayer ? `player ${cls}` : cls;
         layer.style.cssText =
-          "position:absolute;top:0;left:0;width:32px;height:32px;";
+          "position:absolute;top:0;left:0;width:32px;height:32px;pointer-events:none;";
         entity.appendChild(layer);
       }
     }

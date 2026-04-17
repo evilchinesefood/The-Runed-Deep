@@ -37,6 +37,21 @@ function removeFromInventory(hero: Hero, idx: number): Hero {
 }
 
 function usePotion(state: GameState, item: Item, idx: number): GameState {
+  // Cursed potions shouldn't be usable — drinking them shouldn't grant permanent stat gains.
+  if (item.cursed) {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          text: `The cursed ${item.name} resists your touch.`,
+          severity: "important" as const,
+          turn: state.turn,
+        },
+      ],
+    };
+  }
+
   const messages: Message[] = [];
   let hero = { ...state.hero };
   const tid = item.templateId;
@@ -65,7 +80,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
         strength: hero.attributes.strength + 1,
       },
     };
-    hero = recomputeDerivedStats(hero);
+    hero = recomputeDerivedStats(hero, state.statueUpgrades);
     showGameToast("+1 Strength!", "success");
     messages.push({
       text: "You feel stronger! (+1 Strength)",
@@ -80,7 +95,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
         intelligence: hero.attributes.intelligence + 1,
       },
     };
-    hero = recomputeDerivedStats(hero);
+    hero = recomputeDerivedStats(hero, state.statueUpgrades);
     showGameToast("+1 Intelligence!", "success");
     messages.push({
       text: "You feel smarter! (+1 Intelligence)",
@@ -95,7 +110,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
         constitution: hero.attributes.constitution + 1,
       },
     };
-    hero = recomputeDerivedStats(hero);
+    hero = recomputeDerivedStats(hero, state.statueUpgrades);
     showGameToast("+1 Constitution!", "success");
     messages.push({
       text: "You feel healthier! (+1 Constitution)",
@@ -110,7 +125,7 @@ function usePotion(state: GameState, item: Item, idx: number): GameState {
         dexterity: hero.attributes.dexterity + 1,
       },
     };
-    hero = recomputeDerivedStats(hero);
+    hero = recomputeDerivedStats(hero, state.statueUpgrades);
     showGameToast("+1 Dexterity!", "success");
     messages.push({
       text: "You feel more agile! (+1 Dexterity)",

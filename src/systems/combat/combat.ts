@@ -58,15 +58,6 @@ function buildRuneCache(equipment: any): Record<string, number> {
   return cache;
 }
 
-/** Check if any equipped item has a specific rune */
-function hasRune(equipment: any, runeId: string): boolean {
-  for (const item of Object.values(equipment)) {
-    if (!item || !(item as any).sockets) continue;
-    if ((item as any).sockets.includes(runeId)) return true;
-  }
-  return false;
-}
-
 function fortuneXp(
   baseXp: number,
   equipment: any,
@@ -221,11 +212,6 @@ function applyArmor(rawDamage: number, armorValue: number): number {
 // ============================================================
 // Combat resolution
 // ============================================================
-
-export interface CombatResult {
-  state: GameState;
-  messages: Message[];
-}
 
 /**
  * Player attacks a monster. Returns updated state.

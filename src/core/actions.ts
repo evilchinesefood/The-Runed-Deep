@@ -6,6 +6,7 @@ import type {
   Message,
   Hero,
   Floor,
+  Screen,
 } from "./types";
 import {
   generateFloor,
@@ -555,11 +556,11 @@ function processEnterBuilding(state: GameState): GameState {
     return addMessage(state, "There is no building here.", "system");
   }
   const shopIds = ["weapon-shop", "armor-shop", "general-store", "magic-shop"];
-  const directScreens: Record<string, string> = {
+  const directScreens: Partial<Record<string, Screen>> = {
     crucible: "crucible-menu",
     "rift-stone": "rift-menu",
   };
-  const screen = directScreens[tile.buildingId]
+  const screen: Screen = directScreens[tile.buildingId]
     ?? (shopIds.includes(tile.buildingId) ? "shop" : "service");
 
   const info = BUILDING_FLAVORS[tile.buildingId];
@@ -632,25 +633,27 @@ function processUseStairs(state: GameState): GameState {
       const newRift = { ...rift, currentFloor: rift.currentFloor - 1 };
       const riftKey = `rift-${newRift.currentFloor}`;
       let floors = state.floors;
-      let pos = state.hero.position;
+      let pos: Vector2 | null = null;
       if (!floors[riftKey]) {
         const { floor: f, playerStart } = generateRiftFloor(newRift, state);
         floors = { ...floors, [riftKey]: f };
         pos = playerStart;
       } else {
         const f = floors[riftKey];
-        for (let y = 0; y < f.height; y++) {
+        stairSearch: for (let y = 0; y < f.height; y++) {
           for (let x = 0; x < f.width; x++) {
             if (f.tiles[y][x].type === "stairs-down") {
               pos = { x, y };
-              break;
+              break stairSearch;
             }
           }
-          if (
-            pos.x !== state.hero.position.x ||
-            pos.y !== state.hero.position.y
-          )
-            break;
+        }
+        // Fallback: no stairs-down in previous floor — regenerate instead of
+        // dropping the hero in a wall at their old coordinates.
+        if (!pos) {
+          const { floor: f2, playerStart } = generateRiftFloor(newRift, state);
+          floors = { ...floors, [riftKey]: f2 };
+          pos = playerStart;
         }
       }
       return {

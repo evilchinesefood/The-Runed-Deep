@@ -117,8 +117,6 @@ export class HudRenderer {
       document.body.appendChild(this.messagesEl);
     } else {
       // Portrait + Desktop: normal flow layout below map
-      const isPortrait =
-        window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
       const hud = el("div", {
         display: "flex",
         width: "100%",

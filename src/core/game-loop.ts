@@ -320,17 +320,14 @@ export class GameLoop {
           turn: state.turn,
         },
       ];
-
-      // Shield armor bonus removed manually; resist spells handled by recomputeDerivedStats
-      if (e.id === "shield") {
-        hero = { ...hero, armorValue: Math.max(0, hero.armorValue - 4) };
-      }
     }
 
-    // Recompute stats if any resist spell expired (so resistance drops correctly)
+    // Recompute so shield's +4 AC and resist bonuses drop correctly when those effects end.
     hero = { ...hero, activeEffects: remaining };
-    const hasResistExpiry = expired.some((e) => e.id.startsWith("resist-"));
-    if (hasResistExpiry) {
+    const needsRecompute = expired.some(
+      (e) => e.id === "shield" || e.id.startsWith("resist-"),
+    );
+    if (needsRecompute) {
       hero = recomputeDerivedStats(hero, state.statueUpgrades);
     }
 

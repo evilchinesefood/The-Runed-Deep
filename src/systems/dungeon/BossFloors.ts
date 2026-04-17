@@ -14,7 +14,7 @@ import { getBossForFloor, MONSTER_BY_ID } from "../../data/monsters";
 import { createMonster } from "../monsters/spawning";
 import { getItemsForDepth, ALL_ITEM_TEMPLATES } from "../../data/items";
 import { createItemFromTemplate } from "../items/loot";
-import { getDungeonForFloor, TILESETS, type Tileset } from "./Tilesets";
+import { getDungeonForFloor } from "./Tilesets";
 import {
   type DungeonTheme,
   getThemeForDepth,
@@ -25,7 +25,6 @@ const BOSS_FLOORS = new Set([5, 10, 15, 20, 25, 30]);
 
 // ── Tile factories (use active tileset) ───────────────────
 
-let ts: Tileset = TILESETS["mine"];
 let bossTheme: DungeonTheme = getThemeForDepth(1);
 let bossRand: () => number = Math.random;
 
@@ -855,7 +854,7 @@ export function generateBossFloor(
   difficulty: Difficulty,
 ): { floor: Floor; playerStart: Vector2 } | null {
   if (!BOSS_FLOORS.has(floorNum)) return null;
-  ts = TILESETS[getDungeonForFloor(floorNum)] ?? TILESETS["mine"];
+  getDungeonForFloor(floorNum); // retained for side-effect parity
   bossTheme = getThemeForDepth(floorNum);
   bossRand = Math.random;
 

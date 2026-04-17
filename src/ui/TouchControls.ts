@@ -26,7 +26,9 @@ function haptic(): void {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-const BTN_BOTTOM = "12px";
+const BTN_BOTTOM = "calc(12px + env(safe-area-inset-bottom, 0px))";
+const BTN_SIDE_L = "calc(12px + env(safe-area-inset-left, 0px))";
+const BTN_SIDE_R = "calc(12px + env(safe-area-inset-right, 0px))";
 
 function makeBtn(
   size: number,
@@ -60,12 +62,16 @@ function makeBtn(
       repeatTimer = window.setInterval(() => { onClick(); }, 150);
     }
   };
+  let lastTouchFire = 0;
   btn.addEventListener("touchstart", (e) => {
     e.preventDefault();
+    lastTouchFire = Date.now();
     press();
     onClick();
   });
   btn.addEventListener("mousedown", (e) => {
+    // Some mobile browsers synthesize mousedown after touchstart; ignore the ghost.
+    if (Date.now() - lastTouchFire < 400) return;
     e.preventDefault();
     press();
     onClick();
@@ -232,7 +238,7 @@ export class TouchControls {
     // D-pad — consistent SVG arrows in a 3x3 grid
     this.dpad = document.createElement("div");
     this.dpad.style.cssText = `
-      position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.dpadOffsetY}px);left:${12 + this.layout.dpadOffsetX}px;z-index:1000;
+      position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.dpadOffsetY}px);left:calc(${BTN_SIDE_L} + ${this.layout.dpadOffsetX}px);z-index:1000;
       display:${this.layout.dpadVisible ? 'grid' : 'none'};grid-template-columns:${dpadSize}px ${dpadSize}px ${dpadSize}px;grid-template-rows:${dpadSize}px ${dpadSize}px ${dpadSize}px;
       gap:${dpadGap}px;touch-action:none;
     `;
@@ -286,14 +292,14 @@ export class TouchControls {
     const actDisplay = this.layout.actionVisible ? (isLandscape ? 'flex' : 'grid') : 'none';
     if (isLandscape) {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:${12 + this.layout.actionOffsetX}px;z-index:1000;
+        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:calc(${BTN_SIDE_R} + ${this.layout.actionOffsetX}px);z-index:1000;
         display:${actDisplay};flex-direction:row;flex-wrap:wrap;gap:4px;touch-action:none;
         max-width:calc(100vw - ${dpadSize * 3 + dpadGap * 2 + 20}px);
         justify-content:flex-end;
       `;
     } else {
       this.actionBar.style.cssText = `
-        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:${12 + this.layout.actionOffsetX}px;z-index:1000;
+        position:fixed;bottom:calc(${BTN_BOTTOM} + ${this.layout.actionOffsetY}px);right:calc(${BTN_SIDE_R} + ${this.layout.actionOffsetX}px);z-index:1000;
         display:${actDisplay};grid-template-columns:${actionSize}px ${actionSize}px;gap:6px;touch-action:none;
       `;
     }
@@ -630,11 +636,11 @@ export class TouchControls {
     const l = this.layout;
     this.dpad.style.display = l.dpadVisible ? "grid" : "none";
     this.dpad.style.bottom = `calc(${BTN_BOTTOM} + ${l.dpadOffsetY}px)`;
-    this.dpad.style.left = `${12 + l.dpadOffsetX}px`;
+    this.dpad.style.left = `calc(${BTN_SIDE_L} + ${l.dpadOffsetX}px)`;
     const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
     this.actionBar.style.display = l.actionVisible ? (isLandscape ? "flex" : "grid") : "none";
     this.actionBar.style.bottom = `calc(${BTN_BOTTOM} + ${l.actionOffsetY}px)`;
-    this.actionBar.style.right = `${12 + l.actionOffsetX}px`;
+    this.actionBar.style.right = `calc(${BTN_SIDE_R} + ${l.actionOffsetX}px)`;
   }
 
   public openSpellPicker(): void {

@@ -107,21 +107,32 @@ export class AnimationRenderer {
     this.queue.push(anims);
   }
 
+  private activePromise: Promise<void> | null = null;
+
   /**
    * Start playing all queued animations.
    * Returns a promise that resolves when all are done.
+   * If called while another play is in flight, returns that play's promise
+   * so callers can still await completion and never softlock.
    */
   play(): Promise<void> {
-    if (this.queue.length === 0) return Promise.resolve();
+    if (this.queue.length === 0) return this.activePromise ?? Promise.resolve();
+    if (this.activePromise) {
+      // Already running — new groups will play after current chain via playNextGroup
+      return this.activePromise;
+    }
 
     this.playing = true;
-    return new Promise<void>(resolve => {
+    const p = new Promise<void>(resolve => {
       this.onComplete = () => {
         this.playing = false;
+        this.activePromise = null;
         resolve();
       };
       this.playNextGroup();
     });
+    this.activePromise = p;
+    return p;
   }
 
   private playNextGroup(): void {
@@ -297,6 +308,11 @@ export class AnimationRenderer {
     this.animLayer.replaceChildren();
     this.queue = [];
     this.playing = false;
+    // Resolve any outstanding play() promise so callers that awaited it
+    // (and disabled input while animating) don't sit waiting forever.
+    this.onComplete?.();
+    this.onComplete = null;
+    this.activePromise = null;
   }
 }
 

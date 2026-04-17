@@ -10,7 +10,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function createSpellScreen(
   state: GameState,
-  onCast: (spellId: string) => void,
+  _onCast: (spellId: string) => void,
   onClose: () => void,
   onUpdateHotkeys: (hotkeys: string[]) => void,
   onSpells?: () => void,

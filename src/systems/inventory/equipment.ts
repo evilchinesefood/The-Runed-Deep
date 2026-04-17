@@ -64,7 +64,10 @@ export function processEquipItem(
   equipment = { ...equipment, [slot]: equippedItem };
   messages.push(msg(`Equipped ${equippedItem.name}.`, state.turn));
 
-  const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
+  const updatedHero = recomputeDerivedStats(
+    { ...hero, equipment, inventory },
+    state.statueUpgrades,
+  );
 
   trackEquipmentCheck(
     updatedHero.equipment as unknown as Record<string, unknown>,
@@ -104,9 +107,27 @@ export function processUnequipItem(
   const item = hero.equipment[slot];
   if (!item) return state;
 
+  if (item.cursed) {
+    showGameToast(`${getDisplayName(item)} is cursed — it won't come off!`, "warning");
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        msg(
+          `You try to remove ${getDisplayName(item)}, but it is cursed!`,
+          state.turn,
+          "important",
+        ),
+      ],
+    };
+  }
+
   const equipment = { ...hero.equipment, [slot]: null };
   const inventory = [...hero.inventory, item];
-  const updatedHero = recomputeDerivedStats({ ...hero, equipment, inventory });
+  const updatedHero = recomputeDerivedStats(
+    { ...hero, equipment, inventory },
+    state.statueUpgrades,
+  );
 
   Sound.equip();
   showGameToast(`Unequipped ${item.name}`, "info");

@@ -1,6 +1,6 @@
 import type { GameState } from "../../core/types";
 import { generateCrucibleArena } from "./CrucibleGen";
-import { spawnWave as crucibleSpawnWave, getWaveReward } from "./WaveManager";
+import { spawnWave as crucibleSpawnWave } from "./WaveManager";
 import { trackCrucibleWave } from "../Achievements";
 
 export function processEnterCrucible(state: GameState): GameState {

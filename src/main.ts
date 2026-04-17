@@ -29,6 +29,7 @@ import { AnimationRenderer } from "./rendering/animations";
 import { drainAnimations } from "./rendering/animation-queue";
 import { computeFov } from "./utils/fov";
 import { loadGame, saveGame } from "./core/save-load";
+import { recomputeDerivedStats } from "./systems/character/derived-stats";
 import type { GameState, Screen, Floor } from "./core/types";
 import { TouchControls } from "./ui/TouchControls";
 import { renderPackSwapDrawer } from "./ui/PackSwapDrawer";
@@ -878,6 +879,11 @@ window.addEventListener("resize", () => {
   }, 300);
 });
 
+// Track floors whose town-wide visibility has been applied once. WeakMap so
+// garbage-collecting a floor also drops its entry — avoids hidden-class breakage
+// from setting (floor as any)._allVisSet directly on the Floor object.
+const townAllVisFloors = new WeakSet<Floor>();
+
 function render(state: GameState): void {
   try {
     const currentScreen = root.dataset.screen as Screen | undefined;
@@ -918,10 +924,10 @@ function render(state: GameState): void {
           }
         } else {
           // Town: all tiles visible — only set once per floor load
-          if (!(floor as any)._allVisSet) {
+          if (!townAllVisFloors.has(floor)) {
             for (let y = 0; y < floor.height; y++)
               for (let x = 0; x < floor.width; x++) floor.visible[y][x] = true;
-            (floor as any)._allVisSet = true;
+            townAllVisFloors.add(floor);
           }
         }
       }
@@ -1079,6 +1085,14 @@ function switchScreen(state: GameState): void {
       mapRenderer = new MapRenderer(gameContainer);
       animRenderer = new AnimationRenderer(mapRenderer.getAnimContainer());
       hudRenderer = new HudRenderer(gameContainer);
+
+      // If the tab is backgrounded mid-animation, browsers can throttle
+      // setTimeout so the chained projectile/explosion callbacks never fire;
+      // without this, input stays disabled and the game softlocks.
+      const onHide = () => {
+        if (document.hidden) animRenderer?.clear();
+      };
+      document.addEventListener("visibilitychange", onHide);
 
       // Spell bar click → enter spell casting mode
       hudRenderer.setSpellClickHandler((spellId) => {
@@ -1312,6 +1326,16 @@ function switchScreen(state: GameState): void {
             ngCount,
           );
 
+          const ngHero = recomputeDerivedStats(
+            {
+              ...s.hero,
+              position: TOWN_START_INITIAL(),
+              activeEffects: [],
+              hp: s.hero.maxHp,
+              mp: s.hero.maxMp,
+            },
+            s.statueUpgrades,
+          );
           const ngState: GameState = {
             ...s,
             screen: "game",
@@ -1323,6 +1347,8 @@ function switchScreen(state: GameState): void {
             returnFloor: 1,
             activeRift: null,
             activeCrucible: null,
+            pendingPackSwap: null,
+            hero: ngHero,
             messages: [
               {
                 text: `=== NEW GAME PLUS ${ngCount} ===`,
@@ -1342,10 +1368,7 @@ function switchScreen(state: GameState): void {
             ],
             town: { ...s.town, shopInventories: {}, deepestFloor: 1 },
           };
-          gameLoop.setState({
-            ...ngState,
-            hero: { ...ngState.hero, position: TOWN_START_INITIAL() },
-          });
+          gameLoop.setState(ngState);
         },
         () => {
           const freshState = createInitialGameState();
@@ -1399,6 +1422,16 @@ function switchScreen(state: GameState): void {
           shopInventories[sid] = initShopInventory(sid, deepest);
         }
 
+        const respawnedHero = recomputeDerivedStats(
+          {
+            ...s.hero,
+            hp: s.hero.maxHp,
+            mp: s.hero.maxMp,
+            position: TOWN_START_RETURN(),
+            activeEffects: [],
+          },
+          s.statueUpgrades,
+        );
         const respawned: GameState = {
           ...s,
           screen: "game",
@@ -1407,14 +1440,9 @@ function switchScreen(state: GameState): void {
           returnFloor: regenFloor,
           activeRift: null,
           activeCrucible: null,
+          pendingPackSwap: null,
           floors,
-          hero: {
-            ...s.hero,
-            hp: s.hero.maxHp,
-            mp: s.hero.maxMp,
-            position: TOWN_START_RETURN(),
-            activeEffects: [],
-          },
+          hero: respawnedHero,
           town: { ...s.town, shopInventories, deepestFloor: deepest },
           messages: [
             {
@@ -1532,6 +1560,16 @@ function switchScreen(state: GameState): void {
               "town-0": townFloor,
               [`${regenDungeon}-${regenFloor}`]: newDungeonFloor,
             };
+            const crucRespawnHero = recomputeDerivedStats(
+              {
+                ...s.hero,
+                hp: s.hero.maxHp,
+                mp: s.hero.maxMp,
+                position: TOWN_START_RETURN(),
+                activeEffects: [],
+              },
+              s.statueUpgrades,
+            );
             const respawned: GameState = {
               ...s,
               screen: "game",
@@ -1540,13 +1578,8 @@ function switchScreen(state: GameState): void {
               returnFloor: regenFloor,
               floors,
               activeCrucible: null,
-              hero: {
-                ...s.hero,
-                hp: s.hero.maxHp,
-                mp: s.hero.maxMp,
-                position: TOWN_START_RETURN(),
-                activeEffects: [],
-              },
+              pendingPackSwap: null,
+              hero: crucRespawnHero,
               messages: [
                 {
                   text: `${s.hero.name} awakens in town, battered but alive.`,
@@ -1559,7 +1592,7 @@ function switchScreen(state: GameState): void {
                   turn: s.turn,
                 },
               ],
-            } as GameState;
+            };
             gameLoop.setState(respawned);
             saveGame(respawned, 1);
           } else {

@@ -10,6 +10,17 @@ import {
   pullSave,
 } from "../core/CloudSave";
 
+/**
+ * Free localStorage room for a save slot write by removing other save slots.
+ * Never nukes achievements, cloud codes, touch layout, or other preferences.
+ */
+function clearOwnSaveSlots(keepSlot: number): void {
+  for (let i = 1; i <= 3; i++) {
+    if (i === keepSlot) continue;
+    localStorage.removeItem(`rd-save-${i}`);
+  }
+}
+
 export function createSplashScreen(
   container: HTMLElement,
   onAction: (action: GameAction) => void,
@@ -103,8 +114,8 @@ export function createSplashScreen(
       try {
         localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
       } catch {
-        // localStorage full — clear everything and retry
-        localStorage.clear();
+        // localStorage full — clear only save slots, not achievements/cloud codes/layout
+        clearOwnSaveSlots(targetSlot);
         localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
       }
       setCloudCode(targetSlot, code);
@@ -283,7 +294,7 @@ export function createSplashScreen(
                   try {
                     localStorage.setItem(`rd-save-${info.slot}`, saveStr);
                   } catch {
-                    localStorage.clear();
+                    clearOwnSaveSlots(info.slot);
                     setCloudCode(info.slot, cloudCode);
                     try {
                       localStorage.setItem(`rd-save-${info.slot}`, saveStr);
@@ -381,7 +392,7 @@ export function createSplashScreen(
           try {
             localStorage.setItem(`rd-save-${slotNum}`, saveStr);
           } catch {
-            localStorage.clear();
+            clearOwnSaveSlots(slotNum);
             try {
               localStorage.setItem(`rd-save-${slotNum}`, saveStr);
             } catch {

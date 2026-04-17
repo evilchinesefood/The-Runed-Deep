@@ -162,7 +162,7 @@ export function checkAndApplyLevelUps(state: GameState): GameState {
     hero.mp = Math.min(hero.mp + mpGain, newMaxMp);
 
     // Recompute all derived stats (AC, resistances, etc.) using full stat system
-    hero = { ...recomputeDerivedStats(hero), hp: hero.hp, mp: hero.mp };
+    hero = { ...recomputeDerivedStats(hero, state.statueUpgrades), hp: hero.hp, mp: hero.mp };
 
     Sound.levelUp();
     trackLevelUp(hero.level);
