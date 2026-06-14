@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/assets/logo.png" alt="The Runed Deep" width="480" />
+</p>
+
 # The Runed Deep
 
 A web-based reimagining of the classic 1989 tile-based RPG by Rick Saada. Built from the ground up in TypeScript with Vite, playable on desktop and mobile browsers.
@@ -17,12 +21,14 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ## Features
 
 ### Dungeon
+
 - **30-floor dungeon** with 6 themes (Mine, Lair, Crypt, Fortress, Ice, Castle) and 6 hand-designed boss floors
 - **Procedural generation** — 5 room shapes, locked/secret doors, water terrain, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental (fire, acid, lightning, wind, rune), special (portal, cobweb)
 - **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored
 
 ### Combat & Monsters
+
 - **159 monster types** across 6 AI behaviors (melee, ranged, caster, thief, summoner, stationary)
 - **Elemental attacks** — monsters deal cold, fire, acid, or drain damage reduced by your resistances
 - **Giants throw projectiles** — boulder and ice attacks at range
@@ -31,6 +37,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Evasion** — dodge chance from gear affixes
 
 ### Magic
+
 - **31 spells** split into two learning paths:
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks, clairvoyance
   - **15 spellbook-only** (found as loot): teleport, fire ball, ball lightning, resist spells, transmogrify, warcry, and more
@@ -40,16 +47,19 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Resist spells** — temporarily add +50 elemental resistance
 
 ### Items & Equipment
+
 - **100+ item templates** — weapons, armor, potions, spellbooks
 - **3 material tiers** — regular, elven, and meteoric steel with progressively better stats and enchantment ranges
 - **Color-coded rarity** — white (normal), blue (enchanted), purple (blessed), orange (unique), red (cursed)
 - **No identification system** — all items show full stats immediately
 
 #### Rune Sockets
+
 - **16 runes** across 3 rarities (common, uncommon, rare) — socketed into equipment at the Rune Forge
 - Each rune grants a unique passive effect that scales with the item
 
 #### Affix System
+
 - **25 scaled affixes** — each has a base value that scales with the item's enchantment level
 - **Offensive:** Sharpness, Might, Vampiric, Spell Power, Thorns, Fire/Frost/Storm Touched
 - **Defensive:** Hardened, Fortitude, Magic Resistance, Evasion, Vitality, Regeneration
@@ -58,43 +68,52 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Named items** — items with affixes get suffixes: "of Power", "of the Ancients", "of Legends", "of the Gods", "of Valor"
 
 #### Unique Items
+
 - **19 unique items** — named legendaries with special abilities not found on normal gear
 - Includes resist amulets, detection helms, levitation boots, damage-reflection shields, and late-game world-altering items
 - Boss kills guarantee a unique drop
 
 #### Blessed & Cursed Items
+
 - **Cursed items** — negative enchantments, freely unequipped, can roll powerful cursed-only affixes
 - **Blessed items** — remove curse at the Temple (25g): enchantment flips positive, cursed-only affixes persist as a bonus
 - **Blacksmith** — add or reroll affixes, pick from weighted options
 
 ### Fractured Rifts
+
 - **Random challenge dungeons** — 5–10 floor mini-dungeons with themed modifiers, launched from the Rift Stone in town
 - Unique rewards including rune shards
 
 ### The Crucible
+
 - **Wave-based arena combat** — fight escalating waves of enemies triggered from a stone in town
 - Rewards gold and runes on completion
 
 ### Statue of Fortune
+
 - **Essence-powered upgrades** — sacrifice unwanted gear to earn essence, then spend it to enhance your equipment
 
 ### New Game Plus
+
 - Completing the game unlocks a harder NG+ cycle with tougher enemies and better loot
 - Affix counts, enchantment ceilings, unique drop rates, and critical affix chances all scale up with each cycle
 - The item stash at The Resting Stag carries over between cycles
 
 ### Cloud Saves
+
 - **Cross-device sync** — enable cloud saves per slot with a 5-character code
 - **Auto-sync** — every save pushes to server; splash screen auto-pulls latest on load
 - **Load by code** — enter a code on any device to download a save
 
 ### Town
+
 - **12 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Enchanter, Magic Shop, Rift Stone, Temple, Blacksmith, Rune Forge, Crucible, Statue of Fortune
 - **Personal Item Stash** — store items at The Resting Stag; free, unlimited in/out, persists through NG+
 - **Shops restock** on floor clear and on death
 - **Mark for sale** — tag items in inventory, bulk sell at matching shops
 
 ### UI & Polish
+
 - **Rich item tooltips** — effective damage/accuracy/AC with enchantment breakdown, scaled affix values, unique abilities
 - **Tab-compare tooltips** — hold Tab while hovering an equippable to compare with your equipped item
 - **Character sheet** — attributes with equipment bonus breakdown, all active affix totals, combat stats (melee damage, spell power, dodge, swiftness, MP cost, regen, gold/XP bonus, life steal, thorns)
@@ -118,24 +137,24 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 
 ## Controls
 
-| Key | Action |
-|-----|--------|
-| WASD / Arrows / Numpad | Move (8 directions) |
-| E | Context action (pickup, stairs, enter, search) |
-| G | Pick up item |
-| Q | Wait / rest |
-| I | Inventory |
-| C | Character info |
-| Z | Spell hotkey management |
-| M | Minimap |
-| 1–5 | Quick-cast spell |
-| Tab | Auto-explore |
-| Tab (hold) | Compare hovered item with equipped |
-| F1 | Help |
-| F2 | Achievements |
-| F3 | Save game |
-| F4 | Toggle sound |
-| Esc | Close screen |
+| Key                    | Action                                         |
+| ---------------------- | ---------------------------------------------- |
+| WASD / Arrows / Numpad | Move (8 directions)                            |
+| E                      | Context action (pickup, stairs, enter, search) |
+| G                      | Pick up item                                   |
+| Q                      | Wait / rest                                    |
+| I                      | Inventory                                      |
+| C                      | Character info                                 |
+| Z                      | Spell hotkey management                        |
+| M                      | Minimap                                        |
+| 1–5                    | Quick-cast spell                               |
+| Tab                    | Auto-explore                                   |
+| Tab (hold)             | Compare hovered item with equipped             |
+| F1                     | Help                                           |
+| F2                     | Achievements                                   |
+| F3                     | Save game                                      |
+| F4                     | Toggle sound                                   |
+| Esc                    | Close screen                                   |
 
 ---
 
