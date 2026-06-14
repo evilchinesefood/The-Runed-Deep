@@ -329,6 +329,66 @@ export function injectTheme(): void {
       body { padding-top: env(safe-area-inset-top, 0px); }
     }
 
+    /* Help-screen credits: GitHub source link + "made with love" bezel
+       (ported from the MadeWithLove archive / IdleKingdom; VT323 via index.html) */
+    .rd-source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 15px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      color: var(--text);
+      text-decoration: none;
+      background: var(--bg-button);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+    }
+    .rd-source-link:hover {
+      background: var(--bg-button-hover);
+      border-color: var(--border-focus);
+      color: #e0c060;
+    }
+    .credit {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #0e3d1a 0%, #062a10 50%, #021608 100%);
+      border: 1px solid #2d8c4a;
+      box-shadow: inset 0 1px 0 rgba(140,255,170,0.6), inset 0 -2px 4px rgba(0,0,0,0.6), 0 4px 14px rgba(0,0,0,0.5), 0 0 18px rgba(92,255,138,0.2);
+      font-family: 'VT323', 'Consolas', 'Monaco', monospace;
+      font-size: 16px;
+      line-height: 1;
+      color: #5cff8a;
+      text-shadow: 0 0 6px #5cff8a, 0 0 14px rgba(92,255,138,0.55);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      user-select: none;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .credit:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(140,255,170,0.7), inset 0 -2px 4px rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.55), 0 0 24px rgba(92,255,138,0.35);
+    }
+    .credit:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), inset 0 1px 0 rgba(140,255,170,0.3), 0 1px 4px rgba(0,0,0,0.5);
+    }
+    .credit .heart {
+      color: #ff5c5c;
+      text-shadow: 0 0 6px #ff5c5c, 0 0 14px rgba(255,92,92,0.6);
+    }
+    .credit .cursor {
+      display: inline-block;
+      width: 0.55ch;
+      background: #5cff8a;
+      margin-left: 4px;
+      color: transparent;
+      animation: credit-blink 1s steps(1) infinite;
+    }
+    @keyframes credit-blink { 50% { opacity: 0; } }
+
     /* Respect reduced motion preferences */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -413,18 +473,45 @@ export function greyBtn(btn: HTMLButtonElement, disabled: boolean): void {
 }
 
 export const SERVICE_SLOT_LABELS: Record<string, string> = {
-  weapon: "Weapon", shield: "Shield", helmet: "Head", body: "Body",
-  cloak: "Cloak", gauntlets: "Hands", belt: "Belt", boots: "Feet",
-  ringLeft: "Ring L", ringRight: "Ring R", amulet: "Amulet", pack: "Pack",
+  weapon: "Weapon",
+  shield: "Shield",
+  helmet: "Head",
+  body: "Body",
+  cloak: "Cloak",
+  gauntlets: "Hands",
+  belt: "Belt",
+  boots: "Feet",
+  ringLeft: "Ring L",
+  ringRight: "Ring R",
+  amulet: "Amulet",
+  pack: "Pack",
 };
 
 export const INVENTORY_SLOT_LABELS: Record<string, string> = {
-  weapon: "Weapon", shield: "Shield", helmet: "Helmet", body: "Body",
-  cloak: "Cloak", gauntlets: "Gloves", belt: "Belt", boots: "Boots",
-  ringLeft: "Ring L", ringRight: "Ring R", amulet: "Amulet",
+  weapon: "Weapon",
+  shield: "Shield",
+  helmet: "Helmet",
+  body: "Body",
+  cloak: "Cloak",
+  gauntlets: "Gloves",
+  belt: "Belt",
+  boots: "Boots",
+  ringLeft: "Ring L",
+  ringRight: "Ring R",
+  amulet: "Amulet",
 };
 
 export const EQUIP_SLOT_ORDER = [
-  "helmet", "amulet", "cloak", "body", "weapon", "shield",
-  "gauntlets", "belt", "ringLeft", "ringRight", "boots", "pack",
+  "helmet",
+  "amulet",
+  "cloak",
+  "body",
+  "weapon",
+  "shield",
+  "gauntlets",
+  "belt",
+  "ringLeft",
+  "ringRight",
+  "boots",
+  "pack",
 ] as const;
