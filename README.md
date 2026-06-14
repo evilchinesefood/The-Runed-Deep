@@ -17,13 +17,13 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ## Features
 
 ### Dungeon
-- **30-floor dungeon** with 6 themes (Mine, Lair, Crypt, Fortress, Ice, Castle) and 8 hand-designed boss floors
+- **30-floor dungeon** with 6 themes (Mine, Lair, Crypt, Fortress, Ice, Castle) and 6 hand-designed boss floors
 - **Procedural generation** — 5 room shapes, locked/secret doors, water terrain, decorative objects
 - **10 trap types** — physical (pit, arrow, dart), elemental (fire, acid, lightning, wind, rune), special (portal, cobweb)
 - **Tab auto-explore** — walks to nearest unexplored area, stops at monsters/doors/traps/items, navigates to stairs when fully explored
 
 ### Combat & Monsters
-- **169 monster types** across 6 AI behaviors (melee, ranged, caster, thief, summoner, stationary)
+- **159 monster types** across 6 AI behaviors (melee, ranged, caster, thief, summoner, stationary)
 - **Elemental attacks** — monsters deal cold, fire, acid, or drain damage reduced by your resistances
 - **Giants throw projectiles** — boulder and ice attacks at range
 - **Flee mechanic** — monsters flee at low HP once, then fight to the death
@@ -31,9 +31,9 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Evasion** — dodge chance from gear affixes
 
 ### Magic
-- **30 spells** split into two learning paths:
+- **31 spells** split into two learning paths:
   - **15 auto-learned** on level-up (levels 2–16): healing, light, shield, detection, basic attacks, clairvoyance
-  - **14 spellbook-only** (found as loot): teleport, fire ball, ball lightning, resist spells, transmogrify, and more
+  - **15 spellbook-only** (found as loot): teleport, fire ball, ball lightning, resist spells, transmogrify, warcry, and more
   - **Time Stop** (NG+ only): freeze all monsters for 10 turns
 - **INT-based scaling** — spell damage and healing scale with effective Intelligence (base + gear bonuses)
 - **Spell hotkeys** — up to 5 spells bound to number keys
@@ -50,7 +50,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - Each rune grants a unique passive effect that scales with the item
 
 #### Affix System
-- **27 scaled affixes** — each has a base value that scales with the item's enchantment level
+- **25 scaled affixes** — each has a base value that scales with the item's enchantment level
 - **Offensive:** Sharpness, Might, Vampiric, Spell Power, Thorns, Fire/Frost/Storm Touched
 - **Defensive:** Hardened, Fortitude, Magic Resistance, Evasion, Vitality, Regeneration
 - **Utility:** Grace, Brilliance, Swiftness, Arcane Well, Arcane Mastery, Fortune
@@ -89,7 +89,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Load by code** — enter a code on any device to download a save
 
 ### Town
-- **12 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Enchanter, Magic Shop, Junk Store, Temple, Blacksmith, Rune Forge, Crucible, Statue of Fortune
+- **12 service buildings** — Inn (Item Stash), Armor Shop, General Store, Weapon Shop, Enchanter, Magic Shop, Rift Stone, Temple, Blacksmith, Rune Forge, Crucible, Statue of Fortune
 - **Personal Item Stash** — store items at The Resting Stag; free, unlimited in/out, persists through NG+
 - **Shops restock** on floor clear and on death
 - **Mark for sale** — tag items in inventory, bulk sell at matching shops
@@ -100,8 +100,8 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Character sheet** — attributes with equipment bonus breakdown, all active affix totals, combat stats (melee damage, spell power, dodge, swiftness, MP cost, regen, gold/XP bonus, life steal, thorns)
 - **Character creation** — name, gender, 4 attributes, difficulty, starting spell
 - **5 difficulty levels** — Normal, Intermediate, Hard, Nightmare, Impossible
-- **32 achievements**
-- **18 synthesized sound effects** via Web Audio API
+- **29 achievements**
+- **19 synthesized sound effects** via Web Audio API
 - **Visible gear** — equipped items render as layered overlays on the player sprite
 - **NPC shopkeepers** — each town building has a named NPC with a unique sprite
 - **Death respawn** — no game over; die → death summary → Continue → respawn in town
@@ -142,13 +142,13 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 ## Tech Stack
 
 - **TypeScript** + **Vite**
-- DOM-based rendering with CSS sprite sheets (no canvas)
+- DOM-based rendering with CSS sprite sheets (canvas only for the minimap)
 - 3-layer tile system: floor → ground → entity
 - DCSS tileset (CC0 licensed) with custom recolors for material tiers
 - Single global `GameState` with pure functional reducers
 - Web Audio API for sound synthesis
 - localStorage for saves; PHP cloud save backend
-- No frameworks, no runtime dependencies
+- No frameworks; no runtime dependencies in the shipped game bundle
 
 ---
 
@@ -177,7 +177,7 @@ src/
     items/        Loot generation — affixes, scaling, unique items
     monsters/     AI (6 types), spawning
     rift/         Fractured Rift generation and modifiers
-    spells/       All 30 spell implementations
+    spells/       All 31 spell implementations
     town/         Town map, shops, NPC services
   ui/             All screens — splash, creation, inventory, shop, spells, services, etc.
   rendering/      Map renderer, HUD, spell animations
