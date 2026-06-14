@@ -3,34 +3,75 @@
 // Saves are gzip-compressed before upload, decompressed on download
 // ============================================================
 
-const API_BASE = location.hostname.includes('jdayers.com')
-  ? '/rd/api/save.php'
-  : null;
-const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
+const host = location.hostname;
+const API_BASE =
+  host === "jdayers.com" || host.endsWith(".jdayers.com")
+    ? "/rd/api/save.php"
+    : null;
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_INFLATE_BYTES = 10 * 1024 * 1024; // 10 MB — saves stay far below this in practice
 
-async function compress(str: string): Promise<string> {
-  const blob = new Blob([str]);
-  const stream = blob.stream().pipeThrough(new CompressionStream('gzip'));
-  const buf = await new Response(stream).arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+const B64_CHUNK = 0x8000;
+
+function bytesToB64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += B64_CHUNK) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + B64_CHUNK) as unknown as number[],
+    );
+  }
   return btoa(binary);
 }
 
-async function decompress(b64: string): Promise<string> {
+function b64ToBytes(b64: string) {
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function compress(str: string): Promise<string> {
+  const blob = new Blob([str]);
+  const stream = blob.stream().pipeThrough(new CompressionStream("gzip"));
+  const buf = await new Response(stream).arrayBuffer();
+  return bytesToB64(new Uint8Array(buf));
+}
+
+async function decompress(b64: string): Promise<string> {
+  const bytes = b64ToBytes(b64);
   // Try native DecompressionStream first, fall back to manual inflate
-  if (typeof DecompressionStream !== 'undefined') {
+  if (typeof DecompressionStream !== "undefined") {
     try {
-      const blob = new Blob([bytes]);
-      const stream = blob.stream().pipeThrough(new DecompressionStream('gzip'));
-      return await new Response(stream).text();
-    } catch { /* fall through to manual */ }
+      const reader = new Blob([bytes])
+        .stream()
+        .pipeThrough(new DecompressionStream("gzip"))
+        .getReader();
+      const chunks: Uint8Array[] = [];
+      let total = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done || !value) break;
+        total += value.length;
+        if (total > MAX_INFLATE_BYTES) {
+          await reader.cancel();
+          throw new Error("Decompressed size exceeds limit");
+        }
+        chunks.push(value);
+      }
+      const merged = new Uint8Array(total);
+      let off = 0;
+      for (const c of chunks) {
+        merged.set(c, off);
+        off += c.length;
+      }
+      return new TextDecoder().decode(merged);
+    } catch (e) {
+      // Never retry a decompression bomb through the slower manual path
+      if (e instanceof Error && e.message.includes("exceeds limit")) throw e;
+      /* otherwise fall through to manual */
+    }
   }
   // Manual gzip decompression fallback (for iOS Safari)
   return inflateGzip(bytes);
@@ -39,12 +80,20 @@ async function decompress(b64: string): Promise<string> {
 /** Minimal gzip inflate — strips gzip header/footer and inflates raw deflate. */
 function inflateGzip(data: Uint8Array): string {
   // Gzip header: 1f 8b, method 08, then flags byte at offset 3
-  if (data[0] !== 0x1f || data[1] !== 0x8b || data[2] !== 0x08) throw new Error('Not gzip');
+  if (data[0] !== 0x1f || data[1] !== 0x8b || data[2] !== 0x08)
+    throw new Error("Not gzip");
   const flags = data[3];
   let pos = 10;
-  if (flags & 0x04) { const len = data[pos] | (data[pos + 1] << 8); pos += 2 + len; } // FEXTRA
-  if (flags & 0x08) { while (data[pos++] !== 0); } // FNAME
-  if (flags & 0x10) { while (data[pos++] !== 0); } // FCOMMENT
+  if (flags & 0x04) {
+    const len = data[pos] | (data[pos + 1] << 8);
+    pos += 2 + len;
+  } // FEXTRA
+  if (flags & 0x08) {
+    while (pos < data.length && data[pos++] !== 0);
+  } // FNAME
+  if (flags & 0x10) {
+    while (pos < data.length && data[pos++] !== 0);
+  } // FCOMMENT
   if (flags & 0x02) pos += 2; // FHCRC
   // Remaining is raw deflate + 8 byte trailer (CRC32 + ISIZE)
   const deflated = data.subarray(pos, data.length - 8);
@@ -55,19 +104,31 @@ function inflateGzip(data: Uint8Array): string {
 /** Raw DEFLATE inflate — supports stored, fixed Huffman, and dynamic Huffman blocks. */
 function rawInflate(src: Uint8Array): Uint8Array {
   const out: number[] = [];
-  let bitBuf = 0, bitCnt = 0, pos = 0;
+  let bitBuf = 0,
+    bitCnt = 0,
+    pos = 0;
   const guard = () => {
-    if (out.length > MAX_INFLATE_BYTES) throw new Error('Decompressed size exceeds limit');
+    if (out.length > MAX_INFLATE_BYTES)
+      throw new Error("Decompressed size exceeds limit");
   };
 
   function bits(n: number): number {
-    while (bitCnt < n) { bitBuf |= src[pos++] << bitCnt; bitCnt += 8; }
+    while (bitCnt < n) {
+      if (pos >= src.length)
+        throw new Error("Unexpected end of deflate stream");
+      bitBuf |= src[pos++] << bitCnt;
+      bitCnt += 8;
+    }
     const v = bitBuf & ((1 << n) - 1);
-    bitBuf >>>= n; bitCnt -= n;
+    bitBuf >>>= n;
+    bitCnt -= n;
     return v;
   }
 
-  function huffDecode(lengths: Uint8Array, n: number): (bits: () => number) => number {
+  function huffDecode(
+    lengths: Uint8Array,
+    n: number,
+  ): (bits: () => number) => number {
     const count = new Uint16Array(16);
     for (let i = 0; i < n; i++) if (lengths[i]) count[lengths[i]]++;
     const offs = new Uint16Array(16);
@@ -76,14 +137,18 @@ function rawInflate(src: Uint8Array): Uint8Array {
     for (let i = 0; i < n; i++) if (lengths[i]) syms[offs[lengths[i]]++] = i;
 
     return () => {
-      let code = 0, first = 0, idx = 0;
+      let code = 0,
+        first = 0,
+        idx = 0;
       for (let len = 1; len <= 15; len++) {
         code |= bits(1);
         const c = count[len];
         if (code < first + c) return syms[idx + (code - first)];
-        idx += c; first = (first + c) << 1; code <<= 1;
+        idx += c;
+        first = (first + c) << 1;
+        code <<= 1;
       }
-      throw new Error('Invalid Huffman');
+      throw new Error("Invalid Huffman");
     };
   }
 
@@ -93,13 +158,28 @@ function rawInflate(src: Uint8Array): Uint8Array {
   for (let i = 144; i <= 255; i++) fixedLitLen[i] = 9;
   for (let i = 256; i <= 279; i++) fixedLitLen[i] = 7;
   for (let i = 280; i <= 287; i++) fixedLitLen[i] = 8;
-  const fixedDist = new Uint8Array(32); fixedDist.fill(5);
+  const fixedDist = new Uint8Array(32);
+  fixedDist.fill(5);
 
-  const lenBase = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
-  const lenExtra = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
-  const distBase = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
-  const distExtra = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
-  const clOrder = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+  const lenBase = [
+    3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67,
+    83, 99, 115, 131, 163, 195, 227, 258,
+  ];
+  const lenExtra = [
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5,
+    5, 5, 5, 0,
+  ];
+  const distBase = [
+    1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513,
+    769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
+  ];
+  const distExtra = [
+    0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10,
+    11, 11, 12, 12, 13, 13,
+  ];
+  const clOrder = [
+    16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15,
+  ];
 
   let bfinal = 0;
   while (!bfinal) {
@@ -108,8 +188,10 @@ function rawInflate(src: Uint8Array): Uint8Array {
 
     if (btype === 0) {
       // Stored
-      bitBuf = 0; bitCnt = 0;
-      const len = src[pos] | (src[pos + 1] << 8); pos += 4;
+      bitBuf = 0;
+      bitCnt = 0;
+      const len = src[pos] | (src[pos + 1] << 8);
+      pos += 4;
       for (let i = 0; i < len; i++) out.push(src[pos++]);
       guard();
     } else {
@@ -130,10 +212,19 @@ function rawInflate(src: Uint8Array): Uint8Array {
         let ai = 0;
         while (ai < hlit + hdist) {
           const sym = decodeCL(() => bits(1));
-          if (sym < 16) { all[ai++] = sym; }
-          else if (sym === 16) { const r = 3 + bits(2); const v = all[ai - 1]; for (let j = 0; j < r; j++) all[ai++] = v; }
-          else if (sym === 17) { const r = 3 + bits(3); for (let j = 0; j < r; j++) all[ai++] = 0; }
-          else { const r = 11 + bits(7); for (let j = 0; j < r; j++) all[ai++] = 0; }
+          if (sym < 16) {
+            all[ai++] = sym;
+          } else if (sym === 16) {
+            const r = 3 + bits(2);
+            const v = all[ai - 1];
+            for (let j = 0; j < r; j++) all[ai++] = v;
+          } else if (sym === 17) {
+            const r = 3 + bits(3);
+            for (let j = 0; j < r; j++) all[ai++] = 0;
+          } else {
+            const r = 11 + bits(7);
+            for (let j = 0; j < r; j++) all[ai++] = 0;
+          }
         }
         decodeLit = huffDecode(all.subarray(0, hlit), hlit);
         decodeDist = huffDecode(all.subarray(hlit), hdist);
@@ -143,12 +234,17 @@ function rawInflate(src: Uint8Array): Uint8Array {
       for (;;) {
         const sym = decodeLit(getBit);
         if (sym === 256) break;
-        if (sym < 256) { out.push(sym); guard(); continue; }
+        if (sym < 256) {
+          out.push(sym);
+          guard();
+          continue;
+        }
         const li = sym - 257;
         const length = lenBase[li] + bits(lenExtra[li]);
         const di = decodeDist(getBit);
         const distance = distBase[di] + bits(distExtra[di]);
         const start = out.length - distance;
+        if (start < 0) throw new Error("Invalid back-reference");
         for (let i = 0; i < length; i++) out.push(out[start + i]);
         guard();
       }
@@ -158,9 +254,9 @@ function rawInflate(src: Uint8Array): Uint8Array {
 }
 
 export function generateCode(): string {
-  let code = '';
+  let code = "";
   const src =
-    typeof crypto !== 'undefined' && crypto.getRandomValues
+    typeof crypto !== "undefined" && crypto.getRandomValues
       ? crypto.getRandomValues(new Uint32Array(5))
       : null;
   for (let i = 0; i < 5; i++) {
@@ -185,26 +281,31 @@ export function clearCloudCode(slot: number): void {
 function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), FETCH_TIMEOUT_MS);
-  return fetch(url, { ...init, signal: ctl.signal }).finally(() => clearTimeout(timer));
+  return fetch(url, { ...init, signal: ctl.signal }).finally(() =>
+    clearTimeout(timer),
+  );
 }
 
-export async function pushSave(code: string, saveJson: string): Promise<boolean> {
+export async function pushSave(
+  code: string,
+  saveJson: string,
+): Promise<boolean> {
   if (!API_BASE) return false;
   try {
     const compressed = await compress(saveJson);
     const res = await fetchWithTimeout(API_BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code, data: compressed, compressed: true }),
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-      console.warn('[CLOUD] Push failed:', err.error);
+      const err = await res.json().catch(() => ({ error: "Unknown error" }));
+      console.warn("[CLOUD] Push failed:", err.error);
       return false;
     }
     return true;
   } catch (e) {
-    console.warn('[CLOUD] Push error:', e);
+    console.warn("[CLOUD] Push error:", e);
     return false;
   }
 }
@@ -212,14 +313,17 @@ export async function pushSave(code: string, saveJson: string): Promise<boolean>
 export async function pullSave(code: string): Promise<string | null> {
   if (!API_BASE) return null;
   try {
-    const res = await fetchWithTimeout(`${API_BASE}?code=${encodeURIComponent(code)}`);
+    const res = await fetchWithTimeout(
+      `${API_BASE}?code=${encodeURIComponent(code)}`,
+    );
     if (!res.ok) return null;
     const raw = await res.text();
+    if (raw.length > MAX_INFLATE_BYTES) return null;
     try {
       return await decompress(raw);
     } catch {
-      // Fallback: might be uncompressed (old save)
-      return raw;
+      // Only a legacy uncompressed save (looks like JSON); otherwise it's corrupt
+      return raw.trimStart().startsWith("{") ? raw : null;
     }
   } catch {
     return null;
