@@ -3,6 +3,7 @@ import { getSaveSlots, deleteSave } from "../core/save-load";
 import { createScreen, createPanel, createButton, el } from "./Theme";
 import {
   getCloudCode,
+  isCloudCode,
   setCloudCode,
   clearCloudCode,
   generateCode,
@@ -68,10 +69,10 @@ export function createSplashScreen(
   });
   const codeInput = document.createElement("input");
   codeInput.type = "text";
-  codeInput.maxLength = 5;
-  codeInput.placeholder = "Enter code";
+  codeInput.maxLength = 38;
+  codeInput.placeholder = "Paste recovery code";
   codeInput.style.cssText =
-    "background:#1a1a1a;border:1px solid #555;color:#fff;padding:6px 10px;font-size:14px;width:100px;text-transform:uppercase;font-family:monospace;letter-spacing:2px;text-align:center;border-radius:3px;";
+    "background:#1a1a1a;border:1px solid #555;color:#fff;padding:6px 10px;font-size:14px;width:220px;text-transform:none;font-family:monospace;letter-spacing:2px;text-align:center;border-radius:3px;";
   cloudRow.appendChild(codeInput);
 
   const cloudMsg = el("div", { fontSize: "12px", color: "#888", flex: "1" });
@@ -80,8 +81,8 @@ export function createSplashScreen(
   const fetchBtn = createButton("Load");
   fetchBtn.addEventListener("click", async () => {
     const code = codeInput.value.trim().toUpperCase();
-    if (code.length !== 5) {
-      cloudMsg.textContent = "Code must be 5 characters.";
+    if (!isCloudCode(code)) {
+      cloudMsg.textContent = "Paste a full recovery code or a legacy 5-character code.";
       cloudMsg.style.color = "#f44";
       return;
     }
@@ -206,10 +207,22 @@ export function createSplashScreen(
               color: "#f90",
               fontFamily: "monospace",
               letterSpacing: "1px",
+              overflowWrap: "anywhere",
             },
-            `Cloud: ${code}`,
+            `Recovery code: ${code}`,
           ),
         );
+      }
+
+      if (code) {
+        const copy = createButton("Copy recovery code", "sm");
+        copy.title = "Keep this code private: it can load and update your cloud save.";
+        copy.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          try { await navigator.clipboard.writeText(code); copy.textContent = "Copied"; }
+          catch { prompt("Copy your recovery code and keep it private:", code); }
+        });
+        details.appendChild(copy);
       }
 
       row.appendChild(details);

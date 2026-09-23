@@ -101,9 +101,10 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 
 ### Cloud Saves
 
-- **Cross-device sync** — enable cloud saves per slot with a 5-character code
+- **Cross-device sync** — enable cloud saves per slot with a private recovery code (`ABCDE-` followed by 32 hexadecimal characters)
 - **Auto-sync** — every save pushes to server; splash screen auto-pulls latest on load
-- **Load by code** — enter a code on any device to download a save
+- **Load by code** — enter the full recovery code on another device to download and sync a save. Keep it private: anyone holding it can read and update that save.
+- **Legacy saves** — old five-character codes still load, but their cloud copies are read-only. The next upload creates a protected copy and updates the local slot to its new recovery code; the original remains available. Copy the new code before switching devices.
 
 ### Town
 
@@ -215,3 +216,7 @@ public/
 - Original game concept by Rick Saada (Castle of the Winds, 1989)
 - Dungeon tileset from [DCSS](https://github.com/crawl/crawl) (CC0)
 - Built with [Claude Code](https://claude.ai/claude-code)
+
+## Security checks and deployment
+
+Run `npm run test:security` with PHP and Node installed to exercise authorization and legacy-save migration against temporary storage. `bash Scripts/Deploy.sh` runs these checks, builds for `/rd/`, and previews deployment; add `--live` to deploy. The script preserves live save and rate-limit directories, excludes source maps, retains old hashed assets for open tabs, and sets files/directories to 0644/0755. Refresh existing tabs after security releases.

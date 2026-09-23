@@ -1,0 +1,8 @@
+Options -Indexes
+ErrorDocument 403 default
+ErrorDocument 404 default
+<IfModule mod_headers.c>
+  <Files "index.html">
+    Header always set Cache-Control "no-cache, must-revalidate"
+  </Files>
+</IfModule>

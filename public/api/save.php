@@ -5,6 +5,9 @@
 // Saves are gzip-compressed base64 from the client
 // ============================================================
 
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 $ALLOWED_ORIGINS = ['https://dev.jdayers.com', 'https://jdayers.com', 'https://www.jdayers.com'];
 
 header('Content-Type: application/json');
@@ -14,7 +17,7 @@ if (in_array($origin, $ALLOWED_ORIGINS, true)) {
     header('Vary: Origin');
 }
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
 
@@ -22,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
 $SAVES_DIR = __DIR__ . '/saves';
 $RATE_DIR  = __DIR__ . '/ratelimit';
+umask(0077);
+$MAX_BODY_SIZE  = 1100000;
 $MAX_SAVES      = 500;
 $MAX_DATA_SIZE  = 1000000;  // 1MB compressed (base64) — real saves are far below this
 $MIN_DATA_SIZE  = 24;       // smallest plausible gzip+base64 blob
@@ -56,8 +61,8 @@ function checkRate(string $ip, string $action, int $max, int $window): void {
     global $RATE_DIR;
     $file = $RATE_DIR . '/' . md5($ip . $action) . '.json';
     $fp = fopen($file, 'c+');
-    if ($fp === false) return; // fail open — availability over strict limiting
-    if (!flock($fp, LOCK_EX)) { fclose($fp); return; }
+    if ($fp === false) fail(503, 'Rate limiter unavailable.');
+    if (!flock($fp, LOCK_EX | LOCK_NB)) { fclose($fp); fail(503, 'Please retry shortly.'); }
 
     $raw = stream_get_contents($fp);
     $entries = $raw ? (json_decode($raw, true) ?: []) : [];
@@ -103,7 +108,10 @@ function evictOldest(string $dir, int $ttl): bool {
         $m = filemtime($f);
         if ($m !== false && $m < $oldestTime) { $oldestTime = $m; $oldest = $f; }
     }
-    if ($oldest !== null && (time() - $oldestTime) > $ttl) return @unlink($oldest);
+    if ($oldest !== null && (time() - $oldestTime) > $ttl && @unlink($oldest)) {
+        @unlink(substr($oldest, 0, -4) . '.auth');
+        return true;
+    }
     return false;
 }
 
@@ -133,7 +141,8 @@ cleanRateFiles();
 
 // ── GET: Retrieve a save ────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $code = strtoupper(trim((string)($_GET['code'] ?? '')));
+    if (!is_string($_GET['code'] ?? '')) fail(400, 'Invalid code format.');
+    $code = strtoupper(trim($_GET['code'] ?? ''));
     if (!preg_match($CODE_PATTERN, $code)) fail(400, 'Invalid code format.');
 
     checkRate($ip, 'read', $RATE_MAX_READ, $RATE_WINDOW);
@@ -141,6 +150,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $file = $SAVES_DIR . '/' . $code . '.dat';
     if (!file_exists($file)) fail(404, 'Save not found.');
 
+    // New saves require the private recovery token. Legacy saves remain readable,
+    // but cannot be claimed or overwritten by knowing their old short code.
+    $authFile = $SAVES_DIR . '/' . $code . '.auth';
+    if (file_exists($authFile)) {
+        $bearer = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        $token = preg_match('/^Bearer ([a-f0-9]{32})$/', $bearer, $m) ? $m[1] : '';
+        $expected = trim((string)file_get_contents($authFile));
+        if (!$token || !hash_equals($expected, hash('sha256', $token))) fail(403, 'Recovery code required.');
+    }
     @touch($file); // keep active saves from being evicted
     // Success body is raw compressed text; error responses are JSON.
     header('Content-Type: text/plain');
@@ -150,31 +168,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 // ── POST: Store a save ──────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $body = json_decode(file_get_contents('php://input'), true);
+    if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > $MAX_BODY_SIZE) fail(413, 'Request too large.');
+    $raw = file_get_contents('php://input', false, null, 0, $MAX_BODY_SIZE + 1);
+    if ($raw === false || strlen($raw) > $MAX_BODY_SIZE) fail(413, 'Request too large.');
+    $body = json_decode($raw, true);
     if (!is_array($body)) fail(400, 'Invalid JSON body.');
 
-    $code = strtoupper(trim((string)($body['code'] ?? '')));
+    if (!is_string($body['code'] ?? '')) fail(400, 'Invalid code format.');
+    $code = strtoupper(trim($body['code'] ?? ''));
     $data = $body['data'] ?? '';
 
     if (!preg_match($CODE_PATTERN, $code)) fail(400, 'Invalid code format.');
     if (!is_string($data) || strlen($data) < $MIN_DATA_SIZE) fail(400, 'Missing save data.');
     if (strlen($data) > $MAX_DATA_SIZE) fail(400, 'Save data too large (max 1MB compressed).');
 
+    $token = $body['token'] ?? '';
+    if (!is_string($token) || !preg_match('/^[a-f0-9]{32}$/', $token)) fail(403, 'Reload the game to use secure cloud saves.');
+    checkRate($ip, 'write', $RATE_MAX_WRITE, $RATE_WINDOW);
     validateSaveBlob($data, !empty($body['compressed']));
 
-    checkRate($ip, 'write', $RATE_MAX_WRITE, $RATE_WINDOW);
+    // Serialise ownership creation, capacity checks and replacement together.
+    $lock = fopen($SAVES_DIR . '/.write.lock', 'c');
+    if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) fail(503, 'Please retry shortly.');
+    $authFile = $SAVES_DIR . '/' . $code . '.auth';
+    $existing = file_exists($SAVES_DIR . '/' . $code . '.dat');
+    if ($existing && !file_exists($authFile)) fail(409, 'Legacy saves are read-only. Save a new protected copy.');
+    if (file_exists($authFile)) {
+        $expected = trim((string)file_get_contents($authFile));
+        if (!hash_equals($expected, hash('sha256', $token))) fail(403, 'Recovery code required.');
+    } else {
+        $authFile = $SAVES_DIR . '/' . $code . '.auth';
+    }
 
     $file = $SAVES_DIR . '/' . $code . '.dat';
     if (!file_exists($file) && countSaves($SAVES_DIR, $MAX_SAVES) >= $MAX_SAVES) {
         if (!evictOldest($SAVES_DIR, $SAVE_TTL)) fail(507, 'Server save limit reached.');
     }
 
+    if (!file_exists($authFile) && file_put_contents($authFile, hash('sha256', $token), LOCK_EX) === false) {
+        fail(500, 'Failed to protect save.');
+    }
     // Atomic write: temp file + rename so readers never see a torn file.
     $tmp = $file . '.' . getmypid() . '.tmp';
     if (file_put_contents($tmp, $data, LOCK_EX) === false || !rename($tmp, $file)) {
         @unlink($tmp);
         fail(500, 'Failed to store save.');
     }
+    flock($lock, LOCK_UN); fclose($lock);
     echo json_encode(['ok' => true, 'code' => $code, 'size' => strlen($data)]);
     exit;
 }

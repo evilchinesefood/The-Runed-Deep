@@ -254,16 +254,19 @@ function rawInflate(src: Uint8Array): Uint8Array {
 }
 
 export function generateCode(): string {
-  let code = "";
-  const src =
-    typeof crypto !== "undefined" && crypto.getRandomValues
-      ? crypto.getRandomValues(new Uint32Array(5))
-      : null;
-  for (let i = 0; i < 5; i++) {
-    const r = src ? src[i] : Math.floor(Math.random() * 0xffffffff);
-    code += CODE_CHARS[r % CODE_CHARS.length];
-  }
-  return code;
+  const bytes = crypto.getRandomValues(new Uint8Array(21));
+  const name = Array.from(bytes.slice(0, 5), (b) => CODE_CHARS[b % CODE_CHARS.length]).join("");
+  const token = Array.from(bytes.slice(5), (b) => b.toString(16).padStart(2, "0")).join("");
+  return `${name}-${token}`;
+}
+
+export function isCloudCode(code: string): boolean {
+  return /^[A-HJ-NP-Z2-9]{5}(?:-[a-f0-9]{32})?$/i.test(code);
+}
+
+function parseCode(code: string): { name: string; token: string } {
+  const [name, token = ""] = code.split("-");
+  return { name: name.toUpperCase(), token: token.toLowerCase() };
 }
 
 export function getCloudCode(slot: number): string | null {
@@ -290,13 +293,23 @@ export async function pushSave(
   code: string,
   saveJson: string,
 ): Promise<boolean> {
-  if (!API_BASE) return false;
+  if (!API_BASE || !isCloudCode(code)) return false;
+  // Old codes never confer ownership. Fork a protected copy of the local save
+  // and update only slots that were already linked to this legacy code.
+  if (!parseCode(code).token) {
+    const replacement = generateCode();
+    if (!(await pushSave(replacement, saveJson))) return false;
+    for (let slot = 1; slot <= 3; slot++) {
+      if (getCloudCode(slot) === code) setCloudCode(slot, replacement);
+    }
+    return true;
+  }
   try {
     const compressed = await compress(saveJson);
     const res = await fetchWithTimeout(API_BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, data: compressed, compressed: true }),
+      body: JSON.stringify({ code: parseCode(code).name, token: parseCode(code).token, data: compressed, compressed: true }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: "Unknown error" }));
@@ -311,10 +324,11 @@ export async function pushSave(
 }
 
 export async function pullSave(code: string): Promise<string | null> {
-  if (!API_BASE) return null;
+  if (!API_BASE || !isCloudCode(code)) return null;
   try {
     const res = await fetchWithTimeout(
-      `${API_BASE}?code=${encodeURIComponent(code)}`,
+      `${API_BASE}?code=${encodeURIComponent(parseCode(code).name)}`,
+      { headers: parseCode(code).token ? { Authorization: `Bearer ${parseCode(code).token}` } : {} },
     );
     if (!res.ok) return null;
     const raw = await res.text();

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:security": "python3 Tests/CloudSaveApi.py"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,6 @@
     "vite": "^8.0.0"
   },
   "dependencies": {
-    "sharp": "^0.34.5"
+    "sharp": "^0.35.4"
   }
 }
