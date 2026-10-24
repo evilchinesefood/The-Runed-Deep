@@ -1,4 +1,4 @@
-import json, os, shutil, socket, subprocess, tempfile, time, unittest, urllib.request, urllib.error
+import fcntl, hashlib, json, os, shutil, socket, subprocess, tempfile, time, unittest, urllib.request, urllib.error
 from pathlib import Path
 
 class ApiTest(unittest.TestCase):
@@ -39,8 +39,119 @@ class ApiTest(unittest.TestCase):
     @classmethod
     def prepare(cls):
         shutil.copy(Path(__file__).resolve().parents[1] / "public/api/save.php", cls.root / "api.php")
-        (cls.root / "saves").mkdir()
-        (cls.root / "saves/ABCDE.dat").write_text(json.dumps({"hero":{"name":"Legacy"},"currentFloor":1}))
+
+    def setUp(self):
+        for name in ["saves", "ratelimit"]:
+            shutil.rmtree(self.root / name, ignore_errors=True)
+            (self.root / name).mkdir()
+        self.save = json.dumps({"hero":{"name":"Test"},"currentFloor":1})
+        self.token = "a" * 32
+        (self.root / "saves/ABCDE.dat").write_text(json.dumps({"hero":{"name":"Legacy"},"currentFloor":1}))
+
+    def write(self, code, token=None):
+        return self.req(body={"code":code,"token":token or self.token,"data":self.save})
+
+    def age_allocations(self):
+        markers = list((self.root / "saves").glob("*.owner"))
+        self.assertTrue(markers, "New allocations must retain durable ownership metadata")
+        for marker in markers:
+            data = json.loads(marker.read_text())
+            data["created"] = int(time.time()) - 90000
+            marker.write_text(json.dumps(data))
+
+    def fill_global_capacity(self):
+        # Only disposable fixture storage is populated. Existing production saves
+        # and the real application's runtime directories are never opened.
+        for index in range(500 - len(list((self.root / "saves").glob("*.dat")))):
+            (self.root / "saves" / f"fixture-{index}.dat").write_text(self.save)
+
+    def test_new_allocations_have_durable_daily_limit(self):
+        for code in ["FGHJK", "MNPQR", "STUVW"]:
+            self.assertEqual(self.write(code)[0], 200)
+        # Normal hourly-rate cleanup must not erase the allocation budget.
+        shutil.rmtree(self.root / "ratelimit")
+        self.assertEqual(self.write("XYZ23")[0], 429)
+        self.assertFalse((self.root / "saves/XYZ23.dat").exists())
+        self.assertEqual(self.write("FGHJK")[0], 200)
+
+    def test_active_allocation_limit_survives_daily_window(self):
+        for code in ["FGHJK", "MNPQR", "STUVW"]:
+            self.assertEqual(self.write(code)[0], 200)
+        self.age_allocations()
+        for code in ["XYZ23", "45678", "9ABCD"]:
+            self.assertEqual(self.write(code)[0], 200)
+        self.age_allocations()
+        self.assertEqual(self.write("EFGHJ")[0], 429)
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        self.assertEqual(len(list((self.root / "saves").glob("*.dat"))), 7)
+        self.fill_global_capacity()
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        self.assertEqual(len(list((self.root / "saves").glob("*.dat"))), 500)
+
+    def test_stale_allocations_stop_counting_without_deleting_old_saves(self):
+        for code in ["FGHJK", "MNPQR", "STUVW"]:
+            self.assertEqual(self.write(code)[0], 200)
+        self.age_allocations()
+        for code in ["XYZ23", "45678", "9ABCD"]:
+            self.assertEqual(self.write(code)[0], 200)
+        self.age_allocations()
+        for file in (self.root / "saves").glob("*.dat"):
+            os.utime(file, (1, 1))
+        self.assertEqual(self.write("EFGHJ")[0], 200)
+        self.assertEqual(len(list((self.root / "saves").glob("*.dat"))), 8)
+        self.assertEqual(self.req("?code=FGHJK", token=self.token)[0], 200)
+
+    def test_collision_and_wrong_token_do_not_use_allocation_budget(self):
+        self.assertEqual(self.write("ABCDE")[0], 409)
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        self.assertEqual(self.write("FGHJK", "b" * 32)[0], 403)
+        for code in ["MNPQR", "STUVW"]:
+            self.assertEqual(self.write(code)[0], 200)
+        self.assertEqual(self.write("XYZ23")[0], 429)
+
+    def test_unmarked_existing_saves_are_grandfathered_at_global_capacity(self):
+        (self.root / "saves/FGHJK.dat").write_text(self.save)
+        (self.root / "saves/FGHJK.auth").write_text(hashlib.sha256(self.token.encode()).hexdigest())
+        self.fill_global_capacity()
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        self.assertFalse((self.root / "saves/FGHJK.owner").exists())
+        self.assertEqual(self.req("?code=ABCDE")[0], 200)
+        self.assertEqual(self.write("MNPQR")[0], 507)
+        self.assertEqual(len(list((self.root / "saves").glob("*.dat"))), 500)
+
+    def test_owner_metadata_is_private_and_not_a_raw_ip(self):
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        marker = self.root / "saves/FGHJK.owner"
+        self.assertTrue(marker.exists())
+        metadata = json.loads(marker.read_text())
+        salt = self.root / "saves/.allocation.salt"
+        self.assertTrue(salt.exists())
+        self.assertRegex(metadata["owner"], r"^[a-f0-9]{64}$")
+        self.assertNotIn("127.0.0.1", marker.read_text())
+        for file in [marker, salt]:
+            self.assertEqual(file.stat().st_mode & 0o077, 0)
+
+    def test_invalid_ownership_metadata_fails_closed_only_for_allocations(self):
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        (self.root / "saves/FGHJK.owner").write_text("invalid")
+        self.assertEqual(self.write("MNPQR")[0], 503)
+        self.assertFalse((self.root / "saves/MNPQR.dat").exists())
+        self.assertEqual(self.write("FGHJK")[0], 200)
+
+    def test_missing_owner_salt_cannot_reset_allocation_budget(self):
+        self.assertEqual(self.write("FGHJK")[0], 200)
+        salt = self.root / "saves/.allocation.salt"
+        self.assertTrue(salt.exists())
+        salt.unlink()
+        self.assertEqual(self.write("MNPQR")[0], 503)
+        self.assertEqual(self.write("FGHJK")[0], 200)
+
+    def test_write_lock_contention_does_not_change_saves(self):
+        with (self.root / "saves/.write.lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.assertEqual(self.write("FGHJK")[0], 503)
+        self.assertFalse((self.root / "saves/FGHJK.dat").exists())
+        self.assertEqual(self.write("FGHJK")[0], 200)
 
     def test_authorization_and_migration(self):
         save=json.dumps({"hero":{"name":"Test"},"currentFloor":1})
@@ -80,7 +191,8 @@ assert.equal(urls.some(u=>u.includes(recovery.split('-')[1])),false);
 assert.equal(cloud.isCloudCode(recovery.toUpperCase()),true);
 console.log('Client recovery-code migration and roundtrip passed');
 """.replace('BASE',json.dumps(self.url)).replace('MODULE',json.dumps(module))
-        p=subprocess.run(['node','--input-type=module','-e',script],capture_output=True,text=True,timeout=20)
+        loader=str(Path(__file__).resolve().parent/'TypeScriptLoader.mjs')
+        p=subprocess.run(['node','--import',loader,'--input-type=module','-e',script],capture_output=True,text=True,timeout=20)
         self.assertEqual(p.returncode,0,p.stdout+p.stderr)
 
 if __name__ == "__main__": unittest.main()

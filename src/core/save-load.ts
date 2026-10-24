@@ -71,43 +71,21 @@ function pruneSaveState(state: GameState): GameState {
 export function saveGame(state: GameState, slot: number = 1): boolean {
   if (slot < 1 || slot > MAX_SLOTS) return false;
 
-  const saveState = pruneSaveState({ ...state, screen: "game" });
-  const saveJson = JSON.stringify(saveState);
-
-  // Push only to the active slot's cloud code (not all slots)
-  const code = getCloudCode(slot);
-  if (code) {
-    pushSave(code, saveJson).then((ok) => {
-      if (!ok) console.warn(`[SAVE] Cloud push failed for code ${code}`);
-    });
-  }
-
   try {
-    const json = `{"version":1,"timestamp":${Date.now()},"state":${saveJson}}`;
+    const saveState = pruneSaveState({ ...state, screen: "game" });
+    const saveJson = JSON.stringify(saveState);
+    const code = getCloudCode(slot);
+    const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState, cloudCode: code });
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
-    return true;
-  } catch (e: any) {
-    const isQuota =
-      e?.name === "QuotaExceededError" ||
-      e?.code === 22 || // Safari
-      e?.code === 1014; // Firefox
-    if (isQuota) {
-      try {
-        localStorage.removeItem(SAVE_KEY_PREFIX + slot);
-        const json = JSON.stringify({
-          version: 1,
-          timestamp: Date.now(),
-          state: saveState,
-        });
-        localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
-        return true;
-      } catch {
-        const hasCloud = Array.from({ length: MAX_SLOTS }, (_, i) =>
-          getCloudCode(i + 1),
-        ).some(Boolean);
-        if (hasCloud) return true;
-      }
+    if (code) {
+      pushSave(code, saveJson).then(ok => {
+        if (!ok) console.warn("[SAVE] Cloud push failed; the local save is intact.");
+      });
     }
+    return true;
+  } catch (e) {
+    // Failed setItem is atomic: retaining the previous value is safer than
+    // deleting it to retry or reporting success for an unrelated cloud slot.
     console.error("[SAVE] Failed to save game:", e);
     return false;
   }

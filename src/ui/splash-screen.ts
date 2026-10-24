@@ -1,6 +1,7 @@
 import type { GameAction, GameState } from "../core/types";
 import { getSaveSlots, deleteSave } from "../core/save-load";
 import { createScreen, createPanel, createButton, el } from "./Theme";
+import { parseCloudState } from "../core/SaveValidation";
 import {
   getCloudCode,
   isCloudCode,
@@ -11,15 +12,15 @@ import {
   pullSave,
 } from "../core/CloudSave";
 
-/**
- * Free localStorage room for a save slot write by removing other save slots.
- * Never nukes achievements, cloud codes, touch layout, or other preferences.
- */
-function clearOwnSaveSlots(keepSlot: number): void {
-  for (let i = 1; i <= 3; i++) {
-    if (i === keepSlot) continue;
-    localStorage.removeItem(`rd-save-${i}`);
-  }
+function syncCloudSave(slot: number, json: string, code: string): GameState | null {
+  const state = parseCloudState(json);
+  const current = localStorage.getItem(`rd-save-${slot}`);
+  // A slot may have been deleted or relinked while the download was in flight.
+  if (!current || getCloudCode(slot) !== code) return null;
+  const turn = JSON.parse(current).state?.turn;
+  if (!Number.isSafeInteger(turn) || state.turn < turn) return null;
+  localStorage.setItem(`rd-save-${slot}`, JSON.stringify({ version: 1, timestamp: Date.now(), state, cloudCode: code }));
+  return state;
 }
 
 export function createSplashScreen(
@@ -99,33 +100,23 @@ export function createSplashScreen(
       return;
     }
 
-    // Find first empty slot, or use slot 3
-    const slots = getSaveSlots();
-    let targetSlot = slots.findIndex((s) => s === null) + 1;
-    if (targetSlot === 0) targetSlot = 3;
-
-    // Parse and validate
     try {
-      const state = JSON.parse(json) as GameState;
-      if (!state.hero?.name) throw new Error("No hero name in save data");
-
-      // Wrap in save format and store locally
-      const saveData = { version: 1, timestamp: Date.now(), state };
-      const saveStr = JSON.stringify(saveData);
-      try {
-        localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
-      } catch {
-        // localStorage full — clear only save slots, not achievements/cloud codes/layout
-        clearOwnSaveSlots(targetSlot);
-        localStorage.setItem(`rd-save-${targetSlot}`, saveStr);
-      }
-      setCloudCode(targetSlot, code);
+      const state = parseCloudState(json);
+      // Malformed existing slots are still user data, not free space.
+      const targetSlot = [1, 2, 3].find(slot => localStorage.getItem(`rd-save-${slot}`) === null);
+      if (!targetSlot) throw new Error("All save slots are occupied. Export or back up a save, then delete a slot before importing.");
+      const saveData = { version: 1, timestamp: Date.now(), state, cloudCode: code };
+      // setItem replaces atomically or leaves the original untouched. Never delete
+      // saves to make room, and store the recovery code in the same atomic record.
+      localStorage.setItem(`rd-save-${targetSlot}`, JSON.stringify(saveData));
 
       cloudMsg.textContent = `Loaded into slot ${targetSlot}! Refreshing...`;
       cloudMsg.style.color = "#4f4";
       setTimeout(() => location.reload(), 800);
     } catch (err: any) {
-      cloudMsg.textContent = `Error: ${err?.message ?? "Invalid save data."}`;
+      cloudMsg.textContent = err?.name === "QuotaExceededError"
+        ? "Not enough browser storage. Your existing saves have not changed. Back up a save before freeing space."
+        : `Error: ${err?.message ?? "Invalid save data."}`;
       cloudMsg.style.color = "#f44";
     }
   });
@@ -293,30 +284,7 @@ export function createSplashScreen(
           const remote = await pullSave(cloudCode);
           if (remote) {
             try {
-              const state = JSON.parse(remote) as GameState;
-              if (state.hero?.name) {
-                // Only overwrite local if cloud is newer (higher turn count)
-                const localJson = localStorage.getItem(`rd-save-${info.slot}`);
-                const localTurn = localJson
-                  ? (JSON.parse(localJson).state?.turn ?? 0)
-                  : 0;
-                if (state.turn >= localTurn) {
-                  const saveData = { version: 1, timestamp: Date.now(), state };
-                  const saveStr = JSON.stringify(saveData);
-                  localStorage.removeItem(`rd-save-${info.slot}`);
-                  try {
-                    localStorage.setItem(`rd-save-${info.slot}`, saveStr);
-                  } catch {
-                    clearOwnSaveSlots(info.slot);
-                    setCloudCode(info.slot, cloudCode);
-                    try {
-                      localStorage.setItem(`rd-save-${info.slot}`, saveStr);
-                    } catch {
-                      /* give up */
-                    }
-                  }
-                }
-              }
+              syncCloudSave(info.slot, remote, cloudCode);
             } catch {
               /* use local */
             }
@@ -379,7 +347,7 @@ export function createSplashScreen(
     splash.appendChild(slotPanel);
 
     // Background cloud sync — pull latest for each cloud-enabled slot
-    // Cloud is source of truth — always overwrite local
+    // Replace only validated, newer snapshots; failed writes leave local saves intact.
     for (let i = 0; i < slots.length; i++) {
       const info = slots[i];
       if (!info) continue;
@@ -391,29 +359,8 @@ export function createSplashScreen(
         try {
           const remote = await pullSave(code);
           if (!remote) return;
-          const state = JSON.parse(remote) as GameState;
-          if (!state.hero?.name) return;
-          // Only overwrite local if cloud has higher turn count
-          const localJson = localStorage.getItem(`rd-save-${slotNum}`);
-          const localTurn = localJson
-            ? (JSON.parse(localJson).state?.turn ?? 0)
-            : 0;
-          if (state.turn < localTurn) return;
-          const saveData = { version: 1, timestamp: Date.now(), state };
-          const saveStr = JSON.stringify(saveData);
-          localStorage.removeItem(`rd-save-${slotNum}`);
-          try {
-            localStorage.setItem(`rd-save-${slotNum}`, saveStr);
-          } catch {
-            clearOwnSaveSlots(slotNum);
-            try {
-              localStorage.setItem(`rd-save-${slotNum}`, saveStr);
-            } catch {
-              return;
-            }
-          }
-          // Restore cloud code if cleared
-          setCloudCode(slotNum, code);
+          const state = syncCloudSave(slotNum, remote, code);
+          if (!state) return;
           // Update the slot display in-place
           if (!rowEl) return;
           const details = rowEl.querySelector("div") as HTMLElement;

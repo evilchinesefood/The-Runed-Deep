@@ -35,6 +35,9 @@ $SAVE_TTL       = 7776000;  // 90 days — only stale saves are evictable when f
 $RATE_WINDOW    = 3600;
 $RATE_MAX_WRITE = 20;
 $RATE_MAX_READ  = 60;
+$MAX_OWNED_SAVES = 6;
+$MAX_NEW_SAVES   = 3;
+$ALLOCATION_WINDOW = 86400;
 $CODE_PATTERN   = '/^[A-HJ-NP-Z2-9]{5}$/';  // matches client alphabet (no 0/O/1/I/L)
 
 function fail(int $code, string $msg): void {
@@ -92,7 +95,7 @@ function cleanRateFiles(): void {
 // Count .dat saves, short-circuiting once the cap is reached.
 function countSaves(string $dir, int $cap): int {
     $dh = opendir($dir);
-    if ($dh === false) return 0;
+    if ($dh === false) fail(503, 'Storage unavailable.');
     $n = 0;
     while (($f = readdir($dh)) !== false) {
         if (substr($f, -4) === '.dat' && ++$n >= $cap) break;
@@ -110,9 +113,55 @@ function evictOldest(string $dir, int $ttl): bool {
     }
     if ($oldest !== null && (time() - $oldestTime) > $ttl && @unlink($oldest)) {
         @unlink(substr($oldest, 0, -4) . '.auth');
+        @unlink(substr($oldest, 0, -4) . '.owner');
         return true;
     }
     return false;
+}
+
+function writePrivateFile(string $file, string $data): bool {
+    $tmp = $file . '.' . getmypid() . '.tmp';
+    if (@file_put_contents($tmp, $data, LOCK_EX) !== strlen($data) || !@rename($tmp, $file)) {
+        @unlink($tmp);
+        return false;
+    }
+    return true;
+}
+
+// Called only for new allocations, while holding the global write lock. Metadata
+// lives with saves so hourly limiter cleanup cannot reset the ownership budget.
+function allocationOwner(string $ip): string {
+    global $SAVES_DIR, $MAX_OWNED_SAVES, $MAX_NEW_SAVES, $ALLOCATION_WINDOW, $SAVE_TTL;
+    $markers = glob($SAVES_DIR . '/*.owner');
+    if ($markers === false) fail(503, 'Allocation limits unavailable.');
+    $saltFile = $SAVES_DIR . '/.allocation.salt';
+    if (!file_exists($saltFile)) {
+        // Losing the key must never silently give every IP a fresh budget.
+        if ($markers) fail(503, 'Allocation limits unavailable.');
+        if (!writePrivateFile($saltFile, bin2hex(random_bytes(32)))) fail(503, 'Allocation limits unavailable.');
+    }
+    $salt = @file_get_contents($saltFile);
+    if (!is_string($salt) || !preg_match('/^[a-f0-9]{64}$/', $salt)) fail(503, 'Allocation limits unavailable.');
+    $owner = hash_hmac('sha256', $ip, $salt);
+    $active = 0; $recent = 0; $now = time();
+    foreach ($markers as $marker) {
+        $metadata = json_decode((string)@file_get_contents($marker), true);
+        if (!is_array($metadata) || !is_string($metadata['owner'] ?? null)
+            || !preg_match('/^[a-f0-9]{64}$/', $metadata['owner'])
+            || !is_int($metadata['created'] ?? null) || $metadata['created'] <= 0) {
+            fail(503, 'Allocation limits unavailable.');
+        }
+        if (!hash_equals($owner, $metadata['owner'])) continue;
+        $file = substr($marker, 0, -6) . '.dat';
+        if (!file_exists($file)) continue;
+        $modified = filemtime($file);
+        if ($modified === false) fail(503, 'Allocation limits unavailable.');
+        if ($now - $modified <= $SAVE_TTL) $active++;
+        if ($now - $metadata['created'] < $ALLOCATION_WINDOW) $recent++;
+    }
+    if ($active >= $MAX_OWNED_SAVES) fail(429, 'Cloud save allocation limit reached for this network. Existing saves can still sync.');
+    if ($recent >= $MAX_NEW_SAVES) fail(429, 'New cloud save limit reached for this network. Try again tomorrow. Existing saves can still sync.');
+    return $owner;
 }
 
 // Validate that a payload is a real save (same shape check for both branches).
@@ -196,22 +245,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (file_exists($authFile)) {
         $expected = trim((string)file_get_contents($authFile));
         if (!hash_equals($expected, hash('sha256', $token))) fail(403, 'Recovery code required.');
-    } else {
-        $authFile = $SAVES_DIR . '/' . $code . '.auth';
     }
 
     $file = $SAVES_DIR . '/' . $code . '.dat';
-    if (!file_exists($file) && countSaves($SAVES_DIR, $MAX_SAVES) >= $MAX_SAVES) {
+    // Existing saves are grandfathered. Allocation limits never prevent a valid
+    // recovery token from updating its save, even when either capacity is full.
+    $owner = $existing ? null : allocationOwner($ip);
+    if (!$existing && countSaves($SAVES_DIR, $MAX_SAVES) >= $MAX_SAVES) {
         if (!evictOldest($SAVES_DIR, $SAVE_TTL)) fail(507, 'Server save limit reached.');
     }
 
-    if (!file_exists($authFile) && file_put_contents($authFile, hash('sha256', $token), LOCK_EX) === false) {
+    $newAuth = !file_exists($authFile);
+    if ($newAuth && !writePrivateFile($authFile, hash('sha256', $token))) {
         fail(500, 'Failed to protect save.');
     }
+    $ownerFile = $SAVES_DIR . '/' . $code . '.owner';
+    if (!$existing && !writePrivateFile($ownerFile, json_encode(['owner' => $owner, 'created' => time()]))) {
+        if ($newAuth) @unlink($authFile);
+        fail(503, 'Failed to record save allocation.');
+    }
     // Atomic write: temp file + rename so readers never see a torn file.
-    $tmp = $file . '.' . getmypid() . '.tmp';
-    if (file_put_contents($tmp, $data, LOCK_EX) === false || !rename($tmp, $file)) {
-        @unlink($tmp);
+    if (!writePrivateFile($file, $data)) {
+        if (!$existing) @unlink($ownerFile);
+        if ($newAuth) @unlink($authFile);
         fail(500, 'Failed to store save.');
     }
     flock($lock, LOCK_UN); fclose($lock);

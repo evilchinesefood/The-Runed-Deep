@@ -1,5 +1,5 @@
 Options -Indexes
 CGIPassAuth On
-<FilesMatch "\.(auth|dat|json|tmp|bak|lock)$">
+<FilesMatch "\.(auth|dat|owner|salt|json|tmp|bak|lock)$">
   Require all denied
 </FilesMatch>

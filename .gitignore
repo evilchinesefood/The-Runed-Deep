@@ -7,3 +7,5 @@ docs/
 dcss-tiles/
 tools/__pycache__/
 fixes.md
+public/api/saves/
+public/api/ratelimit/

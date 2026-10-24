@@ -3,6 +3,8 @@
 // Saves are gzip-compressed before upload, decompressed on download
 // ============================================================
 
+import { MAX_CLOUD_SAVE_BYTES } from "./SaveValidation";
+
 const host = location.hostname;
 const API_BASE =
   host === "jdayers.com" || host.endsWith(".jdayers.com")
@@ -10,7 +12,7 @@ const API_BASE =
     : null;
 const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
 const FETCH_TIMEOUT_MS = 10_000;
-const MAX_INFLATE_BYTES = 10 * 1024 * 1024; // 10 MB — saves stay far below this in practice
+const MAX_INFLATE_BYTES = MAX_CLOUD_SAVE_BYTES;
 
 const B64_CHUNK = 0x8000;
 
@@ -270,14 +272,35 @@ function parseCode(code: string): { name: string; token: string } {
 }
 
 export function getCloudCode(slot: number): string | null {
+  const raw = localStorage.getItem(`rd-save-${slot}`);
+  if (raw) {
+    try {
+      const save = JSON.parse(raw);
+      if (Object.prototype.hasOwnProperty.call(save, "cloudCode")) {
+        return typeof save.cloudCode === "string" ? save.cloudCode : null;
+      }
+    } catch { /* Old/corrupt slots can still have a separate recovery code. */ }
+  }
   return localStorage.getItem(`rd-cloud-${slot}`);
 }
 
 export function setCloudCode(slot: number, code: string): void {
-  localStorage.setItem(`rd-cloud-${slot}`, code);
+  const raw = localStorage.getItem(`rd-save-${slot}`);
+  if (raw) {
+    const save = JSON.parse(raw);
+    localStorage.setItem(`rd-save-${slot}`, JSON.stringify({ ...save, cloudCode: code }));
+  } else {
+    localStorage.setItem(`rd-cloud-${slot}`, code);
+  }
 }
 
 export function clearCloudCode(slot: number): void {
+  const raw = localStorage.getItem(`rd-save-${slot}`);
+  if (raw) {
+    const save = JSON.parse(raw);
+    // Explicit null prevents an older rd-cloud-* key from reviving the link.
+    localStorage.setItem(`rd-save-${slot}`, JSON.stringify({ ...save, cloudCode: null }));
+  }
   localStorage.removeItem(`rd-cloud-${slot}`);
 }
 
@@ -294,17 +317,17 @@ export async function pushSave(
   saveJson: string,
 ): Promise<boolean> {
   if (!API_BASE || !isCloudCode(code)) return false;
-  // Old codes never confer ownership. Fork a protected copy of the local save
-  // and update only slots that were already linked to this legacy code.
-  if (!parseCode(code).token) {
-    const replacement = generateCode();
-    if (!(await pushSave(replacement, saveJson))) return false;
-    for (let slot = 1; slot <= 3; slot++) {
-      if (getCloudCode(slot) === code) setCloudCode(slot, replacement);
-    }
-    return true;
-  }
   try {
+    // Old codes never confer ownership. Fork a protected copy of the local save
+    // and update only slots that were already linked to this legacy code.
+    if (!parseCode(code).token) {
+      const replacement = generateCode();
+      if (!(await pushSave(replacement, saveJson))) return false;
+      for (let slot = 1; slot <= 3; slot++) {
+        if (getCloudCode(slot) === code) setCloudCode(slot, replacement);
+      }
+      return true;
+    }
     const compressed = await compress(saveJson);
     const res = await fetchWithTimeout(API_BASE, {
       method: "POST",
@@ -317,8 +340,8 @@ export async function pushSave(
       return false;
     }
     return true;
-  } catch (e) {
-    console.warn("[CLOUD] Push error:", e);
+  } catch {
+    console.warn("[CLOUD] Push error; the local save is intact.");
     return false;
   }
 }
