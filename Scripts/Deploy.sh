@@ -6,7 +6,7 @@ extra=(--dry-run)
 if [[ "${1:-}" == "--live" ]]; then extra=(); elif [[ "${1:-}" != "" ]]; then echo "Usage: $0 [--live]" >&2; exit 2; fi
 npm run test:security
 npm run build
-# Preserve runtime data, private authorization hashes, and old hashed assets for open tabs.
+# Preserve retired server data and old hashed assets for open tabs.
 rsync -rlptz --delay-updates --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
   --exclude='/api/saves/' --exclude='/api/ratelimit/' --exclude='*.map' \
   "${extra[@]}" -e 'ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15' \

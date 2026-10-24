@@ -99,12 +99,11 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - Affix counts, enchantment ceilings, unique drop rates, and critical affix chances all scale up with each cycle
 - The item stash at The Resting Stag carries over between cycles
 
-### Cloud Saves
+### Local Saves
 
-- **Cross-device sync** — enable cloud saves per slot with a private recovery code (`ABCDE-` followed by 32 hexadecimal characters)
-- **Auto-sync** — every save pushes to server; splash screen auto-pulls latest on load
-- **Load by code** — enter the full recovery code on another device to download and sync a save. Keep it private: anyone holding it can read and update that save.
-- **Legacy saves** — old five-character codes still load, but their cloud copies are read-only. The next upload creates a protected copy and updates the local slot to its new recovery code; the original remains available. Copy the new code before switching devices.
+- Save up to three games in this browser and load them from the title screen.
+- A failed save leaves the previous slot intact; other slots are never deleted to make room.
+- Saves stay on this device and browser. Cloud sync, recovery codes, and cross-device cloud imports have been removed.
 
 ### Town
 
@@ -132,7 +131,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - **Mobile spell picker** — alphabetized list, hotkey management, D-pad targeting for directional spells
 - **Auto-target** — directional spells auto-fire when only one visible monster is in range
 - **Inventory tabs** — Equipment and Inventory tabs, item drawer with actions on mobile and desktop
-- **Save/load** — 3 slots + auto-save on stairs/death + cloud sync
+- **Save/load** — 3 local slots + auto-save on stairs/death
 
 ---
 
@@ -167,7 +166,7 @@ This project is a full rewrite — not a port. The original game ran on Windows 
 - DCSS tileset (CC0 licensed) with custom recolors for material tiers
 - Single global `GameState` with pure functional reducers
 - Web Audio API for sound synthesis
-- localStorage for saves; PHP cloud save backend
+- localStorage for saves
 - No frameworks; no runtime dependencies in the shipped game bundle
 
 ---
@@ -186,7 +185,7 @@ npm run build     # Build for production (outputs to dist/)
 
 ```
 src/
-  core/           Game state, actions, game loop, save/load, cloud sync
+  core/           Game state, actions, game loop, local save/load
   data/           Item templates, monster data, spells, affixes, traps
   systems/
     character/    Derived stats, leveling
@@ -204,7 +203,7 @@ src/
   input/          Keyboard + touch input, auto-explore, spell targeting
   utils/          FOV, pathfinding, affix helpers
 public/
-  api/            Cloud save PHP endpoint
+  api/            Retired cloud endpoint (always HTTP 410)
   assets/         Sprite sheets (PNG) — tiles, items, monsters, buildings, spells
   css/sprites/    CSS classes for all sprites
 ```
@@ -219,10 +218,8 @@ public/
 
 ## Security checks and deployment
 
-Run `npm run test:security` with PHP and Node installed (validated with Node 26.12.1) to exercise local-save preservation, cloud import/sync, authorization, allocation limits, and legacy-save migration. Client tests use the real TypeScript modules with an in-memory browser boundary; API tests use a localhost PHP server and disposable dummy saves. They do not read or modify production saves. `bash Scripts/Deploy.sh` runs these checks, builds for `/rd/`, and previews deployment; add `--live` to deploy. The script preserves live save and rate-limit directories, excludes source maps, retains old hashed assets for open tabs, and sets files/directories to 0644/0755. Refresh existing tabs after security releases.
+Run `npm run test:security` with PHP and Node installed (validated with Node 26.12.1). Client tests exercise local save/load, older local formats, quota preservation, and the absence of cloud controls or network requests. API tests use a localhost PHP server and disposable files to verify that the retired endpoint returns HTTP 410 for GET, POST, OPTIONS, PUT, PATCH, DELETE, and HEAD without creating or changing runtime storage. Tests do not read or modify production saves.
 
-Cloud imports validate the stable game-state structure and a 5 MB decompressed limit before writing. Imports require an empty local slot; a full browser quota leaves every existing slot intact. Sync only replaces the linked slot when the download is at least as recent by turn count. Local saves and their recovery codes are written together so a failed write preserves the previous save. Existing separate recovery-code keys remain readable and migrate when the slot is next saved. Older optional game-state fields continue through the existing load migrations.
+Cloud saves have been removed. Existing local slots still load, including records with obsolete cloud metadata; there is no browser-storage cleanup or cloud migration. The old `api/save.php` endpoint returns a retirement error for every method and does not read saves, authorization files, rate limits, or configuration. Previously stored server files are left in place and remain protected by Apache access rules.
 
-New cloud-save allocations are limited to three per rolling 24 hours and six active saves per originating IP (`REMOTE_ADDR`, never forwarded headers). Active means read or written within the existing 90-day retention period. Shared networks/NAT share this budget, and rotating IPs can bypass it; this is an abuse limit, not verified identity. Updates to existing protected saves remain available with the correct recovery code at either allocation/global capacity, subject to the existing 20 writes per hour rate limit. Existing saves without allocation metadata are grandfathered. Legacy short-code saves remain readable and read-only; migration creates a separate protected copy.
-
-The existing global limit of 500 saves and stale-only eviction after 90 days remain in place. New private `.owner` metadata and `.allocation.salt` live inside the preserved `api/saves/` directory and must be included in server backups. Owner identifiers are HMACs of the IP; these files do not store raw IPs or recovery tokens. Do not delete or regenerate the salt to reset limits. Missing/corrupt allocation metadata blocks new allocations while preserving existing reads and authenticated updates. Apache denies direct access to all save/ownership files, and runtime storage is ignored by Git.
+`bash Scripts/Deploy.sh` runs the checks, builds for `/rd/`, and previews deployment; add `--live` to deploy. The script preserves the retired server save and rate-limit directories, excludes source maps, retains old hashed assets for open tabs, and sets files/directories to 0644/0755. Refresh existing tabs after this release to use the local-only interface.

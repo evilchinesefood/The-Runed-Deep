@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test:security": "node --test --test-timeout=30000 Tests/CloudSaveClient.mjs && python3 Tests/CloudSaveApi.py"
+    "test:security": "node --test --test-timeout=30000 Tests/LocalSaves.mjs && python3 Tests/RetiredCloudApi.py"
   },
   "repository": {
     "type": "git",

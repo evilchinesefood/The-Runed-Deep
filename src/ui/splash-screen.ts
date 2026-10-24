@@ -1,28 +1,6 @@
-import type { GameAction, GameState } from "../core/types";
+import type { GameAction } from "../core/types";
 import { getSaveSlots, deleteSave } from "../core/save-load";
 import { createScreen, createPanel, createButton, el } from "./Theme";
-import { parseCloudState } from "../core/SaveValidation";
-import {
-  getCloudCode,
-  isCloudCode,
-  setCloudCode,
-  clearCloudCode,
-  generateCode,
-  pushSave,
-  pullSave,
-} from "../core/CloudSave";
-
-function syncCloudSave(slot: number, json: string, code: string): GameState | null {
-  const state = parseCloudState(json);
-  const current = localStorage.getItem(`rd-save-${slot}`);
-  // A slot may have been deleted or relinked while the download was in flight.
-  if (!current || getCloudCode(slot) !== code) return null;
-  const turn = JSON.parse(current).state?.turn;
-  if (!Number.isSafeInteger(turn) || state.turn < turn) return null;
-  localStorage.setItem(`rd-save-${slot}`, JSON.stringify({ version: 1, timestamp: Date.now(), state, cloudCode: code }));
-  return state;
-}
-
 export function createSplashScreen(
   container: HTMLElement,
   onAction: (action: GameAction) => void,
@@ -52,82 +30,7 @@ export function createSplashScreen(
   newGameBtn.addEventListener("click", () => onAction({ type: "newGame" }));
   buttons.appendChild(newGameBtn);
 
-  const cloudLoadBtn = createButton("Load Cloud Save");
-  buttons.appendChild(cloudLoadBtn);
-
   splash.appendChild(buttons);
-
-  // Cloud load panel (toggled)
-  const cloudPanel = createPanel("Load Cloud Save");
-  cloudPanel.style.display = "none";
-  cloudPanel.style.marginBottom = "12px";
-
-  const cloudRow = el("div", {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-    padding: "8px",
-  });
-  const codeInput = document.createElement("input");
-  codeInput.type = "text";
-  codeInput.maxLength = 38;
-  codeInput.placeholder = "Paste recovery code";
-  codeInput.style.cssText =
-    "background:#1a1a1a;border:1px solid #555;color:#fff;padding:6px 10px;font-size:14px;width:220px;text-transform:none;font-family:monospace;letter-spacing:2px;text-align:center;border-radius:3px;";
-  cloudRow.appendChild(codeInput);
-
-  const cloudMsg = el("div", { fontSize: "12px", color: "#888", flex: "1" });
-  cloudRow.appendChild(cloudMsg);
-
-  const fetchBtn = createButton("Load");
-  fetchBtn.addEventListener("click", async () => {
-    const code = codeInput.value.trim().toUpperCase();
-    if (!isCloudCode(code)) {
-      cloudMsg.textContent = "Paste a full recovery code or a legacy 5-character code.";
-      cloudMsg.style.color = "#f44";
-      return;
-    }
-    cloudMsg.textContent = "Loading...";
-    cloudMsg.style.color = "#888";
-    fetchBtn.disabled = true;
-
-    const json = await pullSave(code);
-    fetchBtn.disabled = false;
-
-    if (!json) {
-      cloudMsg.textContent = "Save not found or server error.";
-      cloudMsg.style.color = "#f44";
-      return;
-    }
-
-    try {
-      const state = parseCloudState(json);
-      // Malformed existing slots are still user data, not free space.
-      const targetSlot = [1, 2, 3].find(slot => localStorage.getItem(`rd-save-${slot}`) === null);
-      if (!targetSlot) throw new Error("All save slots are occupied. Export or back up a save, then delete a slot before importing.");
-      const saveData = { version: 1, timestamp: Date.now(), state, cloudCode: code };
-      // setItem replaces atomically or leaves the original untouched. Never delete
-      // saves to make room, and store the recovery code in the same atomic record.
-      localStorage.setItem(`rd-save-${targetSlot}`, JSON.stringify(saveData));
-
-      cloudMsg.textContent = `Loaded into slot ${targetSlot}! Refreshing...`;
-      cloudMsg.style.color = "#4f4";
-      setTimeout(() => location.reload(), 800);
-    } catch (err: any) {
-      cloudMsg.textContent = err?.name === "QuotaExceededError"
-        ? "Not enough browser storage. Your existing saves have not changed. Back up a save before freeing space."
-        : `Error: ${err?.message ?? "Invalid save data."}`;
-      cloudMsg.style.color = "#f44";
-    }
-  });
-  cloudRow.appendChild(fetchBtn);
-  cloudPanel.appendChild(cloudRow);
-  splash.appendChild(cloudPanel);
-
-  cloudLoadBtn.addEventListener("click", () => {
-    cloudPanel.style.display =
-      cloudPanel.style.display === "none" ? "block" : "none";
-  });
 
   // Save slots
   const slots = getSaveSlots();
@@ -187,35 +90,6 @@ export function createSplashScreen(
         ),
       );
 
-      // Cloud code display
-      const code = getCloudCode(info.slot);
-      if (code) {
-        details.appendChild(
-          el(
-            "div",
-            {
-              fontSize: "11px",
-              color: "#f90",
-              fontFamily: "monospace",
-              letterSpacing: "1px",
-              overflowWrap: "anywhere",
-            },
-            `Recovery code: ${code}`,
-          ),
-        );
-      }
-
-      if (code) {
-        const copy = createButton("Copy recovery code", "sm");
-        copy.title = "Keep this code private: it can load and update your cloud save.";
-        copy.addEventListener("click", async (event) => {
-          event.stopPropagation();
-          try { await navigator.clipboard.writeText(code); copy.textContent = "Copied"; }
-          catch { prompt("Copy your recovery code and keep it private:", code); }
-        });
-        details.appendChild(copy);
-      }
-
       row.appendChild(details);
 
       const btnGroup = el("div", {
@@ -227,70 +101,10 @@ export function createSplashScreen(
       const slotBtnStyle =
         "height:34px;padding:0 10px;font-size:13px;display:flex;align-items:center;justify-content:center;";
 
-      // Cloud toggle button
-      const cloudBtn = createButton(code ? "\u2713" : "\u2601", "sm");
-      cloudBtn.title = code ? "Cloud sync enabled" : "Enable cloud sync";
-      cloudBtn.style.cssText += slotBtnStyle + "min-width:34px;font-size:16px;";
-      if (code) {
-        cloudBtn.style.color = "#4f4";
-        cloudBtn.style.borderColor = "#4a4";
-      } else {
-        cloudBtn.style.color = "#aaa";
-      }
-      const slotForCloud = info.slot;
-      cloudBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (getCloudCode(slotForCloud)) {
-          // Already enabled — show disable confirm
-          const wasCode = getCloudCode(slotForCloud);
-          if (confirm(`Disable cloud sync? Code: ${wasCode}`)) {
-            clearCloudCode(slotForCloud);
-            location.reload();
-          }
-          return;
-        }
-        // Enable cloud sync
-        const newCode = generateCode();
-        cloudBtn.disabled = true;
-        cloudBtn.textContent = "...";
-
-        // Push current save to server
-        const json = localStorage.getItem(`rd-save-${slotForCloud}`);
-        if (json) {
-          const saveData = JSON.parse(json);
-          const ok = await pushSave(newCode, JSON.stringify(saveData.state));
-          if (!ok) {
-            cloudBtn.disabled = false;
-            cloudBtn.textContent = "\u2601";
-            alert("Failed to upload save. Try again.");
-            return;
-          }
-        }
-
-        setCloudCode(slotForCloud, newCode);
-        location.reload();
-      });
-      btnGroup.appendChild(cloudBtn);
-
       const loadBtn = createButton("Load");
       loadBtn.style.cssText += slotBtnStyle;
-      loadBtn.addEventListener("click", async (e) => {
+      loadBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        // If cloud-enabled, pull latest from server first
-        const cloudCode = getCloudCode(info.slot);
-        if (cloudCode) {
-          loadBtn.textContent = "Syncing...";
-          loadBtn.disabled = true;
-          const remote = await pullSave(cloudCode);
-          if (remote) {
-            try {
-              syncCloudSave(info.slot, remote, cloudCode);
-            } catch {
-              /* use local */
-            }
-          }
-          loadBtn.disabled = false;
-        }
         onLoadSlot(info.slot);
       });
       btnGroup.appendChild(loadBtn);
@@ -320,7 +134,6 @@ export function createSplashScreen(
         yesBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
           deleteSave(slotNum);
-          clearCloudCode(slotNum);
           row.remove();
           if (slotPanel.children.length === 0) {
             slotPanel.previousElementSibling?.remove();
@@ -346,35 +159,6 @@ export function createSplashScreen(
 
     splash.appendChild(slotPanel);
 
-    // Background cloud sync — pull latest for each cloud-enabled slot
-    // Replace only validated, newer snapshots; failed writes leave local saves intact.
-    for (let i = 0; i < slots.length; i++) {
-      const info = slots[i];
-      if (!info) continue;
-      const code = getCloudCode(info.slot);
-      if (!code) continue;
-      const slotNum = info.slot;
-      const rowEl = slotPanel.children[i] as HTMLElement | undefined;
-      (async () => {
-        try {
-          const remote = await pullSave(code);
-          if (!remote) return;
-          const state = syncCloudSave(slotNum, remote, code);
-          if (!state) return;
-          // Update the slot display in-place
-          if (!rowEl) return;
-          const details = rowEl.querySelector("div") as HTMLElement;
-          if (!details) return;
-          const children = details.children;
-          if (children[0]) children[0].textContent = state.hero.name;
-          if (children[1])
-            children[1].textContent = `Level ${state.hero.level} | Floor ${state.currentFloor ?? 1} | Turn ${state.turn}`;
-          if (children[2]) children[2].textContent = `\u2601 Synced from cloud`;
-        } catch {
-          /* ignore sync errors */
-        }
-      })();
-    }
   }
 
   // GitHub link

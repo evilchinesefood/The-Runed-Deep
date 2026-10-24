@@ -1,7 +1,6 @@
 import type { GameState } from "./types";
 import { syncItemIdCounter } from "../systems/items/loot";
 import { syncMonsterIdCounter } from "../systems/monsters/spawning";
-import { getCloudCode, pushSave } from "./CloudSave";
 import { getDungeonForFloor } from "../systems/dungeon/Tilesets";
 import { generateTownMap } from "../systems/town/TownMap";
 import { generateFloor } from "../systems/dungeon/generator";
@@ -73,19 +72,12 @@ export function saveGame(state: GameState, slot: number = 1): boolean {
 
   try {
     const saveState = pruneSaveState({ ...state, screen: "game" });
-    const saveJson = JSON.stringify(saveState);
-    const code = getCloudCode(slot);
-    const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState, cloudCode: code });
+    const json = JSON.stringify({ version: 1, timestamp: Date.now(), state: saveState });
     localStorage.setItem(SAVE_KEY_PREFIX + slot, json);
-    if (code) {
-      pushSave(code, saveJson).then(ok => {
-        if (!ok) console.warn("[SAVE] Cloud push failed; the local save is intact.");
-      });
-    }
     return true;
   } catch (e) {
     // Failed setItem is atomic: retaining the previous value is safer than
-    // deleting it to retry or reporting success for an unrelated cloud slot.
+    // deleting it to retry or reporting success after a failed write.
     console.error("[SAVE] Failed to save game:", e);
     return false;
   }
